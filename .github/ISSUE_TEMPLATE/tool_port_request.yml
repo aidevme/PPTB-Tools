@@ -1,0 +1,44 @@
+name: Tool Port Request
+description: Propose porting an existing XrmToolBox (or other) plugin to PPTB
+title: "[Tool Port]: "
+labels: ["new-tool"]
+body:
+  - type: input
+    id: source-name
+    attributes:
+      label: Source plugin name
+      description: Name of the existing plugin/tool to port.
+    validations:
+      required: true
+
+  - type: input
+    id: source-link
+    attributes:
+      label: Source repository / link
+      description: Link to the original plugin's source code or documentation.
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: What does it do?
+      description: Summarize the plugin's purpose and core workflow.
+    validations:
+      required: true
+
+  - type: textarea
+    id: features
+    attributes:
+      label: Key features to port
+      description: List the features that should be carried over to PPTB.
+    validations:
+      required: false
+
+  - type: textarea
+    id: differences
+    attributes:
+      label: Known differences or constraints
+      description: Anything that can't be ported as-is, or that needs to be adapted for PPTB's architecture.
+    validations:
+      required: false
