@@ -19,24 +19,27 @@ This repository hosts individual tools that plug into Power Platform ToolBox (PP
 
 PCF2BPF lets you manage PCF (PowerApps Component Framework) controls on the fields of a Business Process Flow (BPF), without hand-editing form XML.
 
-This is a planned port of [Carfup's XTBPlugins.PCF2BPF](https://github.com/carfup/XTBPlugins.PCF2BPF) XrmToolBox plugin to PPTB, reusing its concept and workflow while adapting the implementation to PPTB's tool architecture.
+This is a port of [Carfup's XTBPlugins.PCF2BPF](https://github.com/carfup/XTBPlugins.PCF2BPF) XrmToolBox plugin to PPTB, reusing its concept and workflow while adapting the implementation to PPTB's tool architecture. Source: [tools/pcf2bpf](tools/pcf2bpf/) · Docs: [docs/pcf2bpf](docs/pcf2bpf/index.md).
 
-Planned functionality (based on the original plugin):
+Implemented functionality (based on the original plugin):
 
 - Load all Business Process Flow entities from the connected environment and browse their stages and fields.
 - Select a field on a stage and see which PCF controls are compatible with its data type.
-- Add, edit, or remove a PCF control on a field, per form factor (Web, Mobile, Tablet).
+- Add, edit, or remove a PCF control on a field, per form factor (Web, Phone, Tablet).
 - Configure a PCF control's parameters through a generated input panel.
-- Copy a PCF control's configuration from one form factor to another (e.g. Web → Mobile).
-- Preview the original and modified form XML before committing changes.
-- Update and publish the Business Process Flow form directly from the tool.
+- Preview the modified form XML before committing changes.
+- Save the Business Process Flow form, or save and publish it directly from the tool.
 
-**Status:** planned / not yet implemented.
+Not yet implemented: copying a PCF configuration from one form factor to another, and binding a parameter to another field (see the [tool's README](tools/pcf2bpf/README.md#not-implemented-compared-to-the-original-xrmtoolbox-plugin) for the full list).
+
+**Status:** initial implementation available; not yet validated against a live environment.
 
 ## Contributing
 
 Contributions are welcome. Please open an issue to discuss a change before submitting a pull request, and keep new tools consistent with the structure of existing ones.
 
+If you're using Claude Code, this repo defines custom subagents (architect, developer, tester, code-reviewer, documenter) scoped to the PPTB tool workflow — see [docs/agents/index.md](docs/agents/index.md).
+
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the [GNU General Public License v2.0](LICENSE).

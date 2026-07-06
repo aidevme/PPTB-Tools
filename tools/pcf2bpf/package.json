@@ -1,0 +1,64 @@
+{
+    "name": "pcf2bpf",
+    "version": "0.2.0",
+    "displayName": "PCF2BPF",
+    "description": "Manage PCF (PowerApps Component Framework) controls on Business Process Flow fields, across form factors, without hand-editing form XML.",
+    "main": "index.html",
+    "author": "Zsolt Zombik",
+    "keywords": [
+        "powerplatform",
+        "dataverse",
+        "toolbox",
+        "pptb",
+        "pcf",
+        "bpf",
+        "business-process-flow",
+        "xrmtoolbox-port",
+        "react",
+        "fluentui"
+    ],
+    "license": "GPL-2.0",
+    "icon": "icon/pcf2bpf-icon.svg",
+    "contributors": [
+        {
+            "name": "Zsolt Zombik"
+        }
+    ],
+    "features": {
+        "minAPI": "1.2.2",
+        "enabledForPowerPlatformAPI": false
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aidevme/PPTB-Tools.git",
+        "directory": "tools/pcf2bpf"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "build": "tsc && vite build",
+        "dev": "vite",
+        "preview": "vite preview",
+        "watch": "vite build --watch",
+        "finalize-package": "npm shrinkwrap"
+    },
+    "dependencies": {
+        "@fluentui/react-components": "^9.54.0",
+        "@fluentui/react-icons": "^2.0.257",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@pptb/types": "^1.2.3",
+        "@types/react": "^18.3.12",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "typescript": "^5.6.3",
+        "vite": "^5.4.11"
+    },
+    "files": [
+        "dist",
+        "npm-shrinkwrap.json"
+    ]
+}
