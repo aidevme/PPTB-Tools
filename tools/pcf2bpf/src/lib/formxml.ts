@@ -1,4 +1,4 @@
-import type { FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from "./types";
+import type { FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from "../types";
 
 /**
  * Parsing and editing of Business Process Flow form XML.

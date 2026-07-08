@@ -1,3 +1,4 @@
+/** An XML element, as produced by {@link parseXmlDocument}. */
 export interface XmlElementNode {
     kind: "element";
     /** Stable within one parse: assigned in document order, so a fresh re-parse of structurally
@@ -13,16 +14,19 @@ export interface XmlElementNode {
     endLine: number;
 }
 
+/** A run of non-markup text between/inside elements, as produced by {@link parseXmlDocument}. */
 export interface XmlTextNode {
     kind: "text";
     value: string;
 }
 
+/** An XML comment (`<!-- ... -->`), as produced by {@link parseXmlDocument}. */
 export interface XmlCommentNode {
     kind: "comment";
     value: string;
 }
 
+/** Any node in the tree returned by {@link parseXmlDocument}. */
 export type XmlNode = XmlElementNode | XmlTextNode | XmlCommentNode;
 
 interface ParserState {
@@ -210,6 +214,7 @@ function formatNode(node: XmlNode, depth: number, indent: string, lines: string[
     lines.push(`${pad}</${node.name}>`);
 }
 
+/** A collapsible element span produced by {@link collectFoldRegions}, keyed by the element's `id`. */
 export interface XmlFoldRegion {
     id: number;
     name: string;

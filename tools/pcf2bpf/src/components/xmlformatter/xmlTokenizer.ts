@@ -1,5 +1,7 @@
+/** Color category a span of tokenized XML text belongs to, used to pick a CSS variable in {@link XmlTheme}. */
 export type XmlTokenType = "text" | "tag" | "attrName" | "attrValue" | "comment" | "punctuation";
 
+/** One colorable span produced by {@link tokenizeXml}. */
 export interface XmlToken {
     type: XmlTokenType;
     value: string;

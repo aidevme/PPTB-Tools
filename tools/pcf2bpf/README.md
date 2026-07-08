@@ -19,7 +19,8 @@ and [react-sample](https://github.com/PowerPlatformToolBox/sample-tools/tree/mai
 - Copy a field's PCF configuration from one form factor to another.
 - Configure a PCF control's non-bound manifest parameters via a generated form.
 - Preview the form XML before committing, as a side-by-side Before/After comparison on a dedicated
-  "Xml Details" tab.
+  "Xml Details" tab, with a search box that highlights matching text (case-insensitive substring match) in
+  both panes.
 - Save the form and publish the BPF's entity in one step ("Update and Publish").
 
 ## Not implemented (compared to the original XrmToolBox plugin)

@@ -1,9 +1,10 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Button,
     MessageBar,
     MessageBarBody,
     MessageBarTitle,
+    Spinner,
     Tab,
     TabList,
     Text,
@@ -13,7 +14,16 @@ import {
 import { Apps20Regular, Code20Regular } from "@fluentui/react-icons";
 import { useConnection } from "./hooks";
 import { useAppStyles } from "./styles";
-import { BpfSelector, CopyFormFactorPanel, FieldPropertiesPanel, Footer, FormXmlPanel, PcfConfigPanel, StagesFields } from "./components";
+import {
+    BpfSelectorCard,
+    CopyFormFactorCard,
+    FieldPropertiesPanel,
+    Footer,
+    FormXmlPanel,
+    PcfConfigPanel,
+    SolutionsPublishersCard,
+    StagesFields,
+} from "./components";
 import {
     copyCustomControl,
     getCompatiblePcfControls,
@@ -53,6 +63,7 @@ function App() {
     const [bpfProcesses, setBpfProcesses] = useState<BpfProcess[]>([]);
     const [pcfControls, setPcfControls] = useState<PcfControl[]>([]);
     const [isLoadingBpfs, setIsLoadingBpfs] = useState(false);
+    const [isLoadingSolutionsPublishers, setIsLoadingSolutionsPublishers] = useState(true);
 
     const [selectedBpfId, setSelectedBpfId] = useState("");
     const [isLoadingForm, setIsLoadingForm] = useState(false);
@@ -74,6 +85,13 @@ function App() {
     const [isPublishing, setIsPublishing] = useState(false);
 
     const selectedBpf = useMemo(() => bpfProcesses.find((b) => b.workflowid === selectedBpfId) ?? null, [bpfProcesses, selectedBpfId]);
+
+    // The Xml Details tab is disabled without a selected BPF; if the selection is cleared while
+    // it's active (e.g. via the BPF combobox's clear button), fall back to the config tab instead
+    // of leaving a disabled-looking tab showing stale content.
+    useEffect(() => {
+        if (!selectedBpf) setActiveTab("config");
+    }, [selectedBpf]);
 
     const handleLoadBpfs = useCallback(async () => {
         setIsLoadingBpfs(true);
@@ -235,11 +253,20 @@ function App() {
 
     return (
         <div className={styles.root}>
+            {(isLoadingBpfs || isLoadingSolutionsPublishers) && (
+                <div className={styles.loadingOverlay}>
+                    <Spinner
+                        size="extra-large"
+                        label={isLoadingBpfs ? "Loading Business Process Flows and PCF controls..." : "Loading Solutions and Publishers..."}
+                    />
+                </div>
+            )}
+
             <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
                 <Tab value="config" icon={<Apps20Regular />}>
                     PCFs Configuration
                 </Tab>
-                <Tab value="xml" icon={<Code20Regular />}>
+                <Tab value="xml" icon={<Code20Regular />} disabled={!selectedBpf}>
                     Xml Details
                 </Tab>
             </TabList>
@@ -248,11 +275,16 @@ function App() {
                 {activeTab === "config" && (
                     <div className={styles.configRow}>
                         <div className={styles.leftColumn}>
-                            <BpfSelector
+                            <SolutionsPublishersCard
+                                onLoadingChange={setIsLoadingSolutionsPublishers}
+                                bpfProcesses={bpfProcesses}
+                                isLoadingBpfs={isLoadingBpfs}
+                                onLoadBpfs={() => void handleLoadBpfs()}
+                            />
+
+                            <BpfSelectorCard
                                 bpfProcesses={bpfProcesses}
                                 selectedBpfId={selectedBpfId}
-                                isLoading={isLoadingBpfs}
-                                onLoad={() => void handleLoadBpfs()}
                                 onSelect={(id) => void handleSelectBpf(id)}
                             />
 
@@ -263,11 +295,12 @@ function App() {
                             )}
 
                             {isLoadingForm ? (
-                                <Text italic>Loading form...</Text>
+                                <Text italic>Loading Business Process Flow...</Text>
                             ) : (
                                 <StagesFields
                                     doc={formDocRef.current}
                                     docVersion={docVersion}
+                                    bpfName={selectedBpf?.name ?? ""}
                                     stages={stages}
                                     entityDisplayName={primaryEntityDisplayName}
                                     selectedControlId={selectedField?.controlId ?? null}
@@ -313,7 +346,7 @@ function App() {
 
                         {selectedField && (
                             <div className={styles.rightColumn}>
-                                <CopyFormFactorPanel onCopy={handleCopyFormFactor} />
+                                <CopyFormFactorCard onCopy={handleCopyFormFactor} />
                             </div>
                         )}
                     </div>

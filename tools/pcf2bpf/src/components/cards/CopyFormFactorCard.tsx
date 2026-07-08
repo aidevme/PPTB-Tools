@@ -1,15 +1,23 @@
 import { useState } from "react";
 import { Button, Dropdown, Field, Option, Text, Tooltip } from "@fluentui/react-components";
-import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../lib";
-import type { FormFactor } from "../lib";
-import { useCopyFormFactorPanelStyles } from "../styles";
+import { Desktop20Regular, Phone20Regular, Tablet20Regular } from "@fluentui/react-icons";
+import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../lib";
+import type { FormFactor } from "../../lib";
+import { useCopyFormFactorCardStyles } from "../../styles";
 
-interface ICopyFormFactorPanelProps {
+interface ICopyFormFactorCardProps {
     onCopy: (from: FormFactor, to: FormFactor) => void;
 }
 
-export function CopyFormFactorPanel({ onCopy }: ICopyFormFactorPanelProps) {
-    const styles = useCopyFormFactorPanelStyles();
+/** Icon shown before each form factor's label in the "Copy from"/"Copy to" dropdowns. */
+const FORM_FACTOR_ICONS: Record<FormFactor, JSX.Element> = {
+    0: <Desktop20Regular />,
+    1: <Phone20Regular />,
+    2: <Tablet20Regular />,
+};
+
+export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
+    const styles = useCopyFormFactorCardStyles();
     const [from, setFrom] = useState<FormFactor | "">("");
     const [to, setTo] = useState<FormFactor | "">("");
 
@@ -26,7 +34,7 @@ export function CopyFormFactorPanel({ onCopy }: ICopyFormFactorPanelProps) {
 
     return (
         <div className={styles.root}>
-            <Text weight="semibold" block className={styles.title}>
+            <Text block className={styles.title}>
                 Copy PCF between form factors
             </Text>
 
@@ -37,8 +45,11 @@ export function CopyFormFactorPanel({ onCopy }: ICopyFormFactorPanelProps) {
                     onOptionSelect={(_, data) => setFrom(data.optionValue === undefined ? "" : (Number(data.optionValue) as FormFactor))}
                 >
                     {FORM_FACTORS.map((ff) => (
-                        <Option key={ff} value={String(ff)}>
-                            {FORM_FACTOR_LABELS[ff]}
+                        <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]}>
+                            <span className={styles.optionContent}>
+                                {FORM_FACTOR_ICONS[ff]}
+                                {FORM_FACTOR_LABELS[ff]}
+                            </span>
                         </Option>
                     ))}
                 </Dropdown>
@@ -51,8 +62,11 @@ export function CopyFormFactorPanel({ onCopy }: ICopyFormFactorPanelProps) {
                     onOptionSelect={(_, data) => setTo(data.optionValue === undefined ? "" : (Number(data.optionValue) as FormFactor))}
                 >
                     {FORM_FACTORS.filter((ff) => ff !== from).map((ff) => (
-                        <Option key={ff} value={String(ff)}>
-                            {FORM_FACTOR_LABELS[ff]}
+                        <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]}>
+                            <span className={styles.optionContent}>
+                                {FORM_FACTOR_ICONS[ff]}
+                                {FORM_FACTOR_LABELS[ff]}
+                            </span>
                         </Option>
                     ))}
                 </Dropdown>

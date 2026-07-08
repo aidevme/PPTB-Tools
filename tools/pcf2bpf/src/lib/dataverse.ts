@@ -1,5 +1,5 @@
 import { parsePcfManifestParameters } from "./pcfManifest";
-import type { AttributeInfo, BpfProcess, PcfControl } from "./types";
+import type { AttributeInfo, BpfProcess, PcfControl, PublisherInfo, SolutionInfo } from "../types";
 
 /** Maps Dataverse attribute types to the PCF manifest `of-type` values they satisfy. */
 const ATTRIBUTE_TYPE_TO_PCF_TYPES: Record<string, string[]> = {
@@ -65,6 +65,7 @@ export async function loadBpfProcesses(): Promise<BpfProcess[]> {
             <attribute name="name" />
             <attribute name="uniquename" />
             <attribute name="primaryentity" />
+            <attribute name="xaml" />
             <filter type="and">
               <condition attribute="category" operator="eq" value="4" />
             </filter>
@@ -78,10 +79,16 @@ export async function loadBpfProcesses(): Promise<BpfProcess[]> {
         name: String(r.name ?? ""),
         uniquename: String(r.uniquename ?? ""),
         primaryentity: String(r.primaryentity ?? ""),
+        xaml: String(r.xaml ?? ""),
     }));
 }
 
-/** Loads the Business Process Flow's own form (its hidden entity only ever has one form). */
+/**
+ * Loads the Business Process Flow's own form (its hidden entity only ever has one form).
+ *
+ * @throws If the BPF's private entity's `ObjectTypeCode` can't be resolved via entity metadata.
+ * @throws If no `systemform` record is found for that entity.
+ */
 export async function loadBpfFormXml(bpf: BpfProcess): Promise<{ formId: string; formXml: string }> {
     // systemform.objecttypecode is an EntityName attribute, but FetchXML/Web API filters on it
     // require the numeric ObjectTypeCode rather than the entity logical name.
@@ -171,7 +178,12 @@ export async function loadPcfControls(): Promise<PcfControl[]> {
     return controls;
 }
 
-/** Filters the registered PCF controls to the ones compatible with a Dataverse attribute type. */
+/**
+ * Filters the registered PCF controls to the ones compatible with a Dataverse attribute type.
+ *
+ * @returns An empty array if `attributeType` has no known PCF-type mapping, rather than all
+ * controls or an error.
+ */
 export function getCompatiblePcfControls(attributeType: string, controls: PcfControl[]): PcfControl[] {
     const compatibleTypes = ATTRIBUTE_TYPE_TO_PCF_TYPES[attributeType] ?? [];
     if (compatibleTypes.length === 0) return [];
@@ -186,4 +198,52 @@ export async function saveBpfFormXml(formId: string, formXml: string): Promise<v
 /** Publishes customizations for the BPF's own entity so the changes take effect. */
 export async function publishBpf(bpf: BpfProcess): Promise<void> {
     await api().publishCustomizations(bpf.uniquename);
+}
+
+/** Loads every solution in the connected environment, for the "Solutions & Publishers" filters. */
+export async function loadSolutions(): Promise<SolutionInfo[]> {
+    const fetchXml = `
+        <fetch>
+          <entity name="solution">
+            <attribute name="solutionid" />
+            <attribute name="friendlyname" />
+            <attribute name="uniquename" />
+            <attribute name="version" />
+            <attribute name="description" />
+            <order attribute="friendlyname" />
+          </entity>
+        </fetch>`;
+
+    const result = await api().fetchXmlQuery(fetchXml);
+    return result.value.map((r) => ({
+        solutionid: String(r.solutionid ?? ""),
+        friendlyname: String(r.friendlyname ?? ""),
+        uniquename: String(r.uniquename ?? ""),
+        version: String(r.version ?? ""),
+        description: String(r.description ?? ""),
+    }));
+}
+
+/** Loads every publisher in the connected environment, for the "Solutions & Publishers" filters. */
+export async function loadPublishers(): Promise<PublisherInfo[]> {
+    const fetchXml = `
+        <fetch>
+          <entity name="publisher">
+            <attribute name="publisherid" />
+            <attribute name="friendlyname" />
+            <attribute name="uniquename" />
+            <attribute name="customizationprefix" />
+            <attribute name="description" />
+            <order attribute="friendlyname" />
+          </entity>
+        </fetch>`;
+
+    const result = await api().fetchXmlQuery(fetchXml);
+    return result.value.map((r) => ({
+        publisherid: String(r.publisherid ?? ""),
+        friendlyname: String(r.friendlyname ?? ""),
+        uniquename: String(r.uniquename ?? ""),
+        customizationprefix: String(r.customizationprefix ?? ""),
+        description: String(r.description ?? ""),
+    }));
 }

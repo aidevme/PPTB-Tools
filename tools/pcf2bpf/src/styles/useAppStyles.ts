@@ -37,4 +37,16 @@ export const useAppStyles = makeStyles({
     fullWidth: {
         width: "100%",
     },
+    loadingOverlay: {
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "rgba(211, 211, 211, 0.6)",
+        zIndex: 1000,
+    },
 });

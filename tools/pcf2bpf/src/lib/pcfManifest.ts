@@ -1,4 +1,4 @@
-import type { PcfParameter } from "./types";
+import type { PcfParameter } from "../types";
 
 /**
  * Parses a `customcontrol.manifest` XML string into its `<property>` parameter definitions.

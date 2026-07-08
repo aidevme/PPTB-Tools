@@ -26,7 +26,8 @@ plugin to Power Platform ToolBox. Source lives at [tools/pcf2bpf](../../tools/pc
 6. Pick a compatible PCF control from the dropdown (only controls whose manifest supports the field's data
    type are listed) and fill in any configurable parameters.
 7. Click **Add Control** (or **Update Control** / **Remove Control** for an existing assignment). The form
-   XML preview at the bottom updates immediately.
+   XML preview at the bottom updates immediately; use the search box above it to highlight matching text in
+   the Before/After panes.
 8. Click **Save** to persist the change, or **Save & Publish** to also publish the BPF's customizations so
    the change takes effect immediately.
 
@@ -36,6 +37,11 @@ plugin to Power Platform ToolBox. Source lives at [tools/pcf2bpf](../../tools/pc
   separately.
 - Parameters can only be set to static values; binding a parameter to another field is not supported.
 - Manifest `display-name-key` values are shown as-is rather than resolved through localization resources.
+
+## Dataverse Table References
+
+- [workflow](dataverse/workflow.md) — the Business Process Flow table (`category = 4`), including which
+  columns PCF2BPF reads and how it locates a BPF's form.
 
 See the [tool's README](../../tools/pcf2bpf/README.md) for implementation details (data model, form XML
 structure, build instructions).

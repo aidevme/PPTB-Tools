@@ -1,10 +1,10 @@
 import type { CSSProperties } from "react";
 import { Badge, mergeClasses, Text } from "@fluentui/react-components";
-import { getAttributeTypeLabel } from "../lib";
-import type { AttributeInfo, FieldInfo } from "../lib";
-import { useFieldPropertiesPanelStyles } from "../styles";
+import { getAttributeTypeLabel } from "../../lib";
+import type { AttributeInfo, FieldInfo } from "../../lib";
+import { useFieldPropertiesPanelStyles } from "../../styles";
 
-interface Props {
+interface IFieldPropertiesPanelProps {
     field: FieldInfo;
     attribute: AttributeInfo | undefined;
     entityDisplayName: string;
@@ -13,7 +13,7 @@ interface Props {
 }
 
 /** Read-only summary of the selected field's properties: type, entity, and required-on-stage state. */
-export function FieldPropertiesPanel({ field, attribute, entityDisplayName, stageName, stageColor }: Props) {
+export function FieldPropertiesPanel({ field, attribute, entityDisplayName, stageName, stageColor }: IFieldPropertiesPanelProps) {
     const styles = useFieldPropertiesPanelStyles();
     const cssVars: CSSProperties = { ["--stage-color" as string]: stageColor };
 

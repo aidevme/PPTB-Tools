@@ -38,6 +38,12 @@ export const useXmlFormatterStyles = makeStyles({
         paddingLeft: "10px",
         paddingRight: "10px",
     },
+    lineRowAdded: {
+        backgroundColor: "var(--xml-diff-added)",
+    },
+    lineRowRemoved: {
+        backgroundColor: "var(--xml-diff-removed)",
+    },
     lineNumber: {
         flexShrink: 0,
         minWidth: "2.5em",
@@ -67,9 +73,9 @@ export const useXmlFormatterStyles = makeStyles({
     },
     lineContent: {
         flex: "1 1 auto",
-        minWidth: 0,
-        whiteSpace: "pre-wrap",
-        wordBreak: "break-word",
+        // No wrapping and no min-width shrink: long lines keep their natural width, so `root`'s
+        // `overflow: auto` produces a horizontal scrollbar instead of wrapping text to fit.
+        whiteSpace: "pre",
     },
     text: { color: "var(--xml-text)" },
     tag: { color: "var(--xml-tag)" },
@@ -77,6 +83,11 @@ export const useXmlFormatterStyles = makeStyles({
     attrValue: { color: "var(--xml-attr-value)" },
     comment: { color: "var(--xml-comment)", fontStyle: "italic" },
     punctuation: { color: "var(--xml-punctuation)" },
+    highlight: {
+        backgroundColor: "var(--xml-highlight)",
+        color: "#1a1a1a",
+        borderRadius: "2px",
+    },
     placeholder: {
         display: "block",
         paddingLeft: "10px",
@@ -84,10 +95,12 @@ export const useXmlFormatterStyles = makeStyles({
         color: "var(--xml-placeholder)",
         fontStyle: "italic",
     },
-    copyButton: {
+    cornerActions: {
         position: "absolute",
         top: "6px",
         right: "6px",
         zIndex: 1,
+        display: "flex",
+        gap: "4px",
     },
 });

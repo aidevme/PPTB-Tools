@@ -1,8 +1,13 @@
 export { useAppStyles } from "./useAppStyles";
-export { useBpfSelectorStyles } from "./components/useBpfSelectorStyles";
-export { useCopyFormFactorPanelStyles } from "./components/useCopyFormFactorPanelStyles";
+export { useBpfSelectorCardStyles } from "./components/cards/useBpfSelectorCardStyles";
+export { useCompareXmlsCheckBoxStyles } from "./components/checkbox/useCompareXmlsCheckBoxStyles";
+export { useCopyFormFactorCardStyles } from "./components/cards/useCopyFormFactorCardStyles";
 export { useFieldPropertiesPanelStyles } from "./components/useFieldPropertiesPanelStyles";
 export { useFooterStyles } from "./components/useFooterStyles";
-export { useFormXmlPanelStyles } from "./components/useFormXmlPanelStyles";
+export { useFormXmlPanelStyles } from "./components/panels/useFormXmlPanelStyles";
+export { usePanelHeaderStyles } from "./components/usePanelHeaderStyles";
+export { usePcfConfigPanelStyles } from "./components/panels/usePcfConfigPanelStyles";
+export { useSolutionsPublishersCardStyles } from "./components/cards/useSolutionsPublishersCardStyles";
 export { useStagesFieldsStyles } from "./components/useStagesFieldsStyles";
-export { useXmlFormatterStyles } from "./components/useXmlFormatterStyles";
+export { useXmlFormatterStyles } from "./components/xmlformatter/useXmlFormatterStyles";
+export { useXmlSearchBoxStyles } from "./components/searchbox/useXmlSearchBoxStyles";

@@ -20,6 +20,12 @@ Follow this repo's established conventions rather than generic defaults:
   then `vite build`) as your correctness check after changes — there is no separate lint or test command.
 - **Platform APIs only:** use `window.toolboxAPI` and `window.dataverseAPI` (typed via the `@pptb/types`
   devDependency) — never assume direct Dataverse SDK access.
+- **Dataverse/API errors surface as a toast, not an inline banner:** when a `window.dataverseAPI`/
+  `window.toolboxAPI` call fails, report it via `window.toolboxAPI.utils.showNotification({ title, body,
+  type: "error" })` (wrapped in a try/catch, since notifications are best-effort) — not a `MessageBar`
+  rendered in the component tree. See `App.tsx`'s `notify` helper and
+  `components/Cards/SolutionsPublishersCard.tsx`'s `notifyError` for the pattern; still `console.error` the
+  raw error alongside the toast for debugging.
 - **Look up docs, don't guess:** before using an unfamiliar Fluent UI v9 (`@fluentui/react-components`)
   component/prop, a Vite/TypeScript config option, or any other Microsoft-documented API, query the
   `microsoft-learn` MCP server rather than relying on training-data recall, which is a frequent source of
