@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Combobox, Field, useComboboxFilter, useId, type ComboboxProps } from "@fluentui/react-components";
-import type { BpfProcess } from "../../lib";
+import type { BpfProcess } from "../../services";
 import { useBpfSelectorCardStyles } from "../../styles";
 
 interface IBpfSelectorCardProps {

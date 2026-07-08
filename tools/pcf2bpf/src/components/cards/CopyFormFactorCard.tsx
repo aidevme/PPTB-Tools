@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Button, Dropdown, Field, Option, Text, Tooltip } from "@fluentui/react-components";
 import { Desktop20Regular, Phone20Regular, Tablet20Regular } from "@fluentui/react-icons";
-import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../lib";
-import type { FormFactor } from "../../lib";
+import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../services";
+import type { FormFactor } from "../../services";
 import { useCopyFormFactorCardStyles } from "../../styles";
 
 interface ICopyFormFactorCardProps {

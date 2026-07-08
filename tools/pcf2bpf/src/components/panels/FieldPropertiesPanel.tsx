@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import { Badge, mergeClasses, Text } from "@fluentui/react-components";
-import { getAttributeTypeLabel } from "../../lib";
-import type { AttributeInfo, FieldInfo } from "../../lib";
+import { getAttributeTypeLabel } from "../../services";
+import type { AttributeInfo, FieldInfo } from "../../services";
 import { useFieldPropertiesPanelStyles } from "../../styles";
 
 interface IFieldPropertiesPanelProps {

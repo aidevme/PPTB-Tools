@@ -14,8 +14,8 @@ import {
     type SelectTabEvent,
 } from "@fluentui/react-components";
 import { CheckmarkCircle16Filled, Desktop20Regular, Phone20Regular, Tablet20Regular } from "@fluentui/react-icons";
-import { getExistingCustomControl, FORM_FACTORS, FORM_FACTOR_LABELS } from "../../lib";
-import type { AttributeInfo, FieldInfo, FormFactor, PcfAssignment, PcfControl } from "../../lib";
+import { getExistingCustomControl, FORM_FACTORS, FORM_FACTOR_LABELS } from "../../services";
+import type { AttributeInfo, FieldInfo, FormFactor, PcfAssignment, PcfControl } from "../../services";
 import { usePcfConfigPanelStyles } from "../../styles";
 
 /** Icon shown on each form factor's tab. */

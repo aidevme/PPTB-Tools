@@ -62,14 +62,14 @@ src/
 ├── hooks/
 │   └── useConnection.ts   # polls window.toolboxAPI for the active Dataverse connection
 ├── components/             # presentational; receive data/callbacks from App.tsx as props
-└── lib/                     # framework-free: no React/DOM-UI, only DOMParser/XMLSerializer + window.dataverseAPI
+├── types/                   # shared TypeScript interfaces, one per file
+└── services/                 # framework-free: no React/DOM-UI, only DOMParser/XMLSerializer + window.dataverseAPI
     ├── dataverse.ts   # Dataverse queries: workflow (BPF), systemform, customcontrol, entity metadata
     ├── formxml.ts     # BPF form XML parsing + customControl XML mutation
-    ├── pcfManifest.ts # customcontrol.manifest XML -> parameter definitions
-    └── types.ts       # shared TypeScript interfaces
+    └── pcfManifest.ts # customcontrol.manifest XML -> parameter definitions
 ```
 
-Key domain facts (needed to make sense of `lib/dataverse.ts` and `lib/formxml.ts`):
+Key domain facts (needed to make sense of `services/dataverse.ts` and `services/formxml.ts`):
 
 - **Business Process Flows** are `workflow` records with `category = 4`.
 - A BPF's form is the sole `systemform` record whose `objecttypecode` matches the BPF's private entity
@@ -82,7 +82,7 @@ Key domain facts (needed to make sense of `lib/dataverse.ts` and `lib/formxml.ts
   original XTB plugin's `FormAttribute.cs`.
 
 State management pattern in `App.tsx`: the parsed form XML document is held in a `useRef<XMLDocument>`
-(mutated in place by `lib/formxml.ts` functions, matching how the original plugin mutates its in-memory
+(mutated in place by `services/formxml.ts` functions, matching how the original plugin mutates its in-memory
 `XmlDocument`), alongside a `docVersion` counter state that's incremented after every mutation via the
 `mutateDoc` helper. Since React won't re-render on an in-place mutation of an object it already holds a
 reference to, anything derived from the doc (e.g. `existingAssignment`) must list `docVersion` — not the

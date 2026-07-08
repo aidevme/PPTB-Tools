@@ -200,7 +200,11 @@ export async function publishBpf(bpf: BpfProcess): Promise<void> {
     await api().publishCustomizations(bpf.uniquename);
 }
 
-/** Loads every solution in the connected environment, for the "Solutions & Publishers" filters. */
+/** Loads every visible, non-patch solution in the connected environment, for the "Solutions &
+ * Publishers" filters. Dataverse's own auto-created default solutions (e.g. "Default Solution")
+ * are hidden (`isvisible = 0`) and excluded, since they aren't a meaningful choice for scoping a
+ * user's own BPFs/PCF controls; patches (`solutiontype = 2`) are excluded too, since they layer on
+ * top of their parent solution rather than being a scoping choice of their own. */
 export async function loadSolutions(): Promise<SolutionInfo[]> {
     const fetchXml = `
         <fetch>
@@ -210,6 +214,10 @@ export async function loadSolutions(): Promise<SolutionInfo[]> {
             <attribute name="uniquename" />
             <attribute name="version" />
             <attribute name="description" />
+            <filter type="and">
+              <condition attribute="isvisible" operator="eq" value="1" />
+              <condition attribute="solutiontype" operator="ne" value="2" />
+            </filter>
             <order attribute="friendlyname" />
           </entity>
         </fetch>`;

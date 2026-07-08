@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Combobox, Field, Option, Text, Tooltip, type ComboboxProps } from "@fluentui/react-components";
-import { loadPublishers, loadSolutions } from "../../lib";
-import type { BpfProcess, PublisherInfo, SolutionInfo } from "../../lib";
+import { loadPublishers, loadSolutions } from "../../services";
+import type { BpfProcess, PublisherInfo, SolutionInfo } from "../../services";
 import { useSolutionsPublishersCardStyles } from "../../styles";
 
 function matchesQuery(text: string, query: string): boolean {

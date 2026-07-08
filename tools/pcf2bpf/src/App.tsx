@@ -41,8 +41,8 @@ import {
     saveBpfFormXml,
     serializeFormXml,
     setCustomControl,
-} from "./lib";
-import type { AttributeInfo, BpfProcess, FieldInfo, FormFactor, PcfControl, StageInfo } from "./lib";
+} from "./services";
+import type { AttributeInfo, BpfProcess, FieldInfo, FormFactor, PcfControl, StageInfo } from "./services";
 
 type MainTab = "config" | "xml";
 

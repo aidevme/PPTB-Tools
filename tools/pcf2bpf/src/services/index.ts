@@ -1,5 +1,5 @@
 /**
- * Barrel export for the PPTB/DOM-agnostic data layer.
+ * Barrel export for the PPTB/DOM-agnostic services layer.
  *
  * @remarks
  * Framework-free by design — no React or DOM-UI imports, only `window.dataverseAPI` calls and

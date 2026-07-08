@@ -1,8 +1,8 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { Badge, mergeClasses, Text } from "@fluentui/react-components";
 import { ChevronDown16Regular, ChevronRight12Regular, ChevronRight16Regular } from "@fluentui/react-icons";
-import { getStageColor, hasAnyCustomControl, getFieldsForStage } from "../lib";
-import type { FieldInfo, StageInfo } from "../lib";
+import { getStageColor, hasAnyCustomControl, getFieldsForStage } from "../services";
+import type { FieldInfo, StageInfo } from "../services";
 import { useStagesFieldsStyles } from "../styles";
 
 interface Props {

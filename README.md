@@ -1,5 +1,9 @@
 # Power Platform ToolBox (PPTB) Tools
 
+[![License](https://img.shields.io/github/license/aidevme/PPTB-Tools)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/aidevme/PPTB-Tools)](https://github.com/aidevme/PPTB-Tools/commits/main)
+[![Open issues](https://img.shields.io/github/issues/aidevme/PPTB-Tools)](https://github.com/aidevme/PPTB-Tools/issues)
+
 Tools for Power Platform ToolBox (PPTB) - a comprehensive toolkit for working with Microsoft Dataverse and Power Platform.
 
 - [Power Platform ToolBox (PPTB) Tools](#power-platform-toolbox-pptb-tools)
