@@ -1,7 +1,7 @@
 {
     "name": "pcf2bpf",
     "version": "0.2.0",
-    "displayName": "PCF2BPF",
+    "displayName": "BPF Control Manager",
     "description": "Manage PCF (PowerApps Component Framework) controls on Business Process Flow fields, across form factors, without hand-editing form XML.",
     "main": "index.html",
     "author": "Zsolt Zombik",
