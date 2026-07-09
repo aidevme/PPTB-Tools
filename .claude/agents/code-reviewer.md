@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Use proactively to review a diff or specific files in a PPTB tool for correctness and consistency with this repo's conventions, before or instead of merging. Read-only — reports findings, does not fix them. Do not use to implement changes (see developer) or to check build/runtime behavior (see tester).
 tools: Read, Grep, Glob, Bash
-model: sonnet
+model: haiku
 ---
 
 You review code changes in this repo for correctness and consistency with its established conventions. You
