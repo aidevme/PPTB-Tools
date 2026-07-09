@@ -5,10 +5,11 @@ scoped to one phase of building a Power Platform ToolBox (PPTB) tool. They're de
 agent's description names the others and says explicitly what it is *not* for — so they compose into a
 pipeline instead of overlapping:
 
-```
-architect  →  developer  →  tester  →  code-reviewer
-                  ↓                          ↓
-              documenter  ←──────────────────┘
+```mermaid
+flowchart LR
+    architect([architect]) --> developer([developer]) --> tester([tester]) --> reviewer([code-reviewer])
+    developer --> documenter([documenter])
+    reviewer --> documenter
 ```
 
 Plan with **architect**, implement with **developer**, verify with **tester**, review with
