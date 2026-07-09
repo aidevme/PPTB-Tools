@@ -1,6 +1,6 @@
 # Repository Security Setup
 
-This guide ensures only @sabrish can approve PRs, merge code, and deploy to npm.
+This guide ensures only @aidevme can approve PRs, merge code, and deploy to npm.
 
 ---
 
@@ -32,11 +32,11 @@ This guide ensures only @sabrish can approve PRs, merge code, and deploy to npm.
    - This ensures even admins (you) follow the rules
 
    ✅ **Restrict who can push to matching branches**
-   - Add: **@sabrish** (only you can push)
+   - Add: **@aidevme** (only you can push)
    - Or leave empty to allow only via PR
 
    ✅ **Restrict who can dismiss pull request reviews**
-   - Add: **@sabrish** (only you can dismiss reviews)
+   - Add: **@aidevme** (only you can dismiss reviews)
 
    ✅ **Allow force pushes**: ❌ Disabled
 
@@ -61,7 +61,7 @@ This guide ensures only @sabrish can approve PRs, merge code, and deploy to npm.
 4. **Configure environment:**
 
    ✅ **Required reviewers**
-   - Add: **@sabrish**
+   - Add: **@aidevme**
    - Anyone trying to deploy must wait for your approval
 
    ✅ **Deployment branches**
