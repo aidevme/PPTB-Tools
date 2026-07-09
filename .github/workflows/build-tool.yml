@@ -1,0 +1,69 @@
+name: Build Tool
+
+on:
+  # Runs after the CodeQL workflow completes (instead of its own push/pull_request triggers), so
+  # both analyses have run before a build is attempted. `workflow_dispatch` below still allows
+  # triggering this workflow directly regardless of CodeQL's status.
+  workflow_run:
+    workflows: ["CodeQL"]
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: build-tool-${{ github.workflow }}-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  discover:
+    name: Discover tools
+    runs-on: ubuntu-latest
+    # Only proceed automatically if CodeQL succeeded; workflow_dispatch runs have no workflow_run
+    # context, so they always proceed.
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      tools: ${{ steps.list.outputs.tools }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: List tools with a package.json
+        id: list
+        run: |
+          tools=$(for dir in tools/*/; do
+            name="${dir%/}"
+            [ -f "$name/package.json" ] && echo "$name"
+          done | jq -R . | jq -sc .)
+          echo "tools=$tools" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: Build (${{ matrix.tool }})
+    needs: discover
+    if: ${{ needs.discover.outputs.tools != '[]' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: ${{ fromJson(needs.discover.outputs.tools) }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: ${{ matrix.tool }}/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.tool }}
+        run: npm ci
+
+      - name: Build
+        working-directory: ${{ matrix.tool }}
+        run: npm run build
