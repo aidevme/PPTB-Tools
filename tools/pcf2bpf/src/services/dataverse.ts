@@ -1,4 +1,5 @@
 import { parsePcfManifestParameters } from "./pcfManifest";
+import { parsePcfClientJsonInfo } from "./pcfClientJson";
 import type { AttributeInfo, BpfProcess, BpfScope, PcfControl, PublisherInfo, SolutionInfo } from "../types";
 
 /** Maps Dataverse attribute types to the PCF manifest `of-type` values they satisfy. */
@@ -200,11 +201,15 @@ export async function loadPcfControls(): Promise<PcfControl[]> {
             .map((t) => t.trim())
             .filter(Boolean);
 
+        const { isVirtual, version } = parsePcfClientJsonInfo(String(record.clientjson ?? ""));
+
         controls.push({
             id: String(record.customcontrolid ?? ""),
             name,
             compatibleDataTypes,
             parameters: parsePcfManifestParameters(String(record.manifest ?? "")),
+            isVirtual,
+            version,
         });
     }
 

@@ -6,10 +6,13 @@
  * `DOMParser`/`XMLSerializer`. Re-exports, in dependency order:
  * - `types` — shared interfaces (`FieldInfo`, `PcfControl`, `AttributeInfo`, ...) and stage-color helpers.
  * - `pcfManifest` — parses a `customcontrol.manifest` XML string into PCF parameter definitions.
+ * - `pcfClientJson` — parses a `customcontrol.clientjson` string into PCF parameter definitions and
+ *   control-level metadata (virtual/standard, manifest version).
  * - `formxml` — BPF form XML parsing and `customControl` element mutation.
  * - `dataverse` — Dataverse queries (workflow/BPF, systemform, customcontrol, entity metadata).
  */
 export * from "../types";
 export * from "./pcfManifest";
+export * from "./pcfClientJson";
 export * from "./formxml";
 export * from "./dataverse";

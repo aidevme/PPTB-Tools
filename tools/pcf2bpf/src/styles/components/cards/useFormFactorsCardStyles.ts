@@ -18,4 +18,28 @@ export const useFormFactorsCardStyles = makeStyles({
     assignedIcon: {
         color: tokens.colorStatusSuccessForeground1,
     },
+    row: {
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        gap: "12px",
+        paddingTop: "10px",
+        paddingBottom: "10px",
+        borderTopWidth: "1px",
+        borderTopStyle: "solid",
+        borderTopColor: tokens.colorNeutralStroke2,
+        fontSize: "13px",
+    },
+    firstRow: {
+        borderTopWidth: 0,
+        borderTopStyle: "none",
+    },
+    rowLabel: {
+        color: tokens.colorNeutralForeground3,
+        flexShrink: 0,
+    },
+    rowValue: {
+        fontWeight: 500,
+        textAlign: "right",
+    },
 });

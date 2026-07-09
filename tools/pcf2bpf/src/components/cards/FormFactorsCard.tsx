@@ -5,6 +5,7 @@ import {
     Dropdown,
     Field,
     Input,
+    mergeClasses,
     Option,
     Tab,
     TabList,
@@ -139,7 +140,22 @@ export function FormFactorsCard({
                                 ))}
                             </Dropdown>
                         </Field>
-                        {selectedPcf && <Divider>PCF Details</Divider>}
+                    </>
+                )}
+
+                {selectedPcf && (
+                    <>
+                        <Divider>PCF Details</Divider>
+                        <div>
+                            <div className={mergeClasses(styles.row, styles.firstRow)}>
+                                <span className={styles.rowLabel}>Control type</span>
+                                <span className={styles.rowValue}>{selectedPcf.isVirtual ? "Virtual" : "Standard"}</span>
+                            </div>
+                            <div className={styles.row}>
+                                <span className={styles.rowLabel}>Manifest version</span>
+                                <span className={styles.rowValue}>{selectedPcf.version || "Unknown"}</span>
+                            </div>
+                        </div>
                     </>
                 )}
 
