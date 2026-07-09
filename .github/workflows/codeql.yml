@@ -17,7 +17,7 @@ jobs:
       security-events: write
       packages: read
       actions: read
-      contents: read
+      contents: write
 
     strategy:
       fail-fast: false
@@ -49,3 +49,16 @@ jobs:
           name: codeql-results-${{ matrix.language }}
           path: ${{ steps.analyze.outputs.sarif-output }}
           retention-days: 30
+
+      # Skipped for pull_request: GITHUB_TOKEN is read-only for PRs from forks, and a PR run
+      # shouldn't be pushing commits back to the target branch anyway.
+      - name: Update last-run badge data
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir -p .github/badges
+          echo "{\"schemaVersion\":1,\"label\":\"CodeQL\",\"message\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"color\":\"blue\"}" > .github/badges/codeql-last-run.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/codeql-last-run.json
+          git diff --staged --quiet || git commit -m "chore: update CodeQL last-run badge"
+          git push
