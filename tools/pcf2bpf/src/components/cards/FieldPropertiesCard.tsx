@@ -19,7 +19,12 @@ export function FieldPropertiesCard({ field, attribute, entityDisplayName, stage
     const cssVars: CSSProperties = { ["--stage-color" as string]: stageColor };
 
     return (
-        <GenericCard className={styles.spacing} title="Field properties" style={cssVars}>
+        <GenericCard
+            className={styles.spacing}
+            title="Field properties"
+            description="Read-only summary of the selected field's type, entity, and requirement."
+            style={cssVars}
+        >
             <span className={styles.stageBadge}>{stageName}</span>
 
             <Text className={styles.fieldName}>{field.label}</Text>

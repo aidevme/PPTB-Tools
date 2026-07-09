@@ -101,6 +101,7 @@ export function FormFactorsCard({
                     </span>
                 </>
             }
+            description="Assign, reconfigure, or remove a PCF control for the selected form factor."
         >
             <div className={styles.content}>
                 <TabList

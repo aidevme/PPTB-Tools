@@ -47,7 +47,10 @@ export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfS
     };
 
     return (
-        <GenericCard title="Business Process Flow">
+        <GenericCard
+            title="Business Process Flow"
+            description="Select a loaded Business Process Flow to browse its stages and fields."
+        >
             <Field>
                 <Combobox
                     ref={comboboxRef}

@@ -61,7 +61,10 @@ export function StagesFieldsCard({
     };
 
     return (
-        <GenericCard title="Business Process Details">
+        <GenericCard
+            title="Business Process Details"
+            description="Browse the selected flow's stages and choose a field to configure."
+        >
             <Text className={styles.bpfName}>{bpfName}</Text>
             <div className={styles.flow}>
                 {stages.map((stage, index) => {

@@ -122,7 +122,10 @@ export function SolutionsPublishersCard({ onLoadingChange, bpfProcesses, isLoadi
     };
 
     return (
-        <GenericCard title="Solutions & Publishers">
+        <GenericCard
+            title="Solutions & Publishers"
+            description="Pick a solution or publisher to scope which Business Process Flows can be loaded."
+        >
             <RadioGroup
                 className={styles.filterModeRadioGroup}
                 layout="horizontal"

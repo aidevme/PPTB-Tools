@@ -34,7 +34,11 @@ export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
                 : "Choose two different form factors — you can't copy a form factor onto itself.";
 
     return (
-        <GenericCard className={styles.minWidth} title="Copy PCF between form factors">
+        <GenericCard
+            className={styles.minWidth}
+            title="Copy PCF between form factors"
+            description="Clone the selected field's PCF configuration from one form factor to another."
+        >
             <Field label="Copy from">
                 <Dropdown
                     value={from === "" ? "" : FORM_FACTOR_LABELS[from]}
