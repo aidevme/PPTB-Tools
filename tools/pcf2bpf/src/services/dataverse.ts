@@ -184,6 +184,7 @@ export async function loadPcfControls(): Promise<PcfControl[]> {
             <attribute name="name" />
             <attribute name="compatibledatatypes" />
             <attribute name="manifest" />
+            <attribute name="clientjson" />
           </entity>
         </fetch>`;
 
