@@ -81,14 +81,19 @@ Conventions it follows:
   data the token set has no equivalent for (e.g. a BPF stage's own configured color).
 - **Leaves the IIFE build setup alone** (`vite.config.ts`'s `fixHtmlForPPTB` plugin, `format: "iife"`,
   `inlineDynamicImports: true`) unless the task is specifically about the build.
-- **Code layout** — same `src/lib/` vs `components/`/`App.tsx` split as architect plans against.
+- **Code layout** — same `src/services/` vs `components/`/`App.tsx` split as architect plans against.
 - **In-place XML mutation pattern** — mutates a `useRef<XMLDocument>` in place and bumps a
   `docVersion`-style counter afterward (see `App.tsx`'s `mutateDoc` helper), rather than replacing the ref or
   relying on object-identity re-renders.
 - **Domain invariants** — BPFs are `workflow` records with `category = 4`; a BPF's form is the `systemform`
   whose `objecttypecode` matches the BPF's private entity, resolved via that entity's numeric
   `ObjectTypeCode`; PCF assignments live at
-  `controlDescriptions/controlDescription[@forControl]/customControl[@formFactor]`.
+  `controlDescriptions/controlDescription[@forControl]/customControl[@formFactor]`. Some BPFs span more than
+  one entity (e.g. a Lead → Opportunity sales process) — a field's real entity is recoverable from its own
+  `<control relationship="...">` attribute, not assumed from `workflow.primaryentity`.
+- **GitHub Actions workflows** — pins actions to a version that has actually migrated to the Node 24 runtime
+  (the newest major tag doesn't always mean this — see `docs/github/github-action-runners.md`), rather than
+  assuming "latest major version" is sufficient.
 
 **Finishes by:** running `npm run build` in the affected tool directory and reporting the result — never
 marking work done if the build failed or couldn't be run, and explaining why if so.
