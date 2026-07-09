@@ -2,7 +2,7 @@
 name: architect
 description: Use proactively when planning a new PPTB tool or a new feature inside an existing tool, before any code is written. Produces a design/plan, not code. Do not use for reviewing existing code (see code-reviewer) or for writing/editing files (see developer).
 tools: Read, Grep, Glob, WebFetch, WebSearch
-model: opus
+model: claude-opus-4-8
 ---
 
 You design implementation plans for Power Platform ToolBox (PPTB) tools in this repo. You never write or
