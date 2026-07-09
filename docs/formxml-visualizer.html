@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>FormXML Stage Visualizer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0e1116;
+    --panel:#161b22;
+    --panel-2:#1b222c;
+    --border:#262f3b;
+    --text:#e7ebf1;
+    --text-dim:#8b94a3;
+    --amber:#e8a33d;
+    --amber-dim:#4a3a22;
+    --cyan:#5ad4c8;
+    --green:#6fcf97;
+    --purple:#b18cf0;
+    --pink:#f08fb0;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;}
+  body{padding:32px 28px 80px;min-height:100vh;}
+
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:22px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--amber);margin:0 0 6px;}
+  h1{margin:0;font-size:26px;font-weight:700;letter-spacing:-0.01em;}
+  p.sub{margin:6px 0 0;color:var(--text-dim);font-size:14px;max-width:520px;line-height:1.5;}
+
+  .stats{display:flex;gap:10px;flex-wrap:wrap;}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:right;min-width:76px;}
+  .stat b{display:block;font-family:'IBM Plex Mono',monospace;font-size:18px;color:var(--text);}
+  .stat span{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;}
+
+  details.source{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:22px;overflow:hidden;}
+  details.source summary{cursor:pointer;padding:14px 18px;font-size:13px;font-weight:600;color:var(--text-dim);list-style:none;display:flex;align-items:center;gap:8px;user-select:none;}
+  details.source summary::-webkit-details-marker{display:none;}
+  details.source summary::before{content:"▸";display:inline-block;transition:transform .15s ease;color:var(--amber);}
+  details.source[open] summary::before{transform:rotate(90deg);}
+  .source-body{padding:0 18px 18px;}
+  textarea{width:100%;height:220px;background:var(--ink);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;padding:12px;resize:vertical;}
+  textarea:focus{outline:2px solid var(--amber);outline-offset:1px;}
+
+  .actions{display:flex;align-items:center;gap:12px;margin-top:12px;}
+  button.visualize{background:var(--amber);color:#1a1206;border:none;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:13px;letter-spacing:.03em;padding:11px 20px;border-radius:8px;cursor:pointer;transition:transform .1s ease, box-shadow .15s ease;}
+  button.visualize:hover{box-shadow:0 0 0 3px var(--amber-dim);}
+  button.visualize:active{transform:scale(.97);}
+  button.visualize:focus-visible{outline:2px solid var(--text);outline-offset:2px;}
+  .parse-error{color:var(--pink);font-size:12px;font-family:'IBM Plex Mono',monospace;}
+
+  #empty{padding:70px 20px;text-align:center;color:var(--text-dim);border:1px dashed var(--border);border-radius:var(--radius);font-size:14px;}
+  #empty b{color:var(--text);}
+
+  .pipeline{display:flex;align-items:flex-start;gap:0;overflow-x:auto;padding:8px 4px 20px;}
+  .seam{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;width:56px;flex:0 0 56px;padding-top:52px;}
+  .seam .line{width:0;border-left:2px dashed var(--border);height:40px;}
+  .seam .tag{writing-mode:vertical-rl;text-orientation:mixed;font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:.06em;margin-top:6px;white-space:nowrap;}
+
+  .stage{flex:0 0 260px;width:260px;background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);margin-right:14px;opacity:0;transform:translateY(10px);animation:rise .45s ease forwards;overflow:hidden;}
+  .stage:last-child{margin-right:0;}
+
+  @keyframes rise{to{opacity:1;transform:translateY(0);}}
+
+  .stage-head{padding:14px 16px 12px;border-bottom:1px solid var(--border);}
+  .stage-num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--text-dim);}
+  .stage-name{font-size:16px;font-weight:700;margin:2px 0 8px;}
+  .entity-badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 8px;border-radius:100px;background:var(--panel-2);border:1px solid var(--border);color:var(--cyan);letter-spacing:.03em;}
+  .ribbon{height:4px;background:var(--panel-2);border-radius:2px;margin-top:10px;overflow:hidden;}
+  .ribbon i{display:block;height:100%;background:linear-gradient(90deg,var(--amber),var(--pink));}
+
+  .field-list{padding:6px 0;}
+  .field{display:flex;gap:10px;align-items:flex-start;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,0.03);opacity:0;animation:fieldIn .35s ease forwards;}
+  .field:last-child{border-bottom:none;}
+  @keyframes fieldIn{from{opacity:0;transform:translateX(-4px);}to{opacity:1;transform:translateX(0);}}
+
+  .type-chip{flex:0 0 24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;}
+  .field-text{min-width:0;}
+  .field-label{font-size:13px;font-weight:500;color:var(--text);}
+  .field-meta{font-size:10.5px;color:var(--text-dim);font-family:'IBM Plex Mono',monospace;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:26px;padding-top:18px;border-top:1px solid var(--border);}
+  .legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-dim);}
+  .legend-chip{width:18px;height:18px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;}
+
+  @media (max-width:640px){
+    body{padding:20px 14px 60px;}
+    .stage{flex:0 0 220px;width:220px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <p class="eyebrow">PCF2BPF · FormXML</p>
+      <h1>Stage Visualizer</h1>
+      <p class="sub">Paste a Business Process Flow FormXML export below and visualize its stages, fields, control types, and entity handoffs.</p>
+    </div>
+    <div class="stats" id="stats" style="display:none;">
+      <div class="stat"><b id="statStages">0</b><span>Stages</span></div>
+      <div class="stat"><b id="statFields">0</b><span>Fields</span></div>
+      <div class="stat"><b id="statLookups">0</b><span>Lookups</span></div>
+      <div class="stat"><b id="statEntities">0</b><span>Entities</span></div>
+    </div>
+  </header>
+
+  <details class="source" open>
+    <summary>Source FormXML</summary>
+    <div class="source-body">
+      <textarea id="xmlInput" spellcheck="false"></textarea>
+      <div class="actions">
+        <button class="visualize" id="vizBtn">Visualize ▸</button>
+        <span class="parse-error" id="parseError"></span>
+      </div>
+    </div>
+  </details>
+
+  <div id="empty">Paste FormXML above and hit <b>Visualize</b> to see the stage pipeline.</div>
+  <div class="pipeline" id="pipeline" style="display:none;"></div>
+
+  <div class="legend" id="legend" style="display:none;"></div>
+
+</div>
+
+<script>
+const DEFAULT_XML = `<form>
+  <tabs>
+    <tab verticallayout="true" id="{f99b4d48-7aad-456e-864a-8e7d543f7495}" name="StageStep4" locklevel="0" expanded="true" visible="false" labelid="{1d9767ff-ae37-463f-9656-3906ef7f8b8b}">
+      <labels><label description="Qualify" languagecode="1033" /></labels>
+      <columns><column width="100%"><sections>
+        <section showbar="false" columns="1" id="{1c7586b1-7e38-7c90-6de5-ecacbd4b5a72}" name="StageStep4_section1" labelid="{b2e43496-3b0c-4cf3-98f8-f0b33a020d77}">
+          <labels><label description="Qualify" languagecode="1033" /></labels>
+          <rows>
+            <row><cell id="{96051138-4391-4f70-b23a-4333e49715bf}" showlabel="true" visible="true" labelid="{cd4dcd84-e1c5-45ba-bd4e-0a1348341509}">
+              <labels><label description="Existing Contact?" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:parentcontactid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="parentcontactid" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{25c95401-3b27-4569-900e-72bfcb990c04}" showlabel="true" visible="true" labelid="{8afa852a-c3ed-4415-bffa-0ddbefc32758}">
+              <labels><label description="Existing Account?" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:parentaccountid" classid="{270BD3DB-D9AF-4782-9025-509E298DEC0A}" datafieldname="parentaccountid" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{6e4338c8-272e-4790-9b26-19b658093449}" showlabel="true" visible="true" labelid="{3e5dffbc-b112-48a4-901a-8e2ff6086e06}">
+              <labels><label description="Purchase Timeframe" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:purchasetimeframe" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="purchasetimeframe" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{399b53f3-eaf6-4cd7-b5ca-6e5ffd4d29b7}" showlabel="true" visible="true" labelid="{794bc683-bba7-4036-830f-6c4a33572d80}">
+              <labels><label description="Estimated Budget" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:budgetamount" classid="{533b9e00-756b-4312-95a0-dc888637ac78}" datafieldname="budgetamount" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{739abb53-7ce5-4408-865f-ad8b7efc4e80}" showlabel="true" visible="true" labelid="{5fcc5a92-199f-4b52-bd2e-3f9ae6530d88}">
+              <labels><label description="Purchase Process" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:purchaseprocess" classid="{3ef39988-22bb-4f0b-bbbe-64b5a3748aee}" datafieldname="purchaseprocess" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{646c0de4-de2d-4470-96fa-8f5a2d7cc1f7}" showlabel="true" visible="true" labelid="{c23afa96-31c5-45c1-a121-9b73737f179b}">
+              <labels><label description="Identify Decision Maker" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:decisionmaker" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="decisionmaker" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{4702bf3d-02d3-40a0-9d4b-32ec7c4d5a12}" showlabel="true" visible="true" labelid="{a838f9ae-87c3-4301-9b3f-69d79016e570}">
+              <labels><label description="Capture Summary" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_leadid:description" classid="{e0dece4b-6fc8-4a8f-a065-082708572369}" datafieldname="description" relationship="lk_leadtoopportunitysalesprocess_leadid" isrequired="false" disabled="false" />
+            </cell></row>
+          </rows>
+        </section>
+      </sections></column></columns>
+    </tab>
+
+    <tab verticallayout="true" id="{bfc9108c-8389-406b-9166-2c3298a2e41f}" name="StageStep20" locklevel="0" expanded="true" visible="false" labelid="{6b28c144-5e2a-45a7-94e4-40f270ac0365}">
+      <labels><label description="Develop" languagecode="1033" /></labels>
+      <columns><column width="100%"><sections>
+        <section showbar="false" columns="1" id="{87897719-1b3a-c16c-ba85-87c41a8131b8}" name="StageStep20_section1" labelid="{a7fec162-c062-4944-94f0-a324cd18e4ab}">
+          <labels><label description="Develop" languagecode="1033" /></labels>
+          <rows>
+            <row><cell id="{d106b0f3-10e5-412a-8669-d824ef9a0925}" showlabel="true" visible="true" labelid="{9a012767-75a6-4fe3-bb15-22b598ae3d43}">
+              <labels><label description="Customer Need" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:customerneed" classid="{e0dece4b-6fc8-4a8f-a065-082708572369}" datafieldname="customerneed" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{bc875dd8-7959-4a62-adf4-ba64e75dc4e0}" showlabel="true" visible="true" labelid="{ce1b6f97-d055-4190-a7db-9415fa58807c}">
+              <labels><label description="Proposed Solution" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:proposedsolution" classid="{e0dece4b-6fc8-4a8f-a065-082708572369}" datafieldname="proposedsolution" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{3ebe544a-d29e-4fe4-a18f-98d461b54676}" showlabel="true" visible="true" labelid="{6c3b0f8f-15d9-4dc0-bad8-83294b185e59}">
+              <labels><label description="Identify Stakeholders" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:identifycustomercontacts" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="identifycustomercontacts" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{fdb48dad-a52e-4b1d-95c9-23b58f63ebbe}" showlabel="true" visible="true" labelid="{19311264-6c86-4c17-8bd0-29a656f4936f}">
+              <labels><label description="Identify Competitors" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:identifycompetitors" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="identifycompetitors" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+          </rows>
+        </section>
+      </sections></column></columns>
+    </tab>
+
+    <tab verticallayout="true" id="{3a275c22-fc45-4e89-97fc-41e5ec578743}" name="StageStep30" locklevel="0" expanded="true" visible="false" labelid="{b16efcb7-5be7-4691-b052-b6e669439b3e}">
+      <labels><label description="Propose" languagecode="1033" /></labels>
+      <columns><column width="100%"><sections>
+        <section showbar="false" columns="1" id="{17793b16-367c-baf7-e594-c4cc5889c725}" name="StageStep30_section1" labelid="{514a5182-fbdf-4236-a14d-706625aa2c3c}">
+          <labels><label description="Propose" languagecode="1033" /></labels>
+          <rows>
+            <row><cell id="{c66f1e5e-5f4e-4b65-b012-421cc19d9d18}" showlabel="true" visible="true" labelid="{98ecd346-6eb6-49f0-8454-ff57f362b862}">
+              <labels><label description="Identify Sales Team" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:identifypursuitteam" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="identifypursuitteam" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{8a2e7308-83ff-4dc1-9228-351755dcd32f}" showlabel="true" visible="true" labelid="{ffd91189-8161-432b-9b1f-34ad2fd650e7}">
+              <labels><label description="Develop Proposal" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:developproposal" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="developproposal" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{db8aff44-7c25-46c7-8556-8f3597e50cd8}" showlabel="true" visible="true" labelid="{30d22073-7673-4960-af3b-f96c980ea498}">
+              <labels><label description="Complete Internal Review" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:completeinternalreview" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="completeinternalreview" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{da6173b3-1da1-4217-b728-17317ea2fdfc}" showlabel="true" visible="true" labelid="{2b8f1ec2-b6e7-4667-8a7a-fa4547ec3c3c}">
+              <labels><label description="Present Proposal" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:presentproposal" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="presentproposal" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+          </rows>
+        </section>
+      </sections></column></columns>
+    </tab>
+
+    <tab verticallayout="true" id="{7f5247fe-cfc3-42bc-aa77-b1d836d9b7c0}" name="StageStep40" locklevel="0" expanded="true" visible="false" labelid="{93d70dd6-dd16-4ad1-b9f5-8c3b8734a8bf}">
+      <labels><label description="Close" languagecode="1033" /></labels>
+      <columns><column width="100%"><sections>
+        <section showbar="false" columns="1" id="{8df4206d-c9af-931b-9b24-5959ccde3d66}" name="StageStep40_section1" labelid="{5520736c-91ea-40b1-9415-faf66d527eca}">
+          <labels><label description="Close" languagecode="1033" /></labels>
+          <rows>
+            <row><cell id="{61c7b2be-5d0d-454a-aa8a-00f46467066a}" showlabel="true" visible="true" labelid="{c3e3f7fd-6bb6-4ef1-8088-e7142da99aef}">
+              <labels><label description="Complete Final Proposal" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:completefinalproposal" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="completefinalproposal" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{98f90967-ed0b-41f8-855a-1ae1f26b824c}" showlabel="true" visible="true" labelid="{39df9907-c66d-4ef4-9fd7-79d889747627}">
+              <labels><label description="Present Final Proposal" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:presentfinalproposal" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="presentfinalproposal" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{62c1c2d0-eb99-4962-b69e-d6c2f67b188a}" showlabel="true" visible="true" labelid="{9f7437d3-1e21-4776-a09f-b8a4f6c688e8}">
+              <labels><label description="Confirm Decision Date" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:finaldecisiondate" classid="{5b773807-9fb2-42db-97c3-7a91eff8adff}" datafieldname="finaldecisiondate" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{8c8db49e-e61b-48f4-a24f-1fb2a4361e97}" showlabel="true" visible="true" labelid="{caef9cb3-ae3e-4e2a-a2fe-bfe6e933a285}">
+              <labels><label description="Send Thank You" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:sendthankyounote" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="sendthankyounote" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+            <row><cell id="{fe4980a8-c953-4c34-bd7c-08045be9fdee}" showlabel="true" visible="true" labelid="{8235dfbc-075c-41c5-adf6-d162610ad539}">
+              <labels><label description="File De-brief" languagecode="1033" /></labels>
+              <control id="lk_leadtoopportunitysalesprocess_opportunityid:filedebrief" classid="{67fac785-cd58-4f9f-abb3-4b7ddc6ed5ed}" datafieldname="filedebrief" relationship="lk_leadtoopportunitysalesprocess_opportunityid" isrequired="false" disabled="false" />
+            </cell></row>
+          </rows>
+        </section>
+      </sections></column></columns>
+    </tab>
+  </tabs>
+</form>`;
+
+document.getElementById('xmlInput').value = DEFAULT_XML.trim();
+
+const CONTROL_TYPES = {
+  '270BD3DB-D9AF-4782-9025-509E298DEC0A': { label: 'Lookup',        icon: '→', color: 'var(--cyan)'   },
+  '3EF39988-22BB-4F0B-BBBE-64B5A3748AEE': { label: 'Option Set',    icon: '▤', color: 'var(--amber)'  },
+  '533B9E00-756B-4312-95A0-DC888637AC78': { label: 'Currency',      icon: '$', color: 'var(--green)'  },
+  '67FAC785-CD58-4F9F-ABB3-4B7DDC6ED5ED': { label: 'Two Options',   icon: '◐', color: 'var(--purple)' },
+  'E0DECE4B-6FC8-4A8F-A065-082708572369': { label: 'Multiline Text',icon: '¶', color: 'var(--text-dim)'},
+  '5B773807-9FB2-42DB-97C3-7A91EFF8ADFF': { label: 'Date/Time',     icon: '◷', color: 'var(--pink)'   },
+};
+const DEFAULT_TYPE = { label: 'Text', icon: 'Aa', color: 'var(--text-dim)' };
+
+function typeFor(classid){
+  if(!classid) return DEFAULT_TYPE;
+  const key = classid.replace(/[{}]/g,'').toUpperCase();
+  return CONTROL_TYPES[key] || DEFAULT_TYPE;
+}
+
+function entityFromRelationship(rel){
+  if(!rel) return null;
+  const segments = rel.split('_');
+  const last = segments[segments.length - 1];
+  if(!/id$/i.test(last)) return null;
+  const token = last.replace(/id$/i, '');
+  if(!token) return null;
+  return token.charAt(0).toUpperCase() + token.slice(1);
+}
+
+function parseFormXml(xmlStr){
+  const doc = new DOMParser().parseFromString(xmlStr, 'application/xml');
+  const perr = doc.querySelector('parsererror');
+  if(perr) throw new Error('XML could not be parsed. Check for unclosed tags or invalid characters.');
+
+  const tabs = Array.from(doc.querySelectorAll('tab'));
+  if(tabs.length === 0) throw new Error('No <tab> elements found — is this a BPF FormXML export?');
+
+  return tabs.map(tab => {
+    const labelEl = tab.querySelector(':scope > labels > label');
+    const stageLabel = labelEl ? labelEl.getAttribute('description') : tab.getAttribute('name');
+    const controls = Array.from(tab.querySelectorAll('control'));
+    const fields = controls.map(c => {
+      const cell = c.closest('cell');
+      const cellLabelEl = cell ? cell.querySelector(':scope > labels > label') : null;
+      return {
+        label: cellLabelEl ? cellLabelEl.getAttribute('description') : c.getAttribute('datafieldname'),
+        datafieldname: c.getAttribute('datafieldname'),
+        classid: c.getAttribute('classid'),
+        relationship: c.getAttribute('relationship'),
+      };
+    });
+
+    const entityCounts = {};
+    fields.forEach(f => {
+      const e = entityFromRelationship(f.relationship);
+      if(e) entityCounts[e] = (entityCounts[e]||0) + 1;
+    });
+    const dominantEntity = Object.keys(entityCounts).sort((a,b)=>entityCounts[b]-entityCounts[a])[0] || null;
+
+    return { name: tab.getAttribute('name'), label: stageLabel, fields, dominantEntity };
+  });
+}
+
+function escapeHtml(str){
+  if(str == null) return '';
+  return str.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function render(stages){
+  const pipeline = document.getElementById('pipeline');
+  const empty = document.getElementById('empty');
+  const legend = document.getElementById('legend');
+  const stats = document.getElementById('stats');
+
+  pipeline.innerHTML = '';
+  legend.innerHTML = '';
+
+  const maxFields = Math.max(...stages.map(s => s.fields.length), 1);
+  const usedTypes = new Set();
+  let totalFields = 0, totalLookups = 0;
+  const allEntities = new Set();
+  let prevEntity = null;
+
+  stages.forEach((stage, si) => {
+    if(stage.dominantEntity && prevEntity && stage.dominantEntity !== prevEntity){
+      const seam = document.createElement('div');
+      seam.className = 'seam';
+      seam.innerHTML = `<div class="line"></div><div class="tag">⇄ ${escapeHtml(prevEntity)} → ${escapeHtml(stage.dominantEntity)}</div>`;
+      pipeline.appendChild(seam);
+    }
+    if(stage.dominantEntity){ prevEntity = stage.dominantEntity; allEntities.add(stage.dominantEntity); }
+
+    const el = document.createElement('div');
+    el.className = 'stage';
+    el.style.animationDelay = (si * 90) + 'ms';
+
+    const ribbonPct = Math.round((stage.fields.length / maxFields) * 100);
+
+    el.innerHTML = `
+      <div class="stage-head">
+        <div class="stage-num">STAGE ${si+1} / ${stages.length}</div>
+        <div class="stage-name">${escapeHtml(stage.label || stage.name)}</div>
+        ${stage.dominantEntity ? `<span class="entity-badge">${escapeHtml(stage.dominantEntity)}</span>` : ''}
+        <div class="ribbon"><i style="width:${ribbonPct}%"></i></div>
+      </div>
+      <div class="field-list"></div>
+    `;
+
+    const list = el.querySelector('.field-list');
+    stage.fields.forEach((f, fi) => {
+      totalFields++;
+      if(f.classid && f.classid.replace(/[{}]/g,'').toUpperCase() === '270BD3DB-D9AF-4782-9025-509E298DEC0A') totalLookups++;
+      const t = typeFor(f.classid);
+      usedTypes.add(JSON.stringify(t));
+      const row = document.createElement('div');
+      row.className = 'field';
+      row.style.animationDelay = (si * 90 + 140 + fi * 45) + 'ms';
+      row.innerHTML = `
+        <div class="type-chip" style="background:color-mix(in srgb, ${t.color} 18%, transparent); color:${t.color};">${t.icon}</div>
+        <div class="field-text">
+          <div class="field-label">${escapeHtml(f.label)}</div>
+          <div class="field-meta">${escapeHtml(f.datafieldname)} · ${t.label}</div>
+        </div>
+      `;
+      list.appendChild(row);
+    });
+
+    pipeline.appendChild(el);
+  });
+
+  Array.from(usedTypes).map(s => JSON.parse(s)).forEach(t => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `<div class="legend-chip" style="background:color-mix(in srgb, ${t.color} 18%, transparent); color:${t.color};">${t.icon}</div>${t.label}`;
+    legend.appendChild(item);
+  });
+
+  document.getElementById('statStages').textContent = stages.length;
+  document.getElementById('statFields').textContent = totalFields;
+  document.getElementById('statLookups').textContent = totalLookups;
+  document.getElementById('statEntities').textContent = allEntities.size;
+
+  empty.style.display = 'none';
+  pipeline.style.display = 'flex';
+  legend.style.display = 'flex';
+  stats.style.display = 'flex';
+}
+
+document.getElementById('vizBtn').addEventListener('click', () => {
+  const input = document.getElementById('xmlInput').value;
+  const errEl = document.getElementById('parseError');
+  errEl.textContent = '';
+  try {
+    const stages = parseFormXml(input);
+    render(stages);
+  } catch(e){
+    errEl.textContent = e.message;
+    document.getElementById('pipeline').style.display = 'none';
+    document.getElementById('legend').style.display = 'none';
+    document.getElementById('stats').style.display = 'none';
+    document.getElementById('empty').style.display = 'block';
+  }
+});
+</script>
+</body>
+</html>
