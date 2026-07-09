@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { Button, Caption1, Text, Tooltip, useId } from "@fluentui/react-components";
+import {
+    Button,
+    Caption1,
+    Menu,
+    MenuButton,
+    MenuItem,
+    MenuList,
+    MenuPopover,
+    MenuTrigger,
+    Text,
+    Tooltip,
+    useId,
+} from "@fluentui/react-components";
 import { FullScreenMinimize20Regular } from "@fluentui/react-icons";
 import { XmlFormatter } from "../xmlformatter";
 import { XmlSearchBox } from "../searchbox/XmlSearchBox";
@@ -58,6 +70,21 @@ export function FormXmlPanel({ beforeXml, afterXml }: IFormXmlPanelProps) {
                         Restore
                     </Button>
                 </Tooltip>
+
+                <Menu>
+                    <MenuTrigger disableButtonEnhancement>
+                        <MenuButton appearance="subtle" size="small">
+                            Visualize
+                        </MenuButton>
+                    </MenuTrigger>
+
+                    <MenuPopover>
+                        <MenuList>
+                            <MenuItem>Visualize Before XML</MenuItem>
+                            <MenuItem>Visualize After XML</MenuItem>
+                        </MenuList>
+                    </MenuPopover>
+                </Menu>
             </div>
 
             <div className={styles.columnsRow}>

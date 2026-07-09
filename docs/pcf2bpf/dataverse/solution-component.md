@@ -123,19 +123,22 @@ No many-to-many relationships are defined on `solutioncomponent`.
 
 ## Relevance to PCF2BPF
 
-`lib/dataverse.ts` doesn't currently query `solutioncomponent` — `loadBpfProcesses` and `loadPcfControls`
-both fetch unfiltered `workflow`/`customcontrol` lists regardless of which solution(s) they're in (see
-[solution.md](./solution.md)'s Relevance section). This table is what a solution-scoped version of those
-queries would filter through:
+`services/dataverse.ts`'s `loadBpfProcesses` optionally scopes its `workflow` query to one solution or one
+publisher's solutions, by joining through `solutioncomponent` (`componenttype = 29`, the Workflow/BPF
+component type) via a FetchXML `<link-entity>`, matching each row's `objectid` against `workflow.workflowid`.
+This is triggered from `SolutionsPublishersCard`'s "Load BPFs" button, using whichever solution/publisher is
+selected there (see [solution.md](./solution.md)'s Relevance section); `loadPcfControls` is unaffected and
+still fetches every registered `customcontrol` regardless of solution.
 
-- To list only the BPFs in a given solution: query `solutioncomponent` where `solutionid = <id>` and
-  `componenttype = 29`, then match each row's `objectid` against `workflow.workflowid`.
-- To list only the PCF controls in a given solution: same pattern with `componenttype = 66`, matching
-  `objectid` against `customcontrol.customcontrolid`.
+- Solution-scoped: `solutioncomponent` filtered on `solutionid = <id>` and `componenttype = 29`.
+- Publisher-scoped: the same `solutioncomponent` filter, joined one level further to `solution` on
+  `publisherid = <id>` — since a publisher can own more than one solution, this query also sets FetchXML's
+  `distinct="true"` to dedupe a BPF that appears in more than one of that publisher's solutions.
+- To also list only the PCF controls in a given solution (not currently done): same pattern with
+  `componenttype = 66`, matching `objectid` against `customcontrol.customcontrolid`.
 - `componenttype = 60` (System Form) is the same mechanism for the `systemform` record this tool reads and
-  mutates via `lib/formxml.ts`, though PCF2BPF locates that record by `objecttypecode` (the BPF's private
-  entity), not via `solutioncomponent`.
+  mutates via `services/formxml.ts`, though PCF2BPF locates that record by `objecttypecode` (the BPF's
+  private entity), not via `solutioncomponent`.
 
-None of this is wired up today; `objectid` has no declared `Targets` (it's a bare `Uniqueidentifier`, since
-the target table is implied by `componenttype`), so consuming it would mean branching on `componenttype` to
-know which entity `objectid` refers to before querying it.
+`objectid` has no declared `Targets` (it's a bare `Uniqueidentifier`, since the target table is implied by
+`componenttype`), which is why the queries above hardcode `componenttype = 29` rather than branching on it.

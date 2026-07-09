@@ -2,9 +2,10 @@ import type { CSSProperties } from "react";
 import { Badge, mergeClasses, Text } from "@fluentui/react-components";
 import { getAttributeTypeLabel } from "../../services";
 import type { AttributeInfo, FieldInfo } from "../../services";
-import { useFieldPropertiesPanelStyles } from "../../styles";
+import { useFieldPropertiesCardStyles } from "../../styles";
+import { GenericCard } from "./GenericCard";
 
-interface IFieldPropertiesPanelProps {
+interface IFieldPropertiesCardProps {
     field: FieldInfo;
     attribute: AttributeInfo | undefined;
     entityDisplayName: string;
@@ -13,13 +14,12 @@ interface IFieldPropertiesPanelProps {
 }
 
 /** Read-only summary of the selected field's properties: type, entity, and required-on-stage state. */
-export function FieldPropertiesPanel({ field, attribute, entityDisplayName, stageName, stageColor }: IFieldPropertiesPanelProps) {
-    const styles = useFieldPropertiesPanelStyles();
+export function FieldPropertiesCard({ field, attribute, entityDisplayName, stageName, stageColor }: IFieldPropertiesCardProps) {
+    const styles = useFieldPropertiesCardStyles();
     const cssVars: CSSProperties = { ["--stage-color" as string]: stageColor };
 
     return (
-        <div className={styles.root} style={cssVars}>
-            <Text className={styles.eyebrow}>Field properties</Text>
+        <GenericCard className={styles.spacing} title="Field properties" style={cssVars}>
             <span className={styles.stageBadge}>{stageName}</span>
 
             <Text className={styles.fieldName}>{field.label}</Text>
@@ -41,6 +41,10 @@ export function FieldPropertiesPanel({ field, attribute, entityDisplayName, stag
                     {field.required ? "Required" : "Optional"}
                 </Badge>
             </div>
-        </div>
+            <div className={styles.row}>
+                <span className={styles.rowLabel}>Sequence</span>
+                <span className={styles.rowValue}>{field.sequence}</span>
+            </div>
+        </GenericCard>
     );
 }

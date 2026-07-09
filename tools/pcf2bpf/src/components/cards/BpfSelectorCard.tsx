@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Combobox, Field, useComboboxFilter, useId, type ComboboxProps } from "@fluentui/react-components";
+import { Combobox, Field, useComboboxFilter, type ComboboxProps } from "@fluentui/react-components";
 import type { BpfProcess } from "../../services";
 import { useBpfSelectorCardStyles } from "../../styles";
+import { GenericCard } from "./GenericCard";
 
 interface IBpfSelectorCardProps {
     bpfProcesses: BpfProcess[];
@@ -15,7 +16,6 @@ function bpfLabel(bpf: BpfProcess): string {
 
 export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfSelectorCardProps) {
     const styles = useBpfSelectorCardStyles();
-    const comboId = useId();
     const comboboxRef = useRef<HTMLInputElement>(null);
     const selected = bpfProcesses.find((b) => b.workflowid === selectedBpfId);
     const selectedLabel = selected ? bpfLabel(selected) : "";
@@ -47,21 +47,23 @@ export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfS
     };
 
     return (
-        <Field className={styles.root} label={{ children: "Business Process Flow", className: styles.eyebrow }}>
-            <Combobox
-                ref={comboboxRef}
-                className={styles.fullWidth}
-                clearable
-                aria-labelledby={comboId}
-                placeholder={bpfProcesses.length ? "Select a Business Process Flow" : "Load Business Process Flows first"}
-                value={query}
-                selectedOptions={selectedBpfId ? [selectedBpfId] : []}
-                onOptionSelect={handleOptionSelect}
-                onChange={(event) => setQuery(event.target.value)}
-                disabled={bpfProcesses.length === 0}
-            >
-                {children}
-            </Combobox>
-        </Field>
+        <GenericCard title="Business Process Flow">
+            <Field>
+                <Combobox
+                    ref={comboboxRef}
+                    className={styles.fullWidth}
+                    clearable
+                    aria-label="Business Process Flow"
+                    placeholder={bpfProcesses.length ? "Select a Business Process Flow" : "Load Business Process Flows first"}
+                    value={query}
+                    selectedOptions={selectedBpfId ? [selectedBpfId] : []}
+                    onOptionSelect={handleOptionSelect}
+                    onChange={(event) => setQuery(event.target.value)}
+                    disabled={bpfProcesses.length === 0}
+                >
+                    {children}
+                </Combobox>
+            </Field>
+        </GenericCard>
     );
 }

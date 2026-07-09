@@ -6,64 +6,28 @@ Dataverse-facing state directly.
 
 ## Where each panel is used
 
-`App.tsx`'s "PCFs Configuration" tab is a three-column layout:
+`App.tsx` renders one of these two panels per tab: `PcfConfigurationPanel` for "PCFs Configuration",
+`FormXmlPanel` for "Xml Details". All state and Dataverse calls still live in `App.tsx` — both panels
+are purely presentational, receiving everything as props/callbacks.
 
-- **Left column** — `BpfSelectorCard` (in `../cards`), the stage/field list (`StagesFields`), and the
-  "Update and Publish" button (none of these live in this folder).
-- **Middle column** — `FieldPropertiesPanel` (only rendered once a field is selected) above
-  `PcfConfigPanel`.
-- **Right column** — `CopyFormFactorCard` (in `../cards`), only rendered once a field is selected.
+## PcfConfigurationPanel
 
-The "Xml Details" tab is just `FormXmlPanel`, given the form's before/after XML text.
+The "PCFs Configuration" tab's three-column layout, assembling the cards in `../cards`:
 
-## FieldPropertiesPanel
+- **Left column** — `SolutionsPublishersCard`, `BpfSelectorCard`, an error `MessageBar` (if loading the
+  form failed), the stage/field list (`StagesFieldsCard`, or a loading message while the form loads),
+  and the "Update and Publish" button.
+- **Middle column** — `FieldPropertiesCard` (only rendered once a field is selected) above
+  `FormFactorsCard`.
+- **Right column** — `CopyFormFactorCard`, only rendered once a field is selected.
 
-Read-only summary card for the currently selected field: its label/logical name, resolved attribute type,
-owning entity, and whether it's required on its BPF stage — plus a colored badge matching the field's stage
-color (passed in as `stageColor` and applied via a `--stage-color` CSS custom property, the same pattern
-`XmlFormatter` uses for its theme colors).
+Its own `usePcfConfigurationPanelStyles` holds the column layout (`configRow`/`leftColumn`/
+`middleColumn`/`rightColumn`) and the "Update and Publish" button's `fullWidth`; the card frame/eyebrow
+styling is each card's own concern via `GenericCard`.
 
-| Prop | Type | Description |
-| --- | --- | --- |
-| `field` | `FieldInfo` | The selected field. |
-| `attribute` | `AttributeInfo \| undefined` | Resolved entity metadata for the field; `undefined` renders "Unknown" as the type. |
-| `entityDisplayName` | `string` | Display name of the field's owning entity. |
-| `stageName` | `string` | Name of the BPF stage the field belongs to. |
-| `stageColor` | `string` | CSS color, applied via `--stage-color` to the stage badge. |
-
-## PcfConfigPanel
-
-The main editing surface: pick a form factor (Web/Phone/Tablet), see which of the three already have a PCF
-control assigned (a green checkmark badge vs. a plain "+"), choose a PCF control compatible with the
-field's data type, fill in its non-bound manifest parameters, and apply or remove the assignment.
-
-| Prop | Type | Description |
-| --- | --- | --- |
-| `field` | `FieldInfo \| null` | Selected field; `null` renders a "Select a field…" placeholder instead of the editor. |
-| `entityDisplayName` | `string` | Shown in the "Form Factors for {field} ({entity})" heading. |
-| `doc` | `XMLDocument \| null` | The live form XML document, used to check which form factors already have an assignment. |
-| `docVersion` | `number` | Bump counter from `App.tsx`; `doc` is mutated in place, so this is what actually drives recomputation (see the root `CLAUDE.md`'s state-management note). |
-| `formFactor` | `FormFactor` | Currently selected form factor. |
-| `onFormFactorChange` | `(formFactor: FormFactor) => void` | Called when the user clicks a different form factor. |
-| `attribute` | `AttributeInfo \| undefined` | Resolved metadata for `field`; `undefined` shows a "could not resolve metadata" message. |
-| `compatibleControls` | `PcfControl[]` | PCF controls compatible with the field's attribute type. Empty renders a "no compatible control" message. |
-| `existing` | `PcfAssignment \| null` | The field's current PCF assignment on `formFactor`, if any — seeds the selected control and parameter values. |
-| `onApply` | `(pcf: PcfControl, values: Record<string, string>) => void` | Called on "Add Control / Apply Changes". |
-| `onRemove` | `() => void` | Called on "Remove Control"; disabled when `existing` is `null`. |
-
-Local state (`selectedPcfId`, `paramValues`) resets whenever the selected field, form factor, or that
-combination's existing assignment changes — see the `useEffect` with the `field?.controlId, formFactor,
-existing?.name` dependency array — so switching fields or form factors doesn't leak one field's in-progress
-parameter edits into another's editor.
-
-Only parameters with `usage !== "bound"` are shown, since bound parameters are wired to a field by the form
-designer rather than a static value (see "Not implemented" in the tool's root `README.md` — binding a
-parameter to another field isn't supported by this port).
-
-The root element uses `usePcfConfigPanelStyles` for the card frame (border/radius/padding matching
-`FieldPropertiesPanel`'s, so the two read as a stacked pair), but everything inside it still uses inline
-`style` objects rather than `makeStyles` classes. Match the surrounding inline-style pattern for internal
-layout tweaks; only add to the styles hook for things that should visually match the frame itself.
+The props interface mirrors what `App.tsx` already tracks — no new state or memoization was introduced
+by this extraction, existing `useMemo`/`useCallback` values (`attribute`, `compatibleControls`,
+`selectedStageIndex`, `existingAssignment`, `handle*` callbacks) are just passed straight through.
 
 ## FormXmlPanel
 

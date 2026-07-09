@@ -46,13 +46,39 @@ export function getStages(doc: XMLDocument): StageInfo[] {
     }));
 }
 
-/** Reads the data fields on one stage, from its `<cell><control datafieldname="...">` nodes. */
-export function getFieldsForStage(doc: XMLDocument, stageId: string): FieldInfo[] {
+/**
+ * Extracts the logical name of the entity a field belongs to from its `<control>` node's
+ * `relationship` attribute, e.g. `"lk_leadtoopportunitysalesprocess_leadid"` → `"lead"`. Dataverse
+ * names the relationship between a BPF's private entity and a real business entity
+ * `lk_{bpfUniqueName}_{entityLogicalName}id` — the entity is the last underscore-separated segment
+ * with its trailing `id` (the standard Dataverse lookup-attribute suffix) removed.
+ *
+ * Multi-entity BPFs (e.g. a Lead → Opportunity sales process) have fields from different entities;
+ * this is what lets `getFieldsForStage` resolve each field's own entity instead of assuming the
+ * BPF's single `primaryentity` for every field. Returns `null` if `relationship` is absent (e.g. a
+ * single-entity BPF may omit it) or doesn't end in `id`, so callers should fall back accordingly
+ * rather than treat it as an error.
+ */
+export function getFieldEntityLogicalName(relationship: string | null): string | null {
+    if (!relationship) return null;
+    const segments = relationship.split("_");
+    const last = segments[segments.length - 1];
+    if (!/id$/i.test(last)) return null;
+    const entityLogicalName = last.replace(/id$/i, "");
+    return entityLogicalName || null;
+}
+
+/**
+ * Reads the data fields on one stage, from its `<cell><control datafieldname="...">` nodes.
+ * `fallbackEntityLogicalName` (the BPF's own `primaryentity`) is used for any field whose
+ * `relationship` attribute doesn't resolve to an entity via `getFieldEntityLogicalName`.
+ */
+export function getFieldsForStage(doc: XMLDocument, stageId: string, fallbackEntityLogicalName: string): FieldInfo[] {
     const tab = Array.from(doc.querySelectorAll("tabs > tab")).find((t) => t.getAttribute("id") === stageId);
     if (!tab) return [];
 
     return Array.from(tab.querySelectorAll("cell > control[datafieldname]"))
-        .map((control): FieldInfo => ({
+        .map((control): Omit<FieldInfo, "sequence"> => ({
             controlId: control.getAttribute("id") ?? "",
             datafieldname: control.getAttribute("datafieldname") ?? "",
             label:
@@ -62,8 +88,13 @@ export function getFieldsForStage(doc: XMLDocument, stageId: string): FieldInfo[
             classId: control.getAttribute("classid"),
             stageId,
             required: control.getAttribute("isrequired") === "true",
+            entityLogicalName: getFieldEntityLogicalName(control.getAttribute("relationship")) ?? fallbackEntityLogicalName,
         }))
-        .filter((field) => field.controlId && field.datafieldname);
+        .filter((field) => field.controlId && field.datafieldname)
+        // Numbered after filtering, so this reflects the field's position among the valid fields
+        // actually shown to the user, not its raw position in the form XML (which may include
+        // malformed <control> nodes dropped by the filter above).
+        .map((field, index) => ({ ...field, sequence: index + 1 }));
 }
 
 function getControlDescriptions(doc: XMLDocument): Element | null {

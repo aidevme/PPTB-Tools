@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Button, Dropdown, Field, Option, Text, Tooltip } from "@fluentui/react-components";
+import { Button, Dropdown, Field, Option, Tooltip } from "@fluentui/react-components";
 import { Desktop20Regular, Phone20Regular, Tablet20Regular } from "@fluentui/react-icons";
 import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../services";
 import type { FormFactor } from "../../services";
 import { useCopyFormFactorCardStyles } from "../../styles";
+import { GenericCard } from "./GenericCard";
 
 interface ICopyFormFactorCardProps {
     onCopy: (from: FormFactor, to: FormFactor) => void;
@@ -33,11 +34,7 @@ export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
                 : "Choose two different form factors — you can't copy a form factor onto itself.";
 
     return (
-        <div className={styles.root}>
-            <Text block className={styles.title}>
-                Copy PCF between form factors
-            </Text>
-
+        <GenericCard className={styles.minWidth} title="Copy PCF between form factors">
             <Field label="Copy from">
                 <Dropdown
                     value={from === "" ? "" : FORM_FACTOR_LABELS[from]}
@@ -91,6 +88,6 @@ export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
                     Copy
                 </Button>
             </Tooltip>
-        </div>
+        </GenericCard>
     );
 }

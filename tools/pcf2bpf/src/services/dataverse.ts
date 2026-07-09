@@ -1,5 +1,5 @@
 import { parsePcfManifestParameters } from "./pcfManifest";
-import type { AttributeInfo, BpfProcess, PcfControl, PublisherInfo, SolutionInfo } from "../types";
+import type { AttributeInfo, BpfProcess, BpfScope, PcfControl, PublisherInfo, SolutionInfo } from "../types";
 
 /** Maps Dataverse attribute types to the PCF manifest `of-type` values they satisfy. */
 const ATTRIBUTE_TYPE_TO_PCF_TYPES: Record<string, string[]> = {
@@ -56,10 +56,41 @@ function escapeXmlAttr(value: string): string {
     return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-/** Loads all Business Process Flow definitions (`workflow` records with category = 4). */
-export async function loadBpfProcesses(): Promise<BpfProcess[]> {
+/**
+ * Loads Business Process Flow definitions (`workflow` records with `category = 4`), optionally scoped
+ * to one solution or one publisher's solutions via a `solutioncomponent` join (`componenttype = 29` is
+ * the Workflow/BPF component type; see `docs/pcf2bpf/dataverse/solution-component.md`). Omit `scope`
+ * to load every BPF in the environment, unfiltered.
+ */
+export async function loadBpfProcesses(scope?: BpfScope): Promise<BpfProcess[]> {
+    const solutionFilter =
+        scope && "solutionId" in scope
+            ? `<condition attribute="solutionid" operator="eq" value="${escapeXmlAttr(scope.solutionId)}" />`
+            : "";
+
+    // A publisher can own several solutions, so this joins one level further than the solution-scoped
+    // case; `distinct` below dedupes a BPF that ends up in more than one of that publisher's solutions.
+    const publisherLink =
+        scope && "publisherId" in scope
+            ? `<link-entity name="solution" from="solutionid" to="solutionid" link-type="inner">
+                 <filter type="and">
+                   <condition attribute="publisherid" operator="eq" value="${escapeXmlAttr(scope.publisherId)}" />
+                 </filter>
+               </link-entity>`
+            : "";
+
+    const scopeLink = scope
+        ? `<link-entity name="solutioncomponent" from="objectid" to="workflowid" link-type="inner">
+             <filter type="and">
+               <condition attribute="componenttype" operator="eq" value="29" />
+               ${solutionFilter}
+             </filter>
+             ${publisherLink}
+           </link-entity>`
+        : "";
+
     const fetchXml = `
-        <fetch>
+        <fetch${scope ? ' distinct="true"' : ""}>
           <entity name="workflow">
             <attribute name="workflowid" />
             <attribute name="name" />
@@ -69,6 +100,7 @@ export async function loadBpfProcesses(): Promise<BpfProcess[]> {
             <filter type="and">
               <condition attribute="category" operator="eq" value="4" />
             </filter>
+            ${scopeLink}
             <order attribute="name" />
           </entity>
         </fetch>`;
@@ -217,25 +249,33 @@ export async function loadSolutions(): Promise<SolutionInfo[]> {
             <filter type="and">
               <condition attribute="isvisible" operator="eq" value="1" />
               <condition attribute="solutiontype" operator="ne" value="2" />
+              <condition attribute="ismanaged" operator="eq" value="0" />
             </filter>
             <order attribute="friendlyname" />
           </entity>
         </fetch>`;
 
     const result = await api().fetchXmlQuery(fetchXml);
-    return result.value.map((r) => ({
-        solutionid: String(r.solutionid ?? ""),
-        friendlyname: String(r.friendlyname ?? ""),
-        uniquename: String(r.uniquename ?? ""),
-        version: String(r.version ?? ""),
-        description: String(r.description ?? ""),
-    }));
+    return result.value.map((r) => {
+        const uniquename = String(r.uniquename ?? "");
+        return {
+            solutionid: String(r.solutionid ?? ""),
+            friendlyname: String(r.friendlyname ?? ""),
+            uniquename,
+            version: String(r.version ?? ""),
+            description: String(r.description ?? ""),
+            isDefaultSolution: uniquename === "Default",
+        };
+    });
 }
 
-/** Loads every publisher in the connected environment, for the "Solutions & Publishers" filters. */
+/** Loads the publishers of every visible solution in the connected environment, for the "Solutions &
+ * Publishers" filters (equivalent to `GET solutions?$filter=isvisible eq true&$expand=publisherid(...)`,
+ * but as a single FetchXML query joining `publisher` to `solution` instead of expanding a navigation
+ * property). `distinct` dedupes publishers that own more than one visible solution. */
 export async function loadPublishers(): Promise<PublisherInfo[]> {
     const fetchXml = `
-        <fetch>
+        <fetch distinct="true">
           <entity name="publisher">
             <attribute name="publisherid" />
             <attribute name="friendlyname" />
@@ -243,6 +283,11 @@ export async function loadPublishers(): Promise<PublisherInfo[]> {
             <attribute name="customizationprefix" />
             <attribute name="description" />
             <order attribute="friendlyname" />
+            <link-entity name="solution" from="publisherid" to="publisherid" link-type="inner">
+              <filter type="and">
+                <condition attribute="isvisible" operator="eq" value="1" />
+              </filter>
+            </link-entity>
           </entity>
         </fetch>`;
 

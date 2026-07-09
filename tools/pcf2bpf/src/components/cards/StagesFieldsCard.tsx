@@ -1,32 +1,49 @@
 import { useMemo, useState, type CSSProperties } from "react";
 import { Badge, mergeClasses, Text } from "@fluentui/react-components";
 import { ChevronDown16Regular, ChevronRight12Regular, ChevronRight16Regular } from "@fluentui/react-icons";
-import { getStageColor, hasAnyCustomControl, getFieldsForStage } from "../services";
-import type { FieldInfo, StageInfo } from "../services";
-import { useStagesFieldsStyles } from "../styles";
+import { getStageColor, hasAnyCustomControl, getFieldsForStage } from "../../services";
+import type { FieldInfo, StageInfo } from "../../services";
+import { useStagesFieldsCardStyles } from "../../styles";
+import { GenericCard } from "./GenericCard";
 
-interface Props {
+interface IStagesFieldsCardProps {
     doc: XMLDocument | null;
     docVersion: number;
     /** Name of the selected Business Process Flow, shown under the "Business Process Details" title. */
     bpfName: string;
     stages: StageInfo[];
-    entityDisplayName: string;
+    /** Entity display names keyed by logical name, covering every entity any field belongs to —
+     * multi-entity BPFs (e.g. a Lead → Opportunity sales process) have fields from different
+     * entities, so each field must show its own entity, not one global value. */
+    entityDisplayNamesByEntity: Record<string, string>;
+    /** The BPF's own `primaryentity` logical name, used as the fallback entity for fields whose
+     * `relationship` attribute doesn't resolve to one (see `getFieldEntityLogicalName`). */
+    primaryEntityLogicalName: string;
     selectedControlId: string | null;
     onSelectField: (field: FieldInfo) => void;
 }
 
-export function StagesFields({ doc, docVersion, bpfName, stages, entityDisplayName, selectedControlId, onSelectField }: Props) {
-    const styles = useStagesFieldsStyles();
+/** The colored stage timeline and per-stage field list for the selected Business Process Flow. */
+export function StagesFieldsCard({
+    doc,
+    docVersion,
+    bpfName,
+    stages,
+    entityDisplayNamesByEntity,
+    primaryEntityLogicalName,
+    selectedControlId,
+    onSelectField,
+}: IStagesFieldsCardProps) {
+    const styles = useStagesFieldsCardStyles();
 
     const stageFields = useMemo(() => {
         const map = new Map<string, FieldInfo[]>();
         if (!doc) return map;
-        stages.forEach((stage) => map.set(stage.id, getFieldsForStage(doc, stage.id)));
+        stages.forEach((stage) => map.set(stage.id, getFieldsForStage(doc, stage.id, primaryEntityLogicalName)));
         return map;
         // docVersion drives recomputation after in-place XML mutations; doc itself never changes identity.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [doc, docVersion, stages]);
+    }, [doc, docVersion, stages, primaryEntityLogicalName]);
 
     // Only the first stage starts open, matching a typical accordion default; any number of stages
     // can be open at once (independent per-stage toggle, not mutually exclusive).
@@ -44,8 +61,7 @@ export function StagesFields({ doc, docVersion, bpfName, stages, entityDisplayNa
     };
 
     return (
-        <div className={styles.root}>
-            <Text className={styles.eyebrow}>Business Process Details</Text>
+        <GenericCard title="Business Process Details">
             <Text className={styles.bpfName}>{bpfName}</Text>
             <div className={styles.flow}>
                 {stages.map((stage, index) => {
@@ -95,7 +111,7 @@ export function StagesFields({ doc, docVersion, bpfName, stages, entityDisplayNa
                                                         >
                                                             <span className={styles.fieldName}>{field.label}</span>
                                                             <Badge appearance="outline" size="small">
-                                                                {entityDisplayName}
+                                                                {entityDisplayNamesByEntity[field.entityLogicalName] ?? field.entityLogicalName}
                                                             </Badge>
                                                             {hasControl && (
                                                                 <Badge color="success" size="small">
@@ -115,6 +131,6 @@ export function StagesFields({ doc, docVersion, bpfName, stages, entityDisplayNa
                     );
                 })}
             </div>
-        </div>
+        </GenericCard>
     );
 }

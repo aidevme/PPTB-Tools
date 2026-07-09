@@ -9,4 +9,12 @@ export interface FieldInfo {
     stageId: string;
     /** Whether the field is marked required on this stage (`<control isrequired="...">`). */
     required: boolean;
+    /** 1-based position of the field within its stage, in form XML document order. */
+    sequence: number;
+    /** Logical name of the entity this field belongs to. Resolved from the field's own
+     * `<control relationship="...">` attribute (see `getFieldEntityLogicalName`) since
+     * multi-entity BPFs (e.g. a Lead → Opportunity sales process) have fields from different
+     * entities; falls back to the BPF's own `primaryentity` when `relationship` is absent or
+     * doesn't match the expected shape (e.g. single-entity BPFs). */
+    entityLogicalName: string;
 }

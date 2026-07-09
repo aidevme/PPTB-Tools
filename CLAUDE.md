@@ -80,6 +80,11 @@ Key domain facts (needed to make sense of `services/dataverse.ts` and `services/
 - A field's PCF assignment lives in the form XML under
   `controlDescriptions/controlDescription[@forControl]/customControl[@formFactor]`, mirroring the
   original XTB plugin's `FormAttribute.cs`.
+- Some BPFs span more than one entity (e.g. a Lead → Opportunity sales process) — later stages'
+  `<control>` nodes belong to a different entity than `workflow.primaryentity`. Each field's own
+  entity is recoverable from its `<control relationship="...">` attribute (schema name
+  `lk_{bpfUniqueName}_{entityLogicalName}id`); see `getFieldEntityLogicalName` in
+  `services/formxml.ts`. Don't assume every field on a BPF belongs to `primaryentity`.
 
 State management pattern in `App.tsx`: the parsed form XML document is held in a `useRef<XMLDocument>`
 (mutated in place by `services/formxml.ts` functions, matching how the original plugin mutates its in-memory

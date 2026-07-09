@@ -94,7 +94,11 @@ npm run watch        # rebuild on change
 - A field's PCF assignment lives in the form XML under
   `controlDescriptions/controlDescription[@forControl]/customControl[@formFactor]`, mirroring the structure
   used by the original XTB plugin's `FormAttribute.cs`.
-- The parsed form XML is held in a `useRef<XMLDocument>` in `App.tsx` (mutated in place by `lib/formxml.ts`,
+- Some BPFs span more than one entity (e.g. a Lead → Opportunity sales process) — later stages'
+  `<control>` nodes belong to a different entity than `workflow.primaryentity`. Each field's own entity is
+  recoverable from its `<control relationship="...">` attribute (schema name
+  `lk_{bpfUniqueName}_{entityLogicalName}id`); see `getFieldEntityLogicalName` in `services/formxml.ts`.
+- The parsed form XML is held in a `useRef<XMLDocument>` in `App.tsx` (mutated in place by `services/formxml.ts`,
   same as the original plugin mutates its in-memory `XmlDocument`) alongside a `docVersion` counter state
   that's bumped after every mutation to trigger re-renders, since React won't re-render on an in-place
   mutation of an object it already holds a reference to.

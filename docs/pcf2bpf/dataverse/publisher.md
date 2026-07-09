@@ -125,7 +125,7 @@ No many-to-many relationships are defined on `publisher`.
 `publisher` isn't queried anywhere in `lib/dataverse.ts` — this tool never resolves a BPF's or PCF control's
 publisher directly. It's documented here because `customizationprefix` is the source of the prefixes visible
 throughout PCF2BPF's own UI: entity/attribute logical names like `msdyn_iotalert` or `msdyn_customerasset`
-(shown next to field names in `StagesFields`/`FieldPropertiesPanel`, and in BPF `uniquename`/`primaryentity`
+(shown next to field names in `StagesFieldsCard`/`FieldPropertiesCard`, and in BPF `uniquename`/`primaryentity`
 values) get their `msdyn_`/`new_`/custom prefix from whichever publisher owns the [solution](./solution.md)
 that introduced them — `solution.publisherid` → `publisher.customizationprefix`. Understanding that chain is
 useful context when a field or BPF's logical name looks unfamiliar, even though this tool has no reason to

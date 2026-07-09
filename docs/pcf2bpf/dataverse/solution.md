@@ -154,19 +154,22 @@ beyond their own `solutionid` column (see below).
 
 ## Relevance to PCF2BPF
 
-`lib/dataverse.ts` doesn't currently query `solution` (or `solutioncomponent`) directly — `loadBpfProcesses`
-and `loadPcfControls` both query unfiltered by solution, returning every `workflow`/`customcontrol` in the
-environment regardless of which solution(s) they belong to. Solutions are relevant contextually rather than
-programmatically today:
+`services/dataverse.ts` queries `solution` directly in `loadSolutions` (for the "Solutions & Publishers"
+picker) and indirectly in `loadBpfProcesses`, which optionally joins through `solutioncomponent` (and, for a
+publisher-scoped load, one further join to `solution` on `publisherid`) to scope the BPF list to the
+solution/publisher selected in `SolutionsPublishersCard` — see
+[solution-component.md](./solution-component.md)'s Relevance section for the FetchXML shape.
+`loadPcfControls` still queries `customcontrol` unfiltered by solution.
 
 - `BpfSelector`'s "Load/Reload BPFs" button tooltip tells users to re-click **after importing a solution**
   that adds a new BPF or PCF control, since the list is only fetched on demand — this document exists
   because that guidance implicitly assumes the reader understands what a solution import does.
 - Every entity this tool touches — `workflow`, `customcontrol`, `customcontrolresource`, `systemform` — has
   its own read-only `solutionid`/`SolutionId` column pointing back to `solution`, and `customcontrol`/
-  `customcontrolresource` also carry `ismanaged`. None of that is currently surfaced in the UI (e.g. there's
-  no "which solution is this PCF control from" indicator), but it's there if solution-aware filtering (for
-  example, hiding managed/first-party controls, or scoping the BPF list to one solution) is ever wanted.
-- Publishing (`lib/dataverse.ts`'s `publishBpf`, via `window.dataverseAPI.publishCustomizations`) publishes
-  customizations for the BPF's private entity directly — it doesn't go through solution-level publish/import
-  operations (`CloneAsSolution`, etc.), so nothing in this tool currently exercises the messages table above.
+  `customcontrolresource` also carry `ismanaged`. Only `workflow` is currently solution-scoped (via
+  `loadBpfProcesses`' optional `BpfScope`); `customcontrol` filtering (e.g. hiding managed/first-party
+  controls, or scoping the PCF control list to one solution) is still open if ever wanted.
+- Publishing (`services/dataverse.ts`'s `publishBpf`, via `window.dataverseAPI.publishCustomizations`)
+  publishes customizations for the BPF's private entity directly — it doesn't go through solution-level
+  publish/import operations (`CloneAsSolution`, etc.), so nothing in this tool currently exercises the
+  messages table above.

@@ -1,9 +1,10 @@
 export * from "./bpfprocess";
+export * from "./bpfscope";
 export * from "./stageinfo";
 export * from "./fieldinfo";
 
 /**
- * A fixed, hand-picked "cold to warm" palette for the stage timeline in {@link StagesFields} (and
+ * A fixed, hand-picked "cold to warm" palette for the stage timeline in {@link StagesFieldsCard} (and
  * mirrored by field-detail views that need the same per-stage color), cycling by index if there
  * are more stages than colors. Not derived from Fluent's semantic tokens since it represents an
  * ordered visual sequence across stages, not app theming.

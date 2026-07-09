@@ -1,12 +1,9 @@
 import { makeStyles, tokens } from "@fluentui/react-components";
 
-// Mirrors useFieldPropertiesPanelStyles' `root` card frame so the two panels stacked in App.tsx's
-// middle column read as a matching pair.
-export const usePcfConfigPanelStyles = makeStyles({
+// The card frame (border/radius/padding/background) and eyebrow heading shared by every card in the
+// config tab's columns (`BpfSelectorCard`, `CopyFormFactorCard`, `SolutionsPublishersCard`), via `GenericCard`.
+export const useGenericCardStyles = makeStyles({
     root: {
-        display: "flex",
-        flexDirection: "column",
-        gap: "12px",
         backgroundColor: tokens.colorNeutralBackground1,
         borderTopWidth: "1px",
         borderTopStyle: "solid",
@@ -26,8 +23,18 @@ export const usePcfConfigPanelStyles = makeStyles({
         paddingLeft: "18px",
         paddingRight: "18px",
     },
-    // Matches useFieldPropertiesPanelStyles' `eyebrow`, so the "Form Factors for ..." heading reads
-    // as the same kind of label as "FIELD PROPERTIES" in the card above it.
+    headerBlock: {
+        marginBottom: "10px",
+    },
+    titleRow: {
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "8px",
+    },
+    titleRowWithDescription: {
+        marginBottom: "4px",
+    },
     eyebrow: {
         display: "block",
         fontFamily: "monospace",
@@ -36,12 +43,11 @@ export const usePcfConfigPanelStyles = makeStyles({
         textTransform: "uppercase",
         color: tokens.colorNeutralForeground3,
     },
-    tabLabel: {
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
+    description: {
+        color: tokens.colorNeutralForeground3,
     },
-    assignedIcon: {
-        color: tokens.colorStatusSuccessForeground1,
+    moreButton: {
+        minWidth: "auto",
+        flexShrink: 0,
     },
 });

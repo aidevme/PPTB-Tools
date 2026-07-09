@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    Button,
     MessageBar,
     MessageBarBody,
     MessageBarTitle,
@@ -8,27 +7,19 @@ import {
     Tab,
     TabList,
     Text,
+    Tooltip,
     type SelectTabData,
     type SelectTabEvent,
 } from "@fluentui/react-components";
 import { Apps20Regular, Code20Regular } from "@fluentui/react-icons";
 import { useConnection } from "./hooks";
 import { useAppStyles } from "./styles";
-import {
-    BpfSelectorCard,
-    CopyFormFactorCard,
-    FieldPropertiesPanel,
-    Footer,
-    FormXmlPanel,
-    PcfConfigPanel,
-    SolutionsPublishersCard,
-    StagesFields,
-} from "./components";
+import { Footer, FormXmlPanel, PcfConfigurationPanel } from "./components";
 import {
     copyCustomControl,
     getCompatiblePcfControls,
     getExistingCustomControl,
-    getStageColor,
+    getFieldsForStage,
     getStages,
     loadBpfFormXml,
     loadBpfProcesses,
@@ -42,7 +33,7 @@ import {
     serializeFormXml,
     setCustomControl,
 } from "./services";
-import type { AttributeInfo, BpfProcess, FieldInfo, FormFactor, PcfControl, StageInfo } from "./services";
+import type { AttributeInfo, BpfProcess, BpfScope, FieldInfo, FormFactor, PcfControl, StageInfo } from "./services";
 
 type MainTab = "config" | "xml";
 
@@ -69,8 +60,12 @@ function App() {
     const [isLoadingForm, setIsLoadingForm] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
-    const [entityAttributes, setEntityAttributes] = useState<AttributeInfo[]>([]);
-    const [primaryEntityDisplayName, setPrimaryEntityDisplayName] = useState("");
+    // Keyed by entity logical name rather than a single flat list/string: multi-entity BPFs (e.g. a
+    // Lead → Opportunity sales process) have fields from different entities (see
+    // `FieldInfo.entityLogicalName`, resolved from each field's own `relationship` attribute), so
+    // attribute metadata and display names must be resolved per entity, not once for `bpf.primaryentity`.
+    const [entityAttributesByEntity, setEntityAttributesByEntity] = useState<Record<string, AttributeInfo[]>>({});
+    const [entityDisplayNamesByEntity, setEntityDisplayNamesByEntity] = useState<Record<string, string>>({});
     const [stages, setStages] = useState<StageInfo[]>([]);
     const [formId, setFormId] = useState<string | null>(null);
     const formDocRef = useRef<XMLDocument | null>(null);
@@ -93,10 +88,10 @@ function App() {
         if (!selectedBpf) setActiveTab("config");
     }, [selectedBpf]);
 
-    const handleLoadBpfs = useCallback(async () => {
+    const handleLoadBpfs = useCallback(async (scope: BpfScope) => {
         setIsLoadingBpfs(true);
         try {
-            const [processes, controls] = await Promise.all([loadBpfProcesses(), loadPcfControls()]);
+            const [processes, controls] = await Promise.all([loadBpfProcesses(scope), loadPcfControls()]);
             setBpfProcesses(processes);
             setPcfControls(controls);
             await notify("Success", `Loaded ${processes.length} Business Process Flow(s) and ${controls.length} PCF control(s)`, "success");
@@ -113,6 +108,8 @@ function App() {
         setDocVersion((v) => v + 1);
         setFormId(null);
         setStages([]);
+        setEntityAttributesByEntity({});
+        setEntityDisplayNamesByEntity({});
         setOriginalFormXmlText("");
         setFormXmlText("");
         setIsDirty(false);
@@ -130,18 +127,35 @@ function App() {
 
             setIsLoadingForm(true);
             try {
-                const [{ formId: loadedFormId, formXml }, attributes, entityDisplayName] = await Promise.all([
-                    loadBpfFormXml(bpf),
-                    loadEntityAttributes(bpf.primaryentity),
-                    loadEntityDisplayName(bpf.primaryentity),
-                ]);
-
+                const { formId: loadedFormId, formXml } = await loadBpfFormXml(bpf);
                 const doc = parseFormXml(formXml);
+                const loadedStages = getStages(doc);
+
+                // Each field resolves its own entity from its <control relationship="..."> attribute
+                // (see getFieldEntityLogicalName in services/formxml.ts) — collect every distinct
+                // entity actually in play across all stages before loading their metadata.
+                const allFields = loadedStages.flatMap((stage) => getFieldsForStage(doc, stage.id, bpf.primaryentity));
+                const entityLogicalNames = Array.from(new Set([bpf.primaryentity, ...allFields.map((f) => f.entityLogicalName)]));
+
+                const entityResults = await Promise.all(
+                    entityLogicalNames.map(async (entity) => {
+                        const [displayName, attributes] = await Promise.all([loadEntityDisplayName(entity), loadEntityAttributes(entity)]);
+                        return { entity, displayName, attributes };
+                    }),
+                );
+
+                const displayNamesByEntity: Record<string, string> = {};
+                const attributesByEntity: Record<string, AttributeInfo[]> = {};
+                for (const { entity, displayName, attributes } of entityResults) {
+                    displayNamesByEntity[entity] = displayName;
+                    attributesByEntity[entity] = attributes;
+                }
+
                 formDocRef.current = doc;
                 setFormId(loadedFormId);
-                setEntityAttributes(attributes);
-                setPrimaryEntityDisplayName(entityDisplayName);
-                setStages(getStages(doc));
+                setEntityAttributesByEntity(attributesByEntity);
+                setEntityDisplayNamesByEntity(displayNamesByEntity);
+                setStages(loadedStages);
                 setOriginalFormXmlText(formXml);
                 setFormXmlText(serializeFormXml(doc));
                 setDocVersion((v) => v + 1);
@@ -210,9 +224,18 @@ function App() {
     }, [formId, selectedBpf]);
 
     const attribute = useMemo(
-        () => (selectedField ? entityAttributes.find((a) => a.logicalName === selectedField.datafieldname) : undefined),
-        [selectedField, entityAttributes],
+        () =>
+            selectedField
+                ? (entityAttributesByEntity[selectedField.entityLogicalName] ?? []).find(
+                      (a) => a.logicalName === selectedField.datafieldname,
+                  )
+                : undefined,
+        [selectedField, entityAttributesByEntity],
     );
+
+    const selectedFieldEntityDisplayName = selectedField
+        ? (entityDisplayNamesByEntity[selectedField.entityLogicalName] ?? selectedField.entityLogicalName)
+        : "";
 
     const compatibleControls = useMemo(
         () => (attribute ? getCompatiblePcfControls(attribute.attributeType, pcfControls) : []),
@@ -263,96 +286,74 @@ function App() {
             )}
 
             <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
-                <Tab value="config" icon={<Apps20Regular />}>
-                    PCFs Configuration
-                </Tab>
-                <Tab value="xml" icon={<Code20Regular />} disabled={!selectedBpf}>
-                    Xml Details
-                </Tab>
+                <Tooltip
+                    content="Pick a solution or publisher, load its Business Process Flows and registered PCF controls, then select a BPF to browse its stages and fields. Assign, reconfigure, or remove a PCF control on the selected field per form factor (Web/Phone/Tablet), and copy a field's PCF configuration between form factors. Nothing is saved to Dataverse until you click Update and Publish."
+                    relationship="description"
+                    positioning="below"
+                    withArrow
+                >
+                    <Tab value="config" icon={<Apps20Regular />}>
+                        PCFs Configuration
+                    </Tab>
+                </Tooltip>
+                <Tooltip
+                    content={
+                        selectedBpf
+                            ? "Compare the selected Business Process Flow's form XML before and after your changes, with search highlighting and an optional GitHub-style diff view."
+                            : "Select a Business Process Flow in the PCFs Configuration tab to enable this tab."
+                    }
+                    relationship="description"
+                    positioning="below"
+                    withArrow
+                >
+                    <Tab value="xml" icon={<Code20Regular />} disabled={!selectedBpf}>
+                        Xml Details
+                    </Tab>
+                </Tooltip>
             </TabList>
 
             <div className={styles.contentArea}>
-                {activeTab === "config" && (
-                    <div className={styles.configRow}>
-                        <div className={styles.leftColumn}>
-                            <SolutionsPublishersCard
-                                onLoadingChange={setIsLoadingSolutionsPublishers}
-                                bpfProcesses={bpfProcesses}
-                                isLoadingBpfs={isLoadingBpfs}
-                                onLoadBpfs={() => void handleLoadBpfs()}
-                            />
+                {/* Both tabs stay mounted, toggled via `hidden`, rather than conditionally rendered —
+                    unmounting PcfConfigurationPanel on every tab switch would remount
+                    SolutionsPublishersCard and re-trigger its mount-time solutions/publishers fetch
+                    (and reset its local picker state) every time the user came back to this tab. */}
+                <div hidden={activeTab !== "config"}>
+                    <PcfConfigurationPanel
+                        bpfProcesses={bpfProcesses}
+                        isLoadingBpfs={isLoadingBpfs}
+                        onLoadBpfs={(scope) => void handleLoadBpfs(scope)}
+                        onSolutionsPublishersLoadingChange={setIsLoadingSolutionsPublishers}
+                        selectedBpfId={selectedBpfId}
+                        onSelectBpf={(id) => void handleSelectBpf(id)}
+                        selectedBpf={selectedBpf}
+                        formError={formError}
+                        isLoadingForm={isLoadingForm}
+                        doc={formDocRef.current}
+                        docVersion={docVersion}
+                        stages={stages}
+                        entityDisplayNamesByEntity={entityDisplayNamesByEntity}
+                        selectedFieldEntityDisplayName={selectedFieldEntityDisplayName}
+                        primaryEntityLogicalName={selectedBpf?.primaryentity ?? ""}
+                        selectedField={selectedField}
+                        onSelectField={setSelectedField}
+                        isDirty={isDirty}
+                        isPublishing={isPublishing}
+                        onUpdateAndPublish={() => void handleUpdateAndPublish()}
+                        attribute={attribute}
+                        selectedStageIndex={selectedStageIndex}
+                        compatibleControls={compatibleControls}
+                        selectedFormFactor={selectedFormFactor}
+                        onFormFactorChange={setSelectedFormFactor}
+                        existingAssignment={existingAssignment}
+                        onApplyPcf={handleApplyPcf}
+                        onRemovePcf={handleRemovePcf}
+                        onCopyFormFactor={handleCopyFormFactor}
+                    />
+                </div>
 
-                            <BpfSelectorCard
-                                bpfProcesses={bpfProcesses}
-                                selectedBpfId={selectedBpfId}
-                                onSelect={(id) => void handleSelectBpf(id)}
-                            />
-
-                            {formError && (
-                                <MessageBar intent="error">
-                                    <MessageBarBody>{formError}</MessageBarBody>
-                                </MessageBar>
-                            )}
-
-                            {isLoadingForm ? (
-                                <Text italic>Loading Business Process Flow...</Text>
-                            ) : (
-                                <StagesFields
-                                    doc={formDocRef.current}
-                                    docVersion={docVersion}
-                                    bpfName={selectedBpf?.name ?? ""}
-                                    stages={stages}
-                                    entityDisplayName={primaryEntityDisplayName}
-                                    selectedControlId={selectedField?.controlId ?? null}
-                                    onSelectField={setSelectedField}
-                                />
-                            )}
-
-                            <Button
-                                className={styles.fullWidth}
-                                appearance="primary"
-                                size="large"
-                                disabled={!isDirty || isPublishing}
-                                onClick={() => void handleUpdateAndPublish()}
-                            >
-                                {isPublishing ? "Saving & Publishing..." : "Update and Publish"}
-                            </Button>
-                        </div>
-
-                        <div className={styles.middleColumn}>
-                            {selectedField && selectedStageIndex !== -1 && (
-                                <FieldPropertiesPanel
-                                    field={selectedField}
-                                    attribute={attribute}
-                                    entityDisplayName={primaryEntityDisplayName}
-                                    stageName={stages[selectedStageIndex].name}
-                                    stageColor={getStageColor(selectedStageIndex)}
-                                />
-                            )}
-                            <PcfConfigPanel
-                                field={selectedField}
-                                entityDisplayName={primaryEntityDisplayName}
-                                doc={formDocRef.current}
-                                docVersion={docVersion}
-                                formFactor={selectedFormFactor}
-                                onFormFactorChange={setSelectedFormFactor}
-                                attribute={attribute}
-                                compatibleControls={compatibleControls}
-                                existing={existingAssignment}
-                                onApply={handleApplyPcf}
-                                onRemove={handleRemovePcf}
-                            />
-                        </div>
-
-                        {selectedField && (
-                            <div className={styles.rightColumn}>
-                                <CopyFormFactorCard onCopy={handleCopyFormFactor} />
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {activeTab === "xml" && <FormXmlPanel beforeXml={originalFormXmlText} afterXml={formXmlText} />}
+                <div hidden={activeTab !== "xml"}>
+                    <FormXmlPanel beforeXml={originalFormXmlText} afterXml={formXmlText} />
+                </div>
             </div>
 
             <Footer />
