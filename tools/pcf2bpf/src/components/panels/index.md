@@ -12,18 +12,19 @@ are purely presentational, receiving everything as props/callbacks.
 
 ## PcfConfigurationPanel
 
-The "PCFs Configuration" tab's three-column layout, assembling the cards in `../cards`:
+The "PCFs Configuration" tab's layout, assembling the cards imported directly from their own files under
+`../cards/` (there is no `cards/index.ts` barrel):
 
-- **Left column** — `SolutionsPublishersCard`, `BpfSelectorCard`, an error `MessageBar` (if loading the
+- **Left column** — `ScopeCard`, `BpfSelectorCard`, an error `MessageBar` (if loading the
   form failed), the stage/field list (`StagesFieldsCard`, or a loading message while the form loads),
   and the "Update and Publish" button.
-- **Middle column** — `FieldPropertiesCard` (only rendered once a field is selected) above
-  `FormFactorsCard`.
-- **Right column** — `CopyFormFactorCard`, only rendered once a field is selected.
+- **Right area** — a top row with `FieldPropertiesCard` (only rendered once a field is selected) beside
+  `CopyFormFactorCard` (also only once a field is selected), followed below by `FormFactorsCard` spanning
+  their combined width so its parameter table isn't squeezed into a narrower column.
 
-Its own `usePcfConfigurationPanelStyles` holds the column layout (`configRow`/`leftColumn`/
-`middleColumn`/`rightColumn`) and the "Update and Publish" button's `fullWidth`; the card frame/eyebrow
-styling is each card's own concern via `GenericCard`.
+Its own `usePcfConfigurationPanelStyles` holds the column layout (`configRow`/`leftColumn`/`rightArea`/
+`topRow`/`fieldPropertiesColumn`/`copyColumn`) and the "Update and Publish" button's `fullWidth`; the card
+frame/eyebrow styling is each card's own concern via `GenericCard`.
 
 The props interface mirrors what `App.tsx` already tracks — no new state or memoization was introduced
 by this extraction, existing `useMemo`/`useCallback` values (`attribute`, `compatibleControls`,

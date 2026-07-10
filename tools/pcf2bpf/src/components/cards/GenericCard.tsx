@@ -3,7 +3,7 @@ import { Button, Caption1, mergeClasses, Text, Tooltip } from "@fluentui/react-c
 import { MoreVertical20Regular } from "@fluentui/react-icons";
 import { useGenericCardStyles } from "../../styles";
 
-interface IGenericCardProps {
+export interface IGenericCardProps {
     /** Eyebrow-style heading shown at the top of the card, e.g. "Business Process Flow" — a plain
      * string for most cards, or richer markup (e.g. a partly bold field name) where needed. Omitted
      * entirely (no reserved space) when not given. */
@@ -24,16 +24,18 @@ interface IGenericCardProps {
     children: ReactNode;
 }
 
+const DEFAULT_MORE_BUTTON_TOOLTIP_TEXT = "More...";
+
 /**
  * Shared card frame (border/radius/padding/background) and eyebrow heading used as the base/parent
  * for every card in the config tab's columns — `BpfSelectorCard`, `CopyFormFactorCard`,
- * `SolutionsPublishersCard` — so they read as a consistent set without each re-declaring the same
+ * `ScopeCard` — so they read as a consistent set without each re-declaring the same
  * frame and heading styles.
  */
 export function GenericCard({
     title,
     onMoreClick,
-    tooltipText = "More...",
+    tooltipText = DEFAULT_MORE_BUTTON_TOOLTIP_TEXT,
     description,
     className,
     style,

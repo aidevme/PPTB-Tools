@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Combobox, Field, useComboboxFilter, type ComboboxProps } from "@fluentui/react-components";
+import { useToolContext } from "../../services/pptbtoolservice";
 import type { BpfProcess } from "../../services";
 import { useBpfSelectorCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
 
-interface IBpfSelectorCardProps {
-    bpfProcesses: BpfProcess[];
-    selectedBpfId: string;
+export interface IBpfSelectorCardProps {
+    /** Selecting a BPF also loads its form XML, so this is an `App.tsx`-level orchestration callback
+     * rather than just `ToolContext`'s `setSelectedBpfId`. */
     onSelect: (workflowId: string) => void;
 }
 
@@ -14,8 +15,17 @@ function bpfLabel(bpf: BpfProcess): string {
     return `${bpf.name} (${bpf.primaryentity})`;
 }
 
-export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfSelectorCardProps) {
+const BPF_COMBOBOX_ARIA_LABEL = "Business Process Flow";
+const BPF_COMBOBOX_PLACEHOLDER = "Select a Business Process Flow";
+const BPF_COMBOBOX_PLACEHOLDER_EMPTY = "Load Business Process Flows first";
+const BPF_COMBOBOX_NO_OPTIONS_MESSAGE = "No Business Process Flows match your search.";
+
+const CARD_TITLE = "Business Process Flow";
+const CARD_DESCRIPTION = "Select a loaded Business Process Flow to browse its stages and fields.";
+
+export function BpfSelectorCard({ onSelect }: IBpfSelectorCardProps) {
     const styles = useBpfSelectorCardStyles();
+    const { bpfProcesses, selectedBpfId } = useToolContext();
     const comboboxRef = useRef<HTMLInputElement>(null);
     const selected = bpfProcesses.find((b) => b.workflowid === selectedBpfId);
     const selectedLabel = selected ? bpfLabel(selected) : "";
@@ -33,7 +43,7 @@ export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfS
     );
 
     const children = useComboboxFilter(query, options, {
-        noOptionsMessage: "No Business Process Flows match your search.",
+        noOptionsMessage: BPF_COMBOBOX_NO_OPTIONS_MESSAGE,
         optionToText: (option) => option.children,
     });
 
@@ -48,16 +58,16 @@ export function BpfSelectorCard({ bpfProcesses, selectedBpfId, onSelect }: IBpfS
 
     return (
         <GenericCard
-            title="Business Process Flow"
-            description="Select a loaded Business Process Flow to browse its stages and fields."
+            title={CARD_TITLE}
+            description={CARD_DESCRIPTION}
         >
             <Field>
                 <Combobox
                     ref={comboboxRef}
                     className={styles.fullWidth}
                     clearable
-                    aria-label="Business Process Flow"
-                    placeholder={bpfProcesses.length ? "Select a Business Process Flow" : "Load Business Process Flows first"}
+                    aria-label={BPF_COMBOBOX_ARIA_LABEL}
+                    placeholder={bpfProcesses.length ? BPF_COMBOBOX_PLACEHOLDER : BPF_COMBOBOX_PLACEHOLDER_EMPTY}
                     value={query}
                     selectedOptions={selectedBpfId ? [selectedBpfId] : []}
                     onOptionSelect={handleOptionSelect}

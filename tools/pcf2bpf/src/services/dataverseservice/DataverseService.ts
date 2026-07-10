@@ -1,6 +1,6 @@
-import { parsePcfManifestParameters } from "./pcfManifest";
-import { parsePcfClientJsonInfo } from "./pcfClientJson";
-import type { AttributeInfo, BpfProcess, BpfScope, PcfControl, PublisherInfo, SolutionInfo } from "../types";
+import { parsePcfManifestParameters } from "../pcfManifest";
+import { parsePcfClientJsonInfo } from "../pcfClientJson";
+import type { AttributeInfo, BpfProcess, BpfScope, PcfControl, PublisherInfo, SolutionInfo } from "../../types";
 
 /** Maps Dataverse attribute types to the PCF manifest `of-type` values they satisfy. */
 const ATTRIBUTE_TYPE_TO_PCF_TYPES: Record<string, string[]> = {
@@ -186,6 +186,7 @@ export async function loadPcfControls(): Promise<PcfControl[]> {
             <attribute name="compatibledatatypes" />
             <attribute name="manifest" />
             <attribute name="clientjson" />
+            <order attribute="name" />
           </entity>
         </fetch>`;
 

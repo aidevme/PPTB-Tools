@@ -2,7 +2,7 @@ import type { LabelProps } from "@fluentui/react-components";
 import { Field, InfoLabel, SearchBox } from "@fluentui/react-components";
 import { useXmlSearchBoxStyles } from "../../styles";
 
-interface IXmlSearchBoxProps {
+export interface IXmlSearchBoxProps {
     /** Current search text. */
     value: string;
     /** Called with the new search text on every keystroke. */

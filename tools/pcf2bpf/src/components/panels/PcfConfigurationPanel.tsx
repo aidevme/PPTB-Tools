@@ -1,29 +1,19 @@
-import { Button, MessageBar, MessageBarBody, Text } from "@fluentui/react-components";
+import { Button, MessageBar, MessageBarBody } from "@fluentui/react-components";
+import { useToolContext } from "../../services/pptbtoolservice";
 import { getStageColor } from "../../services";
-import type {
-    AttributeInfo,
-    BpfProcess,
-    BpfScope,
-    FieldInfo,
-    FormFactor,
-    PcfAssignment,
-    PcfControl,
-    StageInfo,
-} from "../../services";
+import type { AttributeInfo, BpfProcess, FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from "../../services";
 import { usePcfConfigurationPanelStyles } from "../../styles";
-import { BpfSelectorCard, CopyFormFactorCard, FieldPropertiesCard, FormFactorsCard, SolutionsPublishersCard, StagesFieldsCard } from "../cards";
+import { BpfSelectorCard } from "../cards/BpfSelectorCard";
+import { CopyFormFactorCard } from "../cards/CopyFormFactorCard";
+import { FieldPropertiesCard } from "../cards/FieldPropertiesCard";
+import { FormFactorsCard } from "../cards/FormFactorsCard";
+import { ScopeCard } from "../cards/ScopeCard";
+import { StagesFieldsCard } from "../cards/StagesFieldsCard";
 
 interface IPcfConfigurationPanelProps {
-    bpfProcesses: BpfProcess[];
-    isLoadingBpfs: boolean;
-    onLoadBpfs: (scope: BpfScope) => void;
-    onSolutionsPublishersLoadingChange: (isLoading: boolean) => void;
-
-    selectedBpfId: string;
     onSelectBpf: (workflowId: string) => void;
     selectedBpf: BpfProcess | null;
     formError: string | null;
-    isLoadingForm: boolean;
 
     doc: XMLDocument | null;
     docVersion: number;
@@ -56,22 +46,18 @@ interface IPcfConfigurationPanelProps {
 }
 
 /**
- * The "PCFs Configuration" tab's three-column layout: solution/publisher and BPF pickers plus the
- * stage/field list and "Update and Publish" action on the left, the selected field's properties and
- * form-factor/PCF editor in the middle, and the copy-between-form-factors action on the right (only
- * once a field is selected). All state and Dataverse calls live in `App.tsx`; this component is purely
- * presentational.
+ * The "PCFs Configuration" tab's layout: solution/publisher and BPF pickers plus the stage/field list
+ * and "Update and Publish" action in a fixed-width left column; to its right, a row with the selected
+ * field's properties and the copy-between-form-factors action (only once a field is selected) side by
+ * side, followed by the form-factor/PCF editor spanning their combined width so its parameter table
+ * isn't squeezed into a narrower column. Solution/publisher/BPF picker state and PCF controls live in
+ * `ToolContext` (read here only for the `bpfProcesses.length` gate — `ScopeCard` and `BpfSelectorCard`
+ * read the rest themselves); the loaded-BPF-form state below is still `App.tsx`'s.
  */
 export function PcfConfigurationPanel({
-    bpfProcesses,
-    isLoadingBpfs,
-    onLoadBpfs,
-    onSolutionsPublishersLoadingChange,
-    selectedBpfId,
     onSelectBpf,
     selectedBpf,
     formError,
-    isLoadingForm,
     doc,
     docVersion,
     stages,
@@ -94,20 +80,14 @@ export function PcfConfigurationPanel({
     onCopyFormFactor,
 }: IPcfConfigurationPanelProps) {
     const styles = usePcfConfigurationPanelStyles();
+    const { bpfProcesses } = useToolContext();
 
     return (
         <div className={styles.configRow}>
             <div className={styles.leftColumn}>
-                <SolutionsPublishersCard
-                    onLoadingChange={onSolutionsPublishersLoadingChange}
-                    bpfProcesses={bpfProcesses}
-                    isLoadingBpfs={isLoadingBpfs}
-                    onLoadBpfs={onLoadBpfs}
-                />
+                <ScopeCard />
 
-                {bpfProcesses.length > 0 && (
-                    <BpfSelectorCard bpfProcesses={bpfProcesses} selectedBpfId={selectedBpfId} onSelect={onSelectBpf} />
-                )}
+                {bpfProcesses.length > 0 && <BpfSelectorCard onSelect={onSelectBpf} />}
 
                 {formError && (
                     <MessageBar intent="error">
@@ -115,20 +95,16 @@ export function PcfConfigurationPanel({
                     </MessageBar>
                 )}
 
-                {isLoadingForm ? (
-                    <Text italic>Loading Business Process Flow...</Text>
-                ) : (
-                    <StagesFieldsCard
-                        doc={doc}
-                        docVersion={docVersion}
-                        bpfName={selectedBpf?.name ?? ""}
-                        stages={stages}
-                        entityDisplayNamesByEntity={entityDisplayNamesByEntity}
-                        primaryEntityLogicalName={primaryEntityLogicalName}
-                        selectedControlId={selectedField?.controlId ?? null}
-                        onSelectField={onSelectField}
-                    />
-                )}
+                <StagesFieldsCard
+                    doc={doc}
+                    docVersion={docVersion}
+                    bpfName={selectedBpf?.name ?? ""}
+                    stages={stages}
+                    entityDisplayNamesByEntity={entityDisplayNamesByEntity}
+                    primaryEntityLogicalName={primaryEntityLogicalName}
+                    selectedControlId={selectedField?.controlId ?? null}
+                    onSelectField={onSelectField}
+                />
 
                 <Button
                     className={styles.fullWidth}
@@ -141,16 +117,26 @@ export function PcfConfigurationPanel({
                 </Button>
             </div>
 
-            <div className={styles.middleColumn}>
-                {selectedField && selectedStageIndex !== -1 && (
-                    <FieldPropertiesCard
-                        field={selectedField}
-                        attribute={attribute}
-                        entityDisplayName={selectedFieldEntityDisplayName}
-                        stageName={stages[selectedStageIndex].name}
-                        stageColor={getStageColor(selectedStageIndex)}
-                    />
-                )}
+            <div className={styles.rightArea}>
+                <div className={styles.topRow}>
+                    {selectedField && selectedStageIndex !== -1 && (
+                        <div className={styles.fieldPropertiesColumn}>
+                            <FieldPropertiesCard
+                                field={selectedField}
+                                attribute={attribute}
+                                entityDisplayName={selectedFieldEntityDisplayName}
+                                stageName={stages[selectedStageIndex].name}
+                                stageColor={getStageColor(selectedStageIndex)}
+                            />
+                        </div>
+                    )}
+                    {selectedField && (
+                        <div className={styles.copyColumn}>
+                            <CopyFormFactorCard onCopy={onCopyFormFactor} />
+                        </div>
+                    )}
+                </div>
+
                 <FormFactorsCard
                     field={selectedField}
                     entityDisplayName={selectedFieldEntityDisplayName}
@@ -165,12 +151,6 @@ export function PcfConfigurationPanel({
                     onRemove={onRemovePcf}
                 />
             </div>
-
-            {selectedField && (
-                <div className={styles.rightColumn}>
-                    <CopyFormFactorCard onCopy={onCopyFormFactor} />
-                </div>
-            )}
         </div>
     );
 }

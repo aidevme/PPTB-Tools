@@ -17,6 +17,7 @@ export function getStageColor(stageIndex: number): string {
 }
 
 export * from "./attributeinfo";
+export * from "./entitymetadata";
 export * from "./pcfparameter";
 export * from "./pcfcontrol";
 
@@ -34,3 +35,4 @@ export const FORM_FACTOR_LABELS: Record<FormFactor, string> = {
 export * from "./pcfassignment";
 export * from "./solutioninfo";
 export * from "./publisherinfo";
+export * from "./scope";

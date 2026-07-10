@@ -19,7 +19,7 @@ const ICON_BY_TYPE: Record<Exclude<PanelHeaderIconType, "none">, ComponentType<F
     error: ErrorCircle20Filled,
 };
 
-interface IPanelHeaderProps {
+export interface IPanelHeaderProps {
     /** Main heading text. */
     title: string;
     /** Supporting text shown under the title. */

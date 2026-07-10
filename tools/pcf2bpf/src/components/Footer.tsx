@@ -1,7 +1,9 @@
-import { Link, Text, tokens } from "@fluentui/react-components";
-import { Document20Regular, Open20Regular } from "@fluentui/react-icons";
+import { Button, Link, Text, tokens } from "@fluentui/react-components";
+import { Bug20Regular, Document20Regular, Open20Regular } from "@fluentui/react-icons";
 import pkg from "../../package.json";
 import { useFooterStyles } from "../styles";
+import { useToolContext } from "../services/pptbtoolservice";
+import { DebuggerPanel } from "./panels/DebuggerPanel";
 
 const AUTHOR_URL = "https://github.com/aidevme";
 const DOCS_URL = "https://github.com/aidevme/PPTB-Tools/blob/main/docs/pcf2bpf/index.md";
@@ -19,6 +21,7 @@ function openExternal(url: string): void {
  */
 export function Footer() {
     const styles = useFooterStyles();
+    const { isDebuggerOpen, setIsDebuggerOpen } = useToolContext();
 
     return (
         <footer className={styles.root}>
@@ -63,6 +66,16 @@ export function Footer() {
                 <Open20Regular />
                 <span>GitHub</span>
             </Link>
+            <Text className={styles.text}>&bull;</Text>
+            <Button
+                appearance="subtle"
+                icon={<Bug20Regular />}
+                className={styles.iconLink}
+                onClick={() => setIsDebuggerOpen(true)}
+            >
+                Debugger
+            </Button>
+            <DebuggerPanel open={isDebuggerOpen} onOpenChange={setIsDebuggerOpen} />
         </footer>
     );
 }

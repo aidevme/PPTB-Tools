@@ -1,7 +1,7 @@
 import { makeStyles, tokens } from "@fluentui/react-components";
 
 // The card frame and eyebrow heading live in `useGenericCardStyles`, applied via `GenericCard`.
-export const useSolutionsPublishersCardStyles = makeStyles({
+export const useScopeCardStyles = makeStyles({
     loadBpfsButton: {
         marginTop: "12px",
         width: "100%",

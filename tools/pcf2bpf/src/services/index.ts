@@ -10,9 +10,13 @@
  *   control-level metadata (virtual/standard, manifest version).
  * - `formxml` — BPF form XML parsing and `customControl` element mutation.
  * - `dataverse` — Dataverse queries (workflow/BPF, systemform, customcontrol, entity metadata).
+ * - `metadata` — full entity + attribute metadata queries (LogicalName, DisplayName, ObjectTypeCode,
+ *   AttributeType, RequiredLevel, MetadataId, Description), separate from `dataverse`'s trimmed
+ *   `loadEntityAttributes`/`loadEntityDisplayName` used for PCF-compatibility filtering.
  */
 export * from "../types";
 export * from "./pcfManifest";
 export * from "./pcfClientJson";
 export * from "./formxml";
-export * from "./dataverse";
+export * from "./dataverseservice/DataverseService";
+export * from "./metadataservice/MetadataService";

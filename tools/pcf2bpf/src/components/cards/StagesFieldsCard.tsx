@@ -6,7 +6,7 @@ import type { FieldInfo, StageInfo } from "../../services";
 import { useStagesFieldsCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
 
-interface IStagesFieldsCardProps {
+export interface IStagesFieldsCardProps {
     doc: XMLDocument | null;
     docVersion: number;
     /** Name of the selected Business Process Flow, shown under the "Business Process Details" title. */
@@ -22,6 +22,14 @@ interface IStagesFieldsCardProps {
     selectedControlId: string | null;
     onSelectField: (field: FieldInfo) => void;
 }
+
+const CARD_TITLE = "Business Process Details";
+const CARD_DESCRIPTION = "Browse the selected flow's stages and choose a field to configure.";
+
+const STAGE_FIELD_COUNT_LABEL = "field";
+const STAGE_FIELD_COUNT_PLURAL_SUFFIX = "s";
+const STAGE_EMPTY_TEXT = "No fields on this stage";
+const FIELD_HAS_CONTROL_BADGE_LABEL = "PCF";
 
 /** The colored stage timeline and per-stage field list for the selected Business Process Flow. */
 export function StagesFieldsCard({
@@ -61,10 +69,7 @@ export function StagesFieldsCard({
     };
 
     return (
-        <GenericCard
-            title="Business Process Details"
-            description="Browse the selected flow's stages and choose a field to configure."
-        >
+        <GenericCard title={CARD_TITLE} description={CARD_DESCRIPTION}>
             <Text className={styles.bpfName}>{bpfName}</Text>
             <div className={styles.flow}>
                 {stages.map((stage, index) => {
@@ -81,7 +86,8 @@ export function StagesFieldsCard({
                                     <span className={styles.stageHeadLeft}>
                                         <span className={styles.stageTitle}>{stage.name}</span>
                                         <span className={styles.stageCount}>
-                                            {fields.length} field{fields.length === 1 ? "" : "s"}
+                                            {fields.length} {STAGE_FIELD_COUNT_LABEL}
+                                            {fields.length === 1 ? "" : STAGE_FIELD_COUNT_PLURAL_SUFFIX}
                                         </span>
                                     </span>
                                     {isOpen ? (
@@ -95,7 +101,7 @@ export function StagesFieldsCard({
                                     <div className={styles.stageBody}>
                                         {fields.length === 0 ? (
                                             <Text italic className={styles.stageEmpty}>
-                                                No fields on this stage
+                                                {STAGE_EMPTY_TEXT}
                                             </Text>
                                         ) : (
                                             <div className={styles.fieldList}>
@@ -118,7 +124,7 @@ export function StagesFieldsCard({
                                                             </Badge>
                                                             {hasControl && (
                                                                 <Badge color="success" size="small">
-                                                                    PCF
+                                                                    {FIELD_HAS_CONTROL_BADGE_LABEL}
                                                                 </Badge>
                                                             )}
                                                             <ChevronRight12Regular className={styles.fieldChevron} />

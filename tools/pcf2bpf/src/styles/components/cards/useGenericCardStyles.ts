@@ -1,7 +1,7 @@
 import { makeStyles, tokens } from "@fluentui/react-components";
 
 // The card frame (border/radius/padding/background) and eyebrow heading shared by every card in the
-// config tab's columns (`BpfSelectorCard`, `CopyFormFactorCard`, `SolutionsPublishersCard`), via `GenericCard`.
+// config tab's columns (`BpfSelectorCard`, `CopyFormFactorCard`, `ScopeCard`), via `GenericCard`.
 export const useGenericCardStyles = makeStyles({
     root: {
         backgroundColor: tokens.colorNeutralBackground1,

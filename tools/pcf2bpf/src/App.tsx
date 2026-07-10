@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    MessageBar,
-    MessageBarBody,
-    MessageBarTitle,
     Spinner,
     Tab,
     TabList,
@@ -12,6 +9,7 @@ import {
     type SelectTabEvent,
 } from "@fluentui/react-components";
 import { Apps20Regular, Code20Regular } from "@fluentui/react-icons";
+import { useToolContext, usePcfContextService } from "./services/pptbtoolservice";
 import { useConnection } from "./hooks";
 import { useAppStyles } from "./styles";
 import { Footer, FormXmlPanel, PcfConfigurationPanel } from "./components";
@@ -22,10 +20,8 @@ import {
     getFieldsForStage,
     getStages,
     loadBpfFormXml,
-    loadBpfProcesses,
     loadEntityAttributes,
     loadEntityDisplayName,
-    loadPcfControls,
     parseFormXml,
     publishBpf,
     removeCustomControl,
@@ -33,30 +29,19 @@ import {
     serializeFormXml,
     setCustomControl,
 } from "./services";
-import type { AttributeInfo, BpfProcess, BpfScope, FieldInfo, FormFactor, PcfControl, StageInfo } from "./services";
+import type { AttributeInfo, FieldInfo, FormFactor, PcfControl, StageInfo } from "./services";
 
 type MainTab = "config" | "xml";
-
-async function notify(title: string, body: string, type: "success" | "error" | "info" | "warning") {
-    try {
-        await window.toolboxAPI.utils.showNotification({ title, body, type });
-    } catch {
-        // Notifications are best-effort.
-    }
-}
 
 function App() {
     const styles = useAppStyles();
     const { connection, isLoading: isConnectionLoading } = useConnection();
+    const { bpfProcesses, selectedBpfId, setSelectedBpfId, pcfControls, isLoadingBpfs, isLoadingSolutionsPublishers, loadEntityMetadataInfos } =
+        useToolContext();
+    const { notify } = usePcfContextService();
 
     const [activeTab, setActiveTab] = useState<MainTab>("config");
 
-    const [bpfProcesses, setBpfProcesses] = useState<BpfProcess[]>([]);
-    const [pcfControls, setPcfControls] = useState<PcfControl[]>([]);
-    const [isLoadingBpfs, setIsLoadingBpfs] = useState(false);
-    const [isLoadingSolutionsPublishers, setIsLoadingSolutionsPublishers] = useState(true);
-
-    const [selectedBpfId, setSelectedBpfId] = useState("");
     const [isLoadingForm, setIsLoadingForm] = useState(false);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -88,21 +73,6 @@ function App() {
         if (!selectedBpf) setActiveTab("config");
     }, [selectedBpf]);
 
-    const handleLoadBpfs = useCallback(async (scope: BpfScope) => {
-        setIsLoadingBpfs(true);
-        try {
-            const [processes, controls] = await Promise.all([loadBpfProcesses(scope), loadPcfControls()]);
-            setBpfProcesses(processes);
-            setPcfControls(controls);
-            await notify("Success", `Loaded ${processes.length} Business Process Flow(s) and ${controls.length} PCF control(s)`, "success");
-        } catch (error) {
-            console.error("Error loading BPFs:", error);
-            await notify("Error", `Failed to load Business Process Flows: ${(error as Error).message}`, "error");
-        } finally {
-            setIsLoadingBpfs(false);
-        }
-    }, []);
-
     const resetFormState = useCallback(() => {
         formDocRef.current = null;
         setDocVersion((v) => v + 1);
@@ -110,11 +80,12 @@ function App() {
         setStages([]);
         setEntityAttributesByEntity({});
         setEntityDisplayNamesByEntity({});
+        void loadEntityMetadataInfos([]);
         setOriginalFormXmlText("");
         setFormXmlText("");
         setIsDirty(false);
         setSelectedField(null);
-    }, []);
+    }, [loadEntityMetadataInfos]);
 
     const handleSelectBpf = useCallback(
         async (workflowId: string) => {
@@ -137,12 +108,18 @@ function App() {
                 const allFields = loadedStages.flatMap((stage) => getFieldsForStage(doc, stage.id, bpf.primaryentity));
                 const entityLogicalNames = Array.from(new Set([bpf.primaryentity, ...allFields.map((f) => f.entityLogicalName)]));
 
-                const entityResults = await Promise.all(
-                    entityLogicalNames.map(async (entity) => {
-                        const [displayName, attributes] = await Promise.all([loadEntityDisplayName(entity), loadEntityAttributes(entity)]);
-                        return { entity, displayName, attributes };
-                    }),
-                );
+                const [entityResults] = await Promise.all([
+                    Promise.all(
+                        entityLogicalNames.map(async (entity) => {
+                            const [displayName, attributes] = await Promise.all([
+                                loadEntityDisplayName(entity),
+                                loadEntityAttributes(entity),
+                            ]);
+                            return { entity, displayName, attributes };
+                        }),
+                    ),
+                    loadEntityMetadataInfos(entityLogicalNames),
+                ]);
 
                 const displayNamesByEntity: Record<string, string> = {};
                 const attributesByEntity: Record<string, AttributeInfo[]> = {};
@@ -159,14 +136,16 @@ function App() {
                 setOriginalFormXmlText(formXml);
                 setFormXmlText(serializeFormXml(doc));
                 setDocVersion((v) => v + 1);
+                await notify("Success", `Loaded "${bpf.name}" (${loadedStages.length} stage(s)).`, "success");
             } catch (error) {
                 console.error("Error loading BPF form:", error);
                 setFormError((error as Error).message);
+                await notify("Error", `Failed to load "${bpf.name}": ${(error as Error).message}`, "error");
             } finally {
                 setIsLoadingForm(false);
             }
         },
-        [bpfProcesses, resetFormState],
+        [bpfProcesses, resetFormState, setSelectedBpfId, loadEntityMetadataInfos],
     );
 
     const mutateDoc = useCallback((mutator: (doc: XMLDocument) => void) => {
@@ -255,19 +234,18 @@ function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedField, selectedFormFactor, docVersion]);
 
+    useEffect(() => {
+        if (!isConnectionLoading && !connection) {
+            void notify("Error", "Please connect to a Dataverse environment first.", "error");
+        }
+    }, [isConnectionLoading, connection]);
+
     if (isConnectionLoading) {
         return <Text>Checking connection...</Text>;
     }
 
     if (!connection) {
-        return (
-            <MessageBar intent="error">
-                <MessageBarBody>
-                    <MessageBarTitle>No Connection</MessageBarTitle>
-                    Please connect to a Dataverse environment first.
-                </MessageBarBody>
-            </MessageBar>
-        );
+        return null;
     }
 
     const handleTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
@@ -276,11 +254,17 @@ function App() {
 
     return (
         <div className={styles.root}>
-            {(isLoadingBpfs || isLoadingSolutionsPublishers) && (
+            {(isLoadingBpfs || isLoadingSolutionsPublishers || isLoadingForm) && (
                 <div className={styles.loadingOverlay}>
                     <Spinner
                         size="extra-large"
-                        label={isLoadingBpfs ? "Loading Business Process Flows and PCF controls..." : "Loading Solutions and Publishers..."}
+                        label={
+                            isLoadingForm
+                                ? "Loading Business Process Flow details..."
+                                : isLoadingBpfs
+                                  ? "Loading Business Process Flows and PCF controls..."
+                                  : "Loading Solutions and Publishers..."
+                        }
                     />
                 </div>
             )}
@@ -315,19 +299,14 @@ function App() {
             <div className={styles.contentArea}>
                 {/* Both tabs stay mounted, toggled via `hidden`, rather than conditionally rendered —
                     unmounting PcfConfigurationPanel on every tab switch would remount
-                    SolutionsPublishersCard and re-trigger its mount-time solutions/publishers fetch
-                    (and reset its local picker state) every time the user came back to this tab. */}
+                    ScopeCard and reset its local search/filter-mode state every time the
+                    user came back to this tab. (Solutions/publishers themselves live in ToolContext,
+                    above App, so they wouldn't be re-fetched either way.) */}
                 <div hidden={activeTab !== "config"}>
                     <PcfConfigurationPanel
-                        bpfProcesses={bpfProcesses}
-                        isLoadingBpfs={isLoadingBpfs}
-                        onLoadBpfs={(scope) => void handleLoadBpfs(scope)}
-                        onSolutionsPublishersLoadingChange={setIsLoadingSolutionsPublishers}
-                        selectedBpfId={selectedBpfId}
                         onSelectBpf={(id) => void handleSelectBpf(id)}
                         selectedBpf={selectedBpf}
                         formError={formError}
-                        isLoadingForm={isLoadingForm}
                         doc={formDocRef.current}
                         docVersion={docVersion}
                         stages={stages}

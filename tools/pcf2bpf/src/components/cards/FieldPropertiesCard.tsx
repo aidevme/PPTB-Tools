@@ -5,7 +5,7 @@ import type { AttributeInfo, FieldInfo } from "../../services";
 import { useFieldPropertiesCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
 
-interface IFieldPropertiesCardProps {
+export interface IFieldPropertiesCardProps {
     field: FieldInfo;
     attribute: AttributeInfo | undefined;
     entityDisplayName: string;
@@ -13,41 +13,51 @@ interface IFieldPropertiesCardProps {
     stageColor: string;
 }
 
+const ROW_LABEL_TYPE = "Type";
+const ROW_LABEL_ENTITY = "Entity";
+const ROW_LABEL_REQUIRED_ON_STAGE = "Required on stage";
+const ROW_LABEL_SEQUENCE = "Sequence";
+
+const ATTRIBUTE_TYPE_UNKNOWN_LABEL = "Unknown";
+
+const BADGE_REQUIRED_LABEL = "Required";
+const BADGE_OPTIONAL_LABEL = "Optional";
+
+const CARD_TITLE = "Field properties";
+const CARD_DESCRIPTION = "Read-only summary of the selected field's type, entity, and requirement.";
+
 /** Read-only summary of the selected field's properties: type, entity, and required-on-stage state. */
 export function FieldPropertiesCard({ field, attribute, entityDisplayName, stageName, stageColor }: IFieldPropertiesCardProps) {
     const styles = useFieldPropertiesCardStyles();
     const cssVars: CSSProperties = { ["--stage-color" as string]: stageColor };
 
     return (
-        <GenericCard
-            className={styles.spacing}
-            title="Field properties"
-            description="Read-only summary of the selected field's type, entity, and requirement."
-            style={cssVars}
-        >
+        <GenericCard className={styles.spacing} title={CARD_TITLE} description={CARD_DESCRIPTION} style={cssVars}>
             <span className={styles.stageBadge}>{stageName}</span>
 
             <Text className={styles.fieldName}>{field.label}</Text>
             <Text className={styles.fieldLogical}>{field.datafieldname}</Text>
 
             <div className={mergeClasses(styles.row, styles.firstRow)}>
-                <span className={styles.rowLabel}>Type</span>
-                <span className={styles.rowValue}>{attribute ? getAttributeTypeLabel(attribute.attributeType) : "Unknown"}</span>
+                <span className={styles.rowLabel}>{ROW_LABEL_TYPE}</span>
+                <span className={styles.rowValue}>
+                    {attribute ? getAttributeTypeLabel(attribute.attributeType) : ATTRIBUTE_TYPE_UNKNOWN_LABEL}
+                </span>
             </div>
 
             <div className={styles.row}>
-                <span className={styles.rowLabel}>Entity</span>
+                <span className={styles.rowLabel}>{ROW_LABEL_ENTITY}</span>
                 <span className={styles.rowValue}>{entityDisplayName}</span>
             </div>
 
             <div className={styles.row}>
-                <span className={styles.rowLabel}>Required on stage</span>
+                <span className={styles.rowLabel}>{ROW_LABEL_REQUIRED_ON_STAGE}</span>
                 <Badge appearance="tint" color={field.required ? "success" : "informative"}>
-                    {field.required ? "Required" : "Optional"}
+                    {field.required ? BADGE_REQUIRED_LABEL : BADGE_OPTIONAL_LABEL}
                 </Badge>
             </div>
             <div className={styles.row}>
-                <span className={styles.rowLabel}>Sequence</span>
+                <span className={styles.rowLabel}>{ROW_LABEL_SEQUENCE}</span>
                 <span className={styles.rowValue}>{field.sequence}</span>
             </div>
         </GenericCard>

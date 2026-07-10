@@ -13,13 +13,13 @@ import {
     useId,
 } from "@fluentui/react-components";
 import { FullScreenMinimize20Regular } from "@fluentui/react-icons";
-import { XmlFormatter } from "../xmlformatter";
+import { XmlFormatter } from "../xmlformatter/XmlFormatter";
 import { XmlSearchBox } from "../searchbox/XmlSearchBox";
 import { CompareXmlsCheckBox } from "../checkbox/CompareXmlsCheckBox";
 import { PanelHeader } from "../PanelHeader";
 import { useFormXmlPanelStyles } from "../../styles";
 
-interface IFormXmlPanelProps {
+export interface IFormXmlPanelProps {
     /** The form's original XML, as it was before any edits made this session. */
     beforeXml: string;
     /** The form's XML reflecting the current (possibly unsaved) edits. */
