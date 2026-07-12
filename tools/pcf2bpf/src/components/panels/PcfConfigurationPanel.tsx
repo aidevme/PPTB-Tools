@@ -1,4 +1,5 @@
-import { Button, MessageBar, MessageBarBody } from "@fluentui/react-components";
+import { useState } from "react";
+import { MessageBar, MessageBarBody } from "@fluentui/react-components";
 import { useToolContext } from "../../services/pptbtoolservice";
 import { getStageColor } from "../../services";
 import type { AttributeInfo, BpfProcess, FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from "../../services";
@@ -9,6 +10,7 @@ import { FieldPropertiesCard } from "../cards/FieldPropertiesCard";
 import { FormFactorsCard } from "../cards/FormFactorsCard";
 import { ScopeCard } from "../cards/ScopeCard";
 import { StagesFieldsCard } from "../cards/StagesFieldsCard";
+import { UpdatePublishCard } from "../cards/UpdatePublishCard";
 
 interface IPcfConfigurationPanelProps {
     onSelectBpf: (workflowId: string) => void;
@@ -82,6 +84,15 @@ export function PcfConfigurationPanel({
     const styles = usePcfConfigurationPanelStyles();
     const { bpfProcesses } = useToolContext();
 
+    // Mirrors FormFactorsCard's per-form-factor PCF pick (applied or not), so "Copy from" reflects
+    // what's currently in each dropdown rather than only what's been applied to the doc.
+    const [draftPcfIdByFormFactor, setDraftPcfIdByFormFactor] = useState<Partial<Record<FormFactor, string>>>({});
+    const assignedByFormFactor: Partial<Record<FormFactor, boolean>> = {
+        0: !!draftPcfIdByFormFactor[0],
+        1: !!draftPcfIdByFormFactor[1],
+        2: !!draftPcfIdByFormFactor[2],
+    };
+
     return (
         <div className={styles.configRow}>
             <div className={styles.leftColumn}>
@@ -106,15 +117,7 @@ export function PcfConfigurationPanel({
                     onSelectField={onSelectField}
                 />
 
-                <Button
-                    className={styles.fullWidth}
-                    appearance="primary"
-                    size="large"
-                    disabled={!isDirty || isPublishing}
-                    onClick={onUpdateAndPublish}
-                >
-                    {isPublishing ? "Saving & Publishing..." : "Update and Publish"}
-                </Button>
+                <UpdatePublishCard isDirty={isDirty} isPublishing={isPublishing} onUpdateAndPublish={onUpdateAndPublish} />
             </div>
 
             <div className={styles.rightArea}>
@@ -132,7 +135,7 @@ export function PcfConfigurationPanel({
                     )}
                     {selectedField && (
                         <div className={styles.copyColumn}>
-                            <CopyFormFactorCard onCopy={onCopyFormFactor} />
+                            <CopyFormFactorCard onCopy={onCopyFormFactor} assignedByFormFactor={assignedByFormFactor} />
                         </div>
                     )}
                 </div>
@@ -149,6 +152,7 @@ export function PcfConfigurationPanel({
                     existing={existingAssignment}
                     onApply={onApplyPcf}
                     onRemove={onRemovePcf}
+                    onDraftSelectionChange={setDraftPcfIdByFormFactor}
                 />
             </div>
         </div>

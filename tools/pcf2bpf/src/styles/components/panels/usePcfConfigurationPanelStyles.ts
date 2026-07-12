@@ -35,7 +35,4 @@ export const usePcfConfigurationPanelStyles = makeStyles({
     copyColumn: {
         flex: "0 0 220px",
     },
-    fullWidth: {
-        width: "100%",
-    },
 });

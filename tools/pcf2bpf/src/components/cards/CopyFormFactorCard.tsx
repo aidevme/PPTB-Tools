@@ -1,39 +1,31 @@
 import { useState } from "react";
 import { Button, Dropdown, Field, Option, Tooltip } from "@fluentui/react-components";
-import { Desktop20Regular, Phone20Regular, Tablet20Regular } from "@fluentui/react-icons";
 import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../services";
 import type { FormFactor } from "../../services";
 import { useCopyFormFactorCardStyles } from "../../styles";
+import { FORM_FACTOR_ICONS } from "./Common.const";
 import { GenericCard } from "./GenericCard";
+import {
+    BUTTON_COPY_LABEL,
+    CARD_DESCRIPTION,
+    CARD_TITLE,
+    DISABLED_REASON_BOTH_MISSING,
+    DISABLED_REASON_FROM_MISSING,
+    DISABLED_REASON_SAME_FORM_FACTOR,
+    DISABLED_REASON_TO_MISSING,
+    FIELD_COPY_FROM_LABEL,
+    FIELD_COPY_TO_LABEL,
+    TOOLTIP_ENABLED_TEXT,
+} from "./CopyFormFactorCard.const";
 
 export interface ICopyFormFactorCardProps {
     onCopy: (from: FormFactor, to: FormFactor) => void;
+    /** Whether each form factor currently has a PCF control assigned on the selected field — the
+     * "Copy from" dropdown disables the option for any form factor with nothing to copy. */
+    assignedByFormFactor: Partial<Record<FormFactor, boolean>>;
 }
 
-/** Icon shown before each form factor's label in the "Copy from"/"Copy to" dropdowns. */
-const FORM_FACTOR_ICONS: Record<FormFactor, JSX.Element> = {
-    0: <Desktop20Regular />,
-    1: <Phone20Regular />,
-    2: <Tablet20Regular />,
-};
-
-const FIELD_COPY_FROM_LABEL = "Copy from";
-const FIELD_COPY_TO_LABEL = "Copy to";
-
-const DISABLED_REASON_BOTH_MISSING = "Select a 'Copy from' and a 'Copy to' form factor to enable copying.";
-const DISABLED_REASON_FROM_MISSING = "Select a 'Copy from' form factor to enable copying.";
-const DISABLED_REASON_TO_MISSING = "Select a 'Copy to' form factor to enable copying.";
-const DISABLED_REASON_SAME_FORM_FACTOR = "Choose two different form factors — you can't copy a form factor onto itself.";
-
-const TOOLTIP_ENABLED_TEXT =
-    "Clones the currently selected field's PCF control assignment — the control and all its parameter values — from the 'Copy from' form factor onto the 'Copy to' form factor, overwriting whatever control (if any) is already configured there. This only affects the field you have selected; other fields and form factors are untouched, and nothing is saved to Dataverse until you click Update and Publish.";
-
-const BUTTON_COPY_LABEL = "Copy";
-
-const CARD_TITLE = "Copy PCF between form factors";
-const CARD_DESCRIPTION = "Clone the selected field's PCF configuration from one form factor to another.";
-
-export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
+export function CopyFormFactorCard({ onCopy, assignedByFormFactor }: ICopyFormFactorCardProps) {
     const styles = useCopyFormFactorCardStyles();
     const [from, setFrom] = useState<FormFactor | "">("");
     const [to, setTo] = useState<FormFactor | "">("");
@@ -70,7 +62,7 @@ export function CopyFormFactorCard({ onCopy }: ICopyFormFactorCardProps) {
                     }
                 >
                     {FORM_FACTORS.map((ff) => (
-                        <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]}>
+                        <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]} disabled={!assignedByFormFactor[ff]}>
                             <span className={styles.optionContent}>
                                 {FORM_FACTOR_ICONS[ff]}
                                 {FORM_FACTOR_LABELS[ff]}

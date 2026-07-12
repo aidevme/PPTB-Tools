@@ -1,0 +1,48 @@
+{
+    "CustomControlId": "fb6c9816-4e20-44ed-88a2-00cd551ea9e3",
+    "Name": "MsdynmktControls.EmailEditor.FormControls.ThicknessControl",
+    "ConstructorName": "ThicknessControl",
+    "ControlMode": "Unknown",
+    "DisplayName": "Thickness Control",
+    "Namespace": "MsdynmktControls.EmailEditor.FormControls",
+    "IsVirtual": true,
+    "Properties": {
+        "Resources": [
+            {
+                "Name": "fluent_9_4_0",
+                "LoadOrder": 0,
+                "LibraryName": "fluent_9_4_0",
+                "Type": 0
+            },
+            {
+                "Name": "MsdynmktControls.EmailEditor.FormControls.ThicknessControl_ThicknessControl.js",
+                "LoadOrder": 2,
+                "Type": 4
+            },
+            {
+                "Name": "locale/ThicknessControl.1033.resx",
+                "LoadOrder": 0,
+                "Type": 5
+            }
+        ],
+        "DataSets": [],
+        "Properties": [
+            {
+                "Name": "value",
+                "Type": "SingleLine.Text",
+                "Hidden": false,
+                "Required": true,
+                "Usage": 0
+            }
+        ],
+        "FeatureUsage": [],
+        "PlatformAction": [],
+        "Events": [],
+        "Actions": []
+    },
+    "VersionNumber": 0,
+    "OverallVersionNumber": 0,
+    "FullName": "MsdynmktControls.EmailEditor.FormControls.ThicknessControl",
+    "Children": [],
+    "ControlManifestVersion": "1.60115.104"
+}

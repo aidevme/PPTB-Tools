@@ -6,7 +6,7 @@ Reference notes on the `<property>` element of a Power Apps component framework 
 A `<property>` node defines one specific, configurable piece of data a component expects from
 Microsoft Dataverse (model-driven apps) or from the app author (canvas apps) — this is the element
 that `customcontrol.manifest` XML is built from, and that PCF2BPF's own
-[`pcfManifest.ts`](../../tools/pcf2bpf/src/services/pcfManifest.ts) parses (see
+[`PcfService.ts`](../../tools/pcf2bpf/src/services/pcfservice/PcfService.ts) parses (see
 [Relevance to PCF2BPF](#relevance-to-pcf2bpf) below).
 
 **Available for:** Model-driven and canvas apps.
@@ -99,8 +99,8 @@ reference theme properties, or wire up custom events.
 
 ## Relevance to PCF2BPF
 
-`tools/pcf2bpf/src/services/pcfManifest.ts` parses `control > property` elements out of a
-`customcontrol.manifest` XML string, reading these attributes:
+`tools/pcf2bpf/src/services/pcfservice/PcfService.ts`'s `parsePcfManifestParameters` parses
+`control > property` elements out of a `customcontrol.manifest` XML string, reading these attributes:
 
 - `name` — the parameter's key (read/write its saved value) **and** its displayed label in
   `FormFactorsCard`'s parameter editor (`param.name + (param.required ? " *" : "")`).

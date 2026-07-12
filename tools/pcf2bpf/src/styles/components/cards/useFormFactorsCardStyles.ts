@@ -15,6 +15,15 @@ export const useFormFactorsCardStyles = makeStyles({
         alignItems: "center",
         gap: "4px",
     },
+    pcfSelectRow: {
+        display: "flex",
+        alignItems: "flex-end",
+        gap: "4px",
+    },
+    pcfSelectField: {
+        flexGrow: 1,
+        minWidth: 0,
+    },
     assignedIcon: {
         color: tokens.colorStatusSuccessForeground1,
     },

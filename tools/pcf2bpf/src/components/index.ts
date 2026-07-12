@@ -16,11 +16,13 @@ export { FormFactorsCard, type IFormFactorsCardProps } from "./cards/FormFactors
 export { GenericCard, type IGenericCardProps } from "./cards/GenericCard";
 export { ScopeCard, type IScopeCardProps } from "./cards/ScopeCard";
 export { StagesFieldsCard, type IStagesFieldsCardProps } from "./cards/StagesFieldsCard";
+export { UpdatePublishCard, type IUpdatePublishCardProps } from "./cards/UpdatePublishCard";
 export { CompareXmlsCheckBox } from "./checkbox/CompareXmlsCheckBox";
 export { DebuggerPanel, type IDebuggerPanelProps } from "./panels/DebuggerPanel";
 export { Footer } from "./Footer";
 export { FormXmlPanel } from "./panels/FormXmlPanel";
 export { PcfConfigurationPanel } from "./panels/PcfConfigurationPanel";
+export { PcfDetailsPanel, type IPcfDetailsPanelProps } from "./panels/PcfDetailsPanel";
 export { PanelHeader, type PanelHeaderIconType } from "./PanelHeader";
 export { XmlSearchBox } from "./searchbox/XmlSearchBox";
 export { PcfConfiguratorTable } from "./tables/PcfConfiguratorTable";

@@ -1,0 +1,14 @@
+<manifest>
+    <control namespace="MsdynmktControls.EmailEditor.FormControls" constructor="ThicknessControl"
+        version="1.60115.104" display-name-key="Thickness Control" control-type="virtual">
+        <modes></modes>
+        <property name="value" display-name-key="CC_ThicknessControlValue"
+            description-key="CC_ThicknessControlValue_desc" of-type="SingleLine.Text" usage="bound"
+            required="true" hidden="false" />
+        <resources>
+            <code path="ThicknessControl.js" order="2" />
+            <resx path="locale/ThicknessControl.1033.resx" version="1.0.2" />
+            <platform-library name="Fluent" version="9.46.2" />
+        </resources>
+    </control>
+</manifest>

@@ -5,6 +5,14 @@ import { getStageColor, hasAnyCustomControl, getFieldsForStage } from "../../ser
 import type { FieldInfo, StageInfo } from "../../services";
 import { useStagesFieldsCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
+import {
+    CARD_DESCRIPTION,
+    CARD_TITLE,
+    FIELD_HAS_CONTROL_BADGE_LABEL,
+    STAGE_EMPTY_TEXT,
+    STAGE_FIELD_COUNT_LABEL,
+    STAGE_FIELD_COUNT_PLURAL_SUFFIX,
+} from "./StagesFieldsCard.const";
 
 export interface IStagesFieldsCardProps {
     doc: XMLDocument | null;
@@ -22,14 +30,6 @@ export interface IStagesFieldsCardProps {
     selectedControlId: string | null;
     onSelectField: (field: FieldInfo) => void;
 }
-
-const CARD_TITLE = "Business Process Details";
-const CARD_DESCRIPTION = "Browse the selected flow's stages and choose a field to configure.";
-
-const STAGE_FIELD_COUNT_LABEL = "field";
-const STAGE_FIELD_COUNT_PLURAL_SUFFIX = "s";
-const STAGE_EMPTY_TEXT = "No fields on this stage";
-const FIELD_HAS_CONTROL_BADGE_LABEL = "PCF";
 
 /** The colored stage timeline and per-stage field list for the selected Business Process Flow. */
 export function StagesFieldsCard({

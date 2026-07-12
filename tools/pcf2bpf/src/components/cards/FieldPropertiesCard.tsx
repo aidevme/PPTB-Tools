@@ -4,6 +4,17 @@ import { getAttributeTypeLabel } from "../../services";
 import type { AttributeInfo, FieldInfo } from "../../services";
 import { useFieldPropertiesCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
+import {
+    ATTRIBUTE_TYPE_UNKNOWN_LABEL,
+    BADGE_OPTIONAL_LABEL,
+    BADGE_REQUIRED_LABEL,
+    CARD_DESCRIPTION,
+    CARD_TITLE,
+    ROW_LABEL_ENTITY,
+    ROW_LABEL_REQUIRED_ON_STAGE,
+    ROW_LABEL_SEQUENCE,
+    ROW_LABEL_TYPE,
+} from "./FieldPropertiesCard.const";
 
 export interface IFieldPropertiesCardProps {
     field: FieldInfo;
@@ -12,19 +23,6 @@ export interface IFieldPropertiesCardProps {
     stageName: string;
     stageColor: string;
 }
-
-const ROW_LABEL_TYPE = "Type";
-const ROW_LABEL_ENTITY = "Entity";
-const ROW_LABEL_REQUIRED_ON_STAGE = "Required on stage";
-const ROW_LABEL_SEQUENCE = "Sequence";
-
-const ATTRIBUTE_TYPE_UNKNOWN_LABEL = "Unknown";
-
-const BADGE_REQUIRED_LABEL = "Required";
-const BADGE_OPTIONAL_LABEL = "Optional";
-
-const CARD_TITLE = "Field properties";
-const CARD_DESCRIPTION = "Read-only summary of the selected field's type, entity, and requirement.";
 
 /** Read-only summary of the selected field's properties: type, entity, and required-on-stage state. */
 export function FieldPropertiesCard({ field, attribute, entityDisplayName, stageName, stageColor }: IFieldPropertiesCardProps) {

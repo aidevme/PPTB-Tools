@@ -4,6 +4,14 @@ import { useToolContext } from "../../services/pptbtoolservice";
 import type { BpfProcess } from "../../services";
 import { useBpfSelectorCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
+import {
+    BPF_COMBOBOX_ARIA_LABEL,
+    BPF_COMBOBOX_NO_OPTIONS_MESSAGE,
+    BPF_COMBOBOX_PLACEHOLDER,
+    BPF_COMBOBOX_PLACEHOLDER_EMPTY,
+    CARD_DESCRIPTION,
+    CARD_TITLE,
+} from "./BpfSelectorCard.const";
 
 export interface IBpfSelectorCardProps {
     /** Selecting a BPF also loads its form XML, so this is an `App.tsx`-level orchestration callback
@@ -14,14 +22,6 @@ export interface IBpfSelectorCardProps {
 function bpfLabel(bpf: BpfProcess): string {
     return `${bpf.name} (${bpf.primaryentity})`;
 }
-
-const BPF_COMBOBOX_ARIA_LABEL = "Business Process Flow";
-const BPF_COMBOBOX_PLACEHOLDER = "Select a Business Process Flow";
-const BPF_COMBOBOX_PLACEHOLDER_EMPTY = "Load Business Process Flows first";
-const BPF_COMBOBOX_NO_OPTIONS_MESSAGE = "No Business Process Flows match your search.";
-
-const CARD_TITLE = "Business Process Flow";
-const CARD_DESCRIPTION = "Select a loaded Business Process Flow to browse its stages and fields.";
 
 export function BpfSelectorCard({ onSelect }: IBpfSelectorCardProps) {
     const styles = useBpfSelectorCardStyles();

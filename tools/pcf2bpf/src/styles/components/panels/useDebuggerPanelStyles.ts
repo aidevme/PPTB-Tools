@@ -1,4 +1,4 @@
-import { makeStyles } from "@fluentui/react-components";
+import { makeStyles, tokens } from "@fluentui/react-components";
 
 export const useDebuggerPanelStyles = makeStyles({
     body: {
@@ -8,6 +8,9 @@ export const useDebuggerPanelStyles = makeStyles({
     },
     entityLabel: {
         marginBottom: "-4px",
+    },
+    tableHeaderCell: {
+        fontWeight: tokens.fontWeightSemibold,
     },
     pagingRow: {
         display: "flex",

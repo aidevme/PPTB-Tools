@@ -10,4 +10,8 @@ export interface PcfControl {
     isVirtual: boolean;
     /** The PCF manifest schema version the control was built against. */
     version: string;
+    /** The raw `customcontrol.manifest` XML string, unparsed. */
+    rawManifestXml: string;
+    /** The raw `customcontrol.clientjson` string, unparsed. */
+    rawClientJson: string;
 }

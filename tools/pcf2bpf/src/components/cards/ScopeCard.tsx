@@ -16,53 +16,43 @@ import { useToolContext } from "../../services/pptbtoolservice";
 import type { FilterMode, PublisherInfo, SolutionInfo } from "../../services";
 import { useScopeCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
+import {
+    BUTTON_LOAD_BPFS_LABEL,
+    BUTTON_RELOAD_BPFS_LABEL,
+    CARD_DESCRIPTION,
+    CARD_TITLE,
+    LOADING_TEXT,
+    PUBLISHER_COMBOBOX_ARIA_LABEL,
+    PUBLISHER_COMBOBOX_PLACEHOLDER,
+    PUBLISHER_FIELD_HINT,
+    PUBLISHER_OPTION_LOADING_TEXT,
+    PUBLISHER_OPTION_NO_ACCESS_TEXT,
+    PUBLISHER_OPTION_NO_MATCH_TEXT,
+    PUBLISHER_OPTION_PREFIX_LABEL,
+    PUBLISHER_WORD,
+    RADIO_BUTTON_NO_FILTERING_LABEL,
+    RADIO_BUTTON_PUBLISHERS_LABEL,
+    RADIO_BUTTON_SOLUTIONS_LABEL,
+    SOLUTION_COMBOBOX_ARIA_LABEL,
+    SOLUTION_COMBOBOX_PLACEHOLDER,
+    SOLUTION_FIELD_HINT,
+    SOLUTION_OPTION_GROUP_NOT_RECOMMENDED_LABEL,
+    SOLUTION_OPTION_LOADING_TEXT,
+    SOLUTION_OPTION_NO_ACCESS_TEXT,
+    SOLUTION_OPTION_NO_MATCH_TEXT,
+    SOLUTION_WORD,
+    TOOLTIP_DISABLED_PREFIX,
+    TOOLTIP_DISABLED_SUFFIX,
+    TOOLTIP_ENABLED_PREFIX,
+    TOOLTIP_ENABLED_SUFFIX,
+    TOOLTIP_SCOPE_PUBLISHER_FRAGMENT,
+    TOOLTIP_SCOPE_SOLUTION_FRAGMENT,
+    TOOLTIP_SCOPE_UNFILTERED_FRAGMENT,
+} from "./ScopeCard.const";
 
 function matchesQuery(text: string, query: string): boolean {
     return !query || text.toLowerCase().includes(query.toLowerCase());
 }
-
-const RADIO_BUTTON_SOLUTIONS_LABEL = "Solutions";
-const RADIO_BUTTON_PUBLISHERS_LABEL = "Publishers";
-const RADIO_BUTTON_NO_FILTERING_LABEL = "No Filtering";
-
-// Shared across both comboboxes' placeholder-while-loading state and the "Load BPFs" button's
-// loading state — literally the same text in every case, so one constant rather than three.
-const LOADING_TEXT = "Loading...";
-
-const SOLUTION_FIELD_HINT = "Only one solution can be selected.";
-const SOLUTION_COMBOBOX_ARIA_LABEL = "Solution";
-const SOLUTION_COMBOBOX_PLACEHOLDER = "Select a solution...";
-const SOLUTION_OPTION_LOADING_TEXT = "Loading solutions...";
-const SOLUTION_OPTION_NO_ACCESS_TEXT =
-    "No solutions were returned — you may not have read access to Solution records in this environment.";
-const SOLUTION_OPTION_NO_MATCH_TEXT = "No solutions match your search.";
-const SOLUTION_OPTION_GROUP_NOT_RECOMMENDED_LABEL = "Not Recommended";
-const SOLUTION_WORD = "solution";
-
-const PUBLISHER_FIELD_HINT = "Only one publisher can be selected.";
-const PUBLISHER_COMBOBOX_ARIA_LABEL = "Publisher";
-const PUBLISHER_COMBOBOX_PLACEHOLDER = "Select a publisher...";
-const PUBLISHER_OPTION_LOADING_TEXT = "Loading publishers...";
-const PUBLISHER_OPTION_NO_ACCESS_TEXT =
-    "No publishers were returned — you may not have read access to Publisher records in this environment.";
-const PUBLISHER_OPTION_NO_MATCH_TEXT = "No publishers match your search.";
-const PUBLISHER_OPTION_PREFIX_LABEL = "Prefix:";
-const PUBLISHER_WORD = "publisher";
-
-const TOOLTIP_SCOPE_SOLUTION_FRAGMENT = "in the selected solution";
-const TOOLTIP_SCOPE_PUBLISHER_FRAGMENT = "in the selected publisher's solutions";
-const TOOLTIP_SCOPE_UNFILTERED_FRAGMENT = "in the environment, unfiltered";
-const TOOLTIP_ENABLED_PREFIX = "Loads every Business Process Flow";
-const TOOLTIP_ENABLED_SUFFIX =
-    ", along with all PCF controls currently registered in the connected environment and their manifest parameters. Run this again after importing a solution that adds a new Business Process Flow or PCF control, since the list is only fetched on click.";
-const TOOLTIP_DISABLED_PREFIX = "Select a";
-const TOOLTIP_DISABLED_SUFFIX = "above to enable loading Business Process Flows.";
-
-const BUTTON_RELOAD_BPFS_LABEL = "Reload BPFs";
-const BUTTON_LOAD_BPFS_LABEL = "Load BPFs";
-
-const CARD_TITLE = "Scope";
-const CARD_DESCRIPTION = "Choose how to scope which Business Process Flows can be loaded — by solution, by publisher, or unfiltered.";
 
 // Documents this card's ToolContext dependency — solutions/selectedSolutionId/publishers/
 // selectedPublisherId aren't received as real props (the component reads live values from
