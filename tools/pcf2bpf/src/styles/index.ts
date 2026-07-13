@@ -6,7 +6,7 @@
  * whose styles it holds. A hook's source path mirrors where its component lives under
  * `components/`: hooks for top-level components sit directly under `styles/components/`, and
  * hooks for components in a `components/<subfolder>/` (`cards`, `panels`, `checkbox`,
- * `searchbox`, `tables`, `xmlformatter`) sit under the matching `styles/components/<subfolder>/`.
+ * `jsonformatter`, `searchbox`, `tables`, `xmlformatter`) sit under the matching `styles/components/<subfolder>/`.
  */
 export { useAppStyles } from "./useAppStyles";
 export { useBpfSelectorCardStyles } from "./components/cards/useBpfSelectorCardStyles";
@@ -18,12 +18,14 @@ export { useFooterStyles } from "./components/useFooterStyles";
 export { useFormFactorsCardStyles } from "./components/cards/useFormFactorsCardStyles";
 export { useFormXmlPanelStyles } from "./components/panels/useFormXmlPanelStyles";
 export { useGenericCardStyles } from "./components/cards/useGenericCardStyles";
+export { useJsonFormatterStyles } from "./components/jsonformatter/useJsonFormatterStyles";
 export { usePanelHeaderStyles } from "./components/usePanelHeaderStyles";
 export { usePcfConfigurationPanelStyles } from "./components/panels/usePcfConfigurationPanelStyles";
 export { usePcfConfiguratorTableStyles } from "./components/tables/usePcfConfiguratorTableStyles";
 export { usePcfDetailsPanelStyles } from "./components/panels/usePcfDetailsPanelStyles";
 export { useScopeCardStyles } from "./components/cards/useScopeCardStyles";
 export { useStagesFieldsCardStyles } from "./components/cards/useStagesFieldsCardStyles";
+export { useToolConfigurationPanelStyles } from "./components/panels/useToolConfigurationPanelStyles";
 export { useUpdatePublishCardStyles } from "./components/cards/useUpdatePublishCardStyles";
 export { useXmlFormatterStyles } from "./components/xmlformatter/useXmlFormatterStyles";
 export { useXmlSearchBoxStyles } from "./components/searchbox/useXmlSearchBoxStyles";

@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { Button, Link, Text, tokens } from "@fluentui/react-components";
-import { Bug20Regular, Document20Regular, Open20Regular } from "@fluentui/react-icons";
+import { Bug20Regular, Document20Regular, Open20Regular, Settings20Regular } from "@fluentui/react-icons";
 import pkg from "../../package.json";
 import { useFooterStyles } from "../styles";
 import { useToolContext } from "../services/pptbtoolservice";
 import { DebuggerPanel } from "./panels/DebuggerPanel";
+import { ToolConfigurationPanel } from "./panels/ToolConfigurationPanel";
 
 const AUTHOR_URL = "https://github.com/aidevme";
 const DOCS_URL = "https://github.com/aidevme/PPTB-Tools/blob/main/docs/pcf2bpf/index.md";
@@ -22,6 +24,7 @@ function openExternal(url: string): void {
 export function Footer() {
     const styles = useFooterStyles();
     const { isDebuggerOpen, setIsDebuggerOpen } = useToolContext();
+    const [isConfigOpen, setIsConfigOpen] = useState(false);
 
     return (
         <footer className={styles.root}>
@@ -75,7 +78,16 @@ export function Footer() {
             >
                 Debugger
             </Button>
+            <Button
+                appearance="subtle"
+                icon={<Settings20Regular />}
+                className={styles.iconLink}
+                onClick={() => setIsConfigOpen(true)}
+            >
+                Configuration
+            </Button>
             <DebuggerPanel open={isDebuggerOpen} onOpenChange={setIsDebuggerOpen} />
+            <ToolConfigurationPanel open={isConfigOpen} onOpenChange={setIsConfigOpen} />
         </footer>
     );
 }

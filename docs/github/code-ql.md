@@ -1,1 +1,1 @@
-# Code QL
+# Code QL Documentation

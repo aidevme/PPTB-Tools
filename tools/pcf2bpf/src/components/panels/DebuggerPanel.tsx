@@ -27,7 +27,6 @@ import {
     ChevronRight20Regular,
     Dismiss24Regular,
     Open20Regular,
-    Settings20Regular,
     Table20Regular,
     Target20Regular,
 } from "@fluentui/react-icons";
@@ -41,7 +40,7 @@ export interface IDebuggerPanelProps {
     onOpenChange: (open: boolean) => void;
 }
 
-type DebuggerTab = "scope" | "entities" | "pcfControls" | "configSettings";
+type DebuggerTab = "scope" | "entities" | "pcfControls";
 
 /** Max attribute rows shown per page in each entity's attribute table, and max PCF control rows
  * shown per page in the "PCF Controls" tab. */
@@ -53,10 +52,10 @@ const CONTROL_TYPE_STANDARD_LABEL = "Standard";
 type PcfControlSortColumn = "name" | "controlType" | "version" | "compatibleDataTypes" | "parameters";
 
 const PCF_CONTROL_SORT_VALUE: Record<PcfControlSortColumn, (pcf: PcfControl) => string | number> = {
-    name: (pcf) => pcf.name.toLowerCase(),
-    controlType: (pcf) => (pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL),
-    version: (pcf) => pcf.version.toLowerCase(),
-    compatibleDataTypes: (pcf) => pcf.compatibleDataTypes.join(", ").toLowerCase(),
+    name: (pcf) => (pcf.parameters[0]?.controlName ?? "").toLowerCase(),
+    controlType: (pcf) => (pcf.parameters[0]?.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL),
+    version: (pcf) => (pcf.parameters[0]?.version ?? "").toLowerCase(),
+    compatibleDataTypes: (pcf) => (pcf.parameters[0]?.compatibleDataTypes ?? []).join(", ").toLowerCase(),
     parameters: (pcf) => pcf.parameters.length,
 };
 
@@ -161,11 +160,6 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                     >
                         <Tab value="pcfControls" icon={<Apps20Regular />}>
                             PCF Controls
-                        </Tab>
-                    </Tooltip>
-                    <Tooltip content="Tool configuration and settings." relationship="description" positioning="below" withArrow>
-                        <Tab value="configSettings" icon={<Settings20Regular />}>
-                            Configuration &amp; Settings
                         </Tab>
                     </Tooltip>
                 </TabList>
@@ -346,11 +340,13 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                     {pagedPcfControls.map((pcf) => (
                                         <TableRow key={pcf.id}>
                                             <TableCell>
-                                                <Link as="span">{pcf.name}</Link>
+                                                <Link as="span">{pcf.parameters[0]?.controlName ?? ""}</Link>
                                             </TableCell>
-                                            <TableCell>{pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}</TableCell>
-                                            <TableCell>{pcf.version || "Unknown"}</TableCell>
-                                            <TableCell>{pcf.compatibleDataTypes.join(", ") || "(none)"}</TableCell>
+                                            <TableCell>
+                                                {pcf.parameters[0]?.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
+                                            </TableCell>
+                                            <TableCell>{pcf.parameters[0]?.version || "Unknown"}</TableCell>
+                                            <TableCell>{(pcf.parameters[0]?.compatibleDataTypes ?? []).join(", ") || "(none)"}</TableCell>
                                             <TableCell>{pcf.parameters.length}</TableCell>
                                             <TableCell>
                                                 <Button
@@ -393,11 +389,8 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                             </div>
                         </>
                     ))}
-
-                {activeTab === "configSettings" && <Text italic>Nothing here yet.</Text>}
             </DrawerBody>
         </OverlayDrawer>
-
             <PcfDetailsPanel open={isPcfDetailsOpen} onOpenChange={setIsPcfDetailsOpen} pcf={selectedPcfForDetails} />
         </>
     );

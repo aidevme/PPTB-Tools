@@ -44,6 +44,7 @@
         "finalize-package": "npm shrinkwrap"
     },
     "dependencies": {
+        "@fluentui/react-charts": "^9.3.21",
         "@fluentui/react-components": "^9.54.0",
         "@fluentui/react-icons": "^2.0.257",
         "react": "^18.3.1",

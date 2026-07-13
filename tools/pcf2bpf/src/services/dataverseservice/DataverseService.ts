@@ -183,7 +183,7 @@ export async function loadEntityAttributes(entityLogicalName: string): Promise<A
 export function getCompatiblePcfControls(attributeType: string, controls: PcfControl[]): PcfControl[] {
     const compatibleTypes = ATTRIBUTE_TYPE_TO_PCF_TYPES[attributeType] ?? [];
     if (compatibleTypes.length === 0) return [];
-    return controls.filter((c) => c.compatibleDataTypes.some((t) => compatibleTypes.includes(t)));
+    return controls.filter((c) => (c.parameters[0]?.compatibleDataTypes ?? []).some((t: string) => compatibleTypes.includes(t)));
 }
 
 /** Saves the modified form XML back to the BPF's systemform record (does not publish). */

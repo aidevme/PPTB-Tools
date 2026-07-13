@@ -14,6 +14,7 @@ export { CopyFormFactorCard, type ICopyFormFactorCardProps } from "./cards/CopyF
 export { FieldPropertiesCard, type IFieldPropertiesCardProps } from "./cards/FieldPropertiesCard";
 export { FormFactorsCard, type IFormFactorsCardProps } from "./cards/FormFactorsCard";
 export { GenericCard, type IGenericCardProps } from "./cards/GenericCard";
+export { JsonFormatter, type IJsonFormatterProps } from "./jsonformatter/JsonFormatter";
 export { ScopeCard, type IScopeCardProps } from "./cards/ScopeCard";
 export { StagesFieldsCard, type IStagesFieldsCardProps } from "./cards/StagesFieldsCard";
 export { UpdatePublishCard, type IUpdatePublishCardProps } from "./cards/UpdatePublishCard";
@@ -24,6 +25,8 @@ export { FormXmlPanel } from "./panels/FormXmlPanel";
 export { PcfConfigurationPanel } from "./panels/PcfConfigurationPanel";
 export { PcfDetailsPanel, type IPcfDetailsPanelProps } from "./panels/PcfDetailsPanel";
 export { PanelHeader, type PanelHeaderIconType } from "./PanelHeader";
+export { PropertyTypeDonut, type IPropertyTypeDonutProps } from "./panels/PropertyTypeDonut";
+export { ToolConfigurationPanel, type IToolConfigurationPanelProps } from "./panels/ToolConfigurationPanel";
 export { XmlSearchBox } from "./searchbox/XmlSearchBox";
 export { PcfConfiguratorTable } from "./tables/PcfConfiguratorTable";
 export { XmlFormatter } from "./xmlformatter/XmlFormatter";

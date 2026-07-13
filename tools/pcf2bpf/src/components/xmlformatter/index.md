@@ -49,7 +49,7 @@ tab.
 | ----------------------- | --------------------------------- | ---------- | --------------------------------------------------------------------------------- |
 | `xml`                   | `string`                          | —          | Raw XML to display. Empty string renders `placeholder` instead.                   |
 | `theme`                 | `XmlThemeName \| XmlTheme`        | `"dark"`   | Built-in palette name, or a fully custom palette.                                 |
-| `showLineNumbers`       | `boolean`                         | `true`     | Show the line-number gutter.                                                      |
+| `showLineNumbers`       | `boolean`                         | `false`    | Show the line-number gutter.                                                      |
 | `collapsible`           | `boolean`                         | `true`     | Show fold chevrons on multi-line elements.                                        |
 | `prettyPrint`           | `boolean`                         | `false`    | Re-indent via the internal structural formatter instead of showing input as-is.   |
 | `indent`                | `string`                          | `"  "`     | Indent unit used when `prettyPrint` is on.                                        |

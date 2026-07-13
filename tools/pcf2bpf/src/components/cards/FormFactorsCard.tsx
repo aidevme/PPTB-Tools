@@ -157,7 +157,7 @@ export function FormFactorsCard({
         changedFormFactors.forEach((ff) => {
           const assignment = existingByFormFactor[ff];
           const match = compatibleControls.find(
-            (c) => c.name === assignment?.name,
+            (c) => c.parameters[0]?.controlName === assignment?.name,
           );
           next[ff] = match?.id ?? "";
         });
@@ -231,7 +231,7 @@ export function FormFactorsCard({
     setParamValuesByFf((prev) => ({
       ...prev,
       [formFactor]:
-        pcf?.name === assignment?.name ? (assignment?.parameters ?? {}) : {},
+        pcf?.parameters[0]?.controlName === assignment?.name ? (assignment?.parameters ?? {}) : {},
     }));
     setStaticOverridesByFf((prev) => ({ ...prev, [formFactor]: {} }));
   };
@@ -256,7 +256,7 @@ export function FormFactorsCard({
             >
               <Dropdown
                 clearable
-                value={selectedPcf?.name ?? ""}
+                value={selectedPcf?.parameters[0]?.controlName ?? ""}
                 selectedOptions={selectedPcfId ? [selectedPcfId] : []}
                 onOptionSelect={(_, data) =>
                   handlePcfChange(data.optionValue ?? "")
@@ -268,17 +268,17 @@ export function FormFactorsCard({
                         children: (
                           <span className={styles.tabLabel}>
                             <AppsRegular />
-                            {selectedPcf.name}
+                            {selectedPcf.parameters[0]?.controlName ?? ""}
                           </span>
                         ),
                       }
                 }
               >
                 {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.name}>
+                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
                     <span className={styles.tabLabel}>
                       <AppsRegular />
-                      {pcf.name}
+                      {pcf.parameters[0]?.controlName ?? ""}
                     </span>
                   </Option>
                 ))}
@@ -326,7 +326,7 @@ export function FormFactorsCard({
         <Tooltip
           content={
             selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.name}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
               : TOOLTIP_APPLY_DISABLED_TEXT
           }
           relationship="description"
@@ -383,7 +383,7 @@ export function FormFactorsCard({
             >
               <Dropdown
                 clearable
-                value={selectedPcf?.name ?? ""}
+                value={selectedPcf?.parameters[0]?.controlName ?? ""}
                 selectedOptions={selectedPcfId ? [selectedPcfId] : []}
                 onOptionSelect={(_, data) =>
                   handlePcfChange(data.optionValue ?? "")
@@ -395,17 +395,17 @@ export function FormFactorsCard({
                         children: (
                           <span className={styles.tabLabel}>
                             <AppsRegular />
-                            {selectedPcf.name}
+                            {selectedPcf.parameters[0]?.controlName ?? ""}
                           </span>
                         ),
                       }
                 }
               >
                 {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.name}>
+                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
                     <span className={styles.tabLabel}>
                       <AppsRegular />
-                      {pcf.name}
+                      {pcf.parameters[0]?.controlName ?? ""}
                     </span>
                   </Option>
                 ))}
@@ -453,7 +453,7 @@ export function FormFactorsCard({
         <Tooltip
           content={
             selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.name}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
               : TOOLTIP_APPLY_DISABLED_TEXT
           }
           relationship="description"
@@ -510,7 +510,7 @@ export function FormFactorsCard({
             >
               <Dropdown
                 clearable
-                value={selectedPcf?.name ?? ""}
+                value={selectedPcf?.parameters[0]?.controlName ?? ""}
                 selectedOptions={selectedPcfId ? [selectedPcfId] : []}
                 onOptionSelect={(_, data) =>
                   handlePcfChange(data.optionValue ?? "")
@@ -522,17 +522,17 @@ export function FormFactorsCard({
                         children: (
                           <span className={styles.tabLabel}>
                             <AppsRegular />
-                            {selectedPcf.name}
+                            {selectedPcf.parameters[0]?.controlName ?? ""}
                           </span>
                         ),
                       }
                 }
               >
                 {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.name}>
+                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
                     <span className={styles.tabLabel}>
                       <AppsRegular />
-                      {pcf.name}
+                      {pcf.parameters[0]?.controlName ?? ""}
                     </span>
                   </Option>
                 ))}
@@ -580,7 +580,7 @@ export function FormFactorsCard({
         <Tooltip
           content={
             selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.name}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
               : TOOLTIP_APPLY_DISABLED_TEXT
           }
           relationship="description"

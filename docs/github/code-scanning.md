@@ -1,1 +1,1 @@
-# Code Scanning
+# Code Scanning Documentation

@@ -95,12 +95,27 @@ export const useXmlFormatterStyles = makeStyles({
         color: "var(--xml-placeholder)",
         fontStyle: "italic",
     },
-    cornerActions: {
-        position: "absolute",
-        top: "6px",
-        right: "6px",
+    // Two nested `position: sticky` elements, rather than the simpler `position: absolute`, so the
+    // corner buttons stay pinned to the visible top-right of `root`'s scrollport on both axes —
+    // `root` scrolls both horizontally (long XML lines) and vertically (many lines), and an
+    // absolutely positioned child is anchored to root's full (unscrolled) content box, so it scrolls
+    // out of view exactly like the surrounding text. The anchor is zero-height and non-interactive so
+    // it doesn't take up layout space or block clicks on the content below it; only the inner flex
+    // row (sized to its buttons) receives pointer events.
+    cornerActionsAnchor: {
+        position: "sticky",
+        top: 0,
+        height: 0,
         zIndex: 1,
+        pointerEvents: "none",
+    },
+    cornerActions: {
+        position: "sticky",
+        right: "6px",
+        marginTop: "6px",
         display: "flex",
+        justifyContent: "flex-end",
         gap: "4px",
+        pointerEvents: "auto",
     },
 });

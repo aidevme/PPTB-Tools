@@ -184,7 +184,7 @@ export function setCustomControl(
     if (existing) desc.removeChild(existing);
 
     const node = doc.createElement("customControl");
-    node.setAttribute("name", pcf.name);
+    node.setAttribute("name", pcf.parameters[0]?.controlName ?? "");
     node.setAttribute("formFactor", String(formFactor));
 
     const params = doc.createElement("parameters");

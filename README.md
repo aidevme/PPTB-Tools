@@ -3,6 +3,7 @@
 [![License](https://img.shields.io/github/license/aidevme/PPTB-Tools)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/aidevme/PPTB-Tools)](https://github.com/aidevme/PPTB-Tools/commits/main)
 [![Open issues](https://img.shields.io/github/issues/aidevme/PPTB-Tools)](https://github.com/aidevme/PPTB-Tools/issues)
+[![Discussions](https://img.shields.io/github/discussions/aidevme/PPTB-Tools)](https://github.com/aidevme/PPTB-Tools/discussions)
 [![CodeQL](https://github.com/aidevme/PPTB-Tools/actions/workflows/codeql.yml/badge.svg)](https://github.com/aidevme/PPTB-Tools/actions/workflows/codeql.yml)
 
 
@@ -43,6 +44,8 @@ Not yet implemented: copying a PCF configuration from one form factor to another
 ## Contributing
 
 Contributions are welcome. Please open an issue to discuss a change before submitting a pull request, and keep new tools consistent with the structure of existing ones.
+
+Have a question, idea, or want to show what you built with a tool from this repo? Use [GitHub Discussions](https://github.com/aidevme/PPTB-Tools/discussions) instead of an issue — issues are for bugs and concrete, actionable feature requests.
 
 If you're using Claude Code, this repo defines custom subagents (architect, developer, tester, code-reviewer, documenter) scoped to the PPTB tool workflow — see [docs/agents/index.md](docs/agents/index.md).
 

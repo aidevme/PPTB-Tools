@@ -20,7 +20,7 @@ export interface IXmlFormatterProps {
     xml: string;
     /** Built-in palette name, or a fully custom palette. @default "dark" */
     theme?: XmlThemeName | XmlTheme;
-    /** Show a line-number gutter. @default true */
+    /** Show a line-number gutter. @default false */
     showLineNumbers?: boolean;
     /** Show fold chevrons on elements whose content spans more than one line. @default true */
     collapsible?: boolean;
@@ -79,7 +79,7 @@ export interface IXmlFormatterProps {
 export function XmlFormatter({
     xml,
     theme,
-    showLineNumbers = true,
+    showLineNumbers = false,
     collapsible = true,
     prettyPrint = false,
     indent = "  ",
@@ -273,28 +273,30 @@ export function XmlFormatter({
 
     return (
         <div className={mergeClasses(styles.root, className)} style={cssVars}>
-            <div className={styles.cornerActions}>
-                {showCopyButton && (
-                    <Tooltip content={copied ? "Copied" : "Copy"} relationship="label">
-                        <Button
-                            appearance="subtle"
-                            size="small"
-                            icon={copied ? <Checkmark20Regular /> : <Copy20Regular />}
-                            onClick={handleCopy}
-                        />
-                    </Tooltip>
-                )}
-                {onMaximizedChange && (
-                    <Tooltip content={maximized ? "Restore" : "Maximize"} relationship="label">
-                        <ToggleButton
-                            appearance="subtle"
-                            size="small"
-                            checked={maximized}
-                            icon={maximized ? <FullScreenMinimize20Regular /> : <FullScreenMaximize20Regular />}
-                            onClick={() => onMaximizedChange(!maximized)}
-                        />
-                    </Tooltip>
-                )}
+            <div className={styles.cornerActionsAnchor}>
+                <div className={styles.cornerActions}>
+                    {showCopyButton && (
+                        <Tooltip content={copied ? "Copied" : "Copy"} relationship="label">
+                            <Button
+                                appearance="subtle"
+                                size="small"
+                                icon={copied ? <Checkmark20Regular /> : <Copy20Regular />}
+                                onClick={handleCopy}
+                            />
+                        </Tooltip>
+                    )}
+                    {onMaximizedChange && (
+                        <Tooltip content={maximized ? "Restore" : "Maximize"} relationship="label">
+                            <ToggleButton
+                                appearance="subtle"
+                                size="small"
+                                checked={maximized}
+                                icon={maximized ? <FullScreenMinimize20Regular /> : <FullScreenMaximize20Regular />}
+                                onClick={() => onMaximizedChange(!maximized)}
+                            />
+                        </Tooltip>
+                    )}
+                </div>
             </div>
             {rows}
         </div>

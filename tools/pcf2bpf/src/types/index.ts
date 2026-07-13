@@ -18,8 +18,11 @@ export function getStageColor(stageIndex: number): string {
 
 export * from "./attributeinfo";
 export * from "./entitymetadata";
+export * from "./pcffeatureusage";
 export * from "./pcfparameter";
 export * from "./pcfcontrol";
+export * from "./pcfresource";
+export * from "./pcftypegroup";
 
 /** Standard Dataverse form-factor codes used on `<customControl formFactor="...">`. */
 export const FORM_FACTORS = [0, 1, 2] as const;
