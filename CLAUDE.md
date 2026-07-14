@@ -17,9 +17,10 @@ left out of scope.
 
 ## Agent pipeline
 
-This repo defines project subagents (`architect`, `developer`, `tester`, `documenter`, `code-reviewer`) in
-`.claude/agents/*.md` for a plan → implement → verify → document → review workflow. See
-`docs/agents/index.md` for what each one covers and its boundaries — don't duplicate that here.
+This repo defines project subagents (`architect`, `developer`, `tester`, `documenter`, `code-reviewer`,
+`commit-writer`) in `.claude/agents/*.md` for a plan → implement → verify → document → review → commit
+workflow. See `docs/agents/index.md` for what each one covers and its boundaries — don't duplicate that
+here.
 
 ## PCF2BPF (`tools/pcf2bpf/`)
 

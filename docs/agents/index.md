@@ -1,6 +1,6 @@
 # Project Agents
 
-This repo defines five custom Claude Code subagents under [`.claude/agents/`](../../.claude/agents/), each
+This repo defines six custom Claude Code subagents under [`.claude/agents/`](../../.claude/agents/), each
 scoped to one phase of building a Power Platform ToolBox (PPTB) tool. They're deliberately narrow — every
 agent's description names the others and says explicitly what it is *not* for — so they compose into a
 pipeline instead of overlapping:
@@ -10,11 +10,14 @@ flowchart LR
     architect([architect]) --> developer([developer]) --> tester([tester]) --> reviewer([code-reviewer])
     developer --> documenter([documenter])
     reviewer --> documenter
+    reviewer --> commit([commit-writer])
 ```
 
 Plan with **architect**, implement with **developer**, verify with **tester**, review with
-**code-reviewer**, then sync docs with **documenter**. None of them write both code and docs, and none of
-them both plan and implement — each does one job and hands off.
+**code-reviewer**, sync docs with **documenter**, then draft the commit message with **commit-writer**. None
+of them write both code and docs, and none of them both plan and implement — each does one job and hands
+off. **commit-writer** never runs `git commit` itself; it only drafts/validates message text, leaving the
+actual commit to the main agent's normal user-approved flow.
 
 ## At a glance
 
@@ -25,6 +28,7 @@ them both plan and implement — each does one job and hands off.
 | [tester](#tester) | Verify a change as far as the environment allows | `Bash`, `Read`, `Grep`, `Glob` | `sonnet` | No |
 | [code-reviewer](#code-reviewer) | Review a diff for correctness and convention consistency | `Read`, `Grep`, `Glob`, `Bash` (read-only) | `sonnet` | No |
 | [documenter](#documenter) | Keep README/docs/TSDoc in sync with what the code does | `Read`, `Edit`, `Write`, `Grep`, `Glob` | `sonnet` | Docs/comments only |
+| [commit-writer](#commit-writer) | Draft/validate a Conventional Commits message for staged changes | `Read`, `Bash` (read-only) | `haiku` | No |
 
 ## architect
 
@@ -203,3 +207,32 @@ its row and section removed.
 
 If a change has no user-visible or architecturally-relevant effect, it says so rather than padding docs with
 filler.
+
+## commit-writer
+
+**Use proactively when:** the user is about to commit staged changes, to draft or validate a commit message
+against `CONTRIBUTING.md`'s Commit Message Guidelines.
+
+**Never:** runs `git commit`, `git add`, or any other mutating git command — its `Bash` access is read-only
+(`git diff --cached`, `git diff`, `git log`, `git status`). Judges code correctness (that's code-reviewer) or
+writes code (that's developer). The actual commit stays with the main agent's normal user-approved flow.
+
+Grounds every judgment in `CONTRIBUTING.md` rather than generic Conventional Commits knowledge, since this
+repo pins a specific type list and scope style:
+
+- **Format:** `<type>(<scope>): <subject>`, scope optional but idiomatic for a change confined to one
+  `tools/<name>/` directory (matching that dir's name) or subsystem (`connections`, `tools`, `api`, `build`).
+- **Types:** exactly `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `perf`, `ci` — maps the
+  diff's actual effect to the closest one rather than defaulting to `feat`/`fix` (e.g. a pure extraction with
+  no behavior change is `refactor`, not `fix`).
+- **Subject:** imperative mood, no trailing period.
+
+**To draft:** reads `git diff --cached` (falls back to `git diff` and says explicitly if nothing is staged)
+plus recent `git log` for style precedent, then outputs a ready-to-paste message plus a one-line reason for
+the chosen type/scope.
+
+**To validate:** checks an already-drafted message against the format/type/subject rules above and, if it
+fails, names the exact rule broken and gives the corrected version.
+
+If a staged diff spans multiple unrelated concerns that don't fit one type/scope, it says so and suggests
+splitting the commit rather than forcing an inaccurate single message.
