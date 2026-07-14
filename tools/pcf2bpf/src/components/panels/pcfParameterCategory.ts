@@ -40,7 +40,7 @@ const TEXT_TYPES = /^(SingleLine\.|Multiple$)/;
 
 /** Classifies a manifest type name (an `of-type` value, or an `of-type-group`'s resolved member
  * type) into a {@link PcfParameterCategory}. */
-function categorizeTypeName(typeName: string): PcfParameterCategory {
+export function categorizeTypeName(typeName: string): PcfParameterCategory {
     if (typeName.startsWith("DateAndTime.")) return "date";
     if (NUMBER_TYPES.test(typeName)) return "number";
     if (CHOICE_TYPES.test(typeName)) return "choice";

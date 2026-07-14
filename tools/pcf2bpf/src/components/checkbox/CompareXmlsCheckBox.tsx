@@ -1,5 +1,6 @@
-import type { LabelProps } from "@fluentui/react-components";
 import { Checkbox, Field, InfoLabel } from "@fluentui/react-components";
+import type { LabelProps } from "@fluentui/react-components";
+import { INFO_TEXT_SHOW_DIFFERENCES, LABEL_SHOW_DIFFERENCES } from "../../consts";
 import { useCompareXmlsCheckBoxStyles } from "../../styles";
 
 interface ICompareXmlsCheckBoxProps {
@@ -22,11 +23,8 @@ export function CompareXmlsCheckBox({ checked, onChange, className }: ICompareXm
             orientation="horizontal"
             label={{
                 children: (_: unknown, slotProps: LabelProps) => (
-                    <InfoLabel
-                        {...slotProps}
-                        info="Highlights the differences between the Before and After XML preview panes below."
-                    >
-                        Show differences
+                    <InfoLabel {...slotProps} info={INFO_TEXT_SHOW_DIFFERENCES}>
+                        {LABEL_SHOW_DIFFERENCES}
                     </InfoLabel>
                 ),
             }}

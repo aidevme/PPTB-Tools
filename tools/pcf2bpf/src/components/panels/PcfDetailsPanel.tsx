@@ -5,7 +5,11 @@ import {
     DrawerBody,
     DrawerHeader,
     DrawerHeaderTitle,
+    Link,
     OverlayDrawer,
+    Popover,
+    PopoverSurface,
+    PopoverTrigger,
     SearchBox,
     Tab,
     TabList,
@@ -17,17 +21,18 @@ import {
     TableRow,
     Text,
     ToggleButton,
+    Tooltip,
     type BadgeProps,
     type SelectTabData,
     type SelectTabEvent,
 } from "@fluentui/react-components";
 import { Dismiss24Regular } from "@fluentui/react-icons";
-import type { PcfControl, PcfParameter } from "../../services";
+import type { PcfControl } from "../../services";
 import { usePcfDetailsPanelStyles } from "../../styles";
 import { GenericCard } from "../cards/GenericCard";
-import { JsonFormatter } from "../jsonformatter/JsonFormatter";
-import { XmlFormatter } from "../xmlformatter/XmlFormatter";
-import { CATEGORY_COLORS, categorizePcfParameter } from "./pcfParameterCategory";
+import { JsonFormatter } from "../formatters/jsonformatter/JsonFormatter";
+import { XmlFormatter } from "../formatters/xmlformatter/XmlFormatter";
+import { CATEGORY_COLORS, categorizePcfParameter, categorizeTypeName } from "./pcfParameterCategory";
 import { PropertyTypeDonut } from "./PropertyTypeDonut";
 
 export interface IPcfDetailsPanelProps {
@@ -58,45 +63,6 @@ const USAGE_BADGE_COLOR: Record<string, BadgeProps["color"]> = {
     output: "informative",
 };
 
-/** Every control-level field, defaulted for a control with zero manifest parameters (nothing to
- * read `[0]` off of) so the rest of the component can destructure without repeating `?? ...`. */
-const EMPTY_PARAMETER: Pick<
-    PcfParameter,
-    | "controlName"
-    | "namespace"
-    | "constructor"
-    | "isVirtual"
-    | "version"
-    | "apiVersion"
-    | "compatibleDataTypes"
-    | "builtByName"
-    | "builtByVersion"
-    | "sharedTemplate"
-    | "resources"
-    | "externalDomains"
-    | "typeGroups"
-    | "featureUsage"
-    | "rawManifestXml"
-    | "rawClientJson"
-> = {
-    controlName: "",
-    namespace: "",
-    constructor: "",
-    isVirtual: false,
-    version: "",
-    apiVersion: "",
-    compatibleDataTypes: [],
-    builtByName: "",
-    builtByVersion: "",
-    sharedTemplate: false,
-    resources: [],
-    externalDomains: [],
-    typeGroups: [],
-    featureUsage: [],
-    rawManifestXml: "",
-    rawClientJson: "",
-};
-
 /** Overlay drawer showing the full details of the PCF control currently selected in
  * `FormFactorsCard`: control facts, a property-type-mix chart, its manifest parameters (with
  * search/usage filtering), bundled resources, requested device/platform features, and the raw
@@ -111,7 +77,6 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
         setActiveTab(data.value as PcfDetailsTab);
     };
 
-    const control = { ...EMPTY_PARAMETER, ...pcf?.parameters[0] };
     const parameters = pcf?.parameters ?? [];
 
     const filteredParameters = useMemo(() => {
@@ -150,21 +115,21 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                     <>
                         <div className={styles.titleBlock}>
                             <Text size={200} weight="semibold" className={styles.eyebrow}>
-                                PCF Control · {control.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
+                                PCF Control · {pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
                             </Text>
                             <Text weight="bold" size={600}>
-                                {control.constructor || control.controlName || "(unnamed control)"}
+                                {pcf.constructor || pcf.controlName || "(unnamed control)"}
                             </Text>
                             <Text size={200} className={styles.mono}>
-                                {control.controlName}
+                                {pcf.controlName}
                             </Text>
                             <div className={styles.badgeRow}>
                                 <Badge appearance="tint" color="brand">
-                                    v{control.version || MANIFEST_VERSION_UNKNOWN_LABEL}
+                                    v{pcf.version || MANIFEST_VERSION_UNKNOWN_LABEL}
                                 </Badge>
-                                {control.apiVersion && (
+                                {pcf.apiVersion && (
                                     <Badge appearance="tint" color="informative">
-                                        API {control.apiVersion}
+                                        API {pcf.apiVersion}
                                     </Badge>
                                 )}
                             </div>
@@ -173,34 +138,35 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                         <div className={styles.heroRow}>
                             <GenericCard title="Control facts" className={styles.heroCard}>
                                 <div className={styles.factsGrid}>
-                                    <Fact label="Namespace" value={control.namespace} mono />
-                                    <Fact label="Constructor" value={control.constructor} mono />
+                                    <Fact label="Namespace" value={pcf.namespace} mono />
+                                    <Fact label="Constructor" value={pcf.constructor} mono />
                                     <Fact
                                         label="Control type"
-                                        value={control.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
+                                        value={pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
                                     />
+                                    <Fact label="Template type" value={pcf.templateType} />
                                     <Fact
                                         label="Compatible data types"
-                                        value={control.compatibleDataTypes.length > 0 ? control.compatibleDataTypes.join(", ") : "(none)"}
+                                        value={pcf.compatibleDataTypes.length > 0 ? pcf.compatibleDataTypes.join(", ") : "(none)"}
                                     />
-                                    {control.apiVersion && <Fact label="API version" value={control.apiVersion} />}
-                                    {control.builtByName && (
-                                        <Fact label="Built with" value={`${control.builtByName} cli ${control.builtByVersion}`} />
+                                    {pcf.apiVersion && <Fact label="API version" value={pcf.apiVersion} />}
+                                    {pcf.builtByName && (
+                                        <Fact label="Built with" value={`${pcf.builtByName} cli ${pcf.builtByVersion}`} />
                                     )}
-                                    <Fact label="Shared template" value={control.sharedTemplate ? "Enabled" : "Disabled"} />
+                                    <Fact label="Shared template" value={pcf.sharedTemplate ? "Enabled" : "Disabled"} />
                                     <Fact label="Custom control ID" value={pcf.id} mono small />
                                 </div>
                             </GenericCard>
 
                             <GenericCard title="Property type mix" className={styles.heroCard}>
-                                <PropertyTypeDonut key={pcf.id} parameters={parameters} typeGroups={control.typeGroups} />
+                                <PropertyTypeDonut key={pcf.id} parameters={parameters} typeGroups={pcf.typeGroups} />
                             </GenericCard>
                         </div>
 
                         <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
                             <Tab value="properties">Properties ({parameters.length})</Tab>
-                            <Tab value="resources">Resources ({control.resources.length})</Tab>
-                            <Tab value="features">Feature usage ({control.featureUsage.length})</Tab>
+                            <Tab value="resources">Resources ({pcf.resources.length})</Tab>
+                            <Tab value="features">Feature usage ({pcf.featureUsage.length})</Tab>
                             <Tab value="manifest">Manifest XML</Tab>
                             <Tab value="clientJson">Client JSON</Tab>
                         </TabList>
@@ -237,26 +203,99 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                                     <Table size="small">
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHeaderCell>Property</TableHeaderCell>
-                                                <TableHeaderCell>Type</TableHeaderCell>
-                                                <TableHeaderCell>Usage</TableHeaderCell>
-                                                <TableHeaderCell>Required</TableHeaderCell>
+                                                <TableHeaderCell className={styles.tableHeaderCell}>
+                                                    <Tooltip
+                                                        content="The manifest parameter's name."
+                                                        relationship="description"
+                                                        positioning="below"
+                                                        withArrow
+                                                    >
+                                                        <span>Property</span>
+                                                    </Tooltip>
+                                                </TableHeaderCell>
+                                                <TableHeaderCell className={styles.tableHeaderCell}>
+                                                    <Tooltip
+                                                        content="The Dataverse attribute type (or type group) this parameter accepts."
+                                                        relationship="description"
+                                                        positioning="below"
+                                                        withArrow
+                                                    >
+                                                        <span>Type</span>
+                                                    </Tooltip>
+                                                </TableHeaderCell>
+                                                <TableHeaderCell className={styles.tableHeaderCell}>
+                                                    <Tooltip
+                                                        content="Bound parameters are wired to the field itself; input/output parameters are user-configurable."
+                                                        relationship="description"
+                                                        positioning="below"
+                                                        withArrow
+                                                    >
+                                                        <span>Usage</span>
+                                                    </Tooltip>
+                                                </TableHeaderCell>
+                                                <TableHeaderCell className={styles.tableHeaderCell}>
+                                                    <Tooltip
+                                                        content="Whether the manifest declares this parameter as required."
+                                                        relationship="description"
+                                                        positioning="below"
+                                                        withArrow
+                                                    >
+                                                        <span>Required</span>
+                                                    </Tooltip>
+                                                </TableHeaderCell>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {filteredParameters.map((param) => {
-                                                const category = categorizePcfParameter(param, control.typeGroups);
+                                                const category = categorizePcfParameter(param, pcf.typeGroups);
+                                                const typeGroup = param.ofTypeGroup
+                                                    ? pcf.typeGroups.find((g) => g.name === param.ofTypeGroup)
+                                                    : undefined;
                                                 return (
                                                     <TableRow key={param.name}>
                                                         <TableCell className={styles.mono}>{param.name}</TableCell>
                                                         <TableCell>
-                                                            <span className={styles.typeTag}>
-                                                                <span
-                                                                    className={styles.typeSwatch}
-                                                                    style={{ background: CATEGORY_COLORS[category] }}
-                                                                />
-                                                                {param.ofTypeGroup ?? param.ofType ?? "—"}
-                                                            </span>
+                                                            {param.ofTypeGroup ? (
+                                                                <Popover withArrow>
+                                                                    <PopoverTrigger disableButtonEnhancement>
+                                                                        <Link as="span" className={styles.typeTag}>
+                                                                            <span
+                                                                                className={styles.typeSwatch}
+                                                                                style={{ background: CATEGORY_COLORS[category] }}
+                                                                            />
+                                                                            {param.ofTypeGroup} (Type Group)
+                                                                        </Link>
+                                                                    </PopoverTrigger>
+                                                                    <PopoverSurface className={styles.typeGroupPopover}>
+                                                                        <Text weight="semibold" block>
+                                                                            {param.ofTypeGroup}
+                                                                        </Text>
+                                                                        {typeGroup?.types.length ? (
+                                                                            typeGroup.types.map((type) => (
+                                                                                <span key={type} className={styles.typeTag}>
+                                                                                    <span
+                                                                                        className={styles.typeSwatch}
+                                                                                        style={{
+                                                                                            background: CATEGORY_COLORS[categorizeTypeName(type)],
+                                                                                        }}
+                                                                                    />
+                                                                                    <Text className={styles.mono}>{type}</Text>
+                                                                                </span>
+                                                                            ))
+                                                                        ) : (
+                                                                            <Text italic>No member types declared.</Text>
+                                                                        )}
+                                                                    </PopoverSurface>
+                                                                </Popover>
+                                                            ) : (
+                                                                <span className={styles.typeTag}>
+                                                                    <span
+                                                                        className={styles.typeSwatch}
+                                                                        style={{ background: CATEGORY_COLORS[category] }}
+                                                                    />
+                                                                    {param.ofType ?? "—"}
+                                                                </span>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Badge appearance="tint" color={USAGE_BADGE_COLOR[param.usage] ?? "subtle"}>
@@ -284,10 +323,10 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                         {activeTab === "resources" && (
                             <div className={styles.resourceGrid}>
                                 <GenericCard title="Bundled resources">
-                                    {control.resources.length === 0 ? (
+                                    {pcf.resources.length === 0 ? (
                                         <Text italic>No bundled resources.</Text>
                                     ) : (
-                                        control.resources.map((resource, index) => (
+                                        pcf.resources.map((resource, index) => (
                                             <div key={`${resource.kind}-${index}`} className={styles.listRow}>
                                                 <span className={styles.listIcon}>{resource.kind.toUpperCase().slice(0, 3)}</span>
                                                 <div>
@@ -306,10 +345,10 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                                 </GenericCard>
 
                                 <GenericCard title="Allowed external domains">
-                                    {control.externalDomains.length === 0 ? (
+                                    {pcf.externalDomains.length === 0 ? (
                                         <Text italic>No external domains declared.</Text>
                                     ) : (
-                                        control.externalDomains.map((domain) => (
+                                        pcf.externalDomains.map((domain) => (
                                             <Text key={domain} block className={styles.mono}>
                                                 {domain}
                                             </Text>
@@ -319,10 +358,10 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                                     <Text weight="semibold" block className={styles.sectionTitle}>
                                         Type groups
                                     </Text>
-                                    {control.typeGroups.length === 0 ? (
+                                    {pcf.typeGroups.length === 0 ? (
                                         <Text italic>No type groups declared.</Text>
                                     ) : (
-                                        control.typeGroups.map((group) => (
+                                        pcf.typeGroups.map((group) => (
                                             <div key={group.name} className={styles.listRow}>
                                                 <div>
                                                     <Text block className={styles.listTitle}>
@@ -341,11 +380,11 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
 
                         {activeTab === "features" && (
                             <GenericCard title="Requested device & platform capabilities">
-                                {control.featureUsage.length === 0 ? (
+                                {pcf.featureUsage.length === 0 ? (
                                     <Text italic>This control declares no feature usage.</Text>
                                 ) : (
                                     <div className={styles.chipCloud}>
-                                        {control.featureUsage.map((feature) => (
+                                        {pcf.featureUsage.map((feature) => (
                                             <div key={feature.name} className={styles.featureChip}>
                                                 {feature.name}
                                                 <Badge
@@ -364,7 +403,7 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
 
                         {activeTab === "manifest" && (
                             <XmlFormatter
-                                xml={control.rawManifestXml}
+                                xml={pcf.rawManifestXml}
                                 theme="light"
                                 prettyPrint
                                 placeholder="No manifest data available."
@@ -372,7 +411,7 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                         )}
 
                         {activeTab === "clientJson" && (
-                            <JsonFormatter value={control.rawClientJson} theme="light" placeholder="No client json data available." />
+                            <JsonFormatter value={pcf.rawClientJson} theme="light" placeholder="No client json data available." />
                         )}
                     </>
                 )}

@@ -24,18 +24,29 @@ export * from "./pcfcontrol";
 export * from "./pcfresource";
 export * from "./pcftypegroup";
 
-/** Standard Dataverse form-factor codes used on `<customControl formFactor="...">`. */
+/** Standard Dataverse form-factor codes used on `<customControl formFactor="...">`: `0` = Phone,
+ * `1` = Tablet, `2` = Web (desktop). */
 export const FORM_FACTORS = [0, 1, 2] as const;
 export type FormFactor = (typeof FORM_FACTORS)[number];
 
 /** Display labels for {@link FORM_FACTORS}, keyed by the same numeric code. */
 export const FORM_FACTOR_LABELS: Record<FormFactor, string> = {
-    0: "Web",
-    1: "Phone",
-    2: "Tablet",
+    0: "Phone",
+    1: "Tablet",
+    2: "Web",
 };
+
+/** Left-to-right tab display order for {@link FORM_FACTORS} in `FormFactorsCard` — purely a UI
+ * ordering, independent of the numeric codes themselves (which are fixed by Dataverse and must not
+ * change): Web, Tablet, Phone. Everything else that iterates form factors (e.g. building the
+ * per-form-factor assignment map) uses {@link FORM_FACTORS} directly, since order doesn't matter there. */
+export const FORM_FACTOR_TAB_ORDER: FormFactor[] = [2, 1, 0];
+
+/** Form factor selected by default when a BPF is first loaded — Web (`2`). */
+export const DEFAULT_FORM_FACTOR: FormFactor = 2;
 
 export * from "./pcfassignment";
 export * from "./solutioninfo";
 export * from "./publisherinfo";
 export * from "./scope";
+export * from "./maintab";

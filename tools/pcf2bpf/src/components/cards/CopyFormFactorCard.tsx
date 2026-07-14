@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Button, Dropdown, Field, Option, Tooltip } from "@fluentui/react-components";
-import { FORM_FACTORS, FORM_FACTOR_LABELS } from "../../services";
+import { FORM_FACTOR_LABELS, FORM_FACTOR_TAB_ORDER } from "../../services";
 import type { FormFactor } from "../../services";
 import { useCopyFormFactorCardStyles } from "../../styles";
-import { FORM_FACTOR_ICONS } from "./Common.const";
+import { FORM_FACTOR_ICONS } from "../../consts/Cards.Common.const";
 import { GenericCard } from "./GenericCard";
 import {
     BUTTON_COPY_LABEL,
@@ -16,7 +16,7 @@ import {
     FIELD_COPY_FROM_LABEL,
     FIELD_COPY_TO_LABEL,
     TOOLTIP_ENABLED_TEXT,
-} from "./CopyFormFactorCard.const";
+} from "../../consts/CopyFormFactorCard.const";
 
 export interface ICopyFormFactorCardProps {
     onCopy: (from: FormFactor, to: FormFactor) => void;
@@ -61,7 +61,7 @@ export function CopyFormFactorCard({ onCopy, assignedByFormFactor }: ICopyFormFa
                               }
                     }
                 >
-                    {FORM_FACTORS.map((ff) => (
+                    {FORM_FACTOR_TAB_ORDER.map((ff) => (
                         <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]} disabled={!assignedByFormFactor[ff]}>
                             <span className={styles.optionContent}>
                                 {FORM_FACTOR_ICONS[ff]}
@@ -90,7 +90,7 @@ export function CopyFormFactorCard({ onCopy, assignedByFormFactor }: ICopyFormFa
                               }
                     }
                 >
-                    {FORM_FACTORS.filter((ff) => ff !== from).map((ff) => (
+                    {FORM_FACTOR_TAB_ORDER.filter((ff) => ff !== from).map((ff) => (
                         <Option key={ff} value={String(ff)} text={FORM_FACTOR_LABELS[ff]}>
                             <span className={styles.optionContent}>
                                 {FORM_FACTOR_ICONS[ff]}

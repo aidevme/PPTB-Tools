@@ -5,9 +5,16 @@ import type { FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from
  *
  * Reimplements the XML manipulation from Carfup's XTBPlugins.PCF2BPF
  * (`AppCode/FormAttribute.cs`) against the browser DOM instead of .NET's XmlDocument.
- * A field's PCF assignment lives under:
+ * A field's PCF assignment lives under two linked spots, tied together by a GUID:
  *
  * ```xml
+ * <!-- 1. The field's own <control> node, on its stage's <tab> -->
+ * <control id="lk_leadtoopportunitysalesprocess_leadid:aidevme_year"
+ *          classid="{default-classid}"
+ *          datafieldname="fieldname"
+ *          uniqueid="{control-guid}" ... />
+ *
+ * <!-- 2. The <controlDescriptions> block at the end of the document -->
  * <controlDescriptions>
  *   <controlDescription forControl="{control-guid}">
  *     <customControl id="{default-classid}">
@@ -19,6 +26,16 @@ import type { FieldInfo, FormFactor, PcfAssignment, PcfControl, StageInfo } from
  *   </controlDescription>
  * </controlDescriptions>
  * ```
+ *
+ * `forControl` matches the `<control>` node's `uniqueid` attribute — **not** its `id` attribute,
+ * which is an unrelated composite `"relationship:datafieldname"` string. `FieldInfo.controlId`
+ * (see `getFieldsForStage`) is sourced from `uniqueid` for exactly this reason.
+ *
+ * Crucially, `uniqueid` is only actually present on a `<control>` node that **already has** a PCF
+ * override — a field with no override yet has no `uniqueid` attribute at all. Every field still
+ * needs a stable, non-empty identifier for the whole editing session (selection tracking, and the
+ * `forControl` a brand-new override gets linked to), so {@link ensureControlUniqueIds} backfills one
+ * onto every field immediately after parsing, before any field data is read.
  */
 
 /** Parses a BPF's `formxml` string into a mutable {@link XMLDocument}. */
@@ -28,6 +45,24 @@ export function parseFormXml(formXml: string): XMLDocument {
         throw new Error("Failed to parse Business Process Flow form XML.");
     }
     return doc;
+}
+
+/**
+ * Backfills a `uniqueid` GUID onto every `<control datafieldname="...">` node that doesn't already
+ * have one. Must run once, immediately after {@link parseFormXml} and before any field data is read
+ * (`getStages`/`getFieldsForStage`) — generating a fresh id lazily on every read would change a
+ * field's identifier on every re-render (breaking selection tracking), and waiting until a PCF is
+ * actually assigned would leave `setCustomControl` with no existing DOM attribute to reuse as
+ * `forControl`. Mutates `doc` in place, matching this file's mutate-then-reserialize pattern —
+ * callers should re-serialize `doc` for their "original" text baseline *after* calling this, so a
+ * backfill alone (with no real user edit yet) doesn't show up as a spurious Before/After diff.
+ */
+export function ensureControlUniqueIds(doc: XMLDocument): void {
+    doc.querySelectorAll("tabs > tab cell > control[datafieldname]").forEach((control) => {
+        if (!control.getAttribute("uniqueid")) {
+            control.setAttribute("uniqueid", `{${crypto.randomUUID()}}`);
+        }
+    });
 }
 
 /** Serializes a form XML document back to a string, e.g. for saving or previewing. */
@@ -79,7 +114,10 @@ export function getFieldsForStage(doc: XMLDocument, stageId: string, fallbackEnt
 
     return Array.from(tab.querySelectorAll("cell > control[datafieldname]"))
         .map((control): Omit<FieldInfo, "sequence"> => ({
-            controlId: control.getAttribute("id") ?? "",
+            // `uniqueid` (a GUID), not `id` (a composite "relationship:datafieldname" string) — the
+            // field's PCF override lives in <controlDescriptions><controlDescription forControl="...">,
+            // and `forControl` matches this <control> node's `uniqueid`, never its `id`.
+            controlId: control.getAttribute("uniqueid") ?? "",
             datafieldname: control.getAttribute("datafieldname") ?? "",
             label:
                 control.closest("cell")?.querySelector("labels > label")?.getAttribute("description") ??
@@ -184,7 +222,7 @@ export function setCustomControl(
     if (existing) desc.removeChild(existing);
 
     const node = doc.createElement("customControl");
-    node.setAttribute("name", pcf.parameters[0]?.controlName ?? "");
+    node.setAttribute("name", pcf.controlName);
     node.setAttribute("formFactor", String(formFactor));
 
     const params = doc.createElement("parameters");

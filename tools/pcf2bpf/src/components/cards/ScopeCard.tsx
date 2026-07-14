@@ -12,7 +12,7 @@ import {
     type ComboboxProps,
     type RadioGroupProps,
 } from "@fluentui/react-components";
-import { useToolContext } from "../../services/pptbtoolservice";
+import { useToolContext } from "../../services/pptbtoolcontextservice";
 import type { FilterMode, PublisherInfo, SolutionInfo } from "../../services";
 import { useScopeCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
@@ -48,7 +48,7 @@ import {
     TOOLTIP_SCOPE_PUBLISHER_FRAGMENT,
     TOOLTIP_SCOPE_SOLUTION_FRAGMENT,
     TOOLTIP_SCOPE_UNFILTERED_FRAGMENT,
-} from "./ScopeCard.const";
+} from "../../consts/ScopeCard.const";
 
 function matchesQuery(text: string, query: string): boolean {
     return !query || text.toLowerCase().includes(query.toLowerCase());
@@ -160,7 +160,11 @@ export function ScopeCard(_props: IScopeCardProps) {
             </RadioGroup>
 
             {filterMode === "noFiltering" ? null : filterMode === "solutions" ? (
-                <Field hint={SOLUTION_FIELD_HINT} label={{ children: SOLUTION_COMBOBOX_ARIA_LABEL, htmlFor: solutionComboboxId }}>
+                <Field
+                    required
+                    hint={SOLUTION_FIELD_HINT}
+                    label={{ children: SOLUTION_COMBOBOX_ARIA_LABEL, htmlFor: solutionComboboxId }}
+                >
                     <Combobox
                         id={solutionComboboxId}
                         clearable
@@ -210,7 +214,11 @@ export function ScopeCard(_props: IScopeCardProps) {
                     </Combobox>
                 </Field>
             ) : (
-                <Field hint={PUBLISHER_FIELD_HINT} label={{ children: PUBLISHER_COMBOBOX_ARIA_LABEL, htmlFor: publisherComboboxId }}>
+                <Field
+                    required
+                    hint={PUBLISHER_FIELD_HINT}
+                    label={{ children: PUBLISHER_COMBOBOX_ARIA_LABEL, htmlFor: publisherComboboxId }}
+                >
                     <Combobox
                         id={publisherComboboxId}
                         clearable

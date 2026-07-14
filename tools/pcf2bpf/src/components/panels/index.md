@@ -35,7 +35,7 @@ by this extraction, existing `useMemo`/`useCallback` values (`attribute`, `compa
 Side-by-side Before/After `XmlFormatter` panes for the BPF's form XML, with a search box that highlights
 matching text in both panes and a "Show differences" checkbox that turns on GitHub-style diff highlighting
 (green for lines added in After, red for lines removed from Before) — see `XmlFormatter`'s own
-[index.md](../xmlformatter/index.md) for how the diff/highlight machinery works.
+[index.md](../formatters/index.md) for how the diff/highlight machinery works.
 
 | Prop | Type | Description |
 | --- | --- | --- |

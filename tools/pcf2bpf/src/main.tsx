@@ -2,7 +2,7 @@ import { StrictMode, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { FluentProvider, webDarkTheme, webLightTheme, type Theme } from "@fluentui/react-components";
 import App from "./App";
-import { ToolContextProvider, ToolContextService } from "./services/pptbtoolservice";
+import { ToolContextProvider, ToolContextService } from "./services/pptbtoolcontextservice";
 import "./index.css";
 
 // Created once at module scope so it's a stable singleton reference across re-renders (and

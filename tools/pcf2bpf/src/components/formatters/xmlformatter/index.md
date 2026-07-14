@@ -29,7 +29,7 @@ weight for what's otherwise a small amount of text.
 ## Usage
 
 ```tsx
-import { XmlFormatter } from "../xmlformatter/XmlFormatter";
+import { XmlFormatter } from "../formatters/XmlFormatter";
 
 <XmlFormatter
     xml={formXml}
@@ -85,7 +85,7 @@ that whole line as changed on both sides (it won't show as a paired "modificatio
 ## Architecture
 
 ```
-xmlformatter/
+formatters/
 ├── XmlFormatter.tsx  # The component itself
 ├── xmlTokenizer.ts   # Regex-based tokenizer -> color-codable spans (tags, attrs, comments, text)
 ├── xmlParser.ts       # Structural parser -> element tree with line spans, used for folding + pretty-print

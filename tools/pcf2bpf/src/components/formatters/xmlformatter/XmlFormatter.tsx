@@ -8,7 +8,7 @@ import {
     FullScreenMaximize20Regular,
     FullScreenMinimize20Regular,
 } from "@fluentui/react-icons";
-import { useXmlFormatterStyles } from "../../styles";
+import { useXmlFormatterStyles } from "../../../styles";
 import { tokenizeXml, type XmlToken } from "./xmlTokenizer";
 import { collectFoldRegions, formatXml, parseXmlDocument, type XmlFoldRegion } from "./xmlParser";
 import { resolveXmlTheme, type XmlTheme, type XmlThemeName } from "./xmlTheme";

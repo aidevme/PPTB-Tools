@@ -1,7 +1,7 @@
 import { Button } from "@fluentui/react-components";
 import { useUpdatePublishCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
-import { BUTTON_LABEL, BUTTON_LABEL_PUBLISHING, CARD_DESCRIPTION, CARD_TITLE } from "./UpdatePublishCard.const";
+import { BUTTON_LABEL, BUTTON_LABEL_PUBLISHING, CARD_DESCRIPTION, CARD_TITLE } from "../../consts/UpdatePublishCard.const";
 
 export interface IUpdatePublishCardProps {
     isDirty: boolean;

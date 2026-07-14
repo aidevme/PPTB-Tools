@@ -26,6 +26,7 @@ import {
   getExistingCustomControl,
   FORM_FACTORS,
   FORM_FACTOR_LABELS,
+  FORM_FACTOR_TAB_ORDER,
 } from "../../services";
 import type {
   AttributeInfo,
@@ -37,7 +38,7 @@ import type {
 import { useFormFactorsCardStyles } from "../../styles";
 import { PcfDetailsPanel } from "../panels/PcfDetailsPanel";
 import { PcfConfiguratorTable } from "../tables/PcfConfiguratorTable";
-import { FORM_FACTOR_ICONS } from "./Common.const";
+import { FORM_FACTOR_ICONS } from "../../consts/Cards.Common.const";
 import { GenericCard } from "./GenericCard";
 import {
   BUTTON_APPLY_LABEL,
@@ -60,7 +61,7 @@ import {
   TOOLTIP_REMOVE_ENABLED_PART1,
   TOOLTIP_REMOVE_ENABLED_PART2,
   TOOLTIP_REMOVE_ENABLED_PART3,
-} from "./FormFactorsCard.const";
+} from "../../consts/FormFactorsCard.const";
 
 export interface IFormFactorsCardProps {
   field: FieldInfo | null;
@@ -157,7 +158,7 @@ export function FormFactorsCard({
         changedFormFactors.forEach((ff) => {
           const assignment = existingByFormFactor[ff];
           const match = compatibleControls.find(
-            (c) => c.parameters[0]?.controlName === assignment?.name,
+            (c) => c.controlName === assignment?.name,
           );
           next[ff] = match?.id ?? "";
         });
@@ -231,137 +232,10 @@ export function FormFactorsCard({
     setParamValuesByFf((prev) => ({
       ...prev,
       [formFactor]:
-        pcf?.parameters[0]?.controlName === assignment?.name ? (assignment?.parameters ?? {}) : {},
+        pcf?.controlName === assignment?.name ? (assignment?.parameters ?? {}) : {},
     }));
     setStaticOverridesByFf((prev) => ({ ...prev, [formFactor]: {} }));
   };
-
-  const WebPanel = (
-    <>
-      {!attribute ? (
-        <Text italic>
-          {TEXT_METADATA_UNRESOLVED_PREFIX} &quot;{field.datafieldname}&quot;
-        </Text>
-      ) : compatibleControls.length === 0 ? (
-        <Text italic>
-          {TEXT_NO_COMPATIBLE_CONTROL_PREFIX} &quot;{attribute.attributeType}
-          &quot; {TEXT_NO_COMPATIBLE_CONTROL_SUFFIX}
-        </Text>
-      ) : (
-        <>
-          <div className={styles.pcfSelectRow}>
-            <Field
-              label={`${FIELD_SELECT_PCF_LABEL} - Web`}
-              className={styles.pcfSelectField}
-            >
-              <Dropdown
-                clearable
-                value={selectedPcf?.parameters[0]?.controlName ?? ""}
-                selectedOptions={selectedPcfId ? [selectedPcfId] : []}
-                onOptionSelect={(_, data) =>
-                  handlePcfChange(data.optionValue ?? "")
-                }
-                button={
-                  !selectedPcf
-                    ? undefined
-                    : {
-                        children: (
-                          <span className={styles.tabLabel}>
-                            <AppsRegular />
-                            {selectedPcf.parameters[0]?.controlName ?? ""}
-                          </span>
-                        ),
-                      }
-                }
-              >
-                {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
-                    <span className={styles.tabLabel}>
-                      <AppsRegular />
-                      {pcf.parameters[0]?.controlName ?? ""}
-                    </span>
-                  </Option>
-                ))}
-              </Dropdown>
-            </Field>
-
-            <Tooltip
-              content={TOOLTIP_PCF_DETAILS_TEXT}
-              relationship="label"
-              positioning="below"
-              withArrow
-            >
-              <Button
-                appearance="subtle"
-                size="medium"
-                icon={<AppsRegular />}
-                disabledFocusable={!selectedPcf}
-                aria-label="PcfDetails"
-                onClick={() => selectedPcf && setIsPcfDetailsOpen(true)}
-              />
-            </Tooltip>
-          </div>
-
-          {selectedPcf && (
-            <MessageBar intent="warning">
-              <MessageBarBody>
-                <MessageBarTitle>{TIPS_TITLE}</MessageBarTitle> {TIPS_BODY_TEXT}
-              </MessageBarBody>
-            </MessageBar>
-          )}
-        </>
-      )}
-
-      <PcfConfiguratorTable
-        selectedPcf={selectedPcf}
-        formFactorId={String(formFactor)}
-        entityLogicalName={field.entityLogicalName}
-        paramValues={paramValues}
-        onParamValuesChange={setParamValues}
-        staticOverrides={staticOverrides}
-        onStaticOverridesChange={setStaticOverrides}
-      />
-
-      <div style={{ display: "flex", gap: 8 }}>
-        <Tooltip
-          content={
-            selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
-              : TOOLTIP_APPLY_DISABLED_TEXT
-          }
-          relationship="description"
-          positioning="below"
-          withArrow
-        >
-          <Button
-            appearance="primary"
-            disabledFocusable={!selectedPcf}
-            onClick={() => selectedPcf && onApply(selectedPcf, paramValues)}
-          >
-            {BUTTON_APPLY_LABEL}
-          </Button>
-        </Tooltip>
-        <Tooltip
-          content={
-            existing
-              ? `${TOOLTIP_REMOVE_ENABLED_PART1}${existing.name}${TOOLTIP_REMOVE_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_REMOVE_ENABLED_PART3}`
-              : TOOLTIP_REMOVE_DISABLED_TEXT
-          }
-          relationship="description"
-          positioning="below"
-          withArrow
-        >
-          <Button
-            appearance="secondary"
-            disabledFocusable={!existing}
-            onClick={() => existing && onRemove()}
-          >
-            {BUTTON_REMOVE_LABEL}
-          </Button>
-        </Tooltip>
-      </div>
-    </>
-  );
 
   const PhonePanel = (
     <>
@@ -378,12 +252,12 @@ export function FormFactorsCard({
         <>
           <div className={styles.pcfSelectRow}>
             <Field
-              label={`${FIELD_SELECT_PCF_LABEL} - Phone`}
+              label={`${FIELD_SELECT_PCF_LABEL} - ${FORM_FACTOR_LABELS[formFactor]}`}
               className={styles.pcfSelectField}
             >
               <Dropdown
                 clearable
-                value={selectedPcf?.parameters[0]?.controlName ?? ""}
+                value={selectedPcf?.controlName ?? ""}
                 selectedOptions={selectedPcfId ? [selectedPcfId] : []}
                 onOptionSelect={(_, data) =>
                   handlePcfChange(data.optionValue ?? "")
@@ -395,17 +269,17 @@ export function FormFactorsCard({
                         children: (
                           <span className={styles.tabLabel}>
                             <AppsRegular />
-                            {selectedPcf.parameters[0]?.controlName ?? ""}
+                            {selectedPcf.controlName}
                           </span>
                         ),
                       }
                 }
               >
                 {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
+                  <Option key={pcf.id} value={pcf.id} text={pcf.controlName}>
                     <span className={styles.tabLabel}>
                       <AppsRegular />
-                      {pcf.parameters[0]?.controlName ?? ""}
+                      {pcf.controlName}
                     </span>
                   </Option>
                 ))}
@@ -453,7 +327,7 @@ export function FormFactorsCard({
         <Tooltip
           content={
             selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
               : TOOLTIP_APPLY_DISABLED_TEXT
           }
           relationship="description"
@@ -505,12 +379,12 @@ export function FormFactorsCard({
         <>
           <div className={styles.pcfSelectRow}>
             <Field
-              label={`${FIELD_SELECT_PCF_LABEL} - Tablet`}
+              label={`${FIELD_SELECT_PCF_LABEL} - ${FORM_FACTOR_LABELS[formFactor]}`}
               className={styles.pcfSelectField}
             >
               <Dropdown
                 clearable
-                value={selectedPcf?.parameters[0]?.controlName ?? ""}
+                value={selectedPcf?.controlName ?? ""}
                 selectedOptions={selectedPcfId ? [selectedPcfId] : []}
                 onOptionSelect={(_, data) =>
                   handlePcfChange(data.optionValue ?? "")
@@ -522,17 +396,17 @@ export function FormFactorsCard({
                         children: (
                           <span className={styles.tabLabel}>
                             <AppsRegular />
-                            {selectedPcf.parameters[0]?.controlName ?? ""}
+                            {selectedPcf.controlName}
                           </span>
                         ),
                       }
                 }
               >
                 {compatibleControls.map((pcf) => (
-                  <Option key={pcf.id} value={pcf.id} text={pcf.parameters[0]?.controlName ?? ""}>
+                  <Option key={pcf.id} value={pcf.id} text={pcf.controlName}>
                     <span className={styles.tabLabel}>
                       <AppsRegular />
-                      {pcf.parameters[0]?.controlName ?? ""}
+                      {pcf.controlName}
                     </span>
                   </Option>
                 ))}
@@ -580,7 +454,134 @@ export function FormFactorsCard({
         <Tooltip
           content={
             selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.parameters[0]?.controlName ?? ""}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
+              : TOOLTIP_APPLY_DISABLED_TEXT
+          }
+          relationship="description"
+          positioning="below"
+          withArrow
+        >
+          <Button
+            appearance="primary"
+            disabledFocusable={!selectedPcf}
+            onClick={() => selectedPcf && onApply(selectedPcf, paramValues)}
+          >
+            {BUTTON_APPLY_LABEL}
+          </Button>
+        </Tooltip>
+        <Tooltip
+          content={
+            existing
+              ? `${TOOLTIP_REMOVE_ENABLED_PART1}${existing.name}${TOOLTIP_REMOVE_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_REMOVE_ENABLED_PART3}`
+              : TOOLTIP_REMOVE_DISABLED_TEXT
+          }
+          relationship="description"
+          positioning="below"
+          withArrow
+        >
+          <Button
+            appearance="secondary"
+            disabledFocusable={!existing}
+            onClick={() => existing && onRemove()}
+          >
+            {BUTTON_REMOVE_LABEL}
+          </Button>
+        </Tooltip>
+      </div>
+    </>
+  );
+
+  const WebPanel = (
+    <>
+      {!attribute ? (
+        <Text italic>
+          {TEXT_METADATA_UNRESOLVED_PREFIX} &quot;{field.datafieldname}&quot;
+        </Text>
+      ) : compatibleControls.length === 0 ? (
+        <Text italic>
+          {TEXT_NO_COMPATIBLE_CONTROL_PREFIX} &quot;{attribute.attributeType}
+          &quot; {TEXT_NO_COMPATIBLE_CONTROL_SUFFIX}
+        </Text>
+      ) : (
+        <>
+          <div className={styles.pcfSelectRow}>
+            <Field
+              label={`${FIELD_SELECT_PCF_LABEL} - ${FORM_FACTOR_LABELS[formFactor]}`}
+              className={styles.pcfSelectField}
+            >
+              <Dropdown
+                clearable
+                value={selectedPcf?.controlName ?? ""}
+                selectedOptions={selectedPcfId ? [selectedPcfId] : []}
+                onOptionSelect={(_, data) =>
+                  handlePcfChange(data.optionValue ?? "")
+                }
+                button={
+                  !selectedPcf
+                    ? undefined
+                    : {
+                        children: (
+                          <span className={styles.tabLabel}>
+                            <AppsRegular />
+                            {selectedPcf.controlName}
+                          </span>
+                        ),
+                      }
+                }
+              >
+                {compatibleControls.map((pcf) => (
+                  <Option key={pcf.id} value={pcf.id} text={pcf.controlName}>
+                    <span className={styles.tabLabel}>
+                      <AppsRegular />
+                      {pcf.controlName}
+                    </span>
+                  </Option>
+                ))}
+              </Dropdown>
+            </Field>
+
+            <Tooltip
+              content={TOOLTIP_PCF_DETAILS_TEXT}
+              relationship="label"
+              positioning="below"
+              withArrow
+            >
+              <Button
+                appearance="subtle"
+                size="medium"
+                icon={<AppsRegular />}
+                disabledFocusable={!selectedPcf}
+                aria-label="PcfDetails"
+                onClick={() => selectedPcf && setIsPcfDetailsOpen(true)}
+              />
+            </Tooltip>
+          </div>
+
+          {selectedPcf && (
+            <MessageBar intent="warning">
+              <MessageBarBody>
+                <MessageBarTitle>{TIPS_TITLE}</MessageBarTitle> {TIPS_BODY_TEXT}
+              </MessageBarBody>
+            </MessageBar>
+          )}
+        </>
+      )}
+
+      <PcfConfiguratorTable
+        selectedPcf={selectedPcf}
+        formFactorId={String(formFactor)}
+        entityLogicalName={field.entityLogicalName}
+        paramValues={paramValues}
+        onParamValuesChange={setParamValues}
+        staticOverrides={staticOverrides}
+        onStaticOverridesChange={setStaticOverrides}
+      />
+
+      <div style={{ display: "flex", gap: 8 }}>
+        <Tooltip
+          content={
+            selectedPcf
+              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
               : TOOLTIP_APPLY_DISABLED_TEXT
           }
           relationship="description"
@@ -637,7 +638,7 @@ export function FormFactorsCard({
               onFormFactorChange(Number(data.value) as FormFactor)
             }
           >
-            {FORM_FACTORS.map((ff) => (
+            {FORM_FACTOR_TAB_ORDER.map((ff) => (
               <Tab key={ff} value={String(ff)} icon={FORM_FACTOR_ICONS[ff]}>
                 <span className={styles.tabLabel}>
                   {FORM_FACTOR_LABELS[ff]}
@@ -652,9 +653,9 @@ export function FormFactorsCard({
             ))}
           </TabList>
           <div className={styles.content}>
-            {formFactor === 0 && WebPanel}
-            {formFactor === 1 && PhonePanel}
-            {formFactor === 2 && TabletPanel}
+            {formFactor === 0 && PhonePanel}
+            {formFactor === 1 && TabletPanel}
+            {formFactor === 2 && WebPanel}
           </div>
         </div>
       </GenericCard>

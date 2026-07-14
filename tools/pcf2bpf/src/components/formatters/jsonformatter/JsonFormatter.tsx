@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState, type CSSProperties } from "react";
 import { Button, mergeClasses, Tooltip } from "@fluentui/react-components";
 import { Checkmark20Regular, Copy20Regular } from "@fluentui/react-icons";
-import { useJsonFormatterStyles } from "../../styles";
+import { useJsonFormatterStyles } from "../../../styles";
 import { tokenizeJson, type JsonToken } from "./jsonTokenizer";
 import { resolveJsonTheme, type JsonTheme, type JsonThemeName } from "./jsonTheme";
 

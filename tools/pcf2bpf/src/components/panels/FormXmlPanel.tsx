@@ -13,7 +13,7 @@ import {
     useId,
 } from "@fluentui/react-components";
 import { FullScreenMinimize20Regular } from "@fluentui/react-icons";
-import { XmlFormatter } from "../xmlformatter/XmlFormatter";
+import { XmlFormatter } from "../formatters/xmlformatter/XmlFormatter";
 import { XmlSearchBox } from "../searchbox/XmlSearchBox";
 import { CompareXmlsCheckBox } from "../checkbox/CompareXmlsCheckBox";
 import { PanelHeader } from "../PanelHeader";

@@ -14,7 +14,7 @@ import {
     ROW_LABEL_REQUIRED_ON_STAGE,
     ROW_LABEL_SEQUENCE,
     ROW_LABEL_TYPE,
-} from "./FieldPropertiesCard.const";
+} from "../../consts/FieldPropertiesCard.const";
 
 export interface IFieldPropertiesCardProps {
     field: FieldInfo;

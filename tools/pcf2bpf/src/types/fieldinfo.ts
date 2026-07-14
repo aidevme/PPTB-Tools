@@ -1,5 +1,9 @@
 /** A data field on a BPF stage, rendered from `<control datafieldname="...">` nodes. */
 export interface FieldInfo {
+    /** The field's `<control>` node's `uniqueid` attribute (a GUID) — the value that
+     * `<controlDescriptions><controlDescription forControl="...">` matches against to link this
+     * field to its PCF override. Distinct from the `<control>` node's own `id` attribute (a
+     * composite `"relationship:datafieldname"` string), which is unrelated to that linkage. */
     controlId: string;
     datafieldname: string;
     label: string;

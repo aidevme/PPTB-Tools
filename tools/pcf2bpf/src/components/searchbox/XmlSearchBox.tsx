@@ -1,5 +1,6 @@
 import type { LabelProps } from "@fluentui/react-components";
 import { Field, InfoLabel, SearchBox } from "@fluentui/react-components";
+import { DEFAULT_PLACEHOLDER, INFO_TEXT_SEARCH, LABEL_SEARCH } from "../../consts";
 import { useXmlSearchBoxStyles } from "../../styles";
 
 export interface IXmlSearchBoxProps {
@@ -18,7 +19,7 @@ export interface IXmlSearchBoxProps {
  * @remarks
  * Only highlights matches — it does not filter or hide non-matching lines.
  */
-export function XmlSearchBox({ value, onChange, placeholder = "Search...", className }: IXmlSearchBoxProps) {
+export function XmlSearchBox({ value, onChange, placeholder = DEFAULT_PLACEHOLDER, className }: IXmlSearchBoxProps) {
     const styles = useXmlSearchBoxStyles();
 
     return (
@@ -27,11 +28,8 @@ export function XmlSearchBox({ value, onChange, placeholder = "Search...", class
             orientation="horizontal"
             label={{
                 children: (_: unknown, slotProps: LabelProps) => (
-                    <InfoLabel
-                        {...slotProps}
-                        info="Highlights matching text in the Before/After XML preview panes below. It does not filter out non-matching lines."
-                    >
-                        Search
+                    <InfoLabel {...slotProps} info={INFO_TEXT_SEARCH}>
+                        {LABEL_SEARCH}
                     </InfoLabel>
                 ),
             }}

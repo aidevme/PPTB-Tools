@@ -6,6 +6,7 @@ import {
     DrawerHeader,
     DrawerHeaderTitle,
     Link,
+    mergeClasses,
     OverlayDrawer,
     Tab,
     TabList,
@@ -30,10 +31,53 @@ import {
     Table20Regular,
     Target20Regular,
 } from "@fluentui/react-icons";
-import type { PcfControl } from "../../services";
-import { useToolContext } from "../../services/pptbtoolservice";
-import { useDebuggerPanelStyles } from "../../styles";
-import { PcfDetailsPanel } from "./PcfDetailsPanel";
+import type { PcfControl } from "../../../services";
+import { useToolContext } from "../../../services/pptbtoolcontextservice";
+import { useDebuggerPanelStyles } from "../../../styles";
+import {
+    ARIA_LABEL_CLOSE,
+    ARIA_LABEL_NEXT_PAGE,
+    ARIA_LABEL_PREVIOUS_PAGE,
+    ATTRIBUTE_WORD,
+    COLUMN_LABEL_COMPATIBLE_DATA_TYPES,
+    COLUMN_LABEL_CONTROL_TYPE,
+    COLUMN_LABEL_DISPLAY_NAME,
+    COLUMN_LABEL_LOGICAL_NAME,
+    COLUMN_LABEL_MANIFEST_VERSION,
+    COLUMN_LABEL_NAME,
+    COLUMN_LABEL_PARAMETERS,
+    COLUMN_LABEL_TEMPLATE_TYPE,
+    COLUMN_LABEL_TYPE,
+    CONTROL_TYPE_STANDARD_LABEL,
+    CONTROL_TYPE_VIRTUAL_LABEL,
+    DRAWER_TITLE,
+    LABEL_ENTITIES_PREFIX,
+    LABEL_PCF_CONTROLS_PREFIX,
+    LABEL_SELECTED_BPF,
+    LABEL_SELECTED_PUBLISHER_ID,
+    LABEL_SELECTED_SOLUTION_ID,
+    NONE_TEXT,
+    PAGE_LABEL_PREFIX,
+    PAGE_LABEL_SEPARATOR,
+    PCF_CONTROL_WORD,
+    TAB_LABEL_ENTITIES,
+    TAB_LABEL_PCF_CONTROLS,
+    TAB_LABEL_SCOPE,
+    TOOLTIP_COLUMN_COMPATIBLE_DATA_TYPES,
+    TOOLTIP_COLUMN_CONTROL_TYPE,
+    TOOLTIP_COLUMN_DISPLAY_NAME,
+    TOOLTIP_COLUMN_LOGICAL_NAME,
+    TOOLTIP_COLUMN_MANIFEST_VERSION,
+    TOOLTIP_COLUMN_NAME,
+    TOOLTIP_COLUMN_PARAMETERS,
+    TOOLTIP_COLUMN_TEMPLATE_TYPE,
+    TOOLTIP_COLUMN_TYPE,
+    TOOLTIP_TAB_ENTITIES,
+    TOOLTIP_TAB_PCF_CONTROLS,
+    TOOLTIP_TAB_SCOPE,
+    VERSION_UNKNOWN_LABEL,
+} from "../../../consts";
+import { PcfDetailsPanel } from "../PcfDetailsPanel";
 
 export interface IDebuggerPanelProps {
     open: boolean;
@@ -46,16 +90,14 @@ type DebuggerTab = "scope" | "entities" | "pcfControls";
  * shown per page in the "PCF Controls" tab. */
 const ATTRIBUTES_PAGE_SIZE = 20;
 
-const CONTROL_TYPE_VIRTUAL_LABEL = "Virtual";
-const CONTROL_TYPE_STANDARD_LABEL = "Standard";
-
-type PcfControlSortColumn = "name" | "controlType" | "version" | "compatibleDataTypes" | "parameters";
+type PcfControlSortColumn = "name" | "controlType" | "templateType" | "version" | "compatibleDataTypes" | "parameters";
 
 const PCF_CONTROL_SORT_VALUE: Record<PcfControlSortColumn, (pcf: PcfControl) => string | number> = {
-    name: (pcf) => (pcf.parameters[0]?.controlName ?? "").toLowerCase(),
-    controlType: (pcf) => (pcf.parameters[0]?.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL),
-    version: (pcf) => (pcf.parameters[0]?.version ?? "").toLowerCase(),
-    compatibleDataTypes: (pcf) => (pcf.parameters[0]?.compatibleDataTypes ?? []).join(", ").toLowerCase(),
+    name: (pcf) => pcf.controlName.toLowerCase(),
+    controlType: (pcf) => (pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL),
+    templateType: (pcf) => pcf.templateType.toLowerCase(),
+    version: (pcf) => pcf.version.toLowerCase(),
+    compatibleDataTypes: (pcf) => pcf.compatibleDataTypes.join(", ").toLowerCase(),
     parameters: (pcf) => pcf.parameters.length,
 };
 
@@ -121,45 +163,30 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                     action={
                         <Button
                             appearance="subtle"
-                            aria-label="Close"
+                            aria-label={ARIA_LABEL_CLOSE}
                             icon={<Dismiss24Regular />}
                             onClick={() => onOpenChange(false)}
                         />
                     }
                 >
-                    Debugger
+                    {DRAWER_TITLE}
                 </DrawerHeaderTitle>
             </DrawerHeader>
             <DrawerBody className={styles.body}>
                 <TabList selectedValue={activeTab} onTabSelect={handleTabSelect}>
-                    <Tooltip
-                        content="Currently selected solution, publisher, and Business Process Flow."
-                        relationship="description"
-                        positioning="below"
-                        withArrow
-                    >
+                    <Tooltip content={TOOLTIP_TAB_SCOPE} relationship="description" positioning="below" withArrow>
                         <Tab value="scope" icon={<Target20Regular />}>
-                            Scope
+                            {TAB_LABEL_SCOPE}
                         </Tab>
                     </Tooltip>
-                    <Tooltip
-                        content="Entities and attributes resolved for the selected Business Process Flow."
-                        relationship="description"
-                        positioning="below"
-                        withArrow
-                    >
+                    <Tooltip content={TOOLTIP_TAB_ENTITIES} relationship="description" positioning="below" withArrow>
                         <Tab value="entities" icon={<Table20Regular />}>
-                            BPF Entities &amp; Attributes
+                            {TAB_LABEL_ENTITIES}
                         </Tab>
                     </Tooltip>
-                    <Tooltip
-                        content="Every registered PCF control and its manifest parameters."
-                        relationship="description"
-                        positioning="below"
-                        withArrow
-                    >
+                    <Tooltip content={TOOLTIP_TAB_PCF_CONTROLS} relationship="description" positioning="below" withArrow>
                         <Tab value="pcfControls" icon={<Apps20Regular />}>
-                            PCF Controls
+                            {TAB_LABEL_PCF_CONTROLS}
                         </Tab>
                     </Tooltip>
                 </TabList>
@@ -167,13 +194,13 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                 {activeTab === "scope" && (
                     <>
                         <Text>
-                            <b>Selected Solution Id:</b> {selectedSolutionId || "(none)"}
+                            <b>{LABEL_SELECTED_SOLUTION_ID}</b> {selectedSolutionId || NONE_TEXT}
                         </Text>
                         <Text>
-                            <b>Selected Publisher Id:</b> {selectedPublisherId || "(none)"}
+                            <b>{LABEL_SELECTED_PUBLISHER_ID}</b> {selectedPublisherId || NONE_TEXT}
                         </Text>
                         <Text>
-                            <b>Selected BPF:</b> {selectedBpfName ?? "(none)"}
+                            <b>{LABEL_SELECTED_BPF}</b> {selectedBpfName ?? NONE_TEXT}
                         </Text>
                     </>
                 )}
@@ -181,7 +208,7 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                 {activeTab === "entities" &&
                     (entityMetadataInfos.length === 0 ? (
                         <Text>
-                            <b>Entities:</b> (none)
+                            <b>{LABEL_ENTITIES_PREFIX}</b> {NONE_TEXT}
                         </Text>
                     ) : (
                         entityMetadataInfos.map((entityInfo) => {
@@ -208,18 +235,18 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHeaderCell className={styles.tableHeaderCell}>
-                                                    <Tooltip content="The attribute's display name." relationship="description" positioning="below" withArrow>
-                                                        <span>Display Name</span>
+                                                    <Tooltip content={TOOLTIP_COLUMN_DISPLAY_NAME} relationship="description" positioning="below" withArrow>
+                                                        <span>{COLUMN_LABEL_DISPLAY_NAME}</span>
                                                     </Tooltip>
                                                 </TableHeaderCell>
                                                 <TableHeaderCell className={styles.tableHeaderCell}>
-                                                    <Tooltip content="The attribute's Dataverse logical name." relationship="description" positioning="below" withArrow>
-                                                        <span>Logical Name</span>
+                                                    <Tooltip content={TOOLTIP_COLUMN_LOGICAL_NAME} relationship="description" positioning="below" withArrow>
+                                                        <span>{COLUMN_LABEL_LOGICAL_NAME}</span>
                                                     </Tooltip>
                                                 </TableHeaderCell>
                                                 <TableHeaderCell className={styles.tableHeaderCell}>
-                                                    <Tooltip content="The attribute's Dataverse AttributeType." relationship="description" positioning="below" withArrow>
-                                                        <span>Type</span>
+                                                    <Tooltip content={TOOLTIP_COLUMN_TYPE} relationship="description" positioning="below" withArrow>
+                                                        <span>{COLUMN_LABEL_TYPE}</span>
                                                     </Tooltip>
                                                 </TableHeaderCell>
                                                 <TableHeaderCell className={styles.tableHeaderCell} />
@@ -242,7 +269,8 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                     </Table>
                                     <div className={styles.pagingRow}>
                                         <Text size={200}>
-                                            {totalAttributes} attribute{totalAttributes === 1 ? "" : "s"}
+                                            {totalAttributes} {ATTRIBUTE_WORD}
+                                            {totalAttributes === 1 ? "" : "s"}
                                         </Text>
                                         <div className={styles.pagingControls}>
                                             <Button
@@ -251,10 +279,10 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                                 icon={<ChevronLeft20Regular />}
                                                 disabled={page <= 1}
                                                 onClick={() => setPage(page - 1)}
-                                                aria-label="Previous page"
+                                                aria-label={ARIA_LABEL_PREVIOUS_PAGE}
                                             />
                                             <Text size={200}>
-                                                Page {page} of {totalPages}
+                                                {PAGE_LABEL_PREFIX} {page} {PAGE_LABEL_SEPARATOR} {totalPages}
                                             </Text>
                                             <Button
                                                 size="small"
@@ -262,7 +290,7 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                                 icon={<ChevronRight20Regular />}
                                                 disabled={page >= totalPages}
                                                 onClick={() => setPage(page + 1)}
-                                                aria-label="Next page"
+                                                aria-label={ARIA_LABEL_NEXT_PAGE}
                                             />
                                         </div>
                                     </div>
@@ -274,41 +302,51 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                 {activeTab === "pcfControls" &&
                     (totalPcfControls === 0 ? (
                         <Text>
-                            <b>PCF Controls:</b> (none)
+                            <b>{LABEL_PCF_CONTROLS_PREFIX}</b> {NONE_TEXT}
                         </Text>
                     ) : (
                         <>
-                            <Table size="small">
+                            <Table size="small" className={styles.pcfControlsTable}>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHeaderCell
-                                            className={styles.tableHeaderCell}
+                                            className={mergeClasses(styles.tableHeaderCell, styles.nameHeaderCell)}
                                             sortable
                                             sortDirection={pcfControlSort?.column === "name" ? pcfControlSort.direction : undefined}
                                             onClick={() => togglePcfControlSort("name")}
                                         >
-                                            <Tooltip content="The registered PCF control's fully-qualified name." relationship="description" positioning="below" withArrow>
-                                                <span>Name</span>
+                                            <Tooltip content={TOOLTIP_COLUMN_NAME} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_NAME}</span>
                                             </Tooltip>
                                         </TableHeaderCell>
                                         <TableHeaderCell
-                                            className={styles.tableHeaderCell}
+                                            className={mergeClasses(styles.tableHeaderCell, styles.controlTypeHeaderCell)}
                                             sortable
                                             sortDirection={pcfControlSort?.column === "controlType" ? pcfControlSort.direction : undefined}
                                             onClick={() => togglePcfControlSort("controlType")}
                                         >
-                                            <Tooltip content="Virtual (React-rendered) or Standard (HTML)." relationship="description" positioning="below" withArrow>
-                                                <span>Control Type</span>
+                                            <Tooltip content={TOOLTIP_COLUMN_CONTROL_TYPE} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_CONTROL_TYPE}</span>
                                             </Tooltip>
                                         </TableHeaderCell>
                                         <TableHeaderCell
-                                            className={styles.tableHeaderCell}
+                                            className={mergeClasses(styles.tableHeaderCell, styles.templateTypeHeaderCell)}
+                                            sortable
+                                            sortDirection={pcfControlSort?.column === "templateType" ? pcfControlSort.direction : undefined}
+                                            onClick={() => togglePcfControlSort("templateType")}
+                                        >
+                                            <Tooltip content={TOOLTIP_COLUMN_TEMPLATE_TYPE} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_TEMPLATE_TYPE}</span>
+                                            </Tooltip>
+                                        </TableHeaderCell>
+                                        <TableHeaderCell
+                                            className={mergeClasses(styles.tableHeaderCell, styles.versionHeaderCell)}
                                             sortable
                                             sortDirection={pcfControlSort?.column === "version" ? pcfControlSort.direction : undefined}
                                             onClick={() => togglePcfControlSort("version")}
                                         >
-                                            <Tooltip content="The PCF manifest schema version the control was built against." relationship="description" positioning="below" withArrow>
-                                                <span>Manifest Version</span>
+                                            <Tooltip content={TOOLTIP_COLUMN_MANIFEST_VERSION} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_MANIFEST_VERSION}</span>
                                             </Tooltip>
                                         </TableHeaderCell>
                                         <TableHeaderCell
@@ -319,51 +357,53 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                             }
                                             onClick={() => togglePcfControlSort("compatibleDataTypes")}
                                         >
-                                            <Tooltip content="Dataverse attribute types this control can be assigned to." relationship="description" positioning="below" withArrow>
-                                                <span>Compatible Data Types</span>
+                                            <Tooltip content={TOOLTIP_COLUMN_COMPATIBLE_DATA_TYPES} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_COMPATIBLE_DATA_TYPES}</span>
                                             </Tooltip>
                                         </TableHeaderCell>
                                         <TableHeaderCell
-                                            className={styles.tableHeaderCell}
+                                            className={mergeClasses(styles.tableHeaderCell, styles.parametersHeaderCell)}
                                             sortable
                                             sortDirection={pcfControlSort?.column === "parameters" ? pcfControlSort.direction : undefined}
                                             onClick={() => togglePcfControlSort("parameters")}
                                         >
-                                            <Tooltip content="Number of manifest parameters this control declares." relationship="description" positioning="below" withArrow>
-                                                <span>Parameters</span>
+                                            <Tooltip content={TOOLTIP_COLUMN_PARAMETERS} relationship="description" positioning="below" withArrow>
+                                                <span>{COLUMN_LABEL_PARAMETERS}</span>
                                             </Tooltip>
                                         </TableHeaderCell>
-                                        <TableHeaderCell className={styles.tableHeaderCell} />
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {pagedPcfControls.map((pcf) => (
                                         <TableRow key={pcf.id}>
                                             <TableCell>
-                                                <Link as="span">{pcf.parameters[0]?.controlName ?? ""}</Link>
+                                                <Tooltip
+                                                    content={pcf.controlName}
+                                                    relationship="label"
+                                                    positioning="below"
+                                                    withArrow
+                                                >
+                                                    <Link as="span" className={styles.nameCell} onClick={() => handleOpenPcfDetails(pcf)}>
+                                                        <Apps20Regular />
+                                                        <span className={styles.nameText}>{pcf.controlName}</span>
+                                                    </Link>
+                                                </Tooltip>
                                             </TableCell>
                                             <TableCell>
-                                                {pcf.parameters[0]?.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
+                                                {pcf.isVirtual ? CONTROL_TYPE_VIRTUAL_LABEL : CONTROL_TYPE_STANDARD_LABEL}
                                             </TableCell>
-                                            <TableCell>{pcf.parameters[0]?.version || "Unknown"}</TableCell>
-                                            <TableCell>{(pcf.parameters[0]?.compatibleDataTypes ?? []).join(", ") || "(none)"}</TableCell>
+                                            <TableCell>{pcf.templateType}</TableCell>
+                                            <TableCell>{pcf.version || VERSION_UNKNOWN_LABEL}</TableCell>
+                                            <TableCell>{pcf.compatibleDataTypes.join(", ") || NONE_TEXT}</TableCell>
                                             <TableCell>{pcf.parameters.length}</TableCell>
-                                            <TableCell>
-                                                <Button
-                                                    appearance="subtle"
-                                                    size="small"
-                                                    icon={<Open20Regular />}
-                                                    aria-label="View PCF control details"
-                                                    onClick={() => handleOpenPcfDetails(pcf)}
-                                                />
-                                            </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
                             <div className={styles.pagingRow}>
                                 <Text size={200}>
-                                    {totalPcfControls} PCF control{totalPcfControls === 1 ? "" : "s"}
+                                    {totalPcfControls} {PCF_CONTROL_WORD}
+                                    {totalPcfControls === 1 ? "" : "s"}
                                 </Text>
                                 <div className={styles.pagingControls}>
                                     <Button
@@ -372,10 +412,10 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                         icon={<ChevronLeft20Regular />}
                                         disabled={currentPcfControlsPage <= 1}
                                         onClick={() => setPcfControlsPage(currentPcfControlsPage - 1)}
-                                        aria-label="Previous page"
+                                        aria-label={ARIA_LABEL_PREVIOUS_PAGE}
                                     />
                                     <Text size={200}>
-                                        Page {currentPcfControlsPage} of {totalPcfControlsPages}
+                                        {PAGE_LABEL_PREFIX} {currentPcfControlsPage} {PAGE_LABEL_SEPARATOR} {totalPcfControlsPages}
                                     </Text>
                                     <Button
                                         size="small"
@@ -383,7 +423,7 @@ export function DebuggerPanel({ open, onOpenChange }: IDebuggerPanelProps) {
                                         icon={<ChevronRight20Regular />}
                                         disabled={currentPcfControlsPage >= totalPcfControlsPages}
                                         onClick={() => setPcfControlsPage(currentPcfControlsPage + 1)}
-                                        aria-label="Next page"
+                                        aria-label={ARIA_LABEL_NEXT_PAGE}
                                     />
                                 </div>
                             </div>

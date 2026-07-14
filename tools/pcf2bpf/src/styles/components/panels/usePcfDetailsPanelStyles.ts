@@ -48,6 +48,10 @@ export const usePcfDetailsPanelStyles = makeStyles({
         marginBottom: "2px",
     },
 
+    tableHeaderCell: {
+        fontWeight: tokens.fontWeightSemibold,
+    },
+
     // Properties tab toolbar
     toolbar: {
         display: "flex",
@@ -79,6 +83,12 @@ export const usePcfDetailsPanelStyles = makeStyles({
     },
     requiredNo: {
         color: tokens.colorNeutralForeground3,
+    },
+    typeGroupPopover: {
+        display: "flex",
+        flexDirection: "column",
+        gap: "4px",
+        maxWidth: "320px",
     },
 
     // Resources tab

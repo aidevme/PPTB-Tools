@@ -3,8 +3,8 @@ import { Button, Link, Text, tokens } from "@fluentui/react-components";
 import { Bug20Regular, Document20Regular, Open20Regular, Settings20Regular } from "@fluentui/react-icons";
 import pkg from "../../package.json";
 import { useFooterStyles } from "../styles";
-import { useToolContext } from "../services/pptbtoolservice";
-import { DebuggerPanel } from "./panels/DebuggerPanel";
+import { useToolContext } from "../services/pptbtoolcontextservice";
+import { DebuggerPanel } from "./panels/debugger/DebuggerPanel";
 import { ToolConfigurationPanel } from "./panels/ToolConfigurationPanel";
 
 const AUTHOR_URL = "https://github.com/aidevme";

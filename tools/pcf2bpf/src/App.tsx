@@ -12,12 +12,14 @@ import { Apps20Regular, Code20Regular } from "@fluentui/react-icons";
 import {
   useToolContext,
   usePcfContextService,
-} from "./services/pptbtoolservice";
+} from "./services/pptbtoolcontextservice";
 import { useConnection } from "./hooks";
 import { useAppStyles } from "./styles";
 import { Footer, FormXmlPanel, PcfConfigurationPanel } from "./components";
 import {
   copyCustomControl,
+  DEFAULT_FORM_FACTOR,
+  ensureControlUniqueIds,
   getCompatiblePcfControls,
   getExistingCustomControl,
   getFieldsForStage,
@@ -39,8 +41,7 @@ import type {
   PcfControl,
   StageInfo,
 } from "./services";
-
-type MainTab = "config" | "xml";
+import type { MainTab } from "./types";
 
 function App() {
   const styles = useAppStyles();
@@ -79,7 +80,7 @@ function App() {
   const [formXmlText, setFormXmlText] = useState("");
   const [isDirty, setIsDirty] = useState(false);
 
-  const [selectedFormFactor, setSelectedFormFactor] = useState<FormFactor>(0);
+  const [selectedFormFactor, setSelectedFormFactor] = useState<FormFactor>(DEFAULT_FORM_FACTOR);
   const [selectedField, setSelectedField] = useState<FieldInfo | null>(null);
 
   const [isPublishing, setIsPublishing] = useState(false);
@@ -123,6 +124,11 @@ function App() {
       try {
         const { formId: loadedFormId, formXml } = await loadBpfFormXml(bpf);
         const doc = parseFormXml(formXml);
+        // Backfills a missing `uniqueid` onto any field that has no PCF override yet, before any
+        // field data is read — see `ensureControlUniqueIds`'s own doc comment for why this can't be
+        // done lazily. Baselines below are taken from the backfilled doc, not the raw `formXml`, so
+        // the backfill itself never shows up as a spurious Before/After diff.
+        ensureControlUniqueIds(doc);
         const loadedStages = getStages(doc);
 
         // Each field resolves its own entity from its <control relationship="..."> attribute
@@ -158,13 +164,17 @@ function App() {
           attributesByEntity[entity] = attributes;
         }
 
+        // Serialized from `doc` (post-backfill), not the raw `formXml`, so both baselines already
+        // reflect any `uniqueid` backfill — otherwise it would show up as a phantom Before/After diff.
+        const serializedDoc = serializeFormXml(doc);
+
         formDocRef.current = doc;
         setFormId(loadedFormId);
         setEntityAttributesByEntity(attributesByEntity);
         setEntityDisplayNamesByEntity(displayNamesByEntity);
         setStages(loadedStages);
-        setOriginalFormXmlText(formXml);
-        setFormXmlText(serializeFormXml(doc));
+        setOriginalFormXmlText(serializedDoc);
+        setFormXmlText(serializedDoc);
         setDocVersion((v) => v + 1);
         await notify(
           "Success",

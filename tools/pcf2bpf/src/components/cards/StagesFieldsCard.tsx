@@ -12,7 +12,7 @@ import {
     STAGE_EMPTY_TEXT,
     STAGE_FIELD_COUNT_LABEL,
     STAGE_FIELD_COUNT_PLURAL_SUFFIX,
-} from "./StagesFieldsCard.const";
+} from "../../consts/StagesFieldsCard.const";
 
 export interface IStagesFieldsCardProps {
     doc: XMLDocument | null;

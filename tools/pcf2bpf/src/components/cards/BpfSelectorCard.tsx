@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Combobox, Field, useComboboxFilter, type ComboboxProps } from "@fluentui/react-components";
-import { useToolContext } from "../../services/pptbtoolservice";
+import { useToolContext } from "../../services/pptbtoolcontextservice";
 import type { BpfProcess } from "../../services";
 import { useBpfSelectorCardStyles } from "../../styles";
 import { GenericCard } from "./GenericCard";
@@ -11,7 +11,7 @@ import {
     BPF_COMBOBOX_PLACEHOLDER_EMPTY,
     CARD_DESCRIPTION,
     CARD_TITLE,
-} from "./BpfSelectorCard.const";
+} from "../../consts/BpfSelectorCard.const";
 
 export interface IBpfSelectorCardProps {
     /** Selecting a BPF also loads its form XML, so this is an `App.tsx`-level orchestration callback

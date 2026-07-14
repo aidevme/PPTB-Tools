@@ -1,6 +1,6 @@
 {
     "name": "pcf2bpf",
-    "version": "1.0.0",
+    "version": "0.9.1",
     "displayName": "BPF Control Manager",
     "description": "Manage PCF (PowerApps Component Framework) controls on Business Process Flow fields, across form factors, without hand-editing form XML.",
     "main": "index.html",
@@ -38,6 +38,7 @@
     },
     "scripts": {
         "build": "tsc && vite build",
+        "build-release": "npm run build && npm version patch --no-git-tag-version",
         "dev": "vite",
         "preview": "vite preview",
         "watch": "vite build --watch",

@@ -17,7 +17,7 @@ import {
 } from "@fluentui/react-components";
 import { ArrowExport20Regular, ArrowImport20Regular, PlugConnected20Regular } from "@fluentui/react-icons";
 import type { PcfControl, PcfParameter } from "../../services";
-import { useToolContext } from "../../services/pptbtoolservice";
+import { useToolContext } from "../../services/pptbtoolcontextservice";
 import { usePcfConfiguratorTableStyles } from "../../styles";
 
 // Placeholder field choices for the "bind to field" Dropdown shown when "Is Static?" is unchecked,
