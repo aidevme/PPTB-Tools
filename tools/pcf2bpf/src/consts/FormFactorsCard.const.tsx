@@ -22,6 +22,8 @@ export const TOOLTIP_APPLY_ENABLED_PART2 = '" (with the parameter values above) 
 export const TOOLTIP_APPLY_ENABLED_PART3 =
     "form factor, overwriting whatever control is already configured there. Nothing is saved to Dataverse until you click Update and Publish.";
 export const TOOLTIP_APPLY_DISABLED_TEXT = "Select a compatible PCF control above to enable assigning it to this field.";
+export const TOOLTIP_APPLY_MISSING_REQUIRED_TEXT =
+    'Every required parameter (marked with "*") must have a value, static or bound to a field, before you can apply this control.';
 export const BUTTON_APPLY_LABEL = "Add Control / Apply Changes";
 
 export const TOOLTIP_REMOVE_ENABLED_PART1 = 'Removes "';

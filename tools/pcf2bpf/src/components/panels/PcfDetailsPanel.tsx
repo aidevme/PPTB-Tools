@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
     Badge,
     Button,
+    Checkbox,
     DrawerBody,
     DrawerHeader,
     DrawerHeaderTitle,
@@ -253,7 +254,12 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                                                     : undefined;
                                                 return (
                                                     <TableRow key={param.name}>
-                                                        <TableCell className={styles.mono}>{param.name}</TableCell>
+                                                        <TableCell>
+                                                            <Link as="span">
+                                                                {param.name}
+                                                                {param.required ? " *" : ""}
+                                                            </Link>
+                                                        </TableCell>
                                                         <TableCell>
                                                             {param.ofTypeGroup ? (
                                                                 <Popover withArrow>
@@ -303,13 +309,7 @@ export function PcfDetailsPanel({ open, onOpenChange, pcf }: IPcfDetailsPanelPro
                                                             </Badge>
                                                         </TableCell>
                                                         <TableCell>
-                                                            {param.required ? (
-                                                                <Text weight="semibold" className={styles.requiredYes}>
-                                                                    Required
-                                                                </Text>
-                                                            ) : (
-                                                                <Text className={styles.requiredNo}>Optional</Text>
-                                                            )}
+                                                            <Checkbox checked={param.required} disabled />
                                                         </TableCell>
                                                     </TableRow>
                                                 );

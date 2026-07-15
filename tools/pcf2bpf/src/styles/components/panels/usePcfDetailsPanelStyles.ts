@@ -78,12 +78,6 @@ export const usePcfDetailsPanelStyles = makeStyles({
         borderRadius: "2px",
         flexShrink: 0,
     },
-    requiredYes: {
-        color: tokens.colorPaletteGreenForeground1,
-    },
-    requiredNo: {
-        color: tokens.colorNeutralForeground3,
-    },
     typeGroupPopover: {
         display: "flex",
         flexDirection: "column",

@@ -56,6 +56,7 @@ import {
   TOOLTIP_APPLY_ENABLED_PART1,
   TOOLTIP_APPLY_ENABLED_PART2,
   TOOLTIP_APPLY_ENABLED_PART3,
+  TOOLTIP_APPLY_MISSING_REQUIRED_TEXT,
   TOOLTIP_PCF_DETAILS_TEXT,
   TOOLTIP_REMOVE_DISABLED_TEXT,
   TOOLTIP_REMOVE_ENABLED_PART1,
@@ -186,14 +187,40 @@ export function FormFactorsCard({
     };
   }, [field?.controlId, existingByFormFactor, compatibleControls]);
 
+  const selectedPcfId = selectedPcfIdByFf[formFactor] ?? "";
+  const selectedPcf = compatibleControls.find((c) => c.id === selectedPcfId);
+
+  // The manifest's first parameter represents the field itself (see PcfConfiguratorTable's read-only
+  // treatment of that row), so its draft value must always mirror whichever BPF attribute is currently
+  // selected, for whichever PCF is currently picked on this tab — not left for the user to pick.
+  useEffect(() => {
+    const firstParam = selectedPcf?.parameters[0];
+    if (!firstParam || !field) return;
+
+    setParamValuesByFf((prev) => {
+      const current = prev[formFactor] ?? {};
+      if (current[firstParam.name] === field.datafieldname) return prev;
+      return {
+        ...prev,
+        [formFactor]: { ...current, [firstParam.name]: field.datafieldname },
+      };
+    });
+  }, [selectedPcf, field, formFactor]);
+
   if (!field) {
     return null;
   }
 
-  const selectedPcfId = selectedPcfIdByFf[formFactor] ?? "";
   const paramValues = paramValuesByFf[formFactor] ?? {};
   const staticOverrides = staticOverridesByFf[formFactor] ?? {};
-  const selectedPcf = compatibleControls.find((c) => c.id === selectedPcfId);
+
+  // Every required parameter needs a value — static or bound to a field, doesn't matter — before the
+  // control can be applied to the field.
+  const hasMissingRequiredParam = !!selectedPcf &&
+    selectedPcf.parameters.some(
+      (p) => p.required && !(paramValues[p.name] ?? "").trim(),
+    );
+  const canApplyPcf = !!selectedPcf && !hasMissingRequiredParam;
 
   const setParamValues: Dispatch<SetStateAction<Record<string, string>>> = (
     update,
@@ -326,9 +353,11 @@ export function FormFactorsCard({
       <div style={{ display: "flex", gap: 8 }}>
         <Tooltip
           content={
-            selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
-              : TOOLTIP_APPLY_DISABLED_TEXT
+            !selectedPcf
+              ? TOOLTIP_APPLY_DISABLED_TEXT
+              : hasMissingRequiredParam
+                ? TOOLTIP_APPLY_MISSING_REQUIRED_TEXT
+                : `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
           }
           relationship="description"
           positioning="below"
@@ -336,8 +365,8 @@ export function FormFactorsCard({
         >
           <Button
             appearance="primary"
-            disabledFocusable={!selectedPcf}
-            onClick={() => selectedPcf && onApply(selectedPcf, paramValues)}
+            disabledFocusable={!canApplyPcf}
+            onClick={() => canApplyPcf && selectedPcf && onApply(selectedPcf, paramValues)}
           >
             {BUTTON_APPLY_LABEL}
           </Button>
@@ -453,9 +482,11 @@ export function FormFactorsCard({
       <div style={{ display: "flex", gap: 8 }}>
         <Tooltip
           content={
-            selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
-              : TOOLTIP_APPLY_DISABLED_TEXT
+            !selectedPcf
+              ? TOOLTIP_APPLY_DISABLED_TEXT
+              : hasMissingRequiredParam
+                ? TOOLTIP_APPLY_MISSING_REQUIRED_TEXT
+                : `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
           }
           relationship="description"
           positioning="below"
@@ -463,8 +494,8 @@ export function FormFactorsCard({
         >
           <Button
             appearance="primary"
-            disabledFocusable={!selectedPcf}
-            onClick={() => selectedPcf && onApply(selectedPcf, paramValues)}
+            disabledFocusable={!canApplyPcf}
+            onClick={() => canApplyPcf && selectedPcf && onApply(selectedPcf, paramValues)}
           >
             {BUTTON_APPLY_LABEL}
           </Button>
@@ -580,9 +611,11 @@ export function FormFactorsCard({
       <div style={{ display: "flex", gap: 8 }}>
         <Tooltip
           content={
-            selectedPcf
-              ? `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
-              : TOOLTIP_APPLY_DISABLED_TEXT
+            !selectedPcf
+              ? TOOLTIP_APPLY_DISABLED_TEXT
+              : hasMissingRequiredParam
+                ? TOOLTIP_APPLY_MISSING_REQUIRED_TEXT
+                : `${TOOLTIP_APPLY_ENABLED_PART1}${selectedPcf.controlName}${TOOLTIP_APPLY_ENABLED_PART2} ${FORM_FACTOR_LABELS[formFactor]} ${TOOLTIP_APPLY_ENABLED_PART3}`
           }
           relationship="description"
           positioning="below"
@@ -590,8 +623,8 @@ export function FormFactorsCard({
         >
           <Button
             appearance="primary"
-            disabledFocusable={!selectedPcf}
-            onClick={() => selectedPcf && onApply(selectedPcf, paramValues)}
+            disabledFocusable={!canApplyPcf}
+            onClick={() => canApplyPcf && selectedPcf && onApply(selectedPcf, paramValues)}
           >
             {BUTTON_APPLY_LABEL}
           </Button>

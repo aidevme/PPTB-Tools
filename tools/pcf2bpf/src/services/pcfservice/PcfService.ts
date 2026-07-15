@@ -19,14 +19,24 @@ export function parsePcfManifestParameters(manifestXml: string): PcfParameter[] 
     if (doc.querySelector("parsererror")) return [];
 
     return Array.from(doc.querySelectorAll("control > property"))
-        .map((prop): PcfParameter => ({
-            name: prop.getAttribute("name") ?? "",
-            displayNameKey: prop.getAttribute("display-name-key") ?? prop.getAttribute("name") ?? "",
-            ofType: prop.getAttribute("of-type") ?? undefined,
-            ofTypeGroup: prop.getAttribute("of-type-group") ?? undefined,
-            required: prop.getAttribute("required") === "true",
-            usage: prop.getAttribute("usage") ?? "input",
-        }))
+        .map((prop): PcfParameter => {
+            const enumValues = Array.from(prop.querySelectorAll("value"))
+                .map((valueEl) => ({
+                    name: valueEl.getAttribute("name") ?? "",
+                    value: valueEl.textContent?.trim() ?? "",
+                }))
+                .filter((v) => v.name.length > 0);
+
+            return {
+                name: prop.getAttribute("name") ?? "",
+                displayNameKey: prop.getAttribute("display-name-key") ?? prop.getAttribute("name") ?? "",
+                ofType: prop.getAttribute("of-type") ?? undefined,
+                ofTypeGroup: prop.getAttribute("of-type-group") ?? undefined,
+                required: prop.getAttribute("required") === "true",
+                usage: prop.getAttribute("usage") ?? "input",
+                enumValues: enumValues.length > 0 ? enumValues : undefined,
+            };
+        })
         .filter((param) => param.name.length > 0);
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 import {
     Checkbox,
     Dropdown,
@@ -16,27 +16,9 @@ import {
     type SortDirection,
 } from "@fluentui/react-components";
 import { ArrowExport20Regular, ArrowImport20Regular, PlugConnected20Regular } from "@fluentui/react-icons";
+import { useBindFieldOptions } from "../../hooks";
 import type { PcfControl, PcfParameter } from "../../services";
-import { useToolContext } from "../../services/pptbtoolcontextservice";
 import { usePcfConfiguratorTableStyles } from "../../styles";
-
-// Placeholder field choices for the "bind to field" Dropdown shown when "Is Static?" is unchecked,
-// for non-Lookup parameter types. Not wired to real entity metadata yet — field-binding itself isn't
-// implemented in this port. Lookup-typed parameters use real lookup fields instead (see `LOOKUP_ATTRIBUTE_TYPES`).
-const MOCK_BIND_FIELD_OPTIONS = ["fullname", "emailaddress1", "telephone1", "address1_city", "parentcustomerid"];
-
-/** Dataverse `AttributeType` values that represent a lookup field, mirroring `dataverse.ts`'s
- * `ATTRIBUTE_TYPE_TO_PCF_TYPES` mapping to `Lookup.Simple`/`Lookup.Customer`/`Lookup.Owner`. */
-const LOOKUP_ATTRIBUTE_TYPES = new Set(["Lookup", "Customer", "Owner"]);
-
-/** Dataverse `AttributeType` value for a simple (single-select) choice field. Excludes
- * `MultiSelectPicklist` (not "simple") and the reserved `State`/`Status` choice fields. */
-const CHOICE_FIELD_ATTRIBUTE_TYPES = new Set(["Picklist"]);
-
-/** Dataverse `AttributeType` value for single-line text fields — covers every `SingleLine.*` PCF
- * of-type (Text/Email/Phone/URL/Ticker/TextArea), since Dataverse metadata doesn't distinguish them
- * by `AttributeType`, only by format. */
-const SINGLE_LINE_TEXT_ATTRIBUTE_TYPES = new Set(["String"]);
 
 /** Icon shown next to a parameter's usage in the parameter table. */
 const PARAM_USAGE_ICONS: Record<string, JSX.Element> = {
@@ -75,9 +57,8 @@ function sortParams(params: PcfParameter[], column: ParamSortColumn | null, dire
 export interface IPcfConfiguratorTableProps {
     selectedPcf: PcfControl | undefined;
     formFactorId?: string;
-    /** Logical name of the entity the current field belongs to, used to look up its lookup-typed and
-     * simple-choice-typed fields (from `ToolContext`'s `entityMetadataInfos`) for Lookup/OptionSet-typed
-     * parameters' bind-field Dropdown. */
+    /** Logical name of the entity the current field belongs to, passed to `useBindFieldOptions` to
+     * resolve each parameter's bind-field Dropdown options. */
     entityLogicalName: string;
     paramValues: Record<string, string>;
     onParamValuesChange: Dispatch<SetStateAction<Record<string, string>>>;
@@ -98,28 +79,8 @@ export function PcfConfiguratorTable({
     onStaticOverridesChange,
 }: IPcfConfiguratorTableProps) {
     const styles = usePcfConfiguratorTableStyles();
-    const { entityMetadataInfos } = useToolContext();
     const [paramSort, setParamSort] = useState<{ column: ParamSortColumn; direction: SortDirection } | null>(null);
-
-    const entityInfo = useMemo(
-        () => entityMetadataInfos.find((e) => e.logicalName === entityLogicalName),
-        [entityMetadataInfos, entityLogicalName],
-    );
-
-    const lookupFieldOptions = useMemo(
-        () => (entityInfo?.attributes ?? []).filter((a) => LOOKUP_ATTRIBUTE_TYPES.has(a.attributeType)).map((a) => a.logicalName),
-        [entityInfo],
-    );
-
-    const choiceFieldOptions = useMemo(
-        () => (entityInfo?.attributes ?? []).filter((a) => CHOICE_FIELD_ATTRIBUTE_TYPES.has(a.attributeType)).map((a) => a.logicalName),
-        [entityInfo],
-    );
-
-    const textFieldOptions = useMemo(
-        () => (entityInfo?.attributes ?? []).filter((a) => SINGLE_LINE_TEXT_ATTRIBUTE_TYPES.has(a.attributeType)).map((a) => a.logicalName),
-        [entityInfo],
-    );
+    const getBindFieldOptions = useBindFieldOptions(entityLogicalName);
 
     const toggleParamSort = (column: ParamSortColumn) => {
         setParamSort((prev) =>
@@ -225,21 +186,12 @@ export function PcfConfiguratorTable({
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {sortParams(selectedPcf.parameters, paramSort?.column ?? null, paramSort?.direction ?? "ascending").map((param) => {
+                {sortParams(selectedPcf.parameters, paramSort?.column ?? null, paramSort?.direction ?? "ascending").map((param, index) => {
                     const paramType = param.ofTypeGroup ?? param.ofType ?? "—";
                     const isEnum = paramType.toLowerCase() === "enum";
+                    const isFirstRow = index === 0;
                     const isStatic = isEnum || (staticOverrides[param.name] ?? false);
-                    const isLookup = paramType.toLowerCase().includes("lookup");
-                    const isOptionSet = paramType.toLowerCase() === "optionset";
-                    const isSingleLineText = paramType.toLowerCase() === "singleline.text";
-
-                    const bindFieldOptions = isOptionSet
-                        ? choiceFieldOptions
-                        : isLookup
-                          ? lookupFieldOptions
-                          : isSingleLineText
-                            ? textFieldOptions
-                            : MOCK_BIND_FIELD_OPTIONS;
+                    const bindFieldOptions = getBindFieldOptions(paramType);
 
                     return (
                         <TableRow key={param.name}>
@@ -262,25 +214,44 @@ export function PcfConfiguratorTable({
                             <TableCell className={styles.colIsStatic}>
                                 <Checkbox
                                     checked={isStatic}
-                                    disabled={isEnum}
+                                    disabled={isEnum || isFirstRow}
                                     onChange={
-                                        isEnum
+                                        isEnum || isFirstRow
                                             ? undefined
                                             : (_, data) =>
                                                   onStaticOverridesChange((prev) => ({ ...prev, [param.name]: !!data.checked }))
                                     }
                                     title={
-                                        isEnum
-                                            ? "Enum parameters must always be static."
-                                            : "This port only supports static parameter values; binding to another field is not supported yet."
+                                        isFirstRow
+                                            ? "The first parameter is bound to the field and is always static."
+                                            : isEnum
+                                              ? "Enum parameters must always be static."
+                                              : "This port only supports static parameter values; binding to another field is not supported yet."
                                     }
                                 />
                             </TableCell>
                             <TableCell className={styles.colValue}>
-                                {isStatic ? (
+                                {isEnum ? (
+                                    <Dropdown
+                                        className={styles.valueControl}
+                                        value={param.enumValues?.find((ev) => ev.value === paramValues[param.name])?.name ?? ""}
+                                        selectedOptions={paramValues[param.name] ? [paramValues[param.name]] : []}
+                                        disabled={isFirstRow}
+                                        onOptionSelect={(_, data) =>
+                                            onParamValuesChange((prev) => ({ ...prev, [param.name]: data.optionValue ?? "" }))
+                                        }
+                                    >
+                                        {(param.enumValues ?? []).map((enumValue) => (
+                                            <Option key={enumValue.name} value={enumValue.value} text={enumValue.name}>
+                                                {enumValue.name}
+                                            </Option>
+                                        ))}
+                                    </Dropdown>
+                                ) : isStatic ? (
                                     <Input
                                         className={styles.valueControl}
                                         value={paramValues[param.name] ?? ""}
+                                        readOnly={isFirstRow}
                                         onChange={(_, data) => onParamValuesChange((prev) => ({ ...prev, [param.name]: data.value }))}
                                     />
                                 ) : (
@@ -288,6 +259,7 @@ export function PcfConfiguratorTable({
                                         className={styles.valueControl}
                                         value={paramValues[param.name] ?? ""}
                                         selectedOptions={paramValues[param.name] ? [paramValues[param.name]] : []}
+                                        disabled={isFirstRow}
                                         onOptionSelect={(_, data) =>
                                             onParamValuesChange((prev) => ({ ...prev, [param.name]: data.optionValue ?? "" }))
                                         }

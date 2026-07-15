@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import { Button, Caption1, mergeClasses, Text, Tooltip } from "@fluentui/react-components";
 import { MoreVertical20Regular } from "@fluentui/react-icons";
+import { DEFAULT_MORE_BUTTON_TOOLTIP_TEXT } from "../../consts/GenericCard.const";
 import { useGenericCardStyles } from "../../styles";
 
 export interface IGenericCardProps {
@@ -23,8 +24,6 @@ export interface IGenericCardProps {
     style?: CSSProperties;
     children: ReactNode;
 }
-
-const DEFAULT_MORE_BUTTON_TOOLTIP_TEXT = "More...";
 
 /**
  * Shared card frame (border/radius/padding/background) and eyebrow heading used as the base/parent

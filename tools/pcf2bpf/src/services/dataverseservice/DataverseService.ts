@@ -47,6 +47,39 @@ export function getAttributeTypeLabel(attributeType: string): string {
     return ATTRIBUTE_TYPE_LABELS[attributeType] ?? attributeType;
 }
 
+/**
+ * Maps a PCF parameter's type (lowercased `of-type`/`of-type-group`, e.g. `"currency"`) to the
+ * Dataverse `AttributeType`(s) it's sensible to offer as a bind-to-field target in
+ * `PcfConfiguratorTable`'s "Param Value" Dropdown.
+ *
+ * Deliberately a separate, narrower map from {@link ATTRIBUTE_TYPE_TO_PCF_TYPES} above — that one
+ * answers "which controls can host this attribute type" (compatibility, so it includes the reserved
+ * `State`/`Status` choice fields and `Uniqueidentifier`), while this one answers "which fields make
+ * sense to bind a parameter to" (curated, so those are excluded). Missing key means "not yet wired up
+ * to real entity metadata" — see `useBindFieldOptions`'s mock fallback for that case.
+ */
+const PCF_TYPE_TO_BINDABLE_ATTRIBUTE_TYPES: Record<string, string[]> = {
+    lookup: ["Lookup", "Customer", "Owner"],
+    optionset: ["Picklist"],
+    "singleline.text": ["String"],
+    twooptions: ["Boolean"],
+    currency: ["Money"],
+};
+
+/** Collapses any `lookup.*` of-type (or the bare `Lookup` type-group token) to a single `"lookup"`
+ * key, since Dataverse's `Lookup`/`Customer`/`Owner` attribute types are all valid bind targets for
+ * any lookup-flavored PCF parameter. Every other PCF type is just lowercased. */
+function normalizePcfBindType(paramType: string): string {
+    const normalized = paramType.toLowerCase();
+    return normalized.includes("lookup") ? "lookup" : normalized;
+}
+
+/** Returns the Dataverse `AttributeType`(s) that can be bound to a PCF parameter of the given type,
+ * or `[]` if that PCF type isn't (yet) mapped to any real Dataverse attribute type. */
+export function getBindableAttributeTypes(paramType: string): string[] {
+    return PCF_TYPE_TO_BINDABLE_ATTRIBUTE_TYPES[normalizePcfBindType(paramType)] ?? [];
+}
+
 function api(): typeof window.dataverseAPI {
     return window.dataverseAPI;
 }
