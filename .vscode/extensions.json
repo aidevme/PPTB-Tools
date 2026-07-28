@@ -1,0 +1,18 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "streetsidesoftware.code-spell-checker",
+    "docsmsft.docs-authoring-pack",
+    "LuisClementDev.npm-visual-manager",
+    "anthropic.claude-code",
+    "GitHub.vscode-codeql",
+    "ms-vscode-remote.remote-containers",
+    "dbaeumer.vscode-eslint",
+    "github.vscode-github-actions",
+    "ms-vscode.vscode-typescript-next",
+    "microsoft-isvexptools.powerplatform-vscode",
+    "bierner.markdown-mermaid",
+    "davidanson.vscode-markdownlint"
+  ],
+  "unwantedRecommendations": []
+}
