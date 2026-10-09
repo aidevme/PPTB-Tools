@@ -13,6 +13,7 @@ Tools for Power Platform ToolBox (PPTB) - a comprehensive toolkit for working wi
     - [Overview](#overview)
     - [Tools](#tools)
         - [PCF2BPF](#pcf2bpf)
+        - [Dataverse Type Forge](#dataverse-type-forge)
     - [Contributing](#contributing)
     - [License](#license)
 
@@ -40,6 +41,17 @@ Implemented functionality (based on the original plugin):
 Not yet implemented: copying a PCF configuration from one form factor to another, and binding a parameter to another field (see the [tool's README](tools/pcf2bpf/README.md#not-implemented-compared-to-the-original-xrmtoolbox-plugin) for the full list).
 
 **Status:** initial implementation available; not yet validated against a live environment.
+
+### Dataverse Type Forge
+
+Dataverse Type Forge generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. Its output works with Scott Durow's [dataverse-ify](https://github.com/scottdurow/dataverse-ify), and it shares the `.dataverse-gen.json` project file with his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, whose generator it ports. Source: [tools/dataverse-type-gen](tools/dataverse-type-gen/) · Docs: [docs/pptb-tools/dataverse-type-gen](docs/pptb-tools/dataverse-type-gen/index.md).
+
+- Pick a project folder and load or create `.dataverse-gen.json`.
+- Select tables (with search and a solution filter), actions and functions.
+- Preview generated files as new, changed, unchanged or orphaned against the output folder.
+- Write only what changed, save the config, or regenerate in one click.
+
+**Status:** initial implementation; output verified against dataverse-gen test fixtures, not yet validated against a live environment.
 
 ## Contributing
 

@@ -1,0 +1,2843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Entra Blueprint Security Posture (Preview)</title>
+<!-- Favicon: the same shield + blueprint-to-agents fan-out as the header logo, inlined so the
+     tool stays a single self-contained file. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M16 2 28 6v9c0 7.5-5.2 13.3-12 15C9.2 28.3 4 22.5 4 15V6z' fill='%230f6cbd'/%3E%3Cpath d='M16 13.8v3.7M10 17.5h12M10 17.5v2M16 17.5v2M22 17.5v2' stroke='%23fff' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='11' r='2.9' fill='%23fff'/%3E%3Ccircle cx='10' cy='21.6' r='2.1' fill='%23fff'/%3E%3Ccircle cx='16' cy='21.6' r='2.1' fill='%23fff'/%3E%3Ccircle cx='22' cy='21.6' r='2.1' fill='%23fff'/%3E%3C/svg%3E" />
+<!-- MSAL is pinned with Subresource Integrity (SRI). The hash below is for @azure/msal-browser@3.28.1.
+     If you BUMP the version, you MUST recompute the hash on BOTH script tags or sign-in silently breaks
+     (the script fails the integrity check and never loads). To recompute:
+     PS> Invoke-WebRequest "https://cdn.jsdelivr.net/npm/@azure/msal-browser@<VER>/lib/msal-browser.min.js" -OutFile m.js
+         "sha384-$([Convert]::ToBase64String([byte[]]((Get-FileHash -Algorithm SHA384 m.js).Hash -split '(?<=\G..)(?=.)' | %{[Convert]::ToByte($_,16)})))" -->
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"
+        integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY"
+        crossorigin="anonymous"></script>
+<script>
+  // Fallback to a second CDN if the first is blocked/unavailable. Same package@version → byte-identical
+  // content, so the same SRI hash pins both — a compromised CDN can't inject script either way.
+  if (typeof msal === "undefined") {
+    document.write('<script src="https://unpkg.com/@azure/msal-browser@3.28.1/lib/msal-browser.min.js" integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY" crossorigin="anonymous"><\/script>');
+  }
+</script>
+<script>
+  // Apply the saved / preferred theme before first paint to avoid a flash.
+  (function () {
+    var t = localStorage.getItem("aib_theme")
+      || ((window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f3f2f1;
+    --card: #ffffff;
+    --border: #e1dfdd;
+    --text: #201f1e;
+    --muted: #605e5c;
+    --accent: #0f6cbd;
+    --accent-dark: #115ea3;
+    --green: #0e700e;
+    --green-bg: #dff6dd;
+    --red: #a4262c;
+    --red-bg: #fde7e9;
+    --on-red: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #8a8886;
+    --hover: #faf9f8;
+    --code-bg: #edebe9;
+    --cert-bg: #deecf9;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.13), 0 .3px .9px rgba(0,0,0,.11);
+  }
+  html[data-theme="dark"] {
+    --bg: #1b1a19;
+    --card: #262523;
+    --border: #3b3a38;
+    --text: #f3f2f1;
+    --muted: #a6a4a1;
+    --accent: #4aa0e6;
+    --accent-dark: #79bce9;
+    --green: #6ccb6c;
+    --green-bg: #16331a;
+    --red: #f1707a;
+    --red-bg: #3a1d20;
+    --on-red: #1b1a19;
+    --input-bg: #1b1a19;
+    --input-border: #605e5c;
+    --hover: #2f2e2c;
+    --code-bg: #333230;
+    --cert-bg: #14324d;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.45), 0 .3px .9px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px;
+  }
+  header {
+    /* Same blue as the primary buttons (var(--accent)) rather than a hardcoded gradient — so the
+       header also tracks the light/dark theme instead of staying fixed. */
+    background: var(--accent);
+    color: #fff; padding: 18px 28px; display: flex; align-items: center;
+    justify-content: space-between; box-shadow: var(--shadow);
+  }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 11px; }
+  /* App logo: a shield (security) around one blueprint node fanning out to the agent identities
+     that inherit from it — the tool's whole thesis in one mark. */
+  .applogo { width: 27px; height: 27px; flex-shrink: 0; }
+  .applogo .sh { fill: rgba(255,255,255,.18); stroke: #fff; stroke-width: 1.6; }
+  .applogo circle { fill: #fff; }
+  .applogo .ln { stroke: #fff; stroke-width: 1.5; fill: none; stroke-linecap: round; }
+  .pv { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase;
+        background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+        padding: 2px 7px; border-radius: 10px; line-height: 1.4; }
+  header .right { display: flex; align-items: center; gap: 16px; }
+  header .who { font-size: 13px; opacity: .95; text-align: right; }
+  .theme-btn {
+    background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35);
+    color: #fff; border-radius: 6px; padding: 6px 11px; cursor: pointer;
+    font-size: 16px; line-height: 1; font-weight: 600;
+  }
+  .theme-btn:hover { background: rgba(255,255,255,.28); }
+  main { max-width: 1560px; margin: 0 auto; padding: 24px 28px 60px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 22px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 14px; font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  input, select {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 4px;
+    font-size: 14px; font-family: inherit; background: var(--input-bg); color: var(--text);
+  }
+  input:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .row-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button {
+    background: var(--accent); color: #fff; border: none; border-radius: 4px;
+    padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  button:hover { background: var(--accent-dark); }
+  button.secondary { background: var(--card); color: var(--text); border: 1px solid var(--input-border); }
+  button.secondary:hover { background: var(--hover); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  code { background: var(--code-bg); color: var(--text); padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .stat.clickable { cursor: pointer; transition: border-color .15s, background .15s; }
+  .stat.clickable:hover { border-color: var(--accent); background: var(--hover); }
+  .stat.active { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+  .stat .n { font-size: 30px; font-weight: 700; line-height: 1; }
+  .stat .l { font-size: 12px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .4px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
+  tbody tr:hover { background: var(--hover); }
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 12px;
+    font-weight: 600; margin: 2px 4px 2px 0; white-space: nowrap;
+  }
+  .b-single { background: var(--green-bg); color: var(--green); }
+  .b-multi { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-secret { background: var(--red-bg); color: var(--red); }
+  .b-cert { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-fic { background: var(--green-bg); color: var(--green); }
+  .b-none { background: var(--hover); color: var(--muted); }
+  .b-risk-high { background: var(--red); color: var(--on-red); }
+  .b-risk-med  { background: var(--red-bg); color: var(--red); }
+  .b-risk-low  { background: var(--green-bg); color: var(--green); }
+  .b-deleg   { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-approle { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-ext  { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-home { background: var(--green-bg); color: var(--green); }
+  .b-ms   { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-blocked { background: var(--red-bg); color: var(--red); text-decoration: line-through; }
+  .badge[title] { cursor: help; }
+  .msicon { vertical-align: -1px; margin-right: 4px; }
+  .mi { width: 14px; height: 14px; vertical-align: -2px; margin-right: 6px; flex-shrink: 0; }
+  .stat .l .mi { width: 12px; height: 12px; vertical-align: -1.5px; margin-right: 5px; }
+  .grp td { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px;
+            background: var(--bg); padding: 14px 12px 6px; border-bottom: 1px solid var(--border); }
+  tbody tr.grp:hover { background: var(--bg); }
+  .chev { width: 26px; text-align: center; padding-left: 6px; padding-right: 0; }
+  .chev .expander { font-size: 11px; }
+  tr.rowx { cursor: pointer; }
+  tr.rowx:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .cnt { color: var(--accent); font-weight: 600; }
+  .dsec.flash { animation: secflash 1.2s ease-out; }
+  @keyframes secflash { from { background: var(--cert-bg); } to { background: var(--card); } }
+  .dpanel { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 10px; align-items: start; }
+  .dsec { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+  .dsec-wide { grid-column: 1 / -1; }
+  .dhead { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px;
+           color: var(--muted); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .dhead .hint { display: inline; font-weight: 400; text-transform: none; letter-spacing: 0; }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .toolbar input, .toolbar select { width: auto; }
+  .toolbar #fltSearch { flex: 1 1 220px; min-width: 200px; max-width: 340px; }
+  .toolbar .count { margin-left: auto; font-size: 12px; color: var(--muted); }
+  th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+  th.sortable:hover { color: var(--accent); }
+  th .arrow { font-size: 10px; margin-left: 3px; opacity: .7; }
+  th.sorted { color: var(--accent); }
+  .mono { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; color: var(--muted); }
+  .expander { cursor: pointer; user-select: none; color: var(--accent); font-weight: 600; }
+  .agent-list { margin: 8px 0 4px; padding: 0; list-style: none; }
+  .agent-list li { padding: 5px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
+  .agent-list li:last-child { border-bottom: none; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; }
+  .dot-on { background: #107c10; } .dot-off { background: #a19f9d; }
+  #status { font-size: 13px; }
+  #status.err { color: var(--red); }
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -3px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+  a { color: var(--accent); }
+  .notice { border: 1px solid var(--border); border-left-width: 3px; border-radius: 6px;
+            padding: 9px 12px; margin: 0 0 10px; font-size: 12.5px; line-height: 1.5; color: var(--text); }
+  .notice code { font-size: 11px; }
+  .notice-warn { border-left-color: var(--red); background: var(--red-bg); }
+  .notice-info { border-left-color: var(--accent); background: var(--hover); color: var(--muted); }
+  /* Light-blue attribution for findings that come from Blue16's lab, not Microsoft docs. */
+  .attrib { color: var(--accent-dark); font-weight: 600; }
+  button.danger { background: var(--red); color: var(--on-red); }
+  button.danger:hover { filter: brightness(1.12); }
+  button.danger:disabled { opacity: .45; cursor: not-allowed; filter: none; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex;
+           align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  /* .modal's display:flex outranks the earlier .hidden{display:none} (equal specificity, later
+     wins), so the dialog would show on load. This restores the hidden state with higher specificity. */
+  .modal.hidden { display: none; }
+  .modal-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+               box-shadow: var(--shadow); padding: 22px 24px; max-width: 620px; width: 100%; }
+  .modal-box h3 { margin: 0 0 12px; font-size: 16px; color: var(--red); }
+  .modal-box ul { margin: 8px 0 14px; padding-left: 18px; font-size: 13px; line-height: 1.65; }
+  .modal-box li { margin: 3px 0; }
+  /* Manifest viewer: a wider box, a neutral (non-danger) title, a search toolbar and a scrollable code pane. */
+  .modal-box-lg { max-width: 940px; }
+  .modal-box-lg h3 { color: var(--text); }
+  .man-toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  .man-toolbar #manSearch { width: auto; flex: 1 1 220px; min-width: 150px; }
+  .man-toolbar input[type="checkbox"] { width: auto; }
+  .man-toolbar label { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+  .man-toolbar button { padding: 7px 12px; }
+  .man-pre { max-height: 60vh; overflow: auto; margin: 0; padding: 12px; background: var(--code-bg);
+             border: 1px solid var(--border); border-radius: 6px; font-family: "Cascadia Code", Consolas, monospace;
+             font-size: 12px; line-height: 1.5; white-space: pre; color: var(--text); }
+  .man-pre mark { background: #ffe08a; color: #000; border-radius: 2px; }
+  .man-pre mark.cur { background: #ff9800; box-shadow: 0 0 0 1px #b35c00; }
+  .jwt-claims { width: 100%; border-collapse: collapse; margin: 4px 0 12px; }
+  .jwt-claims td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 12.5px; }
+  .jwt-claims td.k { color: var(--muted); white-space: nowrap; width: 130px; font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; }
+  .jwt-claims td.v { font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; word-break: break-all; }
+  .jwt-diff { border: 1px solid var(--border); border-left-width: 3px; border-radius: 6px; padding: 10px 12px; margin: 0 0 12px; font-size: 12.5px; line-height: 1.55; }
+  .jwt-diff.lie { border-left-color: var(--red); background: var(--red-bg); }
+  .jwt-diff.ok  { border-left-color: var(--green); background: var(--green-bg); }
+  .jwt-diff.none { border-left-color: var(--accent); background: var(--hover); color: var(--muted); }
+  /* ---- risk exposure chart ---- */
+  .rf { display: grid; grid-template-columns: 190px 1fr 42px; align-items: center; gap: 12px;
+        padding: 4px 6px; border-radius: 4px; cursor: pointer; }
+  .rf:hover { background: var(--hover); }
+  .rf.active { background: var(--hover); box-shadow: inset 0 0 0 1px var(--accent); }
+  .rf-label { font-size: 12px; color: var(--text); }
+  .rf-track { background: var(--code-bg); border-radius: 3px; height: 12px; overflow: hidden; }
+  .rf-bar { height: 100%; border-radius: 3px; min-width: 2px; background: var(--red);
+            width: 0; animation: rfgrow .55s cubic-bezier(.22,.61,.36,1) forwards; }
+  .rf-bar.sev-med { opacity: .45; }
+  .rf-count { font-size: 12px; font-weight: 600; text-align: right; color: var(--text); }
+  @keyframes rfgrow { to { width: var(--w); } }
+  @media (prefers-reduced-motion: reduce) { .rf-bar { animation: none; width: var(--w); } }
+  /* Blast-radius Sankey (blueprint → agent identities) */
+  .sankey { display: block; width: 100%; overflow: visible; }
+  .sk-head { font-size: 10.5px; fill: var(--muted); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+  .sk-label { font-size: 12px; fill: var(--text); paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
+  .sk-count { fill: var(--muted); font-weight: 600; }
+  .sk-ribbon { transition: fill-opacity .12s; }
+  .sk-ribbon:hover { fill-opacity: .72 !important; }
+  .sk-node { transition: opacity .12s; }
+  .sk-click { cursor: pointer; }
+  .sk-click:hover { opacity: .82; }
+  text.sk-click:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+<header>
+  <h1>
+    <svg class="applogo" viewBox="0 0 32 32" role="img" aria-label="Entra Blueprint Security Posture logo"><defs><linearGradient id="egg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4db8f0"/><stop offset="1" stop-color="#0f6cbd"/></linearGradient></defs><rect x="6.4" y="6.4" width="19.2" height="19.2" rx="5.5" transform="rotate(45 16 16)" style="fill:url(#egg)"/><path d="M16 5.4 16 16 5.4 16Z" style="fill:#fff;opacity:.15"/><path d="M16 16.4 16 10M16 16.4 10.8 20.4M16 16.4 21.2 20.4" style="stroke:#fff;stroke-width:1.5;fill:none;opacity:.9" stroke-linecap="round"/><g style="fill:#fff"><circle cx="16" cy="16.4" r="2.3"/><circle cx="16" cy="9.6" r="1.7"/><circle cx="10.8" cy="20.4" r="1.7"/><circle cx="21.2" cy="20.4" r="1.7"/></g></svg>
+    <span>Entra Blueprint Security Posture</span>
+    <span class="pv">Preview</span>
+  </h1>
+  <div class="right">
+    <div class="who" id="who"></div>
+    <button id="themeToggle" class="theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main>
+  <!-- Configuration / sign-in -->
+  <section class="card" id="configCard">
+    <div id="connectForm">
+    <h2>1 · Connect to your tenant</h2>
+    <div class="grid">
+      <div>
+        <label for="clientId">Application (client) ID</label>
+        <input id="clientId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" />
+        <div class="hint">An app registration of type <b>SPA</b> with delegated permissions
+          <code>AgentIdentityBlueprint.Read.All</code>, <code>AgentIdentity.Read.All</code>,
+          <code>AgentIdentityBlueprintPrincipal.Read.All</code>, <code>Application.Read.All</code>,
+          <code>DelegatedPermissionGrant.Read.All</code>, <code>CrossTenantInformation.ReadBasic.All</code>,
+          <code>User.Read</code>.
+          <br><b>Optional (each degrades gracefully if absent — admin consent required):</b>
+          <code>AuditLog.Read.All</code> for per-agent sign-in / dormancy;
+          <code>IdentityRiskyAgent.Read.All</code> (or <code>IdentityRiskyServicePrincipal.Read.All</code>) for risk state;
+          <code>Policy.Read.All</code> for Conditional Access coverage.
+          Risk &amp; CA-for-workload-identities need <b>Workload ID Premium</b>.</div>
+      </div>
+      <div>
+        <label for="tenantId">Directory (tenant) ID or domain</label>
+        <input id="tenantId" placeholder="contoso.onmicrosoft.com or tenant GUID" autocomplete="off" />
+        <div class="hint">Use <code>organizations</code> if unsure.</div>
+      </div>
+      <div>
+        <label for="graphVer">Graph API version</label>
+        <select id="graphVer">
+          <option value="v1.0">v1.0 (GA)</option>
+          <option value="beta">beta</option>
+        </select>
+        <div class="hint">Agent ID APIs are newest on <code>beta</code>. Switch if v1.0 returns errors.</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:12px">
+      Register this page's URL as a <b>Single-page application</b> redirect URI:
+      <code id="redirectUri"></code>
+    </div>
+    </div><!-- /connectForm -->
+    <div class="row-actions">
+      <button id="signInBtn">Sign in</button>
+      <button id="signOutBtn" class="secondary hidden">Sign out</button>
+      <span id="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="hidden">
+    <div class="row-actions" style="margin-bottom:18px">
+      <button id="loadBtn">Load / refresh blueprints</button>
+      <span style="flex:1"></span>
+      <!-- Deliberate, explicit target selection rather than a per-row button: deleting cascades to
+           every agent identity, so picking the blueprint should be a conscious act. -->
+      <select id="delSelect" style="max-width:360px" aria-label="Blueprint">
+        <option value="">Select a blueprint…</option>
+      </select>
+      <button id="manBtn" class="secondary" disabled>View manifest</button>
+      <button id="delBtn" class="danger" disabled>Delete…</button>
+      <select id="delAgentSelect" style="max-width:360px" aria-label="Agent identity to delete">
+        <option value="">Select an agent identity to delete…</option>
+      </select>
+      <button id="delAgentBtn" class="danger" disabled>Delete…</button>
+    </div>
+
+    <div id="notices"></div>
+    <div class="summary" id="summary"></div>
+
+    <div class="card" id="riskChartCard">
+      <h2 style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+        <span>Risk exposure</span>
+        <span class="expander" id="riskChartToggle">hide ▴</span>
+      </h2>
+      <div id="riskChartBody">
+        <div class="hint" style="margin:8px 0 12px">How many blueprints carry each risk factor. Click a bar to scope the table.</div>
+        <div id="riskChart"></div>
+      </div>
+    </div>
+
+    <div class="card" id="blastFlowCard">
+      <h2 style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+        <span><span data-icon="agentid"></span>Blueprint blast radius → agent identities</span>
+        <span class="expander" id="blastFlowToggle">hide ▴</span>
+      </h2>
+      <div id="blastFlowBody">
+        <div class="hint" style="margin:8px 0 12px">Every agent identity flows through exactly <b>one node per column</b> — its blueprint's <b>origin</b> → the blueprint's <b>risk band</b> → the <b>credential that can impersonate it</b>. <b>Every number is a count of AGENT IDENTITIES</b> (the blast radius — each column sums to your total agent identities), <b>not blueprints or credentials</b>: “Client secret 28” means <b>28 agent identities</b> sit under a blueprint keyed by a client secret. (The “Secrets in use” tile counts <b>blueprints</b>, so the two differ.) Ribbon colour = blueprint risk. <b>Click a node</b> to scope the table.</div>
+        <div id="blastFlow"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span data-icon="blueprint"></span>Agent identity blueprints</h2>
+      <div class="toolbar">
+        <input id="fltSearch" placeholder="Filter by name or appId…" autocomplete="off" />
+        <select id="fltTenancy">
+          <option value="">All tenancy</option>
+          <option value="single">Single-tenant</option>
+          <option value="multi">Multi-tenant</option>
+        </select>
+        <select id="fltRisk">
+          <option value="">All risk</option>
+          <option value="act">Act today</option>
+          <option value="sprint">This sprint</option>
+          <option value="healthy">Healthy</option>
+        </select>
+        <select id="fltCred">
+          <option value="">All credentials</option>
+          <option value="secret">Has secret</option>
+          <option value="cert">Has certificate</option>
+          <option value="fic">Has FIC</option>
+          <option value="none">No credentials</option>
+        </select>
+        <select id="fltPerm">
+          <option value="">All permissions</option>
+          <option value="app">Has application perms</option>
+          <option value="deleg">Has delegated perms</option>
+          <option value="none">No permissions</option>
+        </select>
+        <select id="fltOrigin">
+          <option value="">All origins</option>
+          <option value="home">Home tenant</option>
+          <option value="external">External (published)</option>
+        </select>
+        <select id="fltOwners">
+          <option value="">All owners</option>
+          <option value="none">Missing owners</option>
+        </select>
+        <span class="count" id="tableCount"></span>
+        <button id="exportCsv" class="secondary" style="padding:6px 12px">Export CSV</button>
+        <button id="exportJson" class="secondary" style="padding:6px 12px">Export JSON</button>
+        <button id="jwtBtn" class="secondary" style="padding:6px 12px">Decode token</button>
+      </div>
+      <div class="hint" style="margin:-4px 0 10px">Only exceptions are shown — a blank cell is the safe default
+        (single-tenant, home-authored, nothing declared, assignment required, no expiry due).</div>
+      <div style="overflow-x:auto">
+        <table id="table">
+          <thead>
+            <tr>
+              <th style="width:26px"></th>
+              <th class="sortable" data-key="name"><span data-icon="blueprint"></span>Blueprint <span class="arrow"></span></th>
+              <th class="sortable" data-key="tenancy">Tenancy <span class="arrow"></span></th>
+              <th class="sortable" data-key="cred">Client credentials <span class="arrow"></span></th>
+              <th class="sortable" data-key="perms">Declared&nbsp;perms <span class="arrow"></span></th>
+              <th class="sortable" data-key="risk">Risk <span class="arrow"></span></th>
+              <th class="sortable" data-key="roles" style="text-align:center">App&nbsp;roles <span class="arrow"></span></th>
+              <th class="sortable" data-key="consent" style="text-align:center">Granted <span class="arrow"></span></th>
+              <th class="sortable" data-key="agents" style="text-align:center"><span data-icon="agent"></span>Agent&nbsp;identities <span class="arrow"></span></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- Delete confirmation. Names the exact blast radius and requires the blueprint's name typed back
+     — deletion cascades to every agent identity, so a plain OK/Cancel would be too cheap. -->
+<div class="modal hidden" id="jwtModal" role="dialog" aria-modal="true" aria-labelledby="jwtTitle">
+  <div class="modal-box modal-box-lg">
+    <h3 id="jwtTitle">Decode a token</h3>
+    <div class="hint" style="margin:-4px 0 8px">Paste a blueprint-principal or agent access token (JWT). It's decoded
+      <b>locally in your browser</b> — never sent anywhere. The point: diff what the token actually carries against what the directory claims.</div>
+    <textarea id="jwtInput" rows="3" placeholder="eyJ0eXAiOiJKV1QiLCJhbGc…" autocomplete="off" spellcheck="false"
+      style="width:100%;font-family:'Cascadia Code',Consolas,monospace;font-size:11px;resize:vertical"></textarea>
+    <div id="jwtStatus" style="margin:6px 0;font-size:13px"></div>
+    <div id="jwtOut"></div>
+    <div class="row-actions" style="margin-top:12px">
+      <button id="jwtClose" class="secondary">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal hidden" id="manModal" role="dialog" aria-modal="true" aria-labelledby="manTitle">
+  <div class="modal-box modal-box-lg">
+    <h3 id="manTitle">Manifest</h3>
+    <div class="man-toolbar">
+      <input id="manSearch" type="text" placeholder="Search the manifest…" autocomplete="off" spellcheck="false" />
+      <button id="manPrev" class="secondary" title="Previous match" aria-label="Previous match">↑</button>
+      <button id="manNext" class="secondary" title="Next match" aria-label="Next match">↓</button>
+      <span id="manCount" class="hint" style="margin:0"></span>
+      <label><input id="manOnly" type="checkbox" /> matches only</label>
+      <span style="flex:1"></span>
+      <button id="manCopy" class="secondary">Copy</button>
+      <button id="manDownload" class="secondary">Download</button>
+      <button id="manClose" class="secondary">Close</button>
+    </div>
+    <pre id="manPre" class="man-pre" tabindex="0"></pre>
+    <div id="manStatus" style="margin-top:8px;font-size:13px"></div>
+  </div>
+</div>
+
+<div class="modal hidden" id="delModal" role="dialog" aria-modal="true" aria-labelledby="delTitle">
+  <div class="modal-box">
+    <h3 id="delTitle">Delete</h3>
+    <div id="delBody"></div>
+    <label for="delConfirm" id="delConfirmLabel">Type the name to confirm</label>
+    <input id="delConfirm" autocomplete="off" spellcheck="false" />
+    <div class="row-actions">
+      <button id="delGo" class="danger" disabled>Delete blueprint</button>
+      <button id="delCancel" class="secondary">Cancel</button>
+      <span id="delStatus"></span>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const redirectUri = window.location.origin + window.location.pathname.replace(/\/{2,}/g, '/');
+// If opened at a URL with a double slash (…//page), the un-normalized redirect wouldn't match the
+// app registration (AADSTS50011). Redirect is normalized above; also clean the address bar.
+if (/\/{2,}/.test(window.location.pathname)) { try { history.replaceState(null, '', redirectUri + location.search + location.hash); } catch (e) {} }
+$("redirectUri").textContent = redirectUri;
+
+// Entra portal entity icons, matching the admin-centre nav: a grid tile for Agent blueprints
+// (a template others are stamped from) and a contact card for Agent identities. Product icons, so
+// they keep a fixed Entra blue in both themes rather than following --accent.
+const ICON_BLUEPRINT = '<svg class="mi" viewBox="0 0 16 16" aria-hidden="true">'
+  + '<rect x="1" y="2" width="14" height="12" rx="2" fill="#0f6cbd"/>'
+  + '<rect x="3.1" y="4.3" width="3.6" height="2.6" rx=".5" fill="#fff"/>'
+  + '<rect x="7.6" y="4.3" width="5.3" height="2.6" rx=".5" fill="#fff"/>'
+  + '<rect x="3.1" y="8.1" width="5.3" height="2.6" rx=".5" fill="#fff"/>'
+  + '<rect x="9.3" y="8.1" width="3.6" height="2.6" rx=".5" fill="#fff"/></svg>';
+const ICON_AGENTID = '<svg class="mi" viewBox="0 0 16 16" aria-hidden="true">'
+  + '<rect x="1" y="3" width="14" height="10" rx="2" fill="#0f6cbd"/>'
+  + '<circle cx="5.4" cy="7.9" r="1.7" fill="#fff"/>'
+  + '<rect x="8.6" y="6.4" width="4.3" height="1.1" rx=".55" fill="#fff"/>'
+  + '<rect x="8.6" y="8.9" width="4.3" height="1.1" rx=".55" fill="#fff"/></svg>';
+
+// The Microsoft logo keeps its official four-square brand colors.
+const ICON_MS = '<svg class="msicon" width="11" height="11" viewBox="0 0 23 23" aria-hidden="true"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>';
+
+// ---- theme toggle ----
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  $("themeToggle").textContent = t === "dark" ? "◑" : "◐";
+}
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+$("themeToggle").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem("aib_theme", next);
+  applyTheme(next);
+});
+
+// Entra only accepts https redirect URIs, or http on loopback (localhost / 127.0.0.1 / [::1]).
+(function checkScheme() {
+  const proto = window.location.protocol;
+  const host = window.location.hostname;
+  const loopback = host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+  const ok = proto === "https:" || (proto === "http:" && loopback);
+  if (!ok) {
+    const warn = document.createElement("div");
+    warn.className = "hint";
+    warn.style.cssText = "margin-top:10px;color:var(--red);font-weight:600;border:1px solid var(--red);background:var(--red-bg);padding:10px 12px;border-radius:6px";
+    warn.innerHTML = "This page is served from <code>" + escapeHtml(redirectUri) + "</code>. Microsoft Entra rejects this "
+      + "(error AADSTS500111 — invalid scheme). Open the app over <b>http://localhost:&lt;port&gt;</b> "
+      + "or an <b>https://</b> URL — not <code>file://</code> and not a machine name/IP over http.";
+    $("redirectUri").closest(".hint").after(warn);
+  }
+})();
+
+const SCOPES = [
+  "User.Read",
+  "AgentIdentityBlueprint.Read.All",
+  "AgentIdentity.Read.All",
+  "AgentIdentityBlueprintPrincipal.Read.All",   // to find blueprints present in the tenant, incl. externally-owned ones
+  "Application.Read.All",   // to resolve permission-scope GUIDs to names + read app role assignments (application consent)
+  "DelegatedPermissionGrant.Read.All",   // to read delegated permission grants (delegated consent) on the blueprint principal
+  "CrossTenantInformation.ReadBasic.All"   // to resolve an external blueprint's owner tenant to its org name / domain
+];
+
+// ---- restore saved config ----
+["clientId", "tenantId", "graphVer"].forEach(k => {
+  const v = localStorage.getItem("aib_" + k);
+  if (v) $(k).value = v;
+});
+if (!$("tenantId").value) $("tenantId").value = "organizations";
+
+let msalInstance = null;
+let msalConfigKey = null;   // the clientId|tenantId the live instance was actually built with
+let account = null;
+
+// MSAL bakes clientId + authority in at construction, so an instance built from a previously
+// saved config keeps pointing at the OLD app registration even after you type a new client ID —
+// which surfaces as AADSTS700016 naming an appId you're no longer using.
+function configKey() {
+  return $("clientId").value.trim() + "|" + ($("tenantId").value.trim() || "organizations");
+}
+
+function graphBase() {
+  return "https://graph.microsoft.com/" + ($("graphVer").value || "v1.0");
+}
+
+function setStatus(msg, isErr = false, busy = false) {
+  const el = $("status");
+  el.className = isErr ? "err" : "";
+  el.innerHTML = (busy ? '<span class="spinner"></span>' : "") + (msg || "");
+}
+
+function buildMsal() {
+  if (typeof msal === "undefined") {
+    setStatus("The MSAL sign-in library failed to load — check your network / CDN access, then reload.", true);
+    return null;
+  }
+  const clientId = $("clientId").value.trim();
+  const tenantId = $("tenantId").value.trim() || "organizations";
+  if (!clientId) { setStatus("Enter an Application (client) ID first.", true); return null; }
+  localStorage.setItem("aib_clientId", clientId);
+  localStorage.setItem("aib_tenantId", tenantId);
+  localStorage.setItem("aib_graphVer", $("graphVer").value);
+  return new msal.PublicClientApplication({
+    auth: {
+      clientId,
+      authority: "https://login.microsoftonline.com/" + tenantId,
+      redirectUri
+    },
+    cache: { cacheLocation: "sessionStorage" }
+  });
+}
+
+async function ensureInstance() {
+  // Rebuild whenever the client ID / tenant changes — otherwise the cached instance silently
+  // authenticates against whichever app registration it was first constructed with.
+  if (msalInstance && msalConfigKey !== configKey()) {
+    msalInstance = null;
+    msalConfigKey = null;
+    account = null;
+  }
+  if (!msalInstance) {
+    const inst = buildMsal();
+    if (!inst) return false;
+    msalInstance = inst;
+    msalConfigKey = configKey();
+    await msalInstance.initialize();
+    const existing = msalInstance.getAllAccounts();
+    account = existing.length ? existing[0] : null;
+  }
+  return true;
+}
+
+async function signIn() {
+  try {
+    setStatus("Signing in…", false, true);
+    if (!(await ensureInstance())) return;
+    const res = await msalInstance.loginPopup({ scopes: SCOPES, prompt: "select_account" });
+    account = res.account;
+    onSignedIn();
+  } catch (e) {
+    setStatus("Sign-in failed: " + escapeHtml(e.message || String(e)), true);
+  }
+}
+
+function signOut() {
+  if (msalInstance && account) msalInstance.logoutPopup({ account });
+  account = null;
+  $("who").textContent = "";
+  $("results").classList.add("hidden");
+  $("connectForm").classList.remove("hidden");   // show the connect form again
+  $("signInBtn").classList.remove("hidden");
+  $("signOutBtn").classList.add("hidden");
+  setStatus("Signed out.");
+}
+
+function onSignedIn() {
+  $("who").innerHTML = "Signed in as <b>" + escapeHtml(account.name || account.username) + "</b><br>" + escapeHtml(account.username);
+  $("results").classList.remove("hidden");
+  $("connectForm").classList.add("hidden");   // hide the connect form once signed in
+  $("signInBtn").classList.add("hidden");
+  $("signOutBtn").classList.remove("hidden");
+  setStatus("Connected. Click “Load blueprints”.");
+  loadBlueprints();
+}
+
+async function token() {
+  try {
+    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account });
+    return r.accessToken;
+  } catch (e) {
+    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES, account });
+    return r.accessToken;
+  }
+}
+
+// Optional elevated scopes. Each feature requests its OWN token silently, so a tenant missing one
+// permission still gets every other feature — the missing one just degrades with a note.
+const ELEVATED_SCOPES     = ["AuditLog.Read.All"];                        // sign-in activity
+const RISK_AGENT_SCOPES   = ["IdentityRiskyAgent.Read.All"];              // beta riskyAgents (agent-native)
+const RISK_SP_SCOPES      = ["IdentityRiskyServicePrincipal.Read.All"];   // fallback: riskyServicePrincipals
+const CA_SCOPES           = ["Policy.Read.All"];                          // Conditional Access policies
+// The ONLY write scope. Deliberately never part of sign-in: the tool stays read-only until you
+// actually delete something, so an auditor can run it without holding delete rights.
+// Agent-native delete scopes. Both are DeleteRestore (least privilege) and only need the Agent ID
+// Administrator role — NOT Cloud Application Administrator. Using the generic /applications delete
+// + Application.ReadWrite.All required Cloud App Admin, which most Agent ID admins don't hold → 403.
+const BLUEPRINT_DELETE_SCOPES = ["AgentIdentityBlueprint.DeleteRestore.All"];   // delete a blueprint (cascades)
+const AGENT_DELETE_SCOPES     = ["AgentIdentity.DeleteRestore.All"];            // delete a single agent identity
+
+let signInAvailable = null;   // null = not attempted, true = loaded, false = scope not consented
+let riskAvailable   = null;
+let caAvailable     = null;
+let workloadIdPremium = null;   // inferred: risk data returned as "hidden" => no Workload ID Premium
+let pendingScopes   = [];       // optional scopes the "grant access" link should request
+
+async function elevatedToken(scopes) {
+  try { return (await msalInstance.acquireTokenSilent({ scopes, account })).accessToken; }
+  catch { return null; }
+}
+
+// Write access is requested interactively, unlike the read-only optional scopes: the user has
+// explicitly asked to delete, so a consent prompt at that moment is expected rather than a
+// surprise. Returns null if consent is declined or the app registration lacks the permission.
+async function writeToken(scopes) {
+  try { return (await msalInstance.acquireTokenSilent({ scopes, account })).accessToken; }
+  catch {
+    try { return (await msalInstance.acquireTokenPopup({ scopes, account })).accessToken; }
+    catch { return null; }
+  }
+}
+
+// Load beta signInActivity per agent identity. signInActivity is beta-only, so this always calls beta.
+async function loadSignInActivity(agents) {
+  signInAvailable = null;
+  agents.forEach(a => { if (a.signInActivity === undefined) a.signInActivity = undefined; });
+  if (!agents.length) return;
+  const at = await elevatedToken(ELEVATED_SCOPES);
+  if (!at) { signInAvailable = false; return; }
+  signInAvailable = true;
+  const betaBase = "https://graph.microsoft.com/beta";
+  const CONC = 8;
+  for (let i = 0; i < agents.length; i += CONC) {
+    await Promise.all(agents.slice(i, i + CONC).map(async a => {
+      if (!a.id) { a.signInActivity = null; return; }
+      try {
+        const resp = await fetch(betaBase + "/servicePrincipals/" + a.id + "?$select=id,signInActivity",
+          { headers: { Authorization: "Bearer " + at } });
+        a.signInActivity = resp.ok ? ((await resp.json()).signInActivity || null) : null;
+      } catch { a.signInActivity = null; }
+    }));
+  }
+}
+
+// Workload-identity risk state. Prefers the agent-native beta /identityProtection/riskyAgents
+// (its subtypes map 1:1 to agent identities and blueprint principals); falls back to
+// /identityProtection/riskyServicePrincipals. Both need Workload ID Premium — without the license
+// Entra returns riskLevel/riskDetail as "hidden", which is how we infer the licensing state.
+// riskState === "confirmedCompromised" is how an admin's confirmCompromised shows up.
+async function loadRiskState(blueprints, agents) {
+  riskAvailable = null; workloadIdPremium = null;
+  let risky = null;
+
+  const atAgent = await elevatedToken(RISK_AGENT_SCOPES);
+  if (atAgent) {
+    try { risky = await graphGetAll("https://graph.microsoft.com/beta/identityProtection/riskyAgents", atAgent); }
+    catch { risky = null; }
+  }
+  if (!risky) {   // fall back to the service-principal risk API
+    const atSp = await elevatedToken(RISK_SP_SCOPES);
+    if (atSp) {
+      try { risky = await graphGetAll(graphBase() + "/identityProtection/riskyServicePrincipals", atSp); }
+      catch { risky = null; }
+    }
+  }
+  if (!risky) { riskAvailable = false; return; }
+  riskAvailable = true;
+
+  const byId = {};
+  risky.forEach(r => { if (r.id) byId[r.id.toLowerCase()] = r; });
+  const anyHidden = risky.some(r => r.riskLevel === "hidden" || r.riskDetail === "hidden");
+  workloadIdPremium = risky.length ? !anyHidden : null;
+
+  const map = r => r ? {
+    level: r.riskLevel || "none",
+    state: r.riskState || "none",
+    detail: r.riskDetail || "",
+    updated: r.riskLastModifiedDateTime || r.riskLastUpdatedDateTime || ""
+  } : null;
+  agents.forEach(a => { a._risk = map(byId[(a.id || "").toLowerCase()]); });
+  blueprints.forEach(bp => { bp._risk = bp._principalId ? map(byId[bp._principalId.toLowerCase()]) : null; });
+}
+
+// Conditional Access coverage. Agent identities are targeted by their OWN fields —
+// clientApplications.includeAgentIdServicePrincipals (which accepts the literal "All"),
+// excludeAgentIdServicePrincipals, and agentIdServicePrincipalFilter — NOT by the workload-identity
+// includeServicePrincipals fields. These only exist on /beta, so this always queries beta.
+// kind: "agent" for agent identities, "sp" for a plain workload identity (blueprint principal).
+const lcArr = a => (a || []).map(s => String(s).toLowerCase());
+
+function caPolicyHit(p, id, kind) {
+  const ca = p.conditions && p.conditions.clientApplications;
+  if (!ca) return null;
+  const incAgent = lcArr(ca.includeAgentIdServicePrincipals);
+  const excAgent = lcArr(ca.excludeAgentIdServicePrincipals);
+  const incSp    = lcArr(ca.includeServicePrincipals);
+  const excSp    = lcArr(ca.excludeServicePrincipals);
+
+  let included, excluded, byFilter = false;
+  if (kind === "agent") {
+    included = incAgent.includes("all") || incAgent.includes(id) || incSp.includes(id);
+    excluded = excAgent.includes(id) || excSp.includes(id);
+    // A custom-security-attribute filter can't be evaluated without the agent's attributes.
+    byFilter = !!ca.agentIdServicePrincipalFilter && !included && !excluded;
+  } else {
+    included = incSp.includes(id) || incSp.includes("serviceprincipalsinmytenant");
+    excluded = excSp.includes(id);
+  }
+  if (!included && !excluded && !byFilter) return null;
+  return { name: p.displayName || p.id, state: p.state || "", excluded, byFilter };
+}
+
+function caEvaluate(policies, id, kind) {
+  if (!id) return null;
+  const hits = [];
+  policies.forEach(p => { const h = caPolicyHit(p, String(id).toLowerCase(), kind || "sp"); if (h) hits.push(h); });
+  return {
+    policies: hits,
+    covered: hits.some(h => !h.excluded && !h.byFilter && h.state === "enabled"),
+    indeterminate: hits.some(h => h.byFilter)   // attribute-filter policy we can't resolve here
+  };
+}
+
+async function loadCaCoverage(blueprints, agents) {
+  caAvailable = null;
+  const at = await elevatedToken(CA_SCOPES);
+  if (!at) { caAvailable = false; return; }
+  let policies = [];
+  try {
+    policies = await graphGetAll("https://graph.microsoft.com/beta"
+      + "/identity/conditionalAccess/policies?$select=id,displayName,state,conditions", at);
+  } catch { caAvailable = false; return; }
+  caAvailable = true;
+  // Keep only policies that scope to agents or workload identities at all.
+  const wl = policies.filter(p => {
+    const ca = p.conditions && p.conditions.clientApplications;
+    if (!ca) return false;
+    return (ca.includeServicePrincipals || []).length || (ca.excludeServicePrincipals || []).length
+      || (ca.includeAgentIdServicePrincipals || []).length || (ca.excludeAgentIdServicePrincipals || []).length
+      || !!ca.agentIdServicePrincipalFilter;
+  });
+  agents.forEach(a => { a._ca = caEvaluate(wl, a.id, "agent"); });
+  // The blueprint principal itself: CA never governs a blueprint acquiring a token to create agents,
+  // so this only reports an explicit workload-identity targeting, not "coverage" of the blueprint.
+  blueprints.forEach(bp => { bp._ca = caEvaluate(wl, bp._principalId, "sp"); });
+}
+
+// Follow @odata.nextLink and return the full collection.
+async function graphGetAll(url, accessToken) {
+  let out = [];
+  let next = url;
+  while (next) {
+    const resp = await fetch(next, {
+      headers: {
+        Authorization: "Bearer " + accessToken,
+        "ConsistencyLevel": "eventual"
+      }
+    });
+    if (!resp.ok) {
+      let detail = "";
+      try { detail = (await resp.json()).error?.message || ""; } catch {}
+      throw new Error("HTTP " + resp.status + " on " + next.replace(graphBase(), "") + (detail ? " — " + detail : ""));
+    }
+    const json = await resp.json();
+    out = out.concat(json.value || []);
+    next = json["@odata.nextLink"];
+  }
+  return out;
+}
+
+function tenancy(signInAudience) {
+  return signInAudience === "AzureADMyOrg"
+    ? { label: "Single-tenant", cls: "b-single", single: true }
+    : { label: "Multi-tenant", cls: "b-risk-med", single: false };   // multi-tenant = consent-phishing surface
+}
+
+function fmtDate(iso) { return iso ? String(iso).slice(0, 10) : ""; }
+
+function plural(n, one, many) { return n + " " + (n === 1 ? one : (many || one + "s")); }
+
+function b64ToHex(b64) {
+  if (!b64) return "";
+  try {
+    const bin = atob(b64);
+    let hex = "";
+    for (let i = 0; i < bin.length; i++) hex += bin.charCodeAt(i).toString(16).padStart(2, "0");
+    return hex.toUpperCase();
+  } catch { return b64; }
+}
+
+// Flatten a blueprint's secrets + certificates with computed expiry status.
+function credList(bp) {
+  if (bp._credsUnknown) return [];
+  const now = new Date();
+  const mk = (kind, c) => {
+    const endDate = c.endDateTime ? new Date(c.endDateTime) : null;
+    let status = "none", daysLeft = null;
+    if (endDate) {
+      daysLeft = Math.ceil((endDate - now) / 86400000);
+      status = endDate < now ? "expired" : (daysLeft <= 30 ? "soon" : "valid");
+    }
+    return {
+      kind, name: c.displayName || "", start: c.startDateTime || null, end: c.endDateTime || null,
+      endDate, daysLeft, status,
+      thumbprint: kind === "Certificate" ? b64ToHex(c.customKeyIdentifier) : ""
+    };
+  };
+  const secrets = (bp.passwordCredentials || []).map(c => mk("Secret", c));
+  const certs = [];
+  const seen = new Set();
+  (bp.keyCredentials || []).forEach(c => {              // dedupe cert Sign/Verify pairs
+    const k = (c.customKeyIdentifier || "") + "|" + (c.endDateTime || "");
+    if (seen.has(k)) return;
+    seen.add(k);
+    certs.push(mk("Certificate", c));
+  });
+  return [...secrets, ...certs];
+}
+
+function expiryBadge(bp) {
+  const list = credList(bp).filter(c => c.end);
+  if (!list.length) return "";
+  const tip = list.map(c => `${c.kind}${c.name ? " '" + c.name + "'" : ""}: ${c.status === "expired" ? "EXPIRED " + fmtDate(c.end) : "expires " + fmtDate(c.end) + " (" + c.daysLeft + "d)"}`).join(" • ");
+  const expired = list.filter(c => c.status === "expired");
+  const soon = list.filter(c => c.status === "soon");
+  if (expired.length) return `<div style="margin-top:4px"><span class="badge b-risk-high" title="${escapeHtml(tip)}">${expired.length} expired</span></div>`;
+  if (soon.length) return `<div style="margin-top:4px"><span class="badge b-risk-med" title="${escapeHtml(tip)}">expires in ${Math.min(...soon.map(c => c.daysLeft))}d</span></div>`;
+  return "";   // a healthy future expiry is the default — the date lives in the credential details
+}
+
+function credBadges(bp) {
+  if (bp._credsUnknown) return `<span class="badge b-none" title="Credentials live on the blueprint application in the publisher's tenant — and that credential can impersonate the agent identities created here. The publisher, not you, holds the key.">n/a · external</span>`;
+  const secrets = (bp.passwordCredentials || []).length;
+  const certs   = (bp.keyCredentials || []).length;
+  const fic     = (bp.federatedIdentityCredentials || []).length;
+  const parts = [];
+  if (secrets) parts.push(`<span class="badge b-secret">🔑 Secret · ${secrets}</span>`);
+  if (certs)   parts.push(`<span class="badge b-cert">Certificate · ${certs}</span>`);
+  if (fic)     parts.push(`<span class="badge b-fic">🔗 FIC · ${fic}</span>`);
+  if (!parts.length) parts.push(`<span class="badge b-none">None configured</span>`);
+  return parts.join("");
+}
+
+// Well-known Microsoft first-party tenants (recognized offline, no API call needed).
+const MICROSOFT_TENANTS = {
+  "f8cdef31-a31e-4b4a-93e4-5f571e91255a": "Microsoft Services",
+  "72f988bf-86f1-41af-91ab-2d7cd011db47": "Microsoft"
+};
+function msTenantName(id) { return id ? (MICROSOFT_TENANTS[id.toLowerCase()] || null) : null; }
+
+// Verify/name an external blueprint's owner tenant via findTenantInformationByTenantId.
+async function loadTenantInfo(blueprints, base, at) {
+  const ids = new Set();
+  blueprints.forEach(bp => { if (bp._external && bp._ownerOrg) ids.add(bp._ownerOrg); });
+  const info = {};
+  await Promise.all([...ids].map(async id => {
+    try {
+      const resp = await fetch(base + "/tenantRelationships/findTenantInformationByTenantId(tenantId='" + id + "')",
+        { headers: { Authorization: "Bearer " + at } });
+      if (resp.ok) { const t = await resp.json(); info[id] = { name: t.displayName || "", domain: t.defaultDomainName || "" }; }
+    } catch { /* best effort */ }
+  }));
+  blueprints.forEach(bp => {
+    if (!bp._external || !bp._ownerOrg) return;
+    const t = info[bp._ownerOrg];
+    bp._ownerName = (t && t.name) || msTenantName(bp._ownerOrg) || "";
+    bp._ownerDomain = (t && t.domain) || "";
+    bp._ownerIsMicrosoft = !!msTenantName(bp._ownerOrg)
+      || /^microsoft\b/i.test(bp._ownerName || "")
+      || /(^|\.)microsoft\.com$/i.test(bp._ownerDomain || "");
+  });
+}
+
+// Join blueprint principals onto the application list. A principal whose appId has no matching
+// application is an externally-owned blueprint (published from another tenant) — surface it too.
+function mergePrincipals(blueprints, principals, myTenant) {
+  const byApp = {};
+  blueprints.forEach(bp => { byApp[bp.appId] = bp; });
+  const mine = myTenant ? myTenant.toLowerCase() : null;
+
+  principals.forEach(p => {
+    const owner = p.appOwnerOrganizationId || null;
+    const external = mine && owner && owner.toLowerCase() !== mine;
+    const existing = byApp[p.appId];
+    if (existing) {
+      existing._principalId = p.id;
+      existing._ownerOrg = owner;
+      existing._external = !!external;   // normally false: the app is local
+      existing._assignmentRequired = p.appRoleAssignmentRequired;
+      existing._accountEnabled = p.accountEnabled;
+    } else {
+      const bp = {
+        appId: p.appId,
+        displayName: p.appDisplayName || "(external blueprint)",
+        signInAudience: "AzureADMultipleOrgs",   // externally added blueprints are published multi-tenant
+        _external: true,
+        _ownerOrg: owner,
+        _principalId: p.id,
+        _perms: null,          // application (and its permissions/credentials) live in the owner tenant
+        _credsUnknown: true,
+        _appRoles: p.appRoles || [],   // roles exposed by the blueprint, visible on the local principal
+        _assignmentRequired: p.appRoleAssignmentRequired,
+        _accountEnabled: p.accountEnabled
+      };
+      byApp[p.appId] = bp;
+      blueprints.push(bp);
+    }
+  });
+}
+
+// Offline fallback names, used only when the resource's service principal can't be read from the
+// tenant (the SP's own displayName always wins).
+const WELL_KNOWN_APIS = {
+  "00000003-0000-0000-c000-000000000000": "Microsoft Graph",
+  "ea9ffc3e-8a23-4a7d-836d-234d7c7565c1": "Agent 365 Tools",
+  "9b975845-388f-4429-889e-eab1ef63949c": "Agent 365 Observability",
+  "5a807f24-c9de-44ee-a3a7-329e88a00ffc": "Messaging Bot API"
+};
+
+// Name a resource app: tenant SP displayName > well-known fallback > raw appId.
+async function resolveResourceNames(appIds, base, at) {
+  await Promise.all([...appIds].map(async appId => {
+    if (!appId || resourceNames[appId]) return;
+    try {
+      const resp = await fetch(base + "/servicePrincipals(appId='" + appId + "')?$select=appId,displayName",
+        { headers: { Authorization: "Bearer " + at } });
+      if (resp.ok) {
+        const sp = await resp.json();
+        if (sp.displayName) { resourceNames[appId] = sp.displayName; return; }
+      }
+    } catch { /* fall through to the offline map */ }
+    if (WELL_KNOWN_APIS[appId]) resourceNames[appId] = WELL_KNOWN_APIS[appId];
+  }));
+}
+
+// Microsoft's agent-identity permission blocklist. High-risk Graph permissions that can NEVER be
+// granted to (or be effective for) an agent — even an admin can't consent. A declared perm on this
+// list is inert. Blocked-as-application and blocked-as-delegated are tracked separately because the
+// block differs by grant type. Source: Microsoft Entra Agent ID — "permissions blocked for agents".
+const BLOCKED_APP = new Set([
+  "agentidentity.create","agentidentity.create.all","agentidentity.createasmanager",
+  "agentidentityblueprint.create","agentidentityblueprint.createasmanager","agentidentityblueprint.readwrite.all",
+  "agentidentityblueprintprincipal.create","application.readwrite.all","application.readwrite.ownedby",
+  "approleassignment.readwrite.all","bitlockerkey.read.all","calendars.read","channelmessage.read.all",
+  "channelmessage.read.group","chat.read.all","chat.readwrite.all","consentrequest.readwrite.all",
+  "customsecattributeassignment.readwrite.all","customsecattributedefinition.readwrite.all",
+  "delegatedpermissiongrant.readwrite.all","device.readwrite.all","devicemanagementconfiguration.read.all",
+  "directory.readwrite.all","directory.write.restricted","domain.readwrite.all","eduroster.readwrite.all",
+  "entitlementmanagement.readwrite.all","files.read.all","files.readwrite.all","group.create",
+  "group.readwrite.all","groupmember.readwrite.all","identityprovider.readwrite.all",
+  "lifecyclemanagement.readwrite.all","organization.readwrite.all","policy.readwrite.authenticationmethod",
+  "policy.readwrite.crosstenantaccess","policy.readwrite.permissiongrant","policy.readwrite.securitydefaults",
+  "printjob.readwrite.all","privilegedaccess.readwrite.azuread","privilegedaccess.readwrite.azureresources",
+  "rolemanagement.readwrite.directory","sites.fullcontrol.all","sites.manage.all","sites.read.all",
+  "sites.readwrite.all","tasks.readwrite.all","user-passwordprofile.readwrite.all","user.deleterestore.all",
+  "user.enabledisableaccount.all","user.invite.all","user.readwrite.all","userauthenticationmethod.readwrite.all"
+]);
+const BLOCKED_DELEG = new Set([
+  "customsecattributeassignment.readwrite.all","customsecattributedefinition.readwrite.all",
+  "delegatedpermissiongrant.readwrite.all","device.write.restricted","directory.accessasuser.all",
+  "directory.readwrite.all","directory.write.restricted","domain.readwrite.all","group.readwrite.all",
+  "group.write.restricted","groupmember.readwrite.all","rolemanagement.readwrite.all",
+  "rolemanagement.readwrite.directory","user-passwordprofile.readwrite.all","user.deleterestore.all",
+  "user.enabledisableaccount.all","user.readwrite.all","userauthenticationmethod.read.all",
+  "userauthenticationmethod.readwrite.all"
+]);
+function isBlockedPerm(name, type) {
+  const n = (name || "").toLowerCase();
+  return type === "application" ? BLOCKED_APP.has(n) : BLOCKED_DELEG.has(n);
+}
+
+let roleIdToName = {};    // appRole GUID -> permission value, across all resolved resource SPs
+let resourceNames = {};   // resource appId -> display name, across all resolved resource SPs
+
+// Resolve each blueprint's requiredResourceAccess (permission GUIDs) to readable names by
+// reading the resource service principals. Falls back to GUIDs if the SP can't be read.
+async function resolvePermissions(blueprints, base, at) {
+  roleIdToName = {};
+  resourceNames = {};
+  const ids = new Set();
+  blueprints.forEach(bp => (bp.requiredResourceAccess || []).forEach(r => ids.add(r.resourceAppId)));
+
+  const lookup = {};
+  await Promise.all([...ids].map(async appId => {
+    try {
+      const resp = await fetch(
+        base + "/servicePrincipals(appId='" + appId + "')?$select=appId,displayName,appRoles,oauth2PermissionScopes",
+        { headers: { Authorization: "Bearer " + at } });
+      if (!resp.ok) return;
+      const sp = await resp.json();
+      const scopes = {}, roles = {};
+      (sp.oauth2PermissionScopes || []).forEach(s => scopes[s.id] = s.value);
+      (sp.appRoles || []).forEach(r => { roles[r.id] = r.value; roleIdToName[r.id] = r.value; });
+      const nm = sp.displayName || WELL_KNOWN_APIS[appId] || appId;
+      resourceNames[appId] = nm;
+      lookup[appId] = { name: nm, scopes, roles };
+    } catch { /* leave unresolved */ }
+  }));
+
+  blueprints.forEach(bp => {
+    const perms = [];
+    (bp.requiredResourceAccess || []).forEach(rra => {
+      const info = lookup[rra.resourceAppId];
+      const resName = (info && info.name) || WELL_KNOWN_APIS[rra.resourceAppId] || rra.resourceAppId;
+      (rra.resourceAccess || []).forEach(ra => {
+        const deleg = ra.type === "Scope";
+        const name = info ? (deleg ? info.scopes[ra.id] : info.roles[ra.id]) : null;
+        const type = deleg ? "delegated" : "application";
+        const pname = name || ra.id;
+        // Graph is the only resource the agent blocklist applies to; flag declared perms that can never be effective.
+        const blocked = rra.resourceAppId === "00000003-0000-0000-c000-000000000000" && isBlockedPerm(pname, type);
+        perms.push({ name: pname, type, resource: resName, blocked });
+      });
+    });
+    perms.sort((a, b) => a.type.localeCompare(b.type) || a.name.localeCompare(b.name));
+    bp._perms = perms;
+  });
+}
+
+// Inheritable permissions — the escalation lever. Configured per resource app on the blueprint,
+// they decide which grants automatically flow to EVERY agent identity. "allAllowed" means all
+// current & future perms on that resource inherit fleet-wide; "none" means grants stay inert.
+function inheritKind(obj) {
+  if (!obj) return null;
+  let k = (obj.kind || (obj["@odata.type"] || "").split(".").pop() || "").toLowerCase();
+  if (k.includes("allallowed")) return "all";
+  if (k.includes("enumerated")) return "enumerated";
+  if (k.includes("no")) return "none";
+  return k || null;
+}
+function inheritScopeList(obj) {
+  return (obj && (obj.scopes || obj.value || obj.enumeratedScopes)) || [];
+}
+async function loadInheritable(blueprints, base, at) {
+  const raw = new Map();
+  await Promise.all(blueprints.map(async bp => {
+    bp._inherit = [];
+    if (bp._external || !bp.id) return;   // external blueprint's application lives in another tenant
+    try {
+      raw.set(bp, await graphGetAll(base + "/applications/" + bp.id
+        + "/microsoft.graph.agentIdentityBlueprint/inheritablePermissions", at));
+    } catch { /* best effort — betas/tenants may not expose it */ }
+  }));
+
+  // A blueprint can inherit permissions for resources it never declares (Agent 365 Tools,
+  // Observability, …), so those appIds aren't in resourceNames yet — resolve them before rendering,
+  // otherwise the chips show raw GUIDs.
+  const need = new Set();
+  raw.forEach(entries => entries.forEach(e => { if (e.resourceAppId) need.add(e.resourceAppId); }));
+  await resolveResourceNames(need, base, at);
+
+  raw.forEach((entries, bp) => {
+    bp._inherit = entries.map(e => ({
+      resourceAppId: e.resourceAppId,
+      resource: resourceNames[e.resourceAppId] || WELL_KNOWN_APIS[e.resourceAppId] || e.resourceAppId,
+      scopesKind: inheritKind(e.inheritableScopes),
+      scopesList: inheritScopeList(e.inheritableScopes),
+      rolesKind: inheritKind(e.inheritableRoles)
+    }));
+  });
+}
+function inheritOf(bp) { return bp._inherit || []; }
+function inheritHasAll(bp) { return inheritOf(bp).some(i => i.scopesKind === "all" || i.rolesKind === "all"); }
+
+// `inheritablePermissions` is the ONLY thing that makes a blueprint principal's grants matter. The
+// principal itself is a factory, not an app — the STS ignores its own oauth2PermissionGrants /
+// appRoleAssignments (verified). A granted permission becomes agent-effective only when an
+// inheritable conduit (allAllowed or enumerated) carries it to the agents. So grant risk is scored
+// through the conduit, never on the principal alone.
+function conduitCarries(bp) {
+  return inheritOf(bp).some(i => ["all", "enumerated"].includes(i.scopesKind) || ["all", "enumerated"].includes(i.rolesKind));
+}
+function grantsReachAgents(bp) { return (consentOf(bp).app || []).length > 0 && conduitCarries(bp); }
+// Displacement: the moment a blueprint principal holds any EXPLICIT app-role grant, the platform
+// drops its implicit CreateAsManager from enumeration (still functional). Signals that.
+function displacedCreateAsManager(bp) {
+  return (consentOf(bp).app || []).some(a => (a.role || "").toLowerCase() !== "agentidentity.createasmanager");
+}
+
+// inheritablePermissions is deprecated (announced ONLY on the endpoint's response headers). The
+// sunset date is asserted by the API but NOT published anywhere verifiable: the deprecation Link
+// header points to an internal test domain (developer.microsoft-tst.com, does not resolve) and the
+// Graph changelog tag is empty (verified 2026-07). Treat the date as advisory, not a commitment.
+const INHERIT_SUNSET = "This inheritance API (inheritablePermissions) is deprecated. Its response headers assert a sunset of 28 Nov 2027, but that date is NOT published in the Graph changelog or Learn — the deprecation link points to an internal test domain that doesn't resolve (verified 2026-07). Treat it as advisory, not a commitment; a successor is expected. Don't build lasting guidance on it.";
+
+function inheritChips(bp) {
+  if (bp._external) return "";
+  const list = inheritOf(bp);
+  if (!list.length) return "";   // no inheritance configured is the default — render nothing
+  const fmtScopes = i => i.scopesKind === "all" ? "all allowed"
+    : i.scopesKind === "enumerated" ? `${i.scopesList.length} enumerated`
+    : i.scopesKind === "none" ? "none" : (i.scopesKind || "—");
+  const fmtRoles = i => !i.rolesKind ? "" : (i.rolesKind === "all" ? "all allowed" : i.rolesKind);
+  const chips = list.map(i => {
+    const risky = i.scopesKind === "all" || i.rolesKind === "all";
+    const roles = fmtRoles(i);
+    const tip = `${i.resource} · appId ${i.resourceAppId}\nscopes=${fmtScopes(i)}${roles ? ", roles=" + roles : ""}`
+      + (i.scopesKind === "enumerated" && i.scopesList.length ? "\n" + i.scopesList.join(", ") : "")
+      + (risky ? "\nallAllowed inherits every current & future perm on this resource to all agents." : "");
+    return `<span class="badge ${risky ? "b-risk-med" : "b-deleg"}" title="${escapeHtml(tip + "\n\n" + INHERIT_SUNSET)}">${escapeHtml(i.resource)}: scopes ${fmtScopes(i)}${roles ? " · roles " + roles : ""}</span>`;
+  });
+  return `<div class="hint" style="margin-top:6px" title="${escapeHtml(INHERIT_SUNSET)}">Inheritable → agents: ${chips.join(" ")} <span style="opacity:.7">· deprecated API (sunset 2027-11-28, API-asserted only)</span></div>`;
+}
+
+function appRolesOf(bp) {
+  return bp._appRoles || bp.appRoles || [];
+}
+
+function consentOf(bp) {
+  return bp._consent || { delegated: [], app: [] };
+}
+
+// What has actually been consented to the blueprint principal in this tenant:
+// delegated grants (oauth2PermissionGrants) and application permissions (appRoleAssignments).
+async function loadConsent(blueprints, base, at) {
+  await Promise.all(blueprints.map(async bp => {
+    bp._consent = { delegated: [], app: [] };
+    bp._assignees = [];   // principals holding this blueprint's app roles (appRoleAssignedTo)
+    if (!bp._principalId) return;
+    try {
+      const grants = await graphGetAll(base + "/servicePrincipals/" + bp._principalId + "/oauth2PermissionGrants", at);
+      grants.forEach(g => (g.scope || "").trim().split(/\s+/).filter(Boolean).forEach(s =>
+        bp._consent.delegated.push({ scope: s, consentType: g.consentType })));
+    } catch { /* best effort */ }
+    try {
+      const asg = await graphGetAll(base + "/servicePrincipals/" + bp._principalId + "/appRoleAssignments", at);
+      asg.forEach(a => bp._consent.app.push({
+        resource: a.resourceDisplayName || "",
+        role: roleIdToName[a.appRoleId] || a.appRoleId
+      }));
+    } catch { /* best effort */ }
+    try {
+      const assignedTo = await graphGetAll(base + "/servicePrincipals/" + bp._principalId + "/appRoleAssignedTo", at);
+      bp._assignees = assignedTo.map(a => ({
+        name: a.principalDisplayName || a.principalId,
+        type: a.principalType || "",
+        appRoleId: a.appRoleId
+      }));
+    } catch { /* best effort */ }
+  }));
+}
+
+function assigneesOf(bp) { return bp._assignees || []; }
+
+function fmtDir(d) {
+  return {
+    name: d.displayName || d.userPrincipalName || d.id,
+    upn: d.userPrincipalName || "",
+    type: (d["@odata.type"] || "").split(".").pop() || ""
+  };
+}
+
+// Owners & sponsors — accountability for the blueprint.
+// Home: from the application (owners + sponsors). External: from the principal (who added it).
+async function loadOwnersSponsors(blueprints, base, at) {
+  await Promise.all(blueprints.map(async bp => {
+    bp._owners = [];
+    bp._sponsors = [];
+    try {
+      if (bp._external && bp._principalId) {
+        const o = await graphGetAll(base + "/servicePrincipals/" + bp._principalId
+          + "/microsoft.graph.agentIdentityBlueprintPrincipal/owners?$select=id,displayName,userPrincipalName", at).catch(() => []);
+        bp._owners = o.map(fmtDir);
+      } else if (bp.id) {
+        const [o, s] = await Promise.all([
+          graphGetAll(base + "/applications/" + bp.id + "/owners?$select=id,displayName,userPrincipalName", at).catch(() => []),
+          graphGetAll(base + "/applications/" + bp.id + "/sponsors?$select=id,displayName,userPrincipalName", at).catch(() => [])
+        ]);
+        bp._owners = o.map(fmtDir);
+        bp._sponsors = s.map(fmtDir);
+      }
+    } catch { /* best effort */ }
+  }));
+}
+
+// Owners and sponsors are identical on nearly every row, so they don't earn a line in the table —
+// they live in the blueprint name's tooltip, in the "No owner" exception badge, and in the filter.
+function principalsTip(bp) {
+  const fmt = list => (list || []).map(p => p.name + (p.upn ? " <" + p.upn + ">" : "")).join(", ");
+  const o = fmt(bp._owners), s = fmt(bp._sponsors);
+  return [o ? "Owners: " + o : "No owner assigned", s ? "Sponsors: " + s : ""].filter(Boolean).join("\n");
+}
+
+// appRoleAssignmentRequired gates INBOUND access: whether a caller must hold one of this
+// blueprint's app roles before Entra will issue it a token for the blueprint. Two reasons that
+// only matters when the blueprint actually exposes app roles:
+//   - false is the Entra DEFAULT, so flagging it fires on essentially every blueprint;
+//   - with no app roles there is nothing to assign, and a blueprint isn't callable as a resource
+//     anyway (it only mints agent identities), so "open" gates a door into an empty room.
+function isOpenAccess(bp) {
+  return bp._assignmentRequired === false && appRolesOf(bp).length > 0;
+}
+
+function assignmentBadge(bp) {
+  if (isOpenAccess(bp))
+    return `<div style="margin-top:5px"><span class="badge b-risk-med" title="This blueprint exposes app roles, but appRoleAssignmentRequired is false — any principal in the tenant can be issued a token for them without being assigned a role first.">Open access</span></div>`;
+  return "";
+}
+
+// Declared permissions (requiredResourceAccess) — a declaration, NOT an effective grant. Perms on
+// Microsoft's agent blocklist are struck through: they can never be granted, so they overstate risk.
+function permChips(bp) {
+  if (bp._perms === null) return `<span class="badge b-none" title="The blueprint application — its declaration AND its inheritance conduit — lives in the publisher's tenant and returns 404 to you (verified 2026-07). You've admitted a factory whose fan-out surface you cannot inspect.">n/a · external</span>`;
+  const perms = bp._perms || [];
+  if (!perms.length) return "";   // declaring nothing is the default — render nothing
+  const max = 8;
+  const chips = perms.slice(0, max).map(p => {
+    if (p.blocked)
+      return `<span class="badge b-blocked" title="${escapeHtml(p.resource + " · " + p.type)} — BLOCKED for agents: on Microsoft's agent permission blocklist, so it can never be granted or effective.">${escapeHtml(p.name)}</span>`;
+    const cls = p.type === "delegated" ? "b-deleg" : "b-approle";
+    return `<span class="badge ${cls}" title="${escapeHtml(p.resource + " · " + p.type)} — declared (requiredResourceAccess), not necessarily granted.">${escapeHtml(p.name)}</span>`;
+  });
+  if (perms.length > max) {
+    const rest = perms.slice(max).map(p => p.name).join(", ");
+    chips.push(`<span class="badge b-none" title="${escapeHtml(rest)}">+${perms.length - max} more</span>`);
+  }
+  const blockedN = perms.filter(p => p.blocked).length;
+  const note = blockedN
+    ? `<div class="hint" style="margin-top:4px;color:var(--red)">${blockedN} declared perm(s) blocked for agents — never effective.</div>`
+    : "";
+  return chips.join("") + note;
+}
+
+// Longest client-secret validity window, in days (0 if none / no dates).
+function secretMaxLifetimeDays(bp) {
+  let max = 0;
+  (bp.passwordCredentials || []).forEach(c => {
+    if (c.startDateTime && c.endDateTime) {
+      const d = Math.round((new Date(c.endDateTime) - new Date(c.startDateTime)) / 86400000);
+      if (d > max) max = d;
+    }
+  });
+  return max;
+}
+
+// Bands. A label that fires on half the estate ("High" on 21 of 46) stops discriminating, so the
+// verdict is a 0–100 score and the band is derived from it. The score orders WITHIN a band, which
+// is what a "High" label could never do.
+const RISK_BANDS = [
+  { key: "act",     label: "Act today",   min: 60, cls: "b-risk-high", color: "var(--red)" },
+  { key: "sprint",  label: "This sprint", min: 25, cls: "b-risk-med",  color: "var(--red)" },
+  { key: "healthy", label: "Healthy",     min: 0,  cls: "b-risk-low",  color: "var(--green)" }
+];
+function bandOf(score) { return RISK_BANDS.find(b => score >= b.min) || RISK_BANDS[RISK_BANDS.length - 1]; }
+
+function riskVerdict(factors, fallbackWhy) {
+  const score = Math.min(100, factors.reduce((n, f) => n + f.pts, 0));
+  const band = bandOf(score);
+  const why = factors.length
+    ? factors.map(f => f.text + " (+" + f.pts + ")").join(" ")
+    : (fallbackWhy || "No elevated risk factors.");
+  return { score, band: band.key, label: band.label, cls: band.cls, color: band.color, factors, why };
+}
+
+// Risk verdict that explains itself: every factor carries its own weight, so the score is always
+// traceable to the reasons behind it. The heaviest levers are an admin-confirmed compromise,
+// allAllowed inheritance (fleet-wide), and a wildcard redirect.
+function riskOf(bp) {
+  const f = [];
+  const add = (pts, text) => f.push({ pts, text });
+
+  if (bp._external) {
+    if (bp._ownerIsMicrosoft)
+      return riskVerdict([], "Microsoft first-party blueprint (owner tenant: " + (bp._ownerName || "Microsoft") + "). Published by Microsoft.");
+    add(20, "Owned by another tenant (published multi-tenant)" + (bp._ownerName ? " — owner: " + bp._ownerName + (bp._ownerDomain ? " (" + bp._ownerDomain + ")" : "") : "") + ". The publisher holds the credential and controls the inheritance conduit — so it can create agent identities in YOUR tenant (bounded by what you consented) and set what they inherit, while you can't inspect that conduit (it lives in the publisher's tenant, returns 404 to you). Admitting an external blueprint grants a foreign party standing identity-creation here — confirm it's trusted and expected.");
+    return riskVerdict(f);
+  }
+  const hasSecret  = (bp.passwordCredentials || []).length > 0;
+  const secretDays = secretMaxLifetimeDays(bp);
+  const multi      = !tenancy(bp.signInAudience).single;
+  const open       = isOpenAccess(bp);   // only counts where the blueprint exposes app roles to gate
+  const inheritAll = inheritHasAll(bp);
+  const grantedApp = (consentOf(bp).app || []);
+  const carries    = conduitCarries(bp);                 // do inheritable perms actually flow to agents?
+  const grantsFlow = grantedApp.length > 0 && carries;   // grants matter only when the conduit carries them
+  const inertGrants = grantedApp.length > 0 && !carries; // granted on the principal but stuck there (factory)
+  const mailSend   = grantedApp.some(a => (a.role || "").toLowerCase() === "mail.send");
+  const agentN     = agentCount(bp);
+  const cf         = credFlags(bp);
+  const redir      = redirectInfo(bp);
+  // Dormant fleet: sign-in loaded, has agents, none active in 30d, and still holds a live credential.
+  const agents     = (loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || [];
+  const allDormant = allAgentsDormant(bp);
+  const riskState   = ((bp._risk && bp._risk.state) || "").toLowerCase();
+  const riskLevel   = ((bp._risk && bp._risk.level) || "").toLowerCase();
+  const compromised = riskState === "confirmedcompromised";
+  const atRisk      = riskState === "atrisk";
+  const caAgents    = agents.filter(a => a._ca);
+  const caUncov     = caAgents.filter(a => !a._ca.covered).length;
+  const caUncovered = caAvailable === true && caAgents.length > 0 && caUncov > 0;
+  const riskyAgents = agents.filter(a => ((a._risk && a._risk.state) || "").toLowerCase() === "confirmedcompromised"
+                                      || ((a._risk && a._risk.state) || "").toLowerCase() === "atrisk");
+
+  // An admin-confirmed compromise alone pins the score to 100 — nothing outranks it.
+  if (compromised)      add(100, "Admin-confirmed COMPROMISED in Identity Protection (confirmCompromised was raised) — investigate now.");
+  else if (atRisk)      add(riskLevel === "high" ? 40 : 25, "Identity Protection flags this identity at risk (level: " + (bp._risk.level || "?") + ").");
+  if (riskyAgents.length) add(25, riskyAgents.length + " agent identit" + (riskyAgents.length === 1 ? "y is" : "ies are") + " flagged at risk / compromised by Identity Protection.");
+  if (allDormant)       add(30, "All agent identities dormant (>30d) while holding a live credential — act on this today.");
+  if (inheritAll)       add(30, "Inheritable permissions set to allAllowed — every agent inherits ALL of the resource's perms fleet-wide, including ones granted later (the escalation lever).");
+  if (redir.wildcard)   add(30, "Wildcard redirect URI — tokens can be redirected to attacker-controlled hosts.");
+  if (mailSend && carries) add(20, "Mail.Send is granted AND carried to agents by the inheritable conduit — those agents can send mail as any user (send-as-anyone).");
+  if (multi)            add(20, "Multi-tenant (AzureADMultipleOrgs) — usable from other tenants; a consent-phishing surface.");
+  if (open)             add(20, "Exposes " + appRolesOf(bp).length + " app role(s) with no assignment required — any principal in the tenant can be issued a token for them.");
+  if (grantsFlow)       add(Math.min(12, grantedApp.length * 3), grantedApp.length + " application permission(s) granted AND carried to every agent by the inheritable conduit — this is what the agents can actually do.");
+  if (hasSecret)        add(15, "Uses a client secret — the weakest credential. Prefer a managed-identity federated credential (FIC).");
+  if (cf.secretPlusFic) add(15, "Client secret retained alongside a FIC — a live fallback credential path that defeats the point of the FIC. Remove the secret.");
+  if (redir.http)       add(12, "Plain-http (non-loopback) redirect URI — tokens returned over cleartext.");
+  if (cf.orphan)        add(12, "Orphan: 0 agent identities but holds a live credential — dead blueprint, cleanup candidate.");
+  if (caUncovered)      add(10, caUncov + " of " + caAgents.length + " agent identit" + (caAgents.length === 1 ? "y is" : "ies are") + " not covered by an enforced Conditional Access policy.");
+  if (cf.multiSecret)   add(8,  credCounts(bp).secret + " client secrets configured — accumulation from re-provisioning; prune stale ones.");
+  if (secretDays > 180) add(8,  "Long-lived secret (" + secretDays + "-day validity) — shorten the rotation window.");
+  if (!(bp._owners || []).length) add(8, "No owner assigned — nobody is accountable for this blueprint.");
+  if (credList(bp).some(c => c.status === "expired")) add(5, "Holds an expired credential — prune it.");
+  // Honest zero-point factors: recorded so the "why" panel explains the inert/displaced state.
+  if (inertGrants)      add(0, grantedApp.length + " application permission(s) sit on the blueprint principal, but no inheritable conduit carries them to agents — inert today. A blueprint principal is a factory; the STS ignores its own grants. But this is pre-positioned, not safe: a single conduit change (which Entra does NOT record in the audit log) would make all of these live on every agent, invisibly.");
+  if (displacedCreateAsManager(bp)) add(0, "An explicit app-role grant is present, so the platform has dropped the implicit AgentIdentity.CreateAsManager from enumeration — it's no longer listed but remains functional.");
+  // Blast radius scales the consequence of everything above, so it earns points but can't alone
+  // push a clean blueprint out of Healthy.
+  if (agentN)           add(Math.min(10, agentN), agentN + " agent identit" + (agentN === 1 ? "y" : "ies") + " inherit this blueprint (blast radius).");
+  // Disabled is recorded but scores 0 — a disabled principal can't get a token.
+  if (cf.disabled)      add(0,  "Blueprint principal is disabled (accountEnabled = false) — it can't be issued tokens.");
+
+  return riskVerdict(f, "No elevated risk factors (no client secret; single-tenant; assignment required; no allAllowed inheritance).");
+}
+
+async function loadBlueprints() {
+  try {
+    setStatus("Loading blueprints…", false, true);
+    const at = await token();
+    const base = graphBase();
+
+    // Blueprints — request credential collections explicitly (keyCredentials needs $select),
+    // and expand the federated identity credentials relationship.
+    const bpUrl = base
+      + "/applications/microsoft.graph.agentIdentityBlueprint"
+      + "?$select=id,appId,displayName,signInAudience,passwordCredentials,keyCredentials,requiredResourceAccess,appRoles,web,spa,publicClient"
+      + "&$expand=federatedIdentityCredentials&$top=100";
+
+    let blueprints = await graphGetAll(bpUrl, at);
+
+    // Fallback: if $expand didn't hydrate FICs, fetch them per blueprint.
+    if (blueprints.length && blueprints[0].federatedIdentityCredentials === undefined) {
+      await Promise.all(blueprints.map(async bp => {
+        try {
+          bp.federatedIdentityCredentials = await graphGetAll(
+            base + "/applications/" + bp.id + "/federatedIdentityCredentials", at);
+        } catch { bp.federatedIdentityCredentials = []; }
+      }));
+    }
+
+    setStatus("Resolving permission scopes…", false, true);
+    await resolvePermissions(blueprints, base, at);
+
+    setStatus("Reading inheritable permissions…", false, true);
+    await loadInheritable(blueprints, base, at);
+
+    // Blueprint principals — the tenant-local instance of every blueprint present here, including
+    // externally-owned (published multi-tenant) blueprints whose application lives in another tenant.
+    setStatus("Loading blueprint principals…", false, true);
+    let principalWarn = "";
+    let principals = [];
+    try {
+      principals = await graphGetAll(
+        base + "/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal"
+        + "?$select=id,appId,appDisplayName,appOwnerOrganizationId,accountEnabled,appRoles,appRoleAssignmentRequired&$top=100", at);
+    } catch (e) {
+      principalWarn = " · blueprint-principal lookup failed (externally-owned blueprints may be hidden)";
+    }
+    mergePrincipals(blueprints, principals, account && account.tenantId);
+
+    setStatus("Verifying owner tenants…", false, true);
+    await loadTenantInfo(blueprints, base, at);
+
+    setStatus("Loading owners & sponsors…", false, true);
+    await loadOwnersSponsors(blueprints, base, at);
+
+    setStatus("Loading agent identities…", false, true);
+    // Agent identities — grouped by their parent blueprint's appId.
+    const agents = await graphGetAll(
+      base + "/servicePrincipals/microsoft.graph.agentIdentity"
+      + "?$select=id,appId,displayName,accountEnabled,agentIdentityBlueprintId&$top=100", at);
+
+    const byBlueprint = {};
+    for (const a of agents) {
+      const key = a.agentIdentityBlueprintId || "(unknown)";
+      (byBlueprint[key] = byBlueprint[key] || []).push(a);
+    }
+
+    setStatus("Loading consent grants…", false, true);
+    await loadConsent(blueprints, base, at);
+
+    setStatus("Loading sign-in activity…", false, true);
+    await loadSignInActivity(agents);
+
+    setStatus("Loading workload identity risk…", false, true);
+    await loadRiskState(blueprints, agents);
+
+    setStatus("Loading Conditional Access coverage…", false, true);
+    await loadCaCoverage(blueprints, agents);
+
+    render(blueprints, byBlueprint, agents.length);
+
+    // Which optional features didn't get a token, and the scopes that would unlock them.
+    const gaps = [];
+    if (signInAvailable === false) gaps.push({ label: "sign-in activity", scopes: ELEVATED_SCOPES });
+    if (riskAvailable === false)   gaps.push({ label: "risk state", scopes: RISK_AGENT_SCOPES.concat(RISK_SP_SCOPES) });
+    if (caAvailable === false)     gaps.push({ label: "CA coverage", scopes: CA_SCOPES });
+    pendingScopes = [...new Set(gaps.flatMap(g => g.scopes))];
+
+    let msg = "Loaded " + plural(blueprints.length, "blueprint")
+      + " and " + plural(agents.length, "agent identity", "agent identities") + "." + principalWarn;
+    if (workloadIdPremium === false)
+      msg += " Risk details are hidden — this tenant appears to lack Workload ID Premium.";
+    if (gaps.length)
+      msg += ` <span title="Needs consent for: ${escapeHtml(pendingScopes.join(", "))}">`
+        + gaps.map(g => g.label).join(", ") + " not loaded</span> — "
+        + `<a href="#" id="grantBtn">grant access</a>`;
+    setStatus(msg);
+    if (gaps.length) $("grantBtn").addEventListener("click", e => { e.preventDefault(); grantElevated(); });
+  } catch (e) {
+    setStatus("Load failed: " + escapeHtml(e.message || String(e)), true);
+  }
+}
+
+// Ask for the optional scopes interactively. Silent acquisition can't surface a consent prompt, so
+// a tenant that has only just added (or not yet admin-consented) these permissions needs one click.
+async function grantElevated() {
+  if (!pendingScopes.length) return;
+  try {
+    setStatus("Requesting consent…", false, true);
+    await msalInstance.acquireTokenPopup({ scopes: pendingScopes, account });
+    await loadBlueprints();
+  } catch (e) {
+    setStatus("Consent failed: " + escapeHtml(e.message || String(e))
+      + " — check the permissions are on the app registration and admin-consented.", true);
+  }
+}
+
+let loaded = null;              // { blueprints, byBlueprint, totalAgents }
+let sortKey = "risk", sortDir = -1;   // default: risk high → low
+let activeScope = null;         // which summary tile is currently scoping the table
+let activeFactor = null;        // which risk-chart bar is currently scoping the table
+
+function render(blueprints, byBlueprint, totalAgents) {
+  loaded = { blueprints, byBlueprint, totalAgents };
+  populateOwnerFilter();
+  populateDeleteSelect();
+  populateAgentDeleteSelect();
+  renderNotices();
+  renderSummary();
+  renderRiskChart();
+  renderBlastFlow();
+  renderTable();
+}
+
+// Only home blueprints are listed: an external blueprint's application lives in the publisher's
+// tenant, so there's nothing here to inspect or delete. The agent count rides along in the option
+// text — that's the blast radius, and it should be visible before you even open the confirmation.
+// This one dropdown drives both "View manifest" (read-only) and "Delete".
+function populateDeleteSelect() {
+  const sel = $("delSelect");
+  const cur = sel.value;
+  const listed = loaded.blueprints
+    .filter(b => !b._external && b.id)
+    .sort((a, b) => (a.displayName || "").localeCompare(b.displayName || ""));
+  sel.innerHTML = `<option value="">Select a blueprint…</option>`
+    + listed.map(b => {
+        const n = agentCount(b);
+        return `<option value="${escapeHtml(b.appId)}">${escapeHtml(b.displayName || "(no name)")}`
+          + (n ? ` — ${plural(n, "agent", "agents")}` : "") + `</option>`;
+      }).join("");
+  sel.value = cur;
+  if (sel.selectedIndex < 0) sel.value = "";
+  $("delBtn").disabled = $("manBtn").disabled = !sel.value;
+}
+
+// Flat list of every agent identity across all blueprints (value = SP object id, needed for the
+// delete URL). Each option carries its parent blueprint so the same-named agents are tellable apart.
+function populateAgentDeleteSelect() {
+  const sel = $("delAgentSelect");
+  const cur = sel.value;
+  const rows = [];
+  Object.entries(loaded.byBlueprint).forEach(([appId, agents]) => {
+    const bp = loaded.blueprints.find(b => b.appId === appId);
+    (agents || []).forEach(a => { if (a.id) rows.push({ a, bpName: bp ? (bp.displayName || "") : "" }); });
+  });
+  rows.sort((x, y) => (x.a.displayName || "").localeCompare(y.a.displayName || ""));
+  sel.innerHTML = `<option value="">Select an agent identity to delete…</option>`
+    + rows.map(({ a, bpName }) =>
+        `<option value="${escapeHtml(a.id)}">${escapeHtml(a.displayName || "(no name)")}`
+        + (bpName ? ` · ${escapeHtml(bpName)}` : "") + `</option>`).join("");
+  sel.value = cur;
+  if (sel.selectedIndex < 0) sel.value = "";
+  $("delAgentBtn").disabled = !sel.value;
+}
+
+// Owners left the table, so the filter has to carry them: list every distinct owner alongside
+// "Missing owners". Selection survives a re-render.
+function populateOwnerFilter() {
+  const sel = $("fltOwners");
+  const cur = sel.value;
+  const names = [...new Set(loaded.blueprints.flatMap(b => (b._owners || []).map(p => p.name)))]
+    .sort((a, b) => a.localeCompare(b));
+  sel.innerHTML = `<option value="">All owners</option><option value="none">Missing owners</option>`
+    + names.map(n => `<option value="owner:${escapeHtml(n)}">${escapeHtml(n)}</option>`).join("");
+  sel.value = cur;
+  if (sel.selectedIndex < 0) sel.value = "";   // the previously-selected owner no longer exists
+}
+
+// Horizontal bar chart of risk-factor prevalence. Only non-zero factors are shown, worst first,
+// so it reads as "what's actually wrong" rather than a checklist of everything that could be.
+function renderRiskChart() {
+  const { blueprints } = loaded;
+  const total = blueprints.length || 1;
+  const rows = RISK_FACTORS
+    .map(f => ({ f, n: blueprints.filter(f.test).length }))
+    .filter(r => r.n > 0)
+    .sort((a, b) => b.n - a.n || (a.f.sev === b.f.sev ? 0 : a.f.sev === "high" ? -1 : 1));
+
+  if (!rows.length) {
+    $("riskChart").innerHTML = `<div class="hint">No risk factors detected across ${blueprints.length} blueprint(s).</div>`;
+    return;
+  }
+  $("riskChart").innerHTML = rows.map(r => {
+    const pct = Math.round((r.n / total) * 100);
+    return `<div class="rf${activeFactor === r.f.key ? " active" : ""}" role="button" tabindex="0" data-factor="${r.f.key}"
+      title="${escapeHtml(r.f.tip + " — " + r.n + " of " + blueprints.length + " blueprint(s). Click to scope the table.")}">
+      <div class="rf-label">${escapeHtml(r.f.label)}</div>
+      <div class="rf-track"><div class="rf-bar ${r.f.sev === "med" ? "sev-med" : ""}" style="--w:${pct}%"></div></div>
+      <div class="rf-count">${r.n}</div>
+    </div>`;
+  }).join("");
+  $("riskChart").querySelectorAll(".rf").forEach(el => {
+    const act = () => applyFactor(el.dataset.factor);
+    el.addEventListener("click", act);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+  });
+}
+
+// Blast-radius Sankey: every AGENT identity flows through one node per column — its blueprint's origin → the
+// blueprint's risk band → the credential that can impersonate it. Ribbon WIDTH = agent-identity count (the blast
+// radius, so a blueprint with 50 agents draws a fat ribbon); ribbon COLOUR = the blueprint's risk band. Nodes
+// scope the table. Weighted by agentCount(bp), not blueprint count — the whole point is where the agents concentrate.
+function renderBlastFlow() {
+  const host = $("blastFlow");
+  if (!host) return;
+  const bps = (loaded && loaded.blueprints) || [];
+  const BAND_LABEL = { act: "Act today", sprint: "This sprint", healthy: "Healthy" };
+  const RISK_FLOW  = { "Act today": "#c62828", "This sprint": "#e8820e", "Healthy": "#3f9142" };
+  const originOf = bp => bp._external ? (bp._ownerIsMicrosoft ? "Microsoft" : "External") : "Home";
+  const keyOf    = bp => { if (bp._external) return "Publisher-held"; const c = credCounts(bp); return c.secret > 0 ? "Client secret" : c.cert > 0 ? "Certificate" : c.fic > 0 ? "FIC" : "No credential"; };
+  const SEP = " ";
+  let total = 0;
+  const rows = [];   // one per blueprint that has agents: { keys:[origin, bandLabel, key], w:agentCount }
+  bps.forEach(bp => { const w = agentCount(bp); if (!w) return; total += w;
+    rows.push({ keys: [originOf(bp), BAND_LABEL[riskOf(bp).band], keyOf(bp)], w }); });
+  if (!total) { host.innerHTML = `<div class="hint">No agent identities under any blueprint — no blast radius to visualise.</div>`; return; }
+
+  const COLS = [
+    { title: "Blueprint origin",  order: ["External", "Microsoft", "Home"] },
+    { title: "Blueprint risk",    order: ["Act today", "This sprint", "Healthy"], risk: true },
+    { title: "Impersonation key", order: ["Client secret", "Certificate", "FIC", "Publisher-held", "No credential"] }
+  ];
+  const NC = COLS.length;
+  const buildNodes = ci => { const c = {}; rows.forEach(r => { c[r.keys[ci]] = (c[r.keys[ci]] || 0) + r.w; });
+    const order = COLS[ci].order.filter(k => c[k]); Object.keys(c).forEach(k => { if (order.indexOf(k) < 0) order.push(k); });
+    return order.map(k => ({ key: k, count: c[k] })); };
+  const colNodes = []; for (let i = 0; i < NC; i++) colNodes.push(buildNodes(i));
+  const W = 1000, nodeW = 12, padL = 150, padR = 175, topPad = 26, botPad = 8, Hd = 300, G = 7;
+  const maxNodes = Math.max.apply(null, colNodes.map(n => n.length));
+  const scale = (Hd - (maxNodes - 1) * G) / total;
+  const colX = COLS.map((_, ci) => padL + (NC > 1 ? (ci / (NC - 1)) * (W - padL - padR - nodeW) : 0));
+  colNodes.forEach(nodes => { const contentH = nodes.reduce((a, n) => a + n.count * scale, 0) + (nodes.length - 1) * G;
+    let y = topPad + Math.max(0, (Hd - contentH) / 2);
+    nodes.forEach(n => { n.y0 = y; n.h = Math.max(2, n.count * scale); n.y1 = y + n.h; n.cur = y; y = n.y1 + G; }); });
+  const svgH = topPad + Hd + botPad;
+  const ribbons = [];
+  for (let ci = 0; ci < NC - 1; ci++) { const sN = colNodes[ci], tN = colNodes[ci + 1], mat = {};
+    sN.forEach(n => { n.cur = n.y0; }); tN.forEach(n => { n.cur = n.y0; });
+    rows.forEach(r => { const k = r.keys[ci] + SEP + r.keys[ci + 1]; mat[k] = (mat[k] || 0) + r.w; });
+    sN.forEach(sn => tN.forEach(tn => { const c = mat[sn.key + SEP + tn.key]; if (!c) return;
+      const hh = c * scale, sy0 = sn.cur, ty0 = tn.cur; sn.cur += hh; tn.cur += hh;
+      ribbons.push({ x0: colX[ci] + nodeW, x1: colX[ci + 1], sy0, sy1: sy0 + hh, ty0, ty1: ty0 + hh, count: c,
+        color: COLS[ci].risk ? RISK_FLOW[sn.key] : (COLS[ci + 1].risk ? RISK_FLOW[tn.key] : "#9aa0a6") }); })); }
+  const ribbonPath = rb => { const mx = (rb.x0 + rb.x1) / 2, f = v => v.toFixed(1);
+    return `M${rb.x0} ${f(rb.sy0)}C${mx} ${f(rb.sy0)} ${mx} ${f(rb.ty0)} ${rb.x1} ${f(rb.ty0)}L${rb.x1} ${f(rb.ty1)}C${mx} ${f(rb.ty1)} ${mx} ${f(rb.sy1)} ${rb.x0} ${f(rb.sy1)}Z`; };
+  const nodeFilter = (ci, key) => {
+    if (COLS[ci].risk) { const m = { "Act today": "act", "This sprint": "sprint", "Healthy": "healthy" }; return m[key] ? "scope:risk:" + m[key] : ""; }
+    if (ci === 0) return key === "External" ? "scope:origin:external" : key === "Home" ? "scope:origin:home" : "";
+    if (ci === NC - 1) return key === "Client secret" ? "factor:secret" : "";
+    return "";
+  };
+  const p = [`<svg viewBox="0 0 ${W} ${svgH}" width="100%" height="${svgH}" class="sankey" preserveAspectRatio="xMidYMid meet">`];
+  ribbons.forEach(rb => p.push(`<path d="${ribbonPath(rb)}" fill="${rb.color}" fill-opacity="0.4" class="sk-ribbon"><title>${rb.count} agent identit${rb.count === 1 ? "y" : "ies"}</title></path>`));
+  COLS.forEach((c, ci) => p.push(`<text x="${(colX[ci] + nodeW / 2).toFixed(0)}" y="14" text-anchor="middle" class="sk-head">${escapeHtml(c.title)}</text>`));
+  colNodes.forEach((nodes, ci) => { const last = ci === NC - 1, x = colX[ci];
+    nodes.forEach(n => { const fill = COLS[ci].risk ? RISK_FLOW[n.key] : "#adb1b5";
+      const flt = nodeFilter(ci, n.key), da = flt ? ` data-skf="${flt}"` : "", cc = flt ? " sk-click" : "";
+      p.push(`<rect x="${x.toFixed(1)}" y="${n.y0.toFixed(1)}" width="${nodeW}" height="${n.h.toFixed(1)}" rx="2" fill="${fill}" class="sk-node${cc}"${da}><title>${escapeHtml(n.key)} — ${n.count} agent identit${n.count === 1 ? "y" : "ies"}</title></rect>`);
+      const ly = ((n.y0 + n.y1) / 2 + 3.5).toFixed(1), lx = last ? (x + nodeW + 7).toFixed(1) : (x - 7).toFixed(1), anc = last ? "start" : "end";
+      p.push(`<text x="${lx}" y="${ly}" text-anchor="${anc}" class="sk-label${cc}"${da}>${escapeHtml(n.key)} <tspan class="sk-count">${n.count}</tspan></text>`); }); });
+  p.push("</svg>");
+  host.innerHTML = p.join("");
+  host.querySelectorAll("[data-skf]").forEach(el => el.addEventListener("click", () => {
+    const t = el.getAttribute("data-skf");
+    if (t.indexOf("scope:") === 0) applyScope(t.slice(6));
+    else if (t.indexOf("factor:") === 0) applyFactor(t.slice(7));
+  }));
+}
+
+// Scope the table to one risk factor; clicking the active bar again clears it.
+function applyFactor(key) {
+  activeFactor = (activeFactor === key) ? null : key;
+  activeScope = null;
+  ["fltSearch", "fltTenancy", "fltRisk", "fltCred", "fltPerm", "fltOrigin", "fltOwners"].forEach(id => { $(id).value = ""; });
+  renderSummary();
+  renderRiskChart();
+  renderTable();
+}
+
+// CISO-facing KPIs: scale, exposure, urgency, accountability. Every tile is a decision, not an
+// Estate-level notices — actionable facts about the whole set, not per-row. Kept honest: the first
+// is a platform fact (a deprecated API), the second names the tool's own reconstruction thesis so a
+// reader never mistakes the risk score for a Microsoft detection.
+function renderNotices() {
+  const { blueprints } = loaded;
+  const dep = blueprints.filter(b => !b._external && inheritOf(b).length).length;
+  const out = [];
+  if (dep) out.push(`<div class="notice notice-warn" title="${escapeHtml(INHERIT_SUNSET)}">
+    <b>${plural(dep, "blueprint")}</b> depend on <code>inheritablePermissions</code> — a deprecated API.
+    Its response headers assert a sunset of <b>28 Nov 2027</b>, but that date isn't published in the changelog or Learn
+    (the deprecation link points to an internal test domain; verified 2026-07) — treat it as advisory. Re-verify before it's withdrawn.</div>`);
+  out.push(`<div class="notice notice-info">
+    The directory under-reports agent privilege: a blueprint principal's own grants are inert <span class="attrib">(per Blue16 research)</span>,
+    and an agent's effective permissions live only in its token, never in Graph. This tool reconstructs exposure from the
+    blueprint (declared &amp; granted × the inheritable conduit × agent count). Conduit changes aren't recorded in the audit log
+    either (verified 2026-07), so a periodic state snapshot like this is the only reliable way to catch a widening. <b>Risk scores and bands are this
+    tool's heuristic</b> — not Microsoft detections. “Compromised / at risk” is the exception: it reads Identity Protection.</div>`);
+  $("notices").innerHTML = out.join("");
+}
+
+// inventory fact — which is why the complement counts (single-tenant, home) aren't here.
+function renderSummary() {
+  const { blueprints, totalAgents } = loaded;
+  let multi = 0, high = 0, noOwner = 0;
+  blueprints.forEach(b => {
+    if (!tenancy(b.signInAudience).single) multi++;
+    if (!(b._owners || []).length) noOwner++;
+    if (riskOf(b).band === "act") high++;
+  });
+  const fcount = key => blueprints.filter(RISK_FACTORS.find(f => f.key === key).test).length;
+  const pct = n => blueprints.length ? " (" + Math.round((n / blueprints.length) * 100) + "% of the estate)" : "";
+
+  // `icon` is a separate arg, not part of `label` — label also feeds the fallback tooltip, and raw
+  // SVG markup would leak into the hover text.
+  const tile = (n, label, color, scope, tip, icon) => {
+    const active = scope.startsWith("factor:") ? activeFactor === scope.slice(7) : activeScope === scope;
+    return `<div class="stat clickable${active ? " active" : ""}" role="button" tabindex="0" data-scope="${scope}" title="${escapeHtml(tip || ("Click to scope the table to: " + label))}">
+       <div class="n"${color ? ` style="color:${color}"` : ""}>${n}</div><div class="l">${icon || ""}${label}</div></div>`;
+  };
+  // A scope-gated KPI with no data must not render "0" — that reads as "all clear" when it means
+  // "never checked". Show an em dash and say what would unlock it.
+  const tileNA = (label, needs) =>
+    `<div class="stat" title="${escapeHtml("Not loaded — needs consent for " + needs + ". Use “grant access” in the status line above.")}">
+       <div class="n" style="color:var(--muted)">—</div><div class="l">${label}</div></div>`;
+
+  $("summary").innerHTML =
+    tile(blueprints.length, "Blueprints", "var(--accent)", "all", null, ICON_BLUEPRINT) +
+    tile(totalAgents, "Agent identities", "var(--accent)", "sort:agents", null, ICON_AGENTID) +
+    tile(high, "Act today", "var(--red)", "risk:act",
+      high + " of " + blueprints.length + " blueprints score 60+" + pct(high) + ".") +
+    (riskAvailable === true
+      ? tile(fcount("iprisk"), "Compromised / at risk", "var(--red)", "factor:iprisk",
+          "Blueprints whose principal or agents are flagged at risk / admin-confirmed compromised by Identity Protection.")
+      : tileNA("Compromised / at risk", "IdentityRiskyAgent.Read.All")) +
+    (signInAvailable === true
+      ? tile(fcount("dormant"), "Dormant + live cred", "var(--red)", "factor:dormant",
+          "Blueprints whose agents have all been dormant 30+ days while a live credential remains — the act-today list.")
+      : tileNA("Dormant + live cred", "AuditLog.Read.All")) +
+    tile(noOwner, "Missing owners", "var(--red)", "owners:none",
+      noOwner + " blueprint(s) with nobody accountable" + pct(noOwner) + ".") +
+    tile(multi, "Multi-tenant", "var(--red)", "tenancy:multi",
+      multi + " blueprint(s) usable from other tenants — the consent-phishing surface" + pct(multi) + ".") +
+    tile(fcount("secret"), "Secrets in use", "var(--red)", "factor:secret",
+      "Blueprints still using a client secret rather than a federated credential (FIC)" + pct(fcount("secret")) + ".");
+
+  $("summary").querySelectorAll(".stat[data-scope]").forEach(el => {
+    const act = () => applyScope(el.dataset.scope);
+    el.addEventListener("click", act);
+    el.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); act(); } });
+  });
+}
+
+// Scope the table from a summary tile: reset filters, apply the tile's dimension; click again clears.
+function applyScope(scope) {
+  if (!scope) return;
+  if (scope.startsWith("factor:")) { applyFactor(scope.slice(7)); return; }   // KPI backed by a risk factor
+  if (scope === activeScope) scope = "all";
+  activeScope = (scope === "all") ? null : scope;
+  activeFactor = null;   // tile scoping and factor scoping are mutually exclusive
+  ["fltSearch", "fltTenancy", "fltRisk", "fltCred", "fltPerm", "fltOrigin", "fltOwners"].forEach(id => { $(id).value = ""; });
+  if (scope.startsWith("tenancy:")) $("fltTenancy").value = scope.split(":")[1];
+  else if (scope.startsWith("origin:")) $("fltOrigin").value = scope.split(":")[1];
+  else if (scope.startsWith("owners:")) $("fltOwners").value = scope.split(":")[1];
+  else if (scope.startsWith("risk:")) { $("fltRisk").value = scope.split(":")[1]; sortKey = "risk"; sortDir = -1; }
+  else if (scope.startsWith("sort:")) { sortKey = scope.split(":")[1]; sortDir = -1; }
+  renderSummary();   // refresh active-tile highlight
+  renderTable();
+}
+
+function credCounts(bp) {
+  return {
+    secret: (bp.passwordCredentials || []).length,
+    cert: (bp.keyCredentials || []).length,
+    fic: (bp.federatedIdentityCredentials || []).length
+  };
+}
+
+function agentCount(bp) { return ((loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || []).length; }
+
+// The risk-exposure chart's factors. `sev` drives bar intensity (red = risk, per the house scheme);
+// `test` is reused to scope the table when a bar is clicked. riskOf() keeps its own richer sentences.
+const RISK_FACTORS = [
+  { key: "secret",      sev: "high", label: "Client secret",             test: bp => credCounts(bp).secret > 0,
+    tip: "Uses a client secret — the weakest credential. Prefer a federated credential (FIC)." },
+  { key: "secretfic",   sev: "high", label: "Secret + FIC",              test: bp => credFlags(bp).secretPlusFic,
+    tip: "A secret retained alongside a FIC is a live fallback credential path." },
+  { key: "multi",       sev: "high", label: "Multi-tenant",              test: bp => !tenancy(bp.signInAudience).single,
+    tip: "AzureADMultipleOrgs — usable from other tenants; a consent-phishing surface." },
+  { key: "open",        sev: "high", label: "Open access",               test: bp => isOpenAccess(bp),
+    tip: "Exposes app roles with no assignment required — any principal in the tenant can be issued a token for them. (Not flagged when the blueprint exposes no roles: appRoleAssignmentRequired=false is the Entra default and gates nothing.)" },
+  { key: "inheritall",  sev: "high", label: "Inheritable allAllowed",    test: bp => inheritHasAll(bp),
+    tip: "Every agent inherits all of the resource's permissions fleet-wide — the escalation lever." },
+  { key: "mailsend",    sev: "high", label: "Mail.Send → agents",         test: bp => conduitCarries(bp) && (consentOf(bp).app || []).some(a => (a.role || "").toLowerCase() === "mail.send"),
+    tip: "Mail.Send is granted AND carried to agents by the inheritable conduit — send-as-anyone. (Not flagged when no conduit carries it — it would be inert on the blueprint principal.)" },
+  { key: "dormant",     sev: "high", label: "All agents dormant",        test: bp => allAgentsDormant(bp),
+    tip: "No agent has signed in for 30+ days while the blueprint still holds a live credential." },
+  { key: "redirect",    sev: "high", label: "Risky redirect URI",        test: bp => { const r = redirectInfo(bp); return r.wildcard || r.http; },
+    tip: "Wildcard or plain-http (non-loopback) redirect URI." },
+  { key: "iprisk",      sev: "high", label: "Identity Protection risk",  test: bp => {
+      const st = o => ((o && o._risk && o._risk.state) || "").toLowerCase();
+      const flagged = s => s === "atrisk" || s === "confirmedcompromised";
+      if (flagged(st(bp))) return true;
+      return ((loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || []).some(a => flagged(st(a)));
+    },
+    tip: "The blueprint principal or one of its agents is flagged at risk / admin-confirmed compromised by Identity Protection." },
+  { key: "granted",     sev: "med",  label: "Granted → agents",          test: bp => grantsReachAgents(bp),
+    tip: "Application permissions granted AND carried to every agent by the inheritable conduit — what the agents can actually do. Microsoft's blocklist is enforced at grant time (a blocked permission is refused server-side, verified 2026-07), so anything granted here is non-blocked and genuinely reaches agents. Grants without a conduit are inert on the principal and not flagged." },
+  { key: "blocked",     sev: "med",  label: "Blocked declared perms",    test: bp => (bp._perms || []).some(p => p.blocked),
+    tip: "Declares Graph permissions on Microsoft's agent blocklist. These can never be granted — the appRoleAssignment is refused server-side (400, verified 2026-07) — so they only ever appear as declarations and overstate risk." },
+  { key: "multisecret", sev: "med",  label: "Multiple secrets",          test: bp => credFlags(bp).multiSecret,
+    tip: "More than one client secret — accumulation from re-provisioning." },
+  { key: "longsecret",  sev: "med",  label: "Long-lived secret >180d",   test: bp => secretMaxLifetimeDays(bp) > 180,
+    tip: "Secret validity window longer than 180 days." },
+  { key: "expired",     sev: "med",  label: "Expired credential",        test: bp => credList(bp).some(c => c.status === "expired"),
+    tip: "Holds at least one expired secret or certificate." },
+  { key: "orphan",      sev: "med",  label: "Orphan (0 agents)",         test: bp => credFlags(bp).orphan,
+    tip: "No agent identities, but still holds a live credential — cleanup candidate." },
+  { key: "noowner",     sev: "med",  label: "No owner",                  test: bp => !(bp._owners || []).length,
+    tip: "No owner assigned — nobody is accountable for this blueprint." },
+  { key: "cauncov",     sev: "med",  label: "CA uncovered",              test: bp => {
+      if (caAvailable !== true) return false;
+      const ags = ((loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || []).filter(a => a._ca);
+      return ags.length > 0 && ags.some(a => !a._ca.covered);
+    },
+    tip: "Has agent identities that no enforced Conditional Access policy covers." }
+];
+
+// Does this blueprint hold at least one still-usable credential? FICs never expire; secrets/certs
+// count only if not expired. Used to spot dead-but-armed blueprints.
+function hasLiveCredential(bp) {
+  if (bp._credsUnknown) return false;
+  if ((bp.federatedIdentityCredentials || []).length) return true;
+  return credList(bp).some(c => c.status !== "expired");
+}
+
+// Credential-hygiene flags.
+function credFlags(bp) {
+  const c = credCounts(bp);
+  return {
+    secretPlusFic: c.secret > 0 && c.fic > 0,   // secret left as a live fallback beside a FIC
+    multiSecret:   c.secret > 1,                 // secret accumulation from re-provisioning
+    orphan:        !bp._external && agentCount(bp) === 0 && hasLiveCredential(bp),   // dead blueprint, live creds
+    disabled:      bp._accountEnabled === false
+  };
+}
+
+// Sign-in activity (beta signInActivity). a.signInActivity === undefined means not yet loaded;
+// null means loaded-but-none. A dormant agent that still holds a live credential is the best
+// "act on this today" finding.
+function agentLastSignIn(a) {
+  const s = a.signInActivity;
+  const iso = s && (s.lastSignInDateTime || s.lastSuccessfulSignInDateTime);
+  return iso ? new Date(iso).getTime() : null;
+}
+function agentDormant(a) {
+  if (a.signInActivity === undefined) return null;   // sign-in data not loaded
+  const t = agentLastSignIn(a);
+  return !t || (Date.now() - t) > 30 * 86400000;     // never, or >30 days
+}
+function daysSince(ms) { return ms ? Math.floor((Date.now() - ms) / 86400000) : null; }
+
+// Whole fleet dormant while the blueprint still holds a live credential — the "act today" combo.
+// Returns false unless sign-in data actually loaded for every agent.
+function allAgentsDormant(bp) {
+  const agents = (loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || [];
+  if (!agents.length || !agents.every(a => a.signInActivity !== undefined)) return false;
+  return hasLiveCredential(bp) && agents.every(a => agentDormant(a) === true);
+}
+
+// Redirect URIs across web / SPA / public-client, with hygiene classification.
+function redirectInfo(bp) {
+  const uris = [];
+  ["web", "spa", "publicClient"].forEach(k => (bp[k] && bp[k].redirectUris || []).forEach(u => uris.push(u)));
+  const isLoopback = u => /\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\/|$)/i.test(u);
+  return {
+    uris,
+    wildcard: uris.some(u => u.includes("*")),
+    http: uris.some(u => /^http:\/\//i.test(u) && !isLoopback(u)),   // cleartext, non-loopback
+    loopback: uris.some(isLoopback)
+  };
+}
+
+function bpMatches(bp) {
+  const q = $("fltSearch").value.trim().toLowerCase();
+  if (q && !(
+        (bp.displayName || "").toLowerCase().includes(q) ||
+        (bp.appId || "").toLowerCase().includes(q) ||
+        (bp._perms || []).some(p => p.name.toLowerCase().includes(q)) ||
+        appRolesOf(bp).some(r => (r.value || "").toLowerCase().includes(q) || (r.displayName || "").toLowerCase().includes(q)) ||
+        consentOf(bp).delegated.some(d => (d.scope || "").toLowerCase().includes(q)) ||
+        consentOf(bp).app.some(a => (a.role || "").toLowerCase().includes(q)) ||
+        (bp._owners || []).some(p => (p.name || "").toLowerCase().includes(q) || (p.upn || "").toLowerCase().includes(q)) ||
+        (bp._sponsors || []).some(p => (p.name || "").toLowerCase().includes(q) || (p.upn || "").toLowerCase().includes(q))
+      )) return false;
+
+  const ten = $("fltTenancy").value;
+  if (ten === "single" && !tenancy(bp.signInAudience).single) return false;
+  if (ten === "multi" && tenancy(bp.signInAudience).single) return false;
+
+  const risk = $("fltRisk").value;
+  if (risk && riskOf(bp).band !== risk) return false;
+
+  const cred = $("fltCred").value;
+  if (cred) {
+    const c = credCounts(bp);
+    if (cred === "secret" && !c.secret) return false;
+    if (cred === "cert" && !c.cert) return false;
+    if (cred === "fic" && !c.fic) return false;
+    if (cred === "none" && (c.secret || c.cert || c.fic)) return false;
+  }
+
+  const perm = $("fltPerm").value;
+  if (perm) {
+    const ps = bp._perms || [];
+    if (perm === "app" && !ps.some(p => p.type === "application")) return false;
+    if (perm === "deleg" && !ps.some(p => p.type === "delegated")) return false;
+    if (perm === "none" && ps.length) return false;
+  }
+
+  const origin = $("fltOrigin").value;
+  if (origin === "home" && bp._external) return false;
+  if (origin === "external" && !bp._external) return false;
+
+  const owners = $("fltOwners").value;
+  if (owners === "none" && (bp._owners || []).length) return false;
+  if (owners.startsWith("owner:") && !(bp._owners || []).some(p => p.name === owners.slice(6))) return false;
+
+  if (activeFactor) {
+    const f = RISK_FACTORS.find(x => x.key === activeFactor);
+    if (f && !f.test(bp)) return false;
+  }
+  return true;
+}
+
+function bpSortVal(bp, key) {
+  switch (key) {
+    case "name": return (bp.displayName || "").toLowerCase();
+    case "tenancy": return tenancy(bp.signInAudience).single ? 0 : 1;
+    case "cred": { const c = credCounts(bp); return c.secret + c.cert + c.fic; }
+    case "perms": return (bp._perms || []).length;
+    case "roles": return appRolesOf(bp).length;
+    case "consent": { const c = consentOf(bp); return c.delegated.length + c.app.length; }
+    case "risk": return riskOf(bp).score;
+    case "agents": return (loaded.byBlueprint[bp.appId] || []).length;
+    default: return 0;
+  }
+}
+
+function bpComparator(a, b) {
+  const va = bpSortVal(a, sortKey), vb = bpSortVal(b, sortKey);
+  let c = (typeof va === "string") ? va.localeCompare(vb) : (va - vb);
+  if (c) return c * sortDir;
+  return (a.displayName || "").localeCompare(b.displayName || "");   // stable tiebreak
+}
+
+// Flatten the current (filtered + sorted) view into plain rows for export.
+function exportRows() {
+  return loaded.blueprints.filter(bpMatches).sort(bpComparator).map(bp => {
+    const c = consentOf(bp);
+    const agents = loaded.byBlueprint[bp.appId] || [];
+    return {
+      displayName: bp.displayName || "",
+      appId: bp.appId || "",
+      tenancy: tenancy(bp.signInAudience).label,
+      signInAudience: bp._external ? "" : (bp.signInAudience || ""),
+      origin: bp._external ? "External" : "Home",
+      ownerTenantId: bp._ownerOrg || "",
+      ownerTenantName: bp._ownerName || "",
+      ownerTenantDomain: bp._ownerDomain || "",
+      ownerIsMicrosoft: bp._external ? (bp._ownerIsMicrosoft ? "Yes" : "No") : "",
+      owners: (bp._owners || []).map(p => p.name + (p.upn ? " <" + p.upn + ">" : "")),
+      sponsors: (bp._sponsors || []).map(p => p.name + (p.upn ? " <" + p.upn + ">" : "")),
+      riskScore: riskOf(bp).score,
+      riskBand: riskOf(bp).label,
+      riskWhy: riskOf(bp).why,
+      riskFactors: (riskOf(bp).factors || []).map(f => "+" + f.pts + " " + f.text),
+      assignmentRequired: bp._assignmentRequired === true ? "Yes"
+        : bp._assignmentRequired === false ? "No (the Entra default)" : "",
+      openAccess: isOpenAccess(bp) ? "Yes — exposes app roles with no assignment required" : "",
+      accountEnabled: bp._accountEnabled === false ? "No" : bp._accountEnabled === true ? "Yes" : "",
+      secrets: (bp.passwordCredentials || []).length,
+      certificates: (bp.keyCredentials || []).length,
+      fic: (bp.federatedIdentityCredentials || []).length,
+      secretPlusFic: credFlags(bp).secretPlusFic ? "Yes" : "",
+      multipleSecrets: credFlags(bp).multiSecret ? "Yes" : "",
+      orphan: credFlags(bp).orphan ? "Yes (0 agents, live credential)" : "",
+      redirectUris: redirectInfo(bp).uris,
+      redirectUriFlags: (() => { const r = redirectInfo(bp); return [r.wildcard && "wildcard", r.http && "http", r.loopback && "loopback"].filter(Boolean); })(),
+      riskLevel: bp._risk ? (bp._risk.level || "") : (riskAvailable === false ? "(unavailable)" : ""),
+      riskState: bp._risk ? (bp._risk.state || "") : "",
+      riskDetail: bp._risk ? (bp._risk.detail || "") : "",
+      riskLastUpdated: bp._risk && bp._risk.updated ? fmtDate(bp._risk.updated) : "",
+      adminConfirmedCompromised: bp._risk && (bp._risk.state || "").toLowerCase() === "confirmedcompromised" ? "Yes" : "",
+      caCovered: bp._ca ? (bp._ca.covered ? "Yes" : "No") : (caAvailable === false ? "(unavailable)" : ""),
+      caPolicies: bp._ca ? bp._ca.policies.map(p => p.name + " (" + p.state + (p.excluded ? ", excluded" : "") + ")") : [],
+      credentialExpiries: credList(bp).map(c => c.kind + (c.name ? " " + c.name : "") + (c.end ? " expires " + fmtDate(c.end) + " (" + c.status + ")" : " no expiry")),
+      expiredCredentials: credList(bp).filter(c => c.status === "expired").length,
+      soonestExpiry: (() => {
+        const withEnd = credList(bp).filter(c => c.end);
+        return withEnd.length ? fmtDate(withEnd.reduce((a, c) => (!a || c.endDate < a.endDate) ? c : a, null).end) : "";
+      })(),
+      declaredPermissions: bp._perms === null ? "n/a (external)" : (bp._perms || []).map(p => p.name + " (" + p.type + (p.blocked ? ", BLOCKED — never effective" : "") + ")"),
+      declaredBlocked: bp._perms === null ? "" : (bp._perms || []).filter(p => p.blocked).map(p => p.name + " (" + p.type + ")"),
+      inheritablePermissions: bp._external ? "n/a (external)" : inheritOf(bp).map(i =>
+        i.resource + ": scopes=" + (i.scopesKind || "—") + (i.scopesKind === "enumerated" ? "(" + i.scopesList.length + ")" : "") + (i.rolesKind ? ", roles=" + i.rolesKind : "")),
+      appRoles: appRolesOf(bp).map(r => r.value),
+      appRoleAssignees: assigneesOf(bp).map(a => a.name + " (" + a.type + ")"),
+      consentDelegated: c.delegated.map(d => d.scope + " (" + (d.consentType === "AllPrincipals" ? "admin" : "user") + ")"),
+      consentApplication: c.app.map(a => a.role + " (" + a.resource + ")"),
+      agentIdentityCount: agents.length,
+      agentIdentities: agents.map(a => a.displayName || a.appId),
+      agentDirectGrants: agents.map(a => (a.displayName || a.appId) + ": " +
+        (a._grants ? (a._grants.length ? a._grants.map(x => x.role).join(", ") : "none") : "(expand to load)")),
+      agentLastSignIn: agents.map(a => {
+        if (a.signInActivity === undefined) return (a.displayName || a.appId) + ": (sign-in data unavailable)";
+        const t = agentLastSignIn(a);
+        return (a.displayName || a.appId) + ": " + (t ? fmtDate(new Date(t).toISOString()) + (daysSince(t) > 30 ? " (dormant " + daysSince(t) + "d)" : "") : "never");
+      })
+    };
+  });
+}
+
+function toCSV(objs) {
+  if (!objs.length) return "";
+  const keys = Object.keys(objs[0]);
+  const esc = v => {
+    if (Array.isArray(v)) v = v.join(" | ");
+    v = (v == null) ? "" : String(v);
+    return /[",\n\r]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v;
+  };
+  return [keys.join(","), ...objs.map(o => keys.map(k => esc(o[k])).join(","))].join("\r\n");
+}
+
+function download(filename, text, mime) {
+  const blob = new Blob([text], { type: mime });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+
+// One agent identity line. Shows the agent's OWN direct app-role grants once loaded (bp._grants),
+// which sit on top of whatever it inherits from the blueprint — so an over-permissioned single
+// agent isn't hidden. Before lazy-load, a._grants is undefined and no grants line is shown.
+function agentLine(a) {
+  let g = "";
+  if (a._grants) {
+    g = a._grants.length
+      ? `<div style="margin-top:3px">Direct grants: ${a._grants.map(x =>
+          `<span class="badge b-approle" title="${escapeHtml(x.resource + " · application (direct on this agent)")}">${escapeHtml(x.role)}</span>`).join("")}</div>`
+      : `<div class="hint" style="margin-top:3px">No direct grants — inherits from the blueprint only.</div>`;
+  }
+  let si = "";
+  if (a.signInActivity !== undefined) {
+    const t = agentLastSignIn(a), d = daysSince(t);
+    si = !t
+      ? `<span class="badge b-risk-med" title="No sign-in recorded (beta signInActivity).">never signed in</span>`
+      : `<span class="badge ${d > 30 ? "b-risk-med" : "b-risk-low"}" title="Last sign-in ${fmtDate(new Date(t).toISOString())}">${d > 30 ? "dormant · " + d + "d" : "active · " + d + "d ago"}</span>`;
+  }
+  const rb = riskStateBadge(a), cb = caBadge(a);
+  return `<li>
+    <span class="dot ${a.accountEnabled ? "dot-on" : "dot-off"}"></span>
+    <b>${escapeHtml(a.displayName || "(no name)")}</b>
+    <span class="mono"> · ${a.appId}${a.accountEnabled ? "" : " · disabled"}</span>
+    ${si ? " " + si : ""}${rb ? " " + rb : ""}${cb ? " " + cb : ""}
+    ${g}</li>`;
+}
+
+// Credential-hygiene badges shown in the Client-credentials column.
+function credFlagBadges(bp) {
+  const f = credFlags(bp);
+  const out = [];
+  if (f.secretPlusFic) out.push(`<span class="badge b-risk-high" title="A client secret is retained alongside a federated credential (FIC). The FIC is meant to replace the secret; the secret is a live fallback credential path — remove it.">Secret + FIC</span>`);
+  if (f.multiSecret)   out.push(`<span class="badge b-risk-med" title="More than one client secret — accumulation from re-provisioning. Prune stale secrets.">${credCounts(bp).secret} secrets — prune</span>`);
+  return out.length ? `<div style="margin-top:4px">${out.join("")}</div>` : "";
+}
+
+// Identity Protection risk state (riskyAgents / riskyServicePrincipals).
+function riskStateBadge(o) {
+  const r = o && o._risk;
+  if (!r) return "";
+  const lvl = (r.level || "none").toLowerCase();
+  const st  = (r.state || "none").toLowerCase();
+  if (st === "none" && (lvl === "none" || !lvl)) return "";
+  const tip = "riskLevel=" + (r.level || "none") + " · riskState=" + (r.state || "none")
+    + (r.detail ? " · " + r.detail : "") + (r.updated ? " · updated " + fmtDate(r.updated) : "");
+  if (lvl === "hidden")
+    return `<span class="badge b-none" title="${escapeHtml(tip)} — risk details require Workload ID Premium.">Risk hidden</span>`;
+  if (st === "confirmedcompromised")
+    return `<span class="badge b-risk-high" title="${escapeHtml(tip)} — an admin ran confirmCompromised on this identity.">Compromised · admin-confirmed</span>`;
+  if (st === "atrisk")
+    return `<span class="badge ${lvl === "high" ? "b-risk-high" : "b-risk-med"}" title="${escapeHtml(tip)}">At risk · ${escapeHtml(r.level || "")}</span>`;
+  if (st === "confirmedsafe" || st === "remediated" || st === "dismissed")
+    return `<span class="badge b-risk-low" title="${escapeHtml(tip)}">Risk ${escapeHtml(r.state)}</span>`;
+  return `<span class="badge b-none" title="${escapeHtml(tip)}">Risk ${escapeHtml(r.state || r.level)}</span>`;
+}
+
+// Conditional Access coverage for a single agent identity.
+function caBadge(o) {
+  const ca = o && o._ca;
+  if (!ca) return "";
+  if (!ca.policies.length)
+    return `<span class="badge b-risk-med" title="No Conditional Access policy targets this agent identity (checked All-agent, per-agent and workload-identity targeting).">CA: uncovered</span>`;
+  const tip = ca.policies.map(p => p.name + " (" + p.state
+    + (p.excluded ? ", EXCLUDED" : p.byFilter ? ", attribute filter" : "") + ")").join(" · ");
+  if (ca.covered) {
+    const n = ca.policies.filter(p => !p.excluded && !p.byFilter && p.state === "enabled").length;
+    return `<span class="badge b-risk-low" title="${escapeHtml(tip)}">CA: ${n} enforced</span>`;
+  }
+  if (ca.indeterminate)
+    return `<span class="badge b-none" title="${escapeHtml(tip)} — targeted via a custom-security-attribute filter, which can't be resolved here.">CA: filter-based</span>`;
+  return `<span class="badge b-risk-med" title="${escapeHtml(tip)}">CA: ${ca.policies.every(p => p.excluded) ? "excluded" : "not enforced"}</span>`;
+}
+
+// Blueprint-level rollup. CA never governs a blueprint acquiring a token to create agents, so
+// coverage is only meaningful for the agent identities derived from it.
+function caAgentSummary(bp) {
+  if (caAvailable !== true) return "";
+  const agents = (loaded && loaded.byBlueprint && loaded.byBlueprint[bp.appId]) || [];
+  const withCa = agents.filter(a => a._ca);
+  if (!withCa.length) return "";
+  const covered = withCa.filter(a => a._ca.covered).length;
+  const tip = "Conditional Access governs agent identities, not the blueprint itself. "
+    + covered + " of " + withCa.length + " agent identities are covered by an enabled policy.";
+  return `<span class="badge ${covered === withCa.length ? "b-risk-low" : "b-risk-med"}" title="${escapeHtml(tip)}">CA: ${covered}/${withCa.length} agents</span>`;
+}
+
+// Governance / hygiene badges shown under the blueprint name.
+function blueprintFlags(bp) {
+  const out = [];
+  if (!bp._external) {
+    const f = credFlags(bp), r = redirectInfo(bp);
+    if (f.disabled)  out.push(`<span class="badge b-none" title="The blueprint principal is disabled (accountEnabled = false).">Disabled</span>`);
+    if (f.orphan)    out.push(`<span class="badge b-risk-med" title="No agent identities reference this blueprint, yet it still holds a live credential. Orphaned — cleanup candidate.">Orphan · 0 agents</span>`);
+    if (r.wildcard)  out.push(`<span class="badge b-risk-high" title="Wildcard redirect URI — tokens can be redirected to attacker-controlled hosts.">Wildcard redirect</span>`);
+    if (r.http)      out.push(`<span class="badge b-risk-med" title="Plain-http (non-loopback) redirect URI — tokens returned over cleartext.">http redirect</span>`);
+    if (r.loopback)  out.push(`<span class="badge b-none" title="Loopback redirect URI (localhost / 127.0.0.1). Informational.">loopback redirect</span>`);
+  }
+  if (!(bp._owners || []).length)
+    out.push(`<span class="badge b-risk-med" title="No owner assigned — nobody is accountable for this blueprint.">No owner</span>`);
+  const rb = riskStateBadge(bp);   if (rb) out.push(rb);
+  const cb = caAgentSummary(bp);   if (cb) out.push(cb);
+  return out.length ? `<div style="margin-top:4px">${out.join("")}</div>` : "";
+}
+
+// Lazy-load each agent's own appRoleAssignments the first time its blueprint's agent list is expanded.
+async function loadAgentGrants(row, ulEl, agents) {
+  if (row._grantsDone || row._grantsBusy) return;
+  if (agents.every(a => a._grants)) { row._grantsDone = true; return; }
+  row._grantsBusy = true;
+  ulEl.insertAdjacentHTML("afterbegin", `<li id="agld_${row.id}"><span class="spinner"></span> Loading each agent's direct grants…</li>`);
+  try {
+    const at = await token();
+    const base = graphBase();
+    await Promise.all(agents.map(async a => {
+      if (a._grants) return;
+      if (!a.id) { a._grants = []; return; }
+      try {
+        const asg = await graphGetAll(base + "/servicePrincipals/" + a.id + "/appRoleAssignments", at);
+        a._grants = asg.map(x => ({ role: roleIdToName[x.appRoleId] || x.appRoleId, resource: x.resourceDisplayName || "" }));
+      } catch { a._grants = []; }
+    }));
+    row._grantsDone = true;
+  } catch { /* leave for a retry on next expand */ }
+  row._grantsBusy = false;
+  ulEl.innerHTML = agents.map(agentLine).join("");
+}
+
+// ---- expanded-row detail sections ----
+// Each returns "" when it has nothing to say, so the panel only contains what exists.
+function secRisk(r) {
+  if (!r.factors || !r.factors.length) return "";
+  const items = r.factors.map(f =>
+    `<li><b style="color:${f.pts ? "var(--red)" : "var(--muted)"}">+${f.pts}</b> &nbsp;${escapeHtml(f.text)}</li>`).join("");
+  return `<div class="dsec dsec-wide" data-sec="risk"><div class="dhead">Why ${r.score} — ${escapeHtml(r.label)}
+    <span class="hint">(each factor's weight; capped at 100)</span></div>
+    <ul class="agent-list">${items}</ul></div>`;
+}
+
+function secCreds(creds) {
+  if (!creds.length) return "";
+  const items = creds.map(c => {
+    const st = c.status === "expired"
+      ? `<span style="color:var(--red);font-weight:600"> · EXPIRED ${fmtDate(c.end)}</span>`
+      : c.status === "soon"
+        ? `<span style="color:var(--red);font-weight:600"> · expires ${fmtDate(c.end)} (in ${c.daysLeft} days)</span>`
+        : c.end ? ` · expires ${fmtDate(c.end)} (in ${c.daysLeft} days)` : " · no expiry set";
+    return `<li>
+      <span class="badge ${c.kind === "Secret" ? "b-secret" : "b-cert"}">${c.kind}</span>
+      <b>${escapeHtml(c.name || "(no name)")}</b>
+      <span class="mono">${c.start ? " · from " + fmtDate(c.start) : ""}${st}</span>
+      ${c.thumbprint ? `<div class="mono">thumbprint: ${escapeHtml(c.thumbprint)}</div>` : ""}</li>`;
+  }).join("");
+  return `<div class="dsec" data-sec="creds"><div class="dhead">Client credentials <span class="hint">(federated credentials / FIC don't expire)</span></div>
+    <ul class="agent-list">${items}</ul></div>`;
+}
+
+function secPerms(bp) {
+  const perms = bp._perms || [];
+  const inh = inheritOf(bp);
+  let out = "";
+  if (perms.length) {
+    const items = perms.map(p => `<li>
+      <span class="badge ${p.blocked ? "b-blocked" : p.type === "delegated" ? "b-deleg" : "b-approle"}">${escapeHtml(p.name)}</span>
+      <span class="mono"> · ${escapeHtml(p.type)} · ${escapeHtml(p.resource)}${p.blocked ? " · BLOCKED for agents — never effective" : ""}</span></li>`).join("");
+    out += `<div class="dsec" data-sec="perms"><div class="dhead">Declared permissions <span class="hint">(requiredResourceAccess — a declaration, not a grant)</span></div>
+      <ul class="agent-list">${items}</ul></div>`;
+  }
+  if (inh.length) {
+    const items = inh.map(i => `<li>
+      <b>${escapeHtml(i.resource)}</b>
+      <span class="mono"> · scopes ${escapeHtml(i.scopesKind || "—")}${i.rolesKind ? " · roles " + escapeHtml(i.rolesKind) : ""} · appId ${escapeHtml(i.resourceAppId || "")}</span>
+      ${i.scopesKind === "enumerated" && i.scopesList.length ? `<div class="hint">${escapeHtml(i.scopesList.join(", "))}</div>` : ""}
+      ${(i.scopesKind === "all" || i.rolesKind === "all") ? `<div class="hint" style="color:var(--red)">allAllowed — every agent inherits all of this resource's permissions, including future ones.</div>` : ""}</li>`).join("");
+    out += `<div class="dsec" data-sec="inherit"><div class="dhead">Inheritable → every agent</div>
+      <div class="hint" style="margin:0 0 6px">This is the conduit that makes granted permissions agent-effective. Grants with no conduit stay inert on the principal.</div>
+      <ul class="agent-list">${items}</ul>
+      <div class="hint" style="margin:6px 0 0">${escapeHtml(INHERIT_SUNSET)}</div></div>`;
+  }
+  return out;
+}
+
+function secRoles(roles, assignees) {
+  if (!roles.length && !assignees.length) return "";
+  const ZERO = "00000000-0000-0000-0000-000000000000";
+  const byRole = {};
+  assignees.forEach(a => { (byRole[a.appRoleId] = byRole[a.appRoleId] || []).push(a); });
+  const holderChips = list => list.map(h =>
+    `<span class="badge b-deleg" title="${escapeHtml(h.type)}">${escapeHtml(h.name)}</span>`).join("");
+  const items = roles.map(role => {
+    const holders = byRole[role.id] || [];
+    return `<li>
+      <b>${escapeHtml(role.value || "(no value)")}</b>
+      <span class="mono"> · ${escapeHtml(role.displayName || "")} · [${escapeHtml((role.allowedMemberTypes || []).join(", ") || "—")}]${role.isEnabled === false ? " · disabled" : ""}</span>
+      <div style="margin-top:3px">Assigned to: ${holders.length ? holderChips(holders) : `<span class="mono">no explicit assignments</span>`}</div>
+      ${role.description ? `<div class="hint" style="margin-top:2px">${escapeHtml(role.description)}</div>` : ""}</li>`;
+  }).join("");
+  const defaults = byRole[ZERO] || [];
+  const defaultItem = defaults.length
+    ? `<li><b>(default access)</b> <span class="mono"> · no specific app role</span>
+       <div style="margin-top:3px">Assigned to: ${holderChips(defaults)}</div></li>` : "";
+  return `<div class="dsec" data-sec="roles"><div class="dhead">App roles exposed by this blueprint</div>
+    <ul class="agent-list">${items}${defaultItem}</ul></div>`;
+}
+
+function secConsent(bp) {
+  const consent = consentOf(bp);
+  const n = consent.delegated.length + consent.app.length;
+  if (!n) return "";   // no grants on the principal is the default — say nothing
+  const carries = conduitCarries(bp);
+  const d = consent.delegated.map(x => `<li><span class="badge b-deleg">${escapeHtml(x.scope)}</span>
+    <span class="mono"> · delegated · ${x.consentType === "AllPrincipals" ? "admin consent (all users)" : "user consent"}</span></li>`).join("");
+  const a = consent.app.map(x => `<li><span class="badge b-approle">${escapeHtml(x.role)}</span>
+    <span class="mono"> · application · ${escapeHtml(x.resource)}</span></li>`).join("");
+  // The blueprint principal is a factory, not an app: the STS ignores its own grants. What's below
+  // is directory state — it becomes AGENT-effective only where an inheritable conduit carries it.
+  const effect = bp._external ? ""
+    : carries
+      ? `<div class="hint" style="margin:0 0 6px;color:var(--red)">An inheritable conduit is open, so these flow to every agent — this is what the agents can actually do.</div>`
+      : `<div class="hint" style="margin:0 0 6px">Inert on the principal — no inheritable conduit carries these to agents. A blueprint principal is a factory; the STS ignores its own grants <span class="attrib">(per Blue16 research)</span>. Effective agent permissions live only in the token, not the directory.</div>`;
+  const disp = (!bp._external && displacedCreateAsManager(bp))
+    ? `<div class="hint" style="margin:8px 0 0;color:var(--red)"><span class="badge b-risk-high">Bug</span> An explicit grant is present, so the platform dropped the implicit <code>AgentIdentity.CreateAsManager</code> from this list — it's no longer shown but remains functional. <span class="attrib">(per Blue16 research)</span></div>` : "";
+  return `<div class="dsec" data-sec="consent"><div class="dhead">Grants on the principal <span class="hint">(directory state — effective for agents only via the conduit)</span></div>
+    ${effect}<ul class="agent-list">${a}${d}</ul>${disp}</div>`;
+}
+
+function secOwner(bp) {
+  const fmt = list => (list || []).map(p => escapeHtml(p.name + (p.upn ? " <" + p.upn + ">" : ""))).join(", ");
+  const o = fmt(bp._owners), s = fmt(bp._sponsors);
+  const ext = bp._external
+    ? `<li><b>Published by</b> <span class="mono">${bp._ownerName ? escapeHtml(bp._ownerName) : "unknown owner"}${
+        (bp._ownerDomain && !bp._ownerIsMicrosoft) ? " · " + escapeHtml(bp._ownerDomain) : ""} · tenant ${escapeHtml(bp._ownerOrg || "?")}</span></li>` : "";
+  if (!o && !s && !ext) return `<div class="dsec" data-sec="owner"><div class="dhead">Accountability</div>
+    <ul class="agent-list"><li style="color:var(--red)">No owner assigned — nobody is accountable for this blueprint.</li></ul></div>`;
+  return `<div class="dsec" data-sec="owner"><div class="dhead">Accountability</div><ul class="agent-list">
+    <li><b>Owners</b> <span class="mono">${o || "none — nobody is accountable"}</span></li>
+    ${s ? `<li><b>Sponsors</b> <span class="mono">${s}</span></li>` : ""}${ext}</ul></div>`;
+}
+
+function secAgents(agents) {
+  if (!agents.length) return "";
+  return `<div class="dsec dsec-wide" data-sec="agents"><div class="dhead">${ICON_AGENTID}Agent identities</div>
+    <div class="hint" style="margin:0 0 6px">
+      <b><span style="${agents.length > 200 ? "color:var(--red)" : ""}">${agents.length} of 250</span></b> (per-blueprint cap for app-only permissions).
+      Each agent's own direct grants load on expand.
+      Note: <code>AgentIdentity.CreateAsManager</code> is auto-granted and non-revocable — it never appears in the grants list, so its absence doesn't mean the blueprint can't self-manage agents.</div>
+    <ul class="agent-list agents-ul">${agents.map(agentLine).join("")}</ul></div>`;
+}
+
+function renderTable() {
+  const { blueprints, byBlueprint } = loaded;
+  const tbody = $("table").querySelector("tbody");
+  tbody.innerHTML = "";
+
+  // header sort indicators
+  document.querySelectorAll("#table th.sortable").forEach(th => {
+    const arrow = th.querySelector(".arrow");
+    if (th.dataset.key === sortKey) { th.classList.add("sorted"); arrow.textContent = sortDir < 0 ? "▼" : "▲"; }
+    else { th.classList.remove("sorted"); arrow.textContent = ""; }
+  });
+
+  const rows = blueprints.filter(bpMatches).sort(bpComparator);
+
+  $("tableCount").textContent = rows.length === blueprints.length
+    ? `${rows.length} blueprint(s)`
+    : `${rows.length} of ${blueprints.length} blueprint(s)`;
+
+  if (!blueprints.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="color:var(--muted)">No agent identity blueprints found in this tenant.</td></tr>`;
+    return;
+  }
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9" style="color:var(--muted)">No blueprints match the current filters.</td></tr>`;
+    return;
+  }
+
+  // Group into the triage queue. Bands are the primary axis; a column sort reorders within them.
+  let i = -1;
+  RISK_BANDS.forEach(band => {
+    const group = rows.filter(bp => riskOf(bp).band === band.key);
+    if (!group.length) return;
+    const gr = document.createElement("tr");
+    gr.className = "grp";
+    gr.innerHTML = `<td colspan="9"><span style="color:${band.color}">${band.label}</span> · ${group.length}</td>`;
+    tbody.appendChild(gr);
+    group.forEach(bp => { i++; renderRow(bp, i, tbody, byBlueprint); });
+  });
+
+  // The chevron alone was a poor target — it sits ~1500px from the counts people actually click.
+  // The whole row toggles; clicking a specific count jumps to that section of the panel.
+  tbody.querySelectorAll("tr.rowx").forEach(tr => {
+    tr.addEventListener("click", e => toggleDetail(tr, e.target.closest("[data-sec]")));
+    const chev = tr.querySelector(".chev .expander");
+    if (chev) chev.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleDetail(tr, null); }
+    });
+  });
+}
+
+// Expand (or keep open) a row's panel. If `secEl` names a section, scroll to it and flash it.
+function toggleDetail(tr, secEl) {
+  const row = $(tr.dataset.target);
+  if (!row) return;
+  const wantSection = secEl && secEl.dataset.sec;
+  const wasOpen = !row.classList.contains("hidden");
+  // Clicking a count should always land you on that section, never collapse the row.
+  const open = wantSection ? true : !wasOpen;
+  row.classList.toggle("hidden", !open);
+
+  const chev = tr.querySelector(".chev .expander");
+  if (chev) {
+    chev.textContent = open ? "▾" : "▸";
+    chev.title = chev.ariaLabel = open ? "Hide details" : "Show details";
+    chev.setAttribute("aria-expanded", String(open));
+  }
+  if (open && row._agents && row._agents.length)
+    loadAgentGrants(row, row.querySelector(".agents-ul"), row._agents);
+
+  if (open && wantSection) {
+    const sec = row.querySelector(`.dsec[data-sec="${wantSection}"]`);
+    if (sec) {
+      sec.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      sec.classList.remove("flash");
+      void sec.offsetWidth;   // restart the animation if the same section is clicked again
+      sec.classList.add("flash");
+    }
+  }
+}
+
+function renderRow(bp, i, tbody, byBlueprint) {
+  {
+    const t = tenancy(bp.signInAudience);
+    const r = riskOf(bp);
+    const agents = byBlueprint[bp.appId] || [];
+    const roles = appRolesOf(bp);
+    const assignees = assigneesOf(bp);
+    const consent = consentOf(bp);
+    const consentCount = consent.delegated.length + consent.app.length;
+    const creds = credList(bp);
+    const detailId = "d_" + i;
+
+    // Everything secondary lives in one panel behind one chevron, so a healthy blueprint is a
+    // single line and only rows with something to say grow.
+    const detail = secRisk(r) + secCreds(creds) + secPerms(bp)
+      + secRoles(roles, assignees) + secConsent(bp) + secOwner(bp) + secAgents(agents);
+    const flags = blueprintFlags(bp);
+
+    const tr = document.createElement("tr");
+    if (detail) { tr.className = "rowx"; tr.dataset.target = detailId; }
+    tr.innerHTML = `
+      <td class="chev">${detail ? `<span class="expander" role="button" tabindex="0" aria-expanded="false" aria-controls="${detailId}" title="Show details" aria-label="Show details">▸</span>` : ``}</td>
+      <td style="max-width:440px">
+        <div title="${escapeHtml(principalsTip(bp))}">
+          <b>${escapeHtml(bp.displayName || "(no name)")}</b>
+          <span class="mono" style="margin-left:8px; white-space:nowrap">${bp.appId}</span>
+        </div>
+        ${flags}
+      </td>
+      <td>${
+          // Single-tenant + Home + AzureADMyOrg is the safe default and was on ~80% of rows —
+          // three badges saying "normal". Blank now means normal; only exceptions render.
+          t.single ? "" : `<span class="badge ${t.cls}" title="${escapeHtml(bp.signInAudience || "")} — usable from other tenants; a consent-phishing surface.">${t.label}</span>`
+        }${bp._external
+            ? `<span class="badge b-ext" title="The blueprint application is registered in another tenant.">External</span>`
+              + (bp._ownerIsMicrosoft ? `<span class="badge b-ms" title="Owner tenant is a known Microsoft first-party tenant.">${ICON_MS}Microsoft</span>` : ``)
+            : ``}</td>
+      <td>${credBadges(bp)}${credFlagBadges(bp)}${expiryBadge(bp)}</td>
+      <td style="max-width:340px">${permChips(bp)}${
+          // Only allAllowed inheritance earns a place in the row; the rest is in the panel.
+          inheritHasAll(bp) ? `<span class="badge b-risk-med" title="Every agent inherits all of this resource's permissions, including future ones.">Inherits: allAllowed</span>` : ``
+        }</td>
+      <td style="text-align:right"><b data-sec="risk" style="color:${r.color}" title="${escapeHtml(r.label + " · " + r.why)}">${r.score}</b></td>
+      <td style="text-align:center">${roles.length || assignees.length
+          ? `<span class="cnt" data-sec="roles" title="Show the app roles">${roles.length}</span>` : ``}${assignmentBadge(bp)}</td>
+      <td style="text-align:center">${consentCount
+          ? `<span class="cnt" data-sec="consent" title="Show what's actually granted">${consentCount}</span>` : ``}</td>
+      <td style="text-align:center">${agents.length
+          ? `<span class="cnt" data-sec="agents" title="Show the ${agents.length} agent identities · ${agents.length} of the 250-per-blueprint cap"
+               style="${agents.length > 200 ? "color:var(--red)" : ""}">${agents.length}${agents.length > 200 ? " / 250" : ""}</span>`
+          : ``}</td>`;
+    tbody.appendChild(tr);
+
+    if (detail) {
+      const d = document.createElement("tr");
+      d.id = detailId;
+      d.className = "hidden";
+      d.innerHTML = `<td colspan="9" style="background:var(--hover)"><div class="dpanel">${detail}</div></td>`;
+      d._agents = agents;   // for lazy-loading each agent's direct grants on first expand
+      tbody.appendChild(d);
+    }
+  }
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// ---- delete a blueprint ----
+// ---- manifest viewer (read-only: the full application object with keyword search) ----
+let manifestRaw = "", manMatches = 0, manCur = -1;
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+async function openManifest(bp) {
+  $("manTitle").textContent = "Manifest — " + (bp.displayName || bp.appId);
+  $("manModal")._appId = bp.appId;
+  $("manSearch").value = ""; $("manOnly").checked = false;
+  manifestRaw = ""; manMatches = 0; manCur = -1;
+  $("manPre").textContent = ""; $("manCount").textContent = "";
+  $("manStatus").className = ""; $("manStatus").innerHTML = '<span class="spinner"></span>Loading manifest…';
+  $("manModal").classList.remove("hidden");
+  try {
+    const at = await token();   // full application object; Application.Read.All already covers it
+    const resp = await fetch(graphBase() + "/applications/" + bp.id, { headers: { Authorization: "Bearer " + at } });
+    if (!resp.ok) {
+      let d = ""; try { d = (await resp.json()).error?.message || ""; } catch {}
+      throw new Error("HTTP " + resp.status + (d ? " — " + d : ""));
+    }
+    manifestRaw = JSON.stringify(await resp.json(), null, 2);
+    $("manStatus").textContent = "";
+    renderManifest();
+    $("manSearch").focus();
+  } catch (e) {
+    $("manStatus").className = "err";
+    $("manStatus").textContent = "Couldn't load manifest: " + (e.message || e);
+  }
+}
+
+// Highlight matches by splitting on the query with a capture group — split() keeps the delimiters at
+// odd indices, so each segment is escaped independently and offsets never drift.
+function highlightManifest(text, q) {
+  if (!q) { manMatches = 0; return escapeHtml(text); }
+  const re = new RegExp("(" + escapeRegex(q) + ")", "gi");
+  let n = 0;
+  const html = text.split(re).map((part, i) =>
+    i % 2 === 1 ? `<mark data-m="${n++}">${escapeHtml(part)}</mark>` : escapeHtml(part)).join("");
+  manMatches = n;
+  return html;
+}
+
+function renderManifest() {
+  const q = $("manSearch").value;
+  let text = manifestRaw;
+  if ($("manOnly").checked && q) {
+    const lines = manifestRaw.split("\n").filter(l => l.toLowerCase().includes(q.toLowerCase()));
+    text = lines.length ? lines.join("\n") : "(no matching lines)";
+  }
+  $("manPre").innerHTML = highlightManifest(text, q);
+  manCur = manMatches ? 0 : -1;
+  updateManNav();
+}
+
+function updateManNav() {
+  $("manPre").querySelectorAll("mark.cur").forEach(m => m.classList.remove("cur"));
+  if (manCur >= 0) {
+    const el = $("manPre").querySelector(`mark[data-m="${manCur}"]`);
+    if (el) { el.classList.add("cur"); el.scrollIntoView({ block: "center" }); }
+  }
+  $("manCount").textContent = !$("manSearch").value ? "" : manMatches ? (manCur + 1) + " / " + manMatches : "no matches";
+}
+
+function manNav(dir) {
+  if (!manMatches) return;
+  manCur = (manCur + dir + manMatches) % manMatches;
+  updateManNav();
+}
+
+$("manSearch").addEventListener("input", renderManifest);
+$("manOnly").addEventListener("change", renderManifest);
+$("manNext").addEventListener("click", () => manNav(1));
+$("manPrev").addEventListener("click", () => manNav(-1));
+$("manSearch").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); manNav(e.shiftKey ? -1 : 1); } });
+$("manCopy").addEventListener("click", async () => {
+  try { await navigator.clipboard.writeText(manifestRaw); $("manStatus").className = ""; $("manStatus").textContent = "Copied to clipboard."; }
+  catch { $("manStatus").className = "err"; $("manStatus").textContent = "Copy failed — select the text and copy manually."; }
+});
+$("manDownload").addEventListener("click", () => download("manifest-" + ($("manModal")._appId || "blueprint") + ".json", manifestRaw, "application/json"));
+$("manClose").addEventListener("click", () => $("manModal").classList.add("hidden"));
+$("manModal").addEventListener("click", e => { if (e.target === $("manModal")) $("manModal").classList.add("hidden"); });
+
+// ---- token decoder (client-side JWT; the token is NEVER transmitted or used to call Graph) ----
+function decodeJwt(raw) {
+  const token = raw.trim().replace(/^Bearer\s+/i, "");
+  const parts = token.split(".");
+  if (parts.length < 2) throw new Error("That doesn't look like a JWT (expected header.payload.signature).");
+  const b64 = s => {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    const pad = s.length % 4;
+    if (pad === 2) s += "=="; else if (pad === 3) s += "="; else if (pad === 1) throw new Error("Malformed token (bad base64url length).");
+    return new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+  };
+  return { header: JSON.parse(b64(parts[0])), payload: JSON.parse(b64(parts[1])) };
+}
+function fmtEpoch(s) { return s ? new Date(s * 1000).toISOString().replace("T", " ").slice(0, 19) + "Z" : ""; }
+const rolesOf = p => Array.isArray(p.roles) ? p.roles : (p.roles ? [p.roles] : []);
+
+// Match the token to a loaded blueprint principal or agent identity and diff token.roles against the
+// directory — the "directory lies" proof, per token. Purely local comparison, no network.
+function jwtDiff(p) {
+  if (!loaded) return { cls: "none", html: "Load blueprints first to diff this token against the directory." };
+  const roles = rolesOf(p), appid = (p.appid || "").toLowerCase(), oid = (p.oid || "").toLowerCase();
+  const chip = (arr, cls) => arr.length ? arr.map(r => `<span class="badge ${cls}">${escapeHtml(r)}</span>`).join(" ") : `<span class="mono">none</span>`;
+
+  const bp = loaded.blueprints.find(b => !b._external && (b.appId || "").toLowerCase() === appid);
+  let agent = null, agentBp = null;
+  Object.entries(loaded.byBlueprint).forEach(([app, ags]) => {
+    const a = (ags || []).find(x => [oid, appid].includes((x.id || "").toLowerCase()));
+    if (a) { agent = a; agentBp = loaded.blueprints.find(b => b.appId === app); }
+  });
+
+  if (bp) {
+    const dir = (consentOf(bp).app || []).map(a => a.role);
+    const inert = dir.filter(r => !roles.includes(r));
+    const tokenOnly = roles.filter(r => !dir.includes(r));
+    const disagree = inert.length || tokenOnly.length;
+    return { cls: disagree ? "lie" : "ok",
+      html: `<b>Blueprint principal token — ${escapeHtml(bp.displayName || bp.appId)}</b>
+        <div style="margin-top:6px">Token <code>roles</code> (what it can actually do): ${chip(roles, "b-approle")}</div>
+        <div style="margin-top:4px">Directory grants on the principal: ${chip(dir, "b-deleg")}</div>
+        ${inert.length ? `<div style="margin-top:6px;color:var(--red)"><b>${plural(inert.length, "directory grant")} the token does NOT carry — inert:</b> ${chip(inert, "b-blocked")} <span class="attrib">(per Blue16 research)</span></div>` : ""}
+        ${tokenOnly.length ? `<div style="margin-top:6px;color:var(--red)"><b>${plural(tokenOnly.length, "role")} the token carries that the directory does NOT list</b> (e.g. the implicit CreateAsManager): ${chip(tokenOnly, "b-approle")}</div>` : ""}
+        ${!disagree ? `<div style="margin-top:6px;color:var(--green)">Token and directory agree.</div>` : ""}` };
+  }
+  if (agent) {
+    const direct = (agent._grants || []).map(g => g.role);
+    return { cls: roles.length ? "lie" : "none",
+      html: `<b>Agent identity token — ${escapeHtml(agent.displayName || agent.appId)}${agentBp ? " (from " + escapeHtml(agentBp.displayName || "blueprint") + ")" : ""}</b>
+        <div style="margin-top:6px">Token <code>roles</code> (effective, via inheritance): ${chip(roles, "b-approle")}</div>
+        <div style="margin-top:4px">Directory <code>appRoleAssignments</code> on the agent: ${chip(direct, "b-deleg")}${agent._grants ? "" : " <span class='mono'>(expand its blueprint's agent list to load)</span>"}</div>
+        ${roles.length
+          ? `<div style="margin-top:6px;color:var(--red)"><b>The token carries ${plural(roles.length, "role")} the directory reports as ${direct.length} direct — inherited permissions are invisible in Graph. The directory under-reports.</b> <span class="attrib">(per Blue16 research)</span></div>`
+          : `<div style="margin-top:6px;color:var(--muted)">Token carries no app roles.</div>`}` };
+  }
+  return { cls: "none", html: `This token's <code>appid</code>/<code>oid</code> doesn't match a loaded blueprint principal or agent identity in this tenant — claims are shown above, but there's nothing loaded to diff it against.` };
+}
+
+function renderDecoded() {
+  const raw = $("jwtInput").value.trim();
+  $("jwtStatus").className = ""; $("jwtStatus").textContent = ""; $("jwtOut").innerHTML = "";
+  if (!raw) return;
+  let dec;
+  try { dec = decodeJwt(raw); }
+  catch (e) { $("jwtStatus").className = "err"; $("jwtStatus").textContent = e.message || String(e); return; }
+  const p = dec.payload, roles = rolesOf(p);
+  const row = (k, v) => (v || v === 0) ? `<tr><td class="k">${k}</td><td class="v">${escapeHtml(String(v))}</td></tr>` : "";
+  const expNote = p.exp ? (p.exp < Date.now() / 1000 ? " · EXPIRED" : " · valid") : "";
+  const claims = `<table class="jwt-claims">
+    ${row("aud", p.aud)}${row("appid", p.appid)}${row("oid", p.oid)}${row("sub", p.sub)}${row("tid", p.tid)}
+    ${row("idtyp", p.idtyp)}${row("app_displayname", p.app_displayname)}
+    <tr><td class="k">roles</td><td class="v">${roles.length ? roles.map(r => `<span class="badge b-approle">${escapeHtml(r)}</span>`).join(" ") : "<span class='mono'>none</span>"}</td></tr>
+    ${row("scp", p.scp)}${row("iat", fmtEpoch(p.iat))}${row("exp", fmtEpoch(p.exp) + expNote)}</table>`;
+  const diff = jwtDiff(p);
+  $("jwtOut").innerHTML = `<div class="dhead" style="border:none;margin:0 0 2px">Relevant claims</div>${claims}
+    <div class="jwt-diff ${diff.cls}">${diff.html}</div>
+    <details><summary style="cursor:pointer;font-size:12px;color:var(--accent)">Full payload</summary>
+      <pre class="man-pre" style="margin-top:6px">${escapeHtml(JSON.stringify(p, null, 2))}</pre></details>`;
+}
+
+function openDecoder() {
+  $("jwtInput").value = ""; $("jwtStatus").textContent = ""; $("jwtOut").innerHTML = "";
+  $("jwtModal").classList.remove("hidden");
+  $("jwtInput").focus();
+}
+$("jwtBtn").addEventListener("click", openDecoder);
+$("jwtInput").addEventListener("input", renderDecoded);
+$("jwtClose").addEventListener("click", () => $("jwtModal").classList.add("hidden"));
+$("jwtModal").addEventListener("click", e => { if (e.target === $("jwtModal")) $("jwtModal").classList.add("hidden"); });
+
+// One modal, driven by a "delete plan" so blueprint and agent deletion share the same confirm
+// flow. A plan is { title, confirmLabel, name (typed to confirm), scopes, url, consentErr,
+// roleHint, successMsg, bodyHtml }. roleHint is appended on a 403 (delegated perms are bounded by
+// the caller's directory role, so consent can succeed while the call is still denied).
+let delTarget = null;
+
+function blueprintDeletePlan(bp) {
+  const n = agentCount(bp);
+  return {
+    title: "Delete blueprint",
+    confirmLabel: "Type the blueprint name to confirm",
+    name: bp.displayName || "",
+    scopes: BLUEPRINT_DELETE_SCOPES,
+    // Agent-native cast endpoint: needs only the Agent ID Administrator role, not Cloud App Admin.
+    url: graphBase() + "/applications/" + bp.id + "/microsoft.graph.agentIdentityBlueprint",
+    consentErr: "Write consent denied — needs AgentIdentityBlueprint.DeleteRestore.All on the app registration.",
+    roleHint: "Deleting a blueprint needs the Agent ID Administrator role, or being an owner of this blueprint. Delegated permissions are bounded by your own directory roles, so consent can succeed while the delete is still denied.",
+    successMsg: "Deleted “" + (bp.displayName || bp.appId) + "”. Its agent identities are being cascade soft-deleted; all are restorable from the recycle bin for 30 days. Reloading…",
+    bodyHtml: `
+      <div style="font-weight:600">${escapeHtml(bp.displayName || "(no name)")}</div>
+      <div class="mono" style="margin-bottom:10px">appId: ${escapeHtml(bp.appId)}</div>
+      <ul>
+        <li>Deletes the blueprint <b>application and its principal</b>.</li>
+        <li>${n
+          ? `Microsoft Entra will cascade soft-delete <b style="color:var(--red)">${plural(n, "agent identity", "agent identities")}</b> created from this blueprint, plus their agent user accounts. Anything those agents run will stop working.`
+          : `This blueprint has no agent identities, so nothing cascades.`}</li>
+        <li>Soft delete: recoverable from the recycle bin for <b>30 days</b>, then permanent.</li>
+        <li><b>Restoring the blueprint does not undo the cascade</b> once it has run — each agent identity must then be restored individually.</li>
+        <li>Needs <code>AgentIdentityBlueprint.DeleteRestore.All</code> and the <b>Agent ID Administrator</b> role (or blueprint ownership); you'll be asked to consent.</li>
+      </ul>`
+  };
+}
+
+function agentDeletePlan(agent, bp) {
+  return {
+    title: "Delete agent identity",
+    confirmLabel: "Type the agent identity name to confirm",
+    name: agent.displayName || agent.appId || "",
+    scopes: AGENT_DELETE_SCOPES,
+    url: graphBase() + "/servicePrincipals/" + agent.id + "/microsoft.graph.agentIdentity",
+    consentErr: "Write consent denied — needs AgentIdentity.DeleteRestore.All on the app registration.",
+    roleHint: "Deleting an agent identity needs the Agent ID Administrator role, or being an owner of its blueprint. Delegated permissions are bounded by your own directory roles, so consent can succeed while the delete is still denied.",
+    successMsg: "Deleted agent identity “" + (agent.displayName || agent.appId) + "”. It's restorable from the recycle bin for 30 days. Reloading…",
+    bodyHtml: `
+      <div style="font-weight:600">${escapeHtml(agent.displayName || "(no name)")}</div>
+      <div class="mono" style="margin-bottom:10px">appId: ${escapeHtml(agent.appId || "")}</div>
+      <ul>
+        <li>Deletes this <b>single agent identity</b>${bp ? ` (created from <b>${escapeHtml(bp.displayName || "its blueprint")}</b>)` : ""}.</li>
+        <li><b>No cascade</b> — the blueprint and its other agent identities are untouched.</li>
+        <li>Anything this agent runs will stop working.</li>
+        <li>If it has a paired <b>agent user account</b>, that may need to be cleaned up separately.</li>
+        <li>Soft delete: recoverable from the recycle bin for <b>30 days</b>, then permanent.</li>
+        <li>Needs <code>AgentIdentity.DeleteRestore.All</code>; you'll be asked to consent.</li>
+      </ul>`
+  };
+}
+
+function openDeleteModal(plan) {
+  delTarget = plan;
+  $("delTitle").textContent = plan.title;
+  $("delConfirmLabel").textContent = plan.confirmLabel;
+  $("delGo").textContent = plan.title;
+  $("delBody").innerHTML = plan.bodyHtml;
+  $("delConfirm").value = "";
+  $("delGo").disabled = true;
+  $("delStatus").textContent = "";
+  $("delStatus").className = "";
+  $("delModal").classList.remove("hidden");
+  $("delConfirm").focus();
+}
+
+function closeDeleteModal() { $("delModal").classList.add("hidden"); delTarget = null; }
+
+async function doDelete() {
+  if (!delTarget) return;
+  const plan = delTarget;
+  $("delGo").disabled = true;
+  $("delStatus").className = "";
+  $("delStatus").innerHTML = '<span class="spinner"></span>Requesting write consent…';
+  const at = await writeToken(plan.scopes);
+  if (!at) {
+    $("delStatus").className = "err";
+    $("delStatus").textContent = plan.consentErr;
+    $("delGo").disabled = false;
+    return;
+  }
+  try {
+    $("delStatus").innerHTML = '<span class="spinner"></span>Deleting…';
+    const resp = await fetch(plan.url, { method: "DELETE", headers: { Authorization: "Bearer " + at } });
+    if (!resp.ok) {
+      let detail = "";
+      try { detail = (await resp.json()).error?.message || ""; } catch {}
+      // A 403 after consent succeeded is a directory-role gap, not a scope gap — spell out the role.
+      const hint = (resp.status === 403 && plan.roleHint) ? " " + plan.roleHint : "";
+      throw new Error("HTTP " + resp.status + (detail ? " — " + detail : "") + hint);
+    }
+    closeDeleteModal();
+    setStatus(plan.successMsg, false, true);
+    await loadBlueprints();
+  } catch (e) {
+    $("delStatus").className = "err";
+    $("delStatus").textContent = "Delete failed: " + (e.message || e);
+    $("delGo").disabled = false;
+  }
+}
+
+$("delSelect").addEventListener("change", () => { $("delBtn").disabled = $("manBtn").disabled = !$("delSelect").value; });
+$("manBtn").addEventListener("click", () => {
+  const bp = loaded && loaded.blueprints.find(b => b.appId === $("delSelect").value);
+  if (bp) openManifest(bp);
+});
+$("delBtn").addEventListener("click", () => {
+  const bp = loaded && loaded.blueprints.find(b => b.appId === $("delSelect").value);
+  if (bp) openDeleteModal(blueprintDeletePlan(bp));
+});
+
+$("delAgentSelect").addEventListener("change", () => { $("delAgentBtn").disabled = !$("delAgentSelect").value; });
+$("delAgentBtn").addEventListener("click", () => {
+  const id = $("delAgentSelect").value;
+  if (!loaded || !id) return;
+  let agent = null, parent = null;
+  Object.entries(loaded.byBlueprint).forEach(([appId, agents]) => {
+    const a = agents.find(x => x.id === id);
+    if (a) { agent = a; parent = loaded.blueprints.find(b => b.appId === appId); }
+  });
+  if (agent) openDeleteModal(agentDeletePlan(agent, parent));
+});
+
+// Enable the confirm button only on an exact name match — a typo shouldn't delete anything.
+$("delConfirm").addEventListener("input", () => {
+  $("delGo").disabled = !delTarget || $("delConfirm").value.trim() !== (delTarget.name || "").trim();
+});
+$("delGo").addEventListener("click", doDelete);
+$("delCancel").addEventListener("click", closeDeleteModal);
+$("delModal").addEventListener("click", e => { if (e.target === $("delModal")) closeDeleteModal(); });
+document.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (!$("delModal").classList.contains("hidden")) closeDeleteModal();
+  if (!$("manModal").classList.contains("hidden")) $("manModal").classList.add("hidden");
+  if (!$("jwtModal").classList.contains("hidden")) $("jwtModal").classList.add("hidden");
+});
+
+// Fill the static entity-icon placeholders from the single-source constants.
+document.querySelectorAll("[data-icon]").forEach(el => {
+  el.innerHTML = el.dataset.icon === "blueprint" ? ICON_BLUEPRINT : ICON_AGENTID;
+});
+
+// ---- risk-exposure chart: collapsible, remembered across sessions ----
+function applyRiskChartVisibility(hidden) {
+  $("riskChartBody").classList.toggle("hidden", hidden);
+  $("riskChartToggle").textContent = hidden ? "show ▾" : "hide ▴";
+}
+applyRiskChartVisibility(localStorage.getItem("aib_riskchart") === "hidden");
+$("riskChartToggle").addEventListener("click", () => {
+  const hide = !$("riskChartBody").classList.contains("hidden");
+  localStorage.setItem("aib_riskchart", hide ? "hidden" : "shown");
+  applyRiskChartVisibility(hide);
+});
+
+// ---- blast-radius flow: collapsible, remembered across sessions ----
+function applyBlastFlowVisibility(hidden) {
+  $("blastFlowBody").classList.toggle("hidden", hidden);
+  $("blastFlowToggle").textContent = hidden ? "show ▾" : "hide ▴";
+}
+applyBlastFlowVisibility(localStorage.getItem("aib_blastflow") === "hidden");
+$("blastFlowToggle").addEventListener("click", () => {
+  const hide = !$("blastFlowBody").classList.contains("hidden");
+  localStorage.setItem("aib_blastflow", hide ? "hidden" : "shown");
+  applyBlastFlowVisibility(hide);
+});
+
+// ---- wire up ----
+$("signInBtn").addEventListener("click", signIn);
+$("signOutBtn").addEventListener("click", signOut);
+$("loadBtn").addEventListener("click", loadBlueprints);
+
+function doExport(kind) {
+  if (!loaded) { setStatus("Load blueprints first.", true); return; }
+  const objs = exportRows();
+  if (kind === "csv") download("entra-agent-blueprints.csv", toCSV(objs), "text/csv;charset=utf-8");
+  else download("entra-agent-blueprints.json", JSON.stringify(objs, null, 2), "application/json");
+  setStatus("Exported " + objs.length + " blueprint(s) to " + kind.toUpperCase() + " (current filtered view).");
+}
+$("exportCsv").addEventListener("click", () => doExport("csv"));
+$("exportJson").addEventListener("click", () => doExport("json"));
+
+// filters re-render the table (no refetch)
+["fltSearch", "fltTenancy", "fltRisk", "fltCred", "fltPerm", "fltOrigin", "fltOwners"].forEach(id =>
+  $(id).addEventListener("input", () => {
+    if (!loaded) return;
+    if (activeScope) { activeScope = null; renderSummary(); }   // manual filter change clears tile highlight
+    if (activeFactor) { activeFactor = null; renderRiskChart(); }
+    renderTable();
+  }));
+
+// clickable column headers sort the table
+document.querySelectorAll("#table th.sortable").forEach(th =>
+  th.addEventListener("click", () => {
+    const k = th.dataset.key;
+    if (sortKey === k) sortDir = -sortDir;
+    else { sortKey = k; sortDir = (k === "name") ? 1 : -1; }
+    if (loaded) renderTable();
+  }));
+
+// Auto-restore an existing session if config is already saved.
+(async () => {
+  if ($("clientId").value.trim()) {
+    try {
+      if (await ensureInstance() && account) onSignedIn();
+    } catch { /* ignore */ }
+  }
+})();
+</script>
+<script>/* build stamp — auto from Last-Modified, confirms the deployed version */(function(){function a(){var d=new Date(document.lastModified),s=isNaN(d.getTime())?String(document.lastModified):d.toISOString().slice(0,10),e=document.createElement('div');e.textContent='build '+s;e.title='Build date of this file (from the Last-Modified header) — confirms which deployed version you are viewing.';e.style.cssText='position:fixed;bottom:6px;right:9px;font:11px/1 system-ui,-apple-system,sans-serif;color:var(--muted,#8a8886);opacity:.55;z-index:2147483000;pointer-events:none;letter-spacing:.02em';document.body.appendChild(e);}if(document.body)a();else document.addEventListener('DOMContentLoaded',a);})();</script>
+</body>
+</html>

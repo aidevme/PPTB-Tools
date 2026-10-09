@@ -1,0 +1,69 @@
+{
+    "name": "dataverse-type-gen",
+    "version": "0.1.0",
+    "displayName": "Dataverse Type Forge",
+    "description": "Generate early-bound TypeScript types and metadata for Dataverse, compatible with dataverse-ify and the .dataverse-gen.json config used by dataverse-gen.",
+    "main": "index.html",
+    "author": "AIDEVME Zsolt Zombik",
+    "keywords": [
+        "powerplatform",
+        "dataverse",
+        "toolbox",
+        "pptb",
+        "typescript",
+        "early-bound",
+        "dataverse-ify",
+        "dataverse-gen",
+        "react",
+        "fluentui"
+    ],
+    "license": "GPL-2.0",
+    "icon": "icon/dataverse-type-gen-icon.svg",
+    "contributors": [
+        {
+            "name": "Zsolt Zombik"
+        }
+    ],
+    "features": {
+        "minAPI": "1.2.2",
+        "enabledForPowerPlatformAPI": false
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aidevme/PPTB-Tools.git",
+        "directory": "tools/dataverse-type-gen"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "scripts": {
+        "build": "tsc && vite build",
+        "build-release": "npm run build && npm version patch --no-git-tag-version",
+        "dev": "vite",
+        "preview": "vite preview",
+        "watch": "vite build --watch",
+        "test": "vitest run",
+        "test:watch": "vitest",
+        "finalize-package": "npm shrinkwrap"
+    },
+    "dependencies": {
+        "@fluentui/react-components": "^9.74.4",
+        "@fluentui/react-icons": "^2.0.334",
+        "react": "^18.3.1",
+        "react-dom": "^18.3.1"
+    },
+    "devDependencies": {
+        "@pptb/types": "^1.2.4",
+        "@types/react": "^18.3.12",
+        "@types/react-dom": "^18.3.1",
+        "@vitejs/plugin-react": "^4.3.4",
+        "jsdom": "^26.1.0",
+        "typescript": "^5.6.3",
+        "vite": "^7.1.11",
+        "vitest": "^3.2.4"
+    },
+    "files": [
+        "dist",
+        "npm-shrinkwrap.json"
+    ]
+}

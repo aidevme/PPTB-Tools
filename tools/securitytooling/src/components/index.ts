@@ -9,7 +9,3 @@ export { SettingsPanel } from "./panels/SettingsPanel";
 export type { ISettingsPanelProps } from "./panels/SettingsPanel";
 export { Module } from "./modules/Module";
 export type { IModuleProps } from "./modules/Module";
-export { Connect } from "./modules/Connect";
-export type { IConnectProps } from "./modules/Connect";
-export { RunLiveScan } from "./modules/RunLiveScan";
-export type { IRunLiveScanProps } from "./modules/RunLiveScan";

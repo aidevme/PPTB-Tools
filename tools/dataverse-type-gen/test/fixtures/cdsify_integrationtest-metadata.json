@@ -1,0 +1,1240 @@
+{
+ "EntityMetadata": [
+  {
+   "LogicalName": "cdsify_integrationtest",
+   "SchemaName": "cdsify_IntegrationTest",
+   "EntitySetName": "cdsify_integrationtests",
+   "PrimaryIdAttribute": null,
+   "Attributes": [
+    {
+     "LogicalName": "cdsify_bigint",
+     "SchemaName": "cdsify_BigInt",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Multi\nLine\nDescription",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Big Int",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_file1",
+     "SchemaName": "cdsify_File1",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "FileType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "File Column",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "File1",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_file1_name",
+     "SchemaName": "cdsify_File1_Name",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_file1",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_image1",
+     "SchemaName": "cdsify_Image1",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "ImageType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_image1id",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Image1",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_image1_timestamp",
+     "SchemaName": "cdsify_Image1_Timestamp",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_image1id",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_image1_url",
+     "SchemaName": "cdsify_Image1_URL",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_image1id",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Url",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_image1id",
+     "SchemaName": "cdsify_Image1Id",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_integrationtestid",
+     "SchemaName": "cdsify_IntegrationTestId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier for entity instances",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Dataverseify Integration Test",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_name",
+     "SchemaName": "cdsify_Name",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Name",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_primaryimage",
+     "SchemaName": "cdsify_PrimaryImage",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "ImageType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_primaryimageid",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Primary Image",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cdsify_primaryimage_timestamp",
+     "SchemaName": "cdsify_PrimaryImage_Timestamp",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_primaryimageid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_primaryimage_url",
+     "SchemaName": "cdsify_PrimaryImage_URL",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "cdsify_primaryimageid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Url",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "cdsify_primaryimageid",
+     "SchemaName": "cdsify_PrimaryImageId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdby",
+     "SchemaName": "CreatedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user who created the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdbyname",
+     "SchemaName": "CreatedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdbyyominame",
+     "SchemaName": "CreatedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdon",
+     "SchemaName": "CreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the record was created.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfby",
+     "SchemaName": "CreatedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the delegate user who created the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyname",
+     "SchemaName": "CreatedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyyominame",
+     "SchemaName": "CreatedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "importsequencenumber",
+     "SchemaName": "ImportSequenceNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Sequence number of the import that created this record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Import Sequence Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedby",
+     "SchemaName": "ModifiedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user who modified the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedbyname",
+     "SchemaName": "ModifiedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedbyyominame",
+     "SchemaName": "ModifiedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedon",
+     "SchemaName": "ModifiedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the record was modified.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfby",
+     "SchemaName": "ModifiedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the delegate user who modified the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyname",
+     "SchemaName": "ModifiedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyyominame",
+     "SchemaName": "ModifiedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "overriddencreatedon",
+     "SchemaName": "OverriddenCreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time that the record was migrated.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Record Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "ownerid",
+     "SchemaName": "OwnerId",
+     "AttributeType": "Owner",
+     "AttributeTypeName": {
+      "Value": "OwnerType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser",
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Owner Id",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owner",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owneridname",
+     "SchemaName": "OwnerIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Name of the owner",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owneridtype",
+     "SchemaName": "OwnerIdType",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Owner Id Type",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owneridyominame",
+     "SchemaName": "OwnerIdYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Yomi name of the owner",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owningbusinessunit",
+     "SchemaName": "OwningBusinessUnit",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "businessunit"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier for the business unit that owns the record",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning Business Unit",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owningbusinessunitname",
+     "SchemaName": "OwningBusinessUnitName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "owningbusinessunit",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owningteam",
+     "SchemaName": "OwningTeam",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier for the team that owns the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning Team",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owninguser",
+     "SchemaName": "OwningUser",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier for the user that owns the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning User",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "statecode",
+     "SchemaName": "statecode",
+     "AttributeType": "State",
+     "AttributeTypeName": {
+      "Value": "StateType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Status of the Dataverseify Integration Test",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "cdsify_integrationtest_statecode",
+      "IsGlobal": false,
+      "OptionSetType": "State",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Active",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Inactive",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statecodename",
+     "SchemaName": "statecodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "statuscode",
+     "SchemaName": "statuscode",
+     "AttributeType": "Status",
+     "AttributeTypeName": {
+      "Value": "StatusType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Reason for the status of the Dataverseify Integration Test",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status Reason",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "cdsify_integrationtest_statuscode",
+      "IsGlobal": false,
+      "OptionSetType": "Status",
+      "Options": [
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Active",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Inactive",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statuscodename",
+     "SchemaName": "statuscodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statuscode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "timezoneruleversionnumber",
+     "SchemaName": "TimeZoneRuleVersionNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Time Zone Rule Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "utcconversiontimezonecode",
+     "SchemaName": "UTCConversionTimeZoneCode",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Time zone code that was in use when the record was created.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "UTC Conversion Time Zone Code",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "versionnumber",
+     "SchemaName": "VersionNumber",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Version Number",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

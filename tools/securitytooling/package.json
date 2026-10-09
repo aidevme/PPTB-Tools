@@ -1,8 +1,8 @@
 {
     "name": "pptb-securitytooling",
     "version": "0.0.1",
-    "displayName": "Security Tools",
-    "description": "Security tools for the Power Platform Tool Box",
+    "displayName": "Security Assessment Tools for Power Platform",
+    "description": "A unified tools for assessing Shadow AI, red-team reconnaissance, agent governance, and risky application exposure across your Microsoft cloud estate.",
     "contributors": [
         {
             "name": "Power Platform Tool Box",
@@ -37,7 +37,7 @@
         "react-dom": "^18.3.1"
     },
     "devDependencies": {
-        "@pptb/types": "^1.0.17",
+        "@pptb/types": "^1.2.4",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",
         "@vitejs/plugin-react": "^4.3.4",

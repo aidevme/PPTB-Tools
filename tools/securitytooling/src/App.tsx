@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MODULE_CARDS, type IModuleCardData } from "./consts";
-import { Footer, Header, HeaderToolbar, Module, ModuleCard } from "./components";
+import { Footer, Header, HeaderNavigation, HeaderToolbar, Module, ModuleCard } from "./components";
 import { useAppStyles } from "./styles";
 
 function App() {
@@ -14,8 +14,24 @@ function App() {
                 <HeaderToolbar />
             </div>
 
+            <HeaderNavigation
+                items={
+                    activeModule
+                        ? [
+                              { key: "dashboard", label: "Security Tools", onClick: () => setActiveModule(null) },
+                              { key: "module", label: activeModule.title },
+                          ]
+                        : [{ key: "dashboard", label: "Security Tools" }]
+                }
+            />
+
             {activeModule ? (
-                <Module title={activeModule.title} description={activeModule.description} module={activeModule.module} />
+                <Module
+                    icon={<activeModule.icon />}
+                    title={activeModule.title}
+                    description={activeModule.description}
+                    module={activeModule.module}
+                />
             ) : (
                 <div className={styles.toolGrid}>
                     {MODULE_CARDS.map((tool) => {

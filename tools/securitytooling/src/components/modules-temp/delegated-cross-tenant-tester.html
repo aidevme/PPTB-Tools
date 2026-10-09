@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blue16 Delegated Cross-Tenant Tester</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='9' cy='16' r='6' fill='none' stroke='%230f7b7b' stroke-width='2'/%3E%3Ccircle cx='23' cy='16' r='6' fill='none' stroke='%23a4262c' stroke-width='2'/%3E%3Cpath d='M13 16h6' stroke='%23605e5c' stroke-width='2'/%3E%3C/svg%3E" />
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"
+        integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY"
+        crossorigin="anonymous"></script>
+<script>
+  if (typeof msal === "undefined") {
+    document.write('<script src="https://unpkg.com/@azure/msal-browser@3.28.1/lib/msal-browser.min.js" integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY" crossorigin="anonymous"><\/script>');
+  }
+</script>
+<script>
+  (function () {
+    var t = localStorage.getItem("aib_theme")
+      || ((window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f3f2f1; --card: #ffffff; --border: #e1dfdd; --text: #201f1e; --muted: #605e5c;
+    --accent: #0f7b7b; --accent-dark: #0c6363;
+    --green: #0e700e; --green-bg: #dff6dd;
+    --red: #a4262c; --red-bg: #fde7e9; --on-red: #ffffff;
+    --amber: #8a6d00; --amber-bg: #fff4ce;
+    --input-bg: #ffffff; --input-border: #8a8886; --hover: #faf9f8;
+    --code-bg: #edebe9; --cert-bg: #d9f0f0;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.13), 0 .3px .9px rgba(0,0,0,.11);
+  }
+  html[data-theme="dark"] {
+    --bg: #1b1a19; --card: #262523; --border: #3b3a38; --text: #f3f2f1; --muted: #a6a4a1;
+    --accent: #4dc4c4; --accent-dark: #78d6d6;
+    --green: #6ccb6c; --green-bg: #16331a;
+    --red: #f1707a; --red-bg: #3a1d20; --on-red: #1b1a19;
+    --amber: #e9c46a; --amber-bg: #3a300f;
+    --input-bg: #1b1a19; --input-border: #605e5c; --hover: #2f2e2c;
+    --code-bg: #333230; --cert-bg: #13322f;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.45), 0 .3px .9px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  header { background: var(--accent); color: #fff; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 11px; }
+  .applogo { width: 30px; height: 24px; flex-shrink: 0; }
+  .applogo circle { fill: none; stroke-width: 2.2; }
+  .applogo .a { stroke: #fff; } .applogo .b { stroke: #ffd0d0; } .applogo .ln { stroke: rgba(255,255,255,.7); stroke-width: 2; }
+  .pv { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); padding: 2px 7px; border-radius: 10px; }
+  header .right { display: flex; align-items: center; gap: 16px; }
+  header .who { font-size: 13px; opacity: .95; text-align: right; }
+  .theme-btn { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 6px; padding: 6px 11px; cursor: pointer; font-size: 16px; line-height: 1; font-weight: 600; }
+  .theme-btn:hover { background: rgba(255,255,255,.28); }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 28px 60px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 20px; }
+  .card h2 { font-size: 15px; margin: 0 0 14px; font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 14px; font-family: inherit; background: var(--input-bg); color: var(--text); }
+  input:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .row-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  button:hover { background: var(--accent-dark); }
+  button.secondary { background: var(--card); color: var(--text); border: 1px solid var(--input-border); }
+  button.secondary:hover { background: var(--hover); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  code { background: var(--code-bg); color: var(--text); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: "Cascadia Code", Consolas, monospace; }
+  #status { font-size: 13px; } #status.err { color: var(--red); }
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -3px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+  a { color: var(--accent); }
+  .notice { border: 1px solid var(--border); border-left-width: 3px; border-radius: 6px; padding: 9px 12px; margin: 0 0 12px; font-size: 12.5px; line-height: 1.5; }
+  .notice-warn { border-left-color: var(--red); background: var(--red-bg); color: var(--text); }
+  .notice-info { border-left-color: var(--accent); background: var(--hover); color: var(--muted); }
+  /* the headline banner: which tenant am I reading */
+  .banner { border-radius: 10px; padding: 18px 22px; margin-bottom: 20px; border: 2px solid var(--accent); background: var(--cert-bg); }
+  .banner .lead { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+  .banner .tname { font-size: 24px; font-weight: 800; margin: 4px 0 2px; }
+  .banner .tid { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; color: var(--muted); }
+  .banner .cross { margin-top: 8px; font-size: 13px; }
+  .banner.same { border-color: var(--amber); background: var(--amber-bg); }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .b-cross { background: var(--green-bg); color: var(--green); }
+  .b-same { background: var(--amber-bg); color: var(--amber); }
+  /* claim / kv tables */
+  .kv { width: 100%; border-collapse: collapse; }
+  .kv td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 13px; }
+  .kv td.k { color: var(--muted); white-space: nowrap; width: 190px; font-family: "Cascadia Code", Consolas, monospace; font-size: 11.5px; }
+  .kv td.v { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; word-break: break-all; }
+  .kv tr.hot td { background: var(--cert-bg); }
+  .kv tr.hot td.k { color: var(--accent-dark); font-weight: 700; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 780px){ .cols { grid-template-columns: 1fr; } }
+  .sub { font-size: 12px; color: var(--muted); margin: 0 0 10px; line-height: 1.5; }
+  .expander { cursor: pointer; user-select: none; color: var(--accent); font-weight: 600; font-size: 12px; }
+  pre.raw { background: var(--code-bg); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; font-family: "Cascadia Code", Consolas, monospace; font-size: 11px; line-height: 1.5; overflow-x: auto; max-height: 340px; word-break: break-all; white-space: pre-wrap; }
+  /* attack-impact preview */
+  .impact { border: 2px solid var(--red); background: var(--red-bg); color: var(--text); border-radius: 10px; padding: 14px 18px; margin: 14px 0 16px; font-size: 13px; line-height: 1.55; }
+  .impact b { font-weight: 700; }
+  .hgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .hstat { border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; background: var(--card); }
+  .hstat .n { font-size: 28px; font-weight: 800; line-height: 1; }
+  .hstat .n.hot { color: var(--red); }
+  .hstat .n.na { color: var(--muted); font-size: 15px; font-weight: 600; }
+  .hstat .l { font-size: 12px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .3px; }
+  .crown { border: 1px solid var(--red); border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; background: var(--red-bg); }
+  .crown h4 { margin: 0 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .5px; color: var(--red); }
+  .crown ul { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7; }
+  .crown ul b { color: var(--text); }
+  .samp { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  .samp td, .samp th { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .samp th { color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; font-size: 11px; }
+  .samp td { font-family: "Cascadia Code", Consolas, monospace; }
+  .secrow { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; font-size: 12.5px; flex-wrap: wrap; }
+  .secrow .secok { color: var(--green); font-weight: 700; }
+  .secrow .secbad { color: var(--red); font-weight: 700; }
+  .secrow .secwarn { color: var(--amber); font-weight: 700; }
+</style>
+</head>
+<body>
+<header>
+  <h1>
+    <svg class="applogo" viewBox="0 0 32 24" role="img" aria-label="Cross-tenant tester logo">
+      <circle class="a" cx="9" cy="12" r="6.5" /><circle class="b" cx="23" cy="12" r="6.5" /><path class="ln" d="M13 12h6" />
+    </svg>
+    <span>Delegated Cross-Tenant Tester</span>
+    <span class="pv">Lab</span>
+  </h1>
+  <div class="right">
+    <div class="who" id="who"></div>
+    <button id="themeToggle" class="theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main>
+  <div class="notice notice-info">
+    Demonstrates that a <b>multi-tenant app with delegated permissions</b> reads the <b>signed-in user's</b> tenant —
+    not the app owner's. Sign in with an account from your <b>other</b> tenant and watch the access-token <code>tid</code>/<code>scp</code>
+    and the live <code>GET /me</code> come from that tenant. Runs entirely in your browser; nothing is sent anywhere except Microsoft.
+  </div>
+
+  <section class="card" id="configCard">
+    <h2>1 · Your multi-tenant app</h2>
+    <div class="grid">
+      <div>
+        <label for="clientId">Application (client) ID</label>
+        <input id="clientId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" spellcheck="false" />
+        <div class="hint">An app registration you own, <b>Supported account types = multi-tenant</b>, platform <b>SPA</b> with this page's URL as a redirect URI.</div>
+      </div>
+      <div>
+        <label for="authority">Sign-in authority</label>
+        <select id="authority">
+          <option value="organizations">organizations — any work/school tenant (recommended)</option>
+          <option value="common">common — work/school + personal</option>
+          <option value="custom">specific tenant ID / domain…</option>
+        </select>
+        <input id="customTenant" class="hidden" style="margin-top:8px" placeholder="othertenant.onmicrosoft.com or tenant GUID" autocomplete="off" spellcheck="false" />
+        <div class="hint"><code>organizations</code> routes to whichever account you pick — the easiest way to hop tenants.</div>
+      </div>
+      <div>
+        <label for="scopes">Delegated scopes to request</label>
+        <input id="scopes" value="User.Read" autocomplete="off" spellcheck="false" />
+        <div class="hint">Space-separated. <code>User.Read</code> always works. For the clearest <b>"capped by the user"</b> demo, add <b><code>Policy.Read.All</code></b> — admins can read Conditional Access policies, but ordinary users <b>can't, even with the scope</b>. Add <code>RoleManagement.Read.Directory</code> and <code>AuditLog.Read.All</code> for the same effect on role assignments and sign-in logs, and <code>Directory.Read.All</code> to read the directory. All the <code>*.Read.All</code> scopes need admin consent <b>in the signed-in user's tenant</b>.</div>
+      </div>
+    </div>
+    <div class="row-actions">
+      <button id="btn-signin">Sign in &amp; read</button>
+      <button id="btn-switch" class="secondary hidden">Switch account</button>
+      <button id="btn-signout" class="secondary hidden">Sign out</button>
+      <span id="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <div id="err-box"></div>
+
+  <section id="results" class="hidden">
+    <div class="banner" id="banner"></div>
+
+    <div class="card">
+      <h2>Access-token claims — what this token is for</h2>
+      <div class="sub">Decoded locally from the delegated access token. <code>tid</code> = the tenant you're reading; <code>scp</code> = the delegated scopes you may use; <code>oid</code>/<code>upn</code> = the user you're acting as.</div>
+      <table class="kv" id="claims"></table>
+      <div style="margin-top:10px"><span class="expander" id="rawToggle">show raw token ▾</span></div>
+      <pre class="raw hidden" id="rawTok"></pre>
+    </div>
+
+    <div class="card" id="impactCard">
+      <h2>Attack-impact preview — what a hostile app could capture</h2>
+      <div class="sub">Uses this session's token to enumerate the <b>breadth</b> of what it can read in <span id="impactTenant">this tenant</span>.
+        For a CISO demo: this is what a malicious multi-tenant app would silently harvest the instant your user consents.
+        <b>Nothing here leaves your browser</b> — it's read-only and sent only to Microsoft Graph; the only thing a real attacker adds is a <code>POST</code> to their own server.</div>
+      <button id="btn-impact">Preview what this session can read</button>
+      <div id="impact" style="margin-top:14px"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+const $ = (id) => document.getElementById(id);
+function escHtml(s){ if(s==null) return ""; return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+function applyTheme(t){ document.documentElement.setAttribute("data-theme", t); $("themeToggle").textContent = t==="dark"?"◑":"◐"; }
+applyTheme(document.documentElement.getAttribute("data-theme")||"light");
+$("themeToggle").addEventListener("click", ()=>{ const n=document.documentElement.getAttribute("data-theme")==="dark"?"light":"dark"; localStorage.setItem("aib_theme",n); applyTheme(n); });
+
+const REDIRECT = location.origin + location.pathname.replace(/\/{2,}/g, '/');
+// If opened at a URL with a double slash (…//page), the un-normalized redirect wouldn't match the
+// app registration (AADSTS50011). Redirect is normalized above; also clean the address bar.
+if (/\/{2,}/.test(location.pathname)) { try { history.replaceState(null, '', REDIRECT + location.search + location.hash); } catch (e) {} }
+$("clientId").value = localStorage.getItem("dxt_clientId") || "";
+let msalApp = null, account = null, firstTid = null;
+
+$("authority").addEventListener("change", ()=>{ $("customTenant").classList.toggle("hidden", $("authority").value !== "custom"); });
+
+function authorityUrl(){
+  const a = $("authority").value;
+  if(a === "custom"){ const t = $("customTenant").value.trim() || "organizations"; return "https://login.microsoftonline.com/" + t; }
+  return "https://login.microsoftonline.com/" + a;
+}
+function scopeList(){ return ($("scopes").value.trim() || "User.Read").split(/[\s,]+/).filter(Boolean); }
+function setStatus(msg, isErr, busy){ const s=$("status"); s.className=isErr?"err":""; s.innerHTML=(busy?'<span class="spinner"></span>':"")+(msg||""); }
+function clearError(){ $("err-box").innerHTML=""; }
+
+function buildMsal(){
+  const clientId = $("clientId").value.trim();
+  if(!clientId){ setStatus("Enter your app's Client ID first.", true); return null; }
+  localStorage.setItem("dxt_clientId", clientId);
+  return new msal.PublicClientApplication({
+    auth: { clientId, authority: authorityUrl(), redirectUri: REDIRECT, knownAuthorities: [] },
+    cache: { cacheLocation: "sessionStorage" }
+  });
+}
+
+async function signIn(prompt){
+  clearError();
+  try {
+    msalApp = buildMsal(); if(!msalApp) return;
+    await msalApp.initialize();
+    setStatus("Signing in…", false, true);
+    // prompt:select_account so you can pick the OTHER tenant's account each time.
+    const res = await msalApp.loginPopup({ scopes: scopeList(), prompt: prompt || "select_account" });
+    account = res.account; msalApp.setActiveAccount(account);
+    $("who").innerHTML = "Signed in as <strong>" + escHtml(account.username) + "</strong>";
+    $("btn-switch").classList.remove("hidden"); $("btn-signout").classList.remove("hidden");
+    await readAndRender(res);
+  } catch(e){ setStatus(""); showAuthError(e); }
+}
+function signOut(){ if(msalApp&&account) msalApp.logoutPopup({ account }).catch(()=>{}); account=null; $("who").textContent=""; $("results").classList.add("hidden"); $("btn-switch").classList.add("hidden"); $("btn-signout").classList.add("hidden"); setStatus("Signed out."); }
+
+async function getToken(){
+  try { return (await msalApp.acquireTokenSilent({ scopes: scopeList(), account })).accessToken; }
+  catch { return (await msalApp.acquireTokenPopup({ scopes: scopeList() })).accessToken; }
+}
+function decodeJwt(t){ try { let p=t.split(".")[1].replace(/-/g,"+").replace(/_/g,"/"); while(p.length%4)p+="="; return JSON.parse(decodeURIComponent(escape(atob(p)))); } catch(e){ return null; } }
+
+async function graphGet(path, token){
+  const r = await fetch("https://graph.microsoft.com/v1.0" + path, { headers:{ Authorization:"Bearer "+token, ConsistencyLevel:"eventual" } });
+  let body; try { body = await r.json(); } catch(e){ body = { note:"(no JSON body)" }; }
+  return { status: r.status, ok: r.ok, body };
+}
+
+async function readAndRender(loginRes){
+  setStatus("Reading…", false, true);
+  const token = (loginRes && loginRes.accessToken) || await getToken();
+  const claims = decodeJwt(token) || {};
+  const tid = claims.tid || (account.idTokenClaims && account.idTokenClaims.tid) || "?";
+  if(!firstTid) firstTid = tid;
+
+  // /organization gives us the tenant's friendly name if the scope allows it; the UPN domain is the fallback.
+  const org = await graphGet("/organization?$select=displayName,verifiedDomains,id", token);
+  const orgName = (org.ok && org.body.value && org.body.value[0] && org.body.value[0].displayName) || null;
+  const upnDomain = (account.username || "").split("@")[1] || "";
+  const tenantName = orgName || upnDomain || tid;
+  const cross = firstTid && firstTid !== tid;
+
+  // ---- banner ----
+  const b = $("banner");
+  b.className = "banner" + (cross ? "" : " same");
+  b.innerHTML = '<div class="lead">You are reading data from</div>'
+    + '<div class="tname">' + escHtml(tenantName) + '</div>'
+    + '<div class="tid">tenant id (tid): ' + escHtml(tid) + '</div>'
+    + '<div class="cross">Acting as <b>' + escHtml(account.username) + '</b> · scopes <code>' + escHtml((claims.scp||"").trim() || "(none in token)") + '</code>'
+    + (cross ? ' <span class="badge b-cross">✓ different tenant than your first sign-in — cross-tenant delegated read</span>'
+             : ' <span class="badge b-same">same tenant as your first sign-in — sign out &amp; sign in with the OTHER tenant’s account to see tid change</span>') + '</div>';
+
+  // ---- claims table ----
+  const HOT = { tid:1, scp:1, oid:1, upn:1, preferred_username:1 };
+  const order = ["tid","scp","upn","preferred_username","oid","name","aud","iss","appid","app_displayname","roles","ver","exp"];
+  const seen = {};
+  const rows = order.filter(k=>k in claims).concat(Object.keys(claims).filter(k=>order.indexOf(k)<0));
+  $("claims").innerHTML = rows.map(k=>{ if(seen[k]) return ""; seen[k]=1;
+    let v = claims[k]; if(Array.isArray(v)) v=v.join(" "); if(typeof v==="object") v=JSON.stringify(v);
+    if(k==="exp"||k==="iat"||k==="nbf") v = v + " (" + new Date(v*1000).toISOString().slice(0,19).replace("T"," ") + "Z)";
+    const note = k==="tid"?"the tenant you are reading":k==="scp"?"delegated scopes you may use":k==="oid"?"the user object id":k==="aud"?"the resource (Graph)":k==="appid"?"your app":"";
+    return '<tr'+(HOT[k]?' class="hot"':'')+'><td class="k">'+escHtml(k)+'</td><td class="v">'+escHtml(String(v))+(note?' <span style="color:var(--muted);font-family:Segoe UI">— '+note+'</span>':'')+'</td></tr>';
+  }).join("");
+  $("rawTok").textContent = token;
+
+  // reset the attack-impact preview for the (possibly new) tenant
+  $("impactTenant").textContent = tenantName;
+  $("impact").innerHTML = ""; $("btn-impact").disabled = false;
+
+  $("results").classList.remove("hidden");
+  setStatus("Read complete — token tenant " + tid + ".");
+}
+// Attack-impact preview: enumerate the BREADTH this session can read (counts + a small sample + the
+// privileged accounts). Read-only; nothing leaves the browser. It shows a CISO exactly what a hostile
+// multi-tenant app would harvest on consent — the only thing a real attacker adds is exfiltration.
+const PRIV_ROLE_RX = /Global Administrator|Privileged Role|Privileged Authentication|Security Administrator|Application Administrator|Cloud Application Administrator|User Administrator|Exchange Administrator|SharePoint Administrator|Authentication Administrator|Hybrid Identity|Helpdesk Administrator|Conditional Access/i;
+async function harvestPreview(){
+  const btn = $("btn-impact"); btn.disabled = true;
+  $("impact").innerHTML = '<p class="sub"><span class="spinner"></span> Enumerating the directory this session can reach…</p>';
+  let token; try { token = await getToken(); } catch(e){ $("impact").innerHTML = '<div class="notice notice-warn">Could not get a token: '+escHtml(e.message||String(e))+'</div>'; btn.disabled=false; return; }
+  const scpSet = new Set((((decodeJwt(token)||{}).scp)||"").split(/\s+/).filter(Boolean));
+  const users   = await graphGet("/users?$count=true&$top=8&$select=displayName,userPrincipalName,jobTitle", token);
+  const groups  = await graphGet("/groups?$count=true&$top=1&$select=id", token);
+  const devices = await graphGet("/devices?$count=true&$top=1&$select=id", token);
+  const sps     = await graphGet("/servicePrincipals?$count=true&$top=1&$select=id", token);
+  const roles   = await graphGet("/directoryRoles?$expand=members($select=displayName,userPrincipalName)", token);
+  // Admin-gated security/governance reads — these need the scope AND a directory role, so they're the
+  // cleanest proof of the delegated cap: 200 as an admin, 403 as an ordinary user (same app + same scopes).
+  const ca   = await graphGet("/identity/conditionalAccess/policies?$select=id,displayName,state&$top=100", token);
+  const raps = await graphGet("/roleManagement/directory/roleAssignments?$top=5&$select=id", token);
+  const logs = await graphGet("/auditLogs/signIns?$top=1&$select=id", token);
+
+  const cnt = (res)=> (res.ok && typeof res.body["@odata.count"] === "number") ? res.body["@odata.count"] : null;
+  function tile(label, res){
+    const n = cnt(res);
+    const cls = !res.ok ? "na" : (n>0 ? "hot" : "");
+    const val = !res.ok ? "blocked" : (n==null ? (Array.isArray(res.body.value) ? res.body.value.length+"+" : "readable") : n.toLocaleString());
+    return '<div class="hstat"><div class="n '+cls+'">'+escHtml(String(val))+'</div><div class="l">'+label+(res.ok?'':' — needs a broader scope')+'</div></div>';
+  }
+
+  let crown = "";
+  if(roles.ok && Array.isArray(roles.body.value)){
+    const priv = roles.body.value.filter(r=> PRIV_ROLE_RX.test(r.displayName||"") && r.members && r.members.length);
+    const admins = {}; priv.forEach(r=> (r.members||[]).forEach(m=>{ admins[m.userPrincipalName||m.displayName]=1; }));
+    if(priv.length) crown = '<div class="crown"><h4>⚠ Privileged accounts this session can enumerate ('+Object.keys(admins).length+' distinct)</h4><ul>'
+      + priv.map(r=> '<li><b>'+escHtml(r.displayName)+'</b>: '+(r.members||[]).map(m=> escHtml(m.displayName||m.userPrincipalName)).join(", ")+'</li>').join("")
+      + '</ul></div>';
+  }
+
+  let samp = "";
+  if(users.ok && Array.isArray(users.body.value) && users.body.value.length)
+    samp = '<div class="sub" style="margin:6px 0 4px"><b>Sample of the user directory it just read</b> (first '+users.body.value.length+'):</div><table class="samp"><thead><tr><th>Name</th><th>UPN</th><th>Title</th></tr></thead><tbody>'
+      + users.body.value.map(u=> '<tr><td>'+escHtml(u.displayName||"")+'</td><td>'+escHtml(u.userPrincipalName||"")+'</td><td>'+escHtml(u.jobTitle||"")+'</td></tr>').join("")
+      + '</tbody></table>';
+
+  // Admin-gated reads — the real proof of the "capped by the user" model.
+  // Three outcomes, told apart by the token's own scp claim so an admin isn't misled:
+  //   200                     → scope in token AND the role allows it (green)
+  //   403 + scope NOT in scp  → the scope was never consented — a config gap, not the cap (amber)
+  //   403 + scope IS in scp   → the scope is present but this account's role can't read it — the real cap (red)
+  function secRow(label, scope, res){
+    let cls, detail;
+    if(res.ok){ const n = (res.body && Array.isArray(res.body.value)) ? res.body.value.length : null;
+      cls = "secok";
+      detail = (n!=null ? (n + (res.body["@odata.nextLink"]?"+":"") + " returned") : "readable") + " — scope in token, and this account’s role allows it"; }
+    else { const code = (res.body&&res.body.error&&res.body.error.code) || "blocked";
+      if(!scpSet.has(scope)){ cls = "secwarn";
+        detail = res.status + " " + code + " — " + scope + " isn’t in your token: it was never consented. Grant + admin-consent it, then re-acquire. (A config gap, not the cap.)"; }
+      else if(/Authorization_RequestDenied/i.test(code)){ cls = "secbad";
+        detail = res.status + " " + code + " — the scope IS in your token, but this account’s role can’t read it. This is the delegated cap."; }
+      else { cls = "secbad";
+        detail = res.status + " " + code + " — blocked even though the scope is present in the token."; } }
+    return '<div class="secrow"><div><b>'+label+'</b> <span class="mono" style="font-size:11px;color:var(--muted)">'+scope+'</span></div><div class="'+cls+'">'+escHtml(detail)+'</div></div>';
+  }
+  const secHtml = '<div style="margin-top:16px;font-weight:700;font-size:13px">Security &amp; governance reads — admin-gated (the real proof of the cap)</div>'
+    + '<div class="sub" style="margin:4px 0 8px">Each read needs the scope <b>in your token</b> <b>and</b> a directory role. There are two different 403s: <span style="color:var(--amber);font-weight:700">amber</span> = the scope was never consented (a config gap — fix it and re-acquire); <span style="color:var(--red);font-weight:700">red</span> = the scope <b>is</b> in your token but your role still can’t read it — <b>that</b> is the cap. As a <b>Global Admin</b> the red case turns green; an <b>ordinary user</b> 403s red on the very same token. <span class="mono" style="font-size:11px">First get all three scopes into the token — add Policy.Read.All, RoleManagement.Read.Directory, AuditLog.Read.All and admin-consent them — then compare admin vs user.</span></div>'
+    + secRow("Conditional Access policies", "Policy.Read.All", ca)
+    + secRow("Directory role assignments (who is admin)", "RoleManagement.Read.Directory", raps)
+    + secRow("Sign-in logs", "AuditLog.Read.All", logs);
+
+  const anyBlocked = [users,groups,devices,sps].some(r=>!r.ok);
+  $("impact").innerHTML =
+      '<div class="impact"><b>Everything below was read on your user’s behalf and shown here in your browser — nothing was sent anywhere.</b> A hostile multi-tenant app would <code>POST</code> exactly this to its own server the moment consent is granted: no further clicks, invisible to the user, and (with a backend + refresh token) it keeps reading for days until an admin revokes the app.</div>'
+    + '<div class="hgrid">' + tile("Users", users) + tile("Groups", groups) + tile("Devices", devices) + tile("Apps / SPNs", sps) + '</div>'
+    + crown + samp + secHtml
+    + (anyBlocked ? '<div class="notice notice-info" style="margin-top:12px">Some reads were blocked — the consented scopes don’t cover them here. Add <code>Directory.Read.All</code> to the scopes and re-consent (as an admin), then re-run: a single broad admin consent is what turns one login into a full directory dump.</div>' : '');
+  btn.disabled = false;
+}
+function showAuthError(e){
+  const msg=(e&&(e.message||e.errorMessage))||String(e);
+  let friendly=null;
+  if(/AADSTS650051|AADSTS65001|consent_required|interaction_required|AADSTS900971/i.test(msg))
+    friendly='<b>Consent needed in this tenant.</b> The requested scope isn’t consented for your app in the signed-in user’s tenant. Either accept the consent prompt, drop back to <code>User.Read</code>, or have an admin of that tenant grant it — consent is <b>per tenant</b>.';
+  else if(/AADSTS700016|not found in the tenant|unauthorized_client/i.test(msg))
+    friendly='<b>App not present in this tenant.</b> The app isn’t provisioned in the signed-in user’s tenant yet. Make sure it’s <b>multi-tenant</b>; the first sign-in from that tenant creates the service principal (and prompts consent).';
+  else if(/AADSTS50020|does not exist in tenant/i.test(msg))
+    friendly='<b>Wrong directory.</b> This account can’t use the app in the tenant you pinned. Use authority <code>organizations</code> and pick the other tenant’s account.';
+  else if(/popup|user_cancelled|BrowserAuthError/i.test(msg))
+    friendly='Sign-in popup was closed or blocked. Allow popups for this site and try again.';
+  $("err-box").innerHTML='<div class="notice notice-warn">'+(friendly||escHtml(msg))+(friendly?'<div class="hint" style="margin-top:6px">Detail: <code>'+escHtml(msg.slice(0,240))+'</code></div>':'')+'</div>';
+  console.error(e);
+}
+
+$("btn-impact").addEventListener("click", harvestPreview);
+$("btn-signin").addEventListener("click", ()=>signIn("select_account"));
+$("btn-switch").addEventListener("click", ()=>signIn("select_account"));
+$("btn-signout").addEventListener("click", signOut);
+$("rawToggle").addEventListener("click", ()=>{ const p=$("rawTok"); const h=p.classList.toggle("hidden"); $("rawToggle").textContent = h?"show raw token ▾":"hide raw token ▴"; });
+</script>
+</body>
+</html>

@@ -1,8 +1,8 @@
-import { StrictMode, useCallback, useEffect, useMemo, useState } from 'react';
+import { StrictMode, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FluentProvider, webDarkTheme, webLightTheme } from '@fluentui/react-components';
 import App from './App';
-import { AppContext, type Connection, type ThemeMode } from './hooks';
+import { AppContext, useConnection, type ThemeMode } from './hooks';
 import './index.css';
 
 /** Wraps `<App>` in a `FluentProvider`, picking the theme once PPTB reports it (light by default),
@@ -10,8 +10,7 @@ import './index.css';
  * components that need to branch on either. */
 function Root() {
     const [mode, setMode] = useState<ThemeMode>('light');
-    const [connection, setConnection] = useState<Connection>(null);
-    const [isConnectionLoading, setIsConnectionLoading] = useState(true);
+    const { connection, isLoading: isConnectionLoading, refreshConnection } = useConnection();
 
     useEffect(() => {
         // window.toolboxAPI is only injected when running inside PPTB; accessing it directly in
@@ -24,26 +23,6 @@ function Root() {
             // Fall back to light rather than leaving the app unrendered on a theme-detection failure.
             .catch(() => setMode('light'));
     }, []);
-
-    const refreshConnection = useCallback(async () => {
-        if (!window.toolboxAPI) {
-            setIsConnectionLoading(false);
-            return;
-        }
-
-        try {
-            const conn = await window.toolboxAPI.connections.getActiveConnection();
-            setConnection(conn);
-        } catch (error) {
-            console.error('Error refreshing connection:', error);
-        } finally {
-            setIsConnectionLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        void refreshConnection();
-    }, [refreshConnection]);
 
     // FluentProvider only paints its own element's background, not the page behind/around it
     // (e.g. the margin outside #root's max-width, or any area before the app has mounted). Mirror

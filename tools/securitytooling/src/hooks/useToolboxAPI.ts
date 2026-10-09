@@ -11,6 +11,13 @@ export function useConnection() {
     const [isLoading, setIsLoading] = useState(true);
 
     const refreshConnection = useCallback(async () => {
+        // window.toolboxAPI is only injected when running inside PPTB; guard so standalone dev
+        // mode doesn't log a spurious "Error refreshing connection" on every mount.
+        if (!window.toolboxAPI) {
+            setIsLoading(false);
+            return;
+        }
+
         try {
             const conn = await window.toolboxAPI.connections.getActiveConnection();
             setConnection(conn);
@@ -22,7 +29,7 @@ export function useConnection() {
     }, []);
 
     useEffect(() => {
-        refreshConnection();
+        void refreshConnection();
     }, [refreshConnection]);
 
     return { connection, isLoading, refreshConnection };

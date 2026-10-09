@@ -1,0 +1,1897 @@
+{
+ "EntityMetadata": [
+  {
+   "LogicalName": "queueitem",
+   "SchemaName": "QueueItem",
+   "EntitySetName": "queueitems",
+   "PrimaryIdAttribute": null,
+   "Attributes": [
+    {
+     "LogicalName": "createdby",
+     "SchemaName": "CreatedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows who created the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdbyname",
+     "SchemaName": "CreatedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdbyyominame",
+     "SchemaName": "CreatedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdon",
+     "SchemaName": "CreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the date and time when the record was created. The date and time are displayed in the time zone selected in Microsoft Dynamics 365 options.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfby",
+     "SchemaName": "CreatedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows who created the record on behalf of another user.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyname",
+     "SchemaName": "CreatedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyyominame",
+     "SchemaName": "CreatedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "enteredon",
+     "SchemaName": "EnteredOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the date the record was assigned to the queue.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Entered Queue",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "exchangerate",
+     "SchemaName": "ExchangeRate",
+     "AttributeType": "Decimal",
+     "AttributeTypeName": {
+      "Value": "DecimalType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the conversion rate of the record's currency. The exchange rate is used to convert all money fields in the record from the local currency to the system's default currency.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Exchange Rate",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "importsequencenumber",
+     "SchemaName": "ImportSequenceNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the data import or data migration that created this record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Import Sequence Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedby",
+     "SchemaName": "ModifiedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows who last updated the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedbyname",
+     "SchemaName": "ModifiedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedbyyominame",
+     "SchemaName": "ModifiedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedon",
+     "SchemaName": "ModifiedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the date and time when the record was last updated. The date and time are displayed in the time zone selected in Microsoft Dynamics 365 options.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfby",
+     "SchemaName": "ModifiedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the delegate user who last modified the queueitem.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyname",
+     "SchemaName": "ModifiedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyyominame",
+     "SchemaName": "ModifiedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "msdyn_liveworkstreamid",
+     "SchemaName": "msdyn_liveworkstreamid",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "msdyn_liveworkstream"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Liveworkstream this queue item belongs to",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Live workstream",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "msdyn_liveworkstreamidname",
+     "SchemaName": "msdyn_liveworkstreamidName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "msdyn_liveworkstreamid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "msdyn_skipursync",
+     "SchemaName": "msdyn_skipursync",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "This attribute is used by Unified Routing system to decide whether to Skip Sync Call to Omnichannel Service or not.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "msdyn_skipursync",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "queueitem_msdyn_skipursync",
+      "IsGlobal": false,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "msdyn_skipursyncname",
+     "SchemaName": "msdyn_skipursyncName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "msdyn_skipursync",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "objectid",
+     "SchemaName": "ObjectId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "activitypointer",
+      "adx_inviteredemption",
+      "adx_portalcomment",
+      "appointment",
+      "bulkoperation",
+      "campaignactivity",
+      "campaignresponse",
+      "chat",
+      "email",
+      "fax",
+      "incident",
+      "knowledgearticle",
+      "letter",
+      "msdyn_copilottranscript",
+      "msdyn_iotalert",
+      "msdyn_knowledgearticletemplate",
+      "msdyn_liveconversation",
+      "msdyn_ocliveworkitem",
+      "msdyn_ocsession",
+      "msdyn_overflowactionconfig",
+      "msfp_alert",
+      "msfp_surveyinvite",
+      "msfp_surveyresponse",
+      "phonecall",
+      "recurringappointmentmaster",
+      "serviceappointment",
+      "socialactivity",
+      "task"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Choose the activity, case, or article assigned to the queue.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Regarding",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Object",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "objectidname",
+     "SchemaName": "ObjectIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "objectid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "objectidtypecode",
+     "SchemaName": "ObjectIdTypeCode",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "objectid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Regarding Object Type",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "objecttypecode",
+     "SchemaName": "ObjectTypeCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Select the type of the queue item, such as activity, case, or appointment.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Type",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "queueitem_objecttypecode",
+      "IsGlobal": false,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 10085,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Teams chat",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4402,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Campaign Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10877,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Portal Comment",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4406,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Quick Campaign",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10490,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Session",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4216,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Social Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10461,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Ongoing conversation (Deprecated)",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10362,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice alert",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4212,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Task",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 112,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Case",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10876,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Invite Redemption",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4202,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Email",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4214,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Service Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 9953,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Knowledge Article",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10099,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Knowledge Article Template",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10372,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice survey invite",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10808,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Copilot Transcript",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4207,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Letter",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10374,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice survey response",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4204,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Fax",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4210,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Phone Call",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4200,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4251,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Appointment",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10473,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Conversation",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4201,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Appointment",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10201,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "IoT Alert",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4401,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Campaign Response",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10437,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Overflow Action Config",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "objecttypecodename",
+     "SchemaName": "ObjectTypeCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "objecttypecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "organizationid",
+     "SchemaName": "OrganizationId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "organization"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the organization with which the queue item is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Organization",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "organizationidname",
+     "SchemaName": "OrganizationIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "organizationid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "overriddencreatedon",
+     "SchemaName": "OverriddenCreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time that the record was migrated.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Record Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "ownerid",
+     "SchemaName": "OwnerId",
+     "AttributeType": "Owner",
+     "AttributeTypeName": {
+      "Value": "OwnerType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser",
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user or team who owns the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owner",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owneridtype",
+     "SchemaName": "OwnerIdType",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owningbusinessunit",
+     "SchemaName": "OwningBusinessUnit",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "businessunit"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the business unit that owns the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning Business Unit",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owninguser",
+     "SchemaName": "OwningUser",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user who owns the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning User",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "priority",
+     "SchemaName": "Priority",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Priority of the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Priority",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "queueid",
+     "SchemaName": "QueueId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "queue"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Choose the queue that the item is assigned to.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Queue",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "queueidname",
+     "SchemaName": "QueueIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "queueid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "queueitemid",
+     "SchemaName": "QueueItemId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Queue Item",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "sender",
+     "SchemaName": "Sender",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Sender who created the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "From",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "state",
+     "SchemaName": "State",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Status of the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status (deprecated)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "statecode",
+     "SchemaName": "StateCode",
+     "AttributeType": "State",
+     "AttributeTypeName": {
+      "Value": "StateType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows whether the queue record is active or inactive. Inactive queue records are read-only and can't be edited unless they are reactivated.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "queueitem_statecode",
+      "IsGlobal": false,
+      "OptionSetType": "State",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Active",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Inactive",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statecodename",
+     "SchemaName": "StateCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "status",
+     "SchemaName": "Status",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Reason for the status of the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status Reason (deprecated)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "statuscode",
+     "SchemaName": "StatusCode",
+     "AttributeType": "Status",
+     "AttributeTypeName": {
+      "Value": "StatusType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Select the item's status.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status Reason",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "queueitem_statuscode",
+      "IsGlobal": false,
+      "OptionSetType": "Status",
+      "Options": [
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Inactive",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Active",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statuscodename",
+     "SchemaName": "StatusCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statuscode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "timezoneruleversionnumber",
+     "SchemaName": "TimeZoneRuleVersionNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Time Zone Rule Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "title",
+     "SchemaName": "Title",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the title or name that describes the queue record. This value is copied from the record that was assigned to the queue.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Title",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "torecipients",
+     "SchemaName": "ToRecipients",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Recipients listed on the To line of the message for email queue items.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "To",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "transactioncurrencyid",
+     "SchemaName": "TransactionCurrencyId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "transactioncurrency"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Choose the local currency for the record to make sure budgets are reported in the correct currency.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Currency",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "transactioncurrencyidname",
+     "SchemaName": "TransactionCurrencyIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "transactioncurrencyid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "utcconversiontimezonecode",
+     "SchemaName": "UTCConversionTimeZoneCode",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Time zone code that was in use when the record was created.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "UTC Conversion Time Zone Code",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "versionnumber",
+     "SchemaName": "VersionNumber",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Version number of the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "workerid",
+     "SchemaName": "WorkerId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser",
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows who is working on the queue item.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Worked By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "workeridmodifiedon",
+     "SchemaName": "WorkerIdModifiedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the date and time when the queue item was last assigned to a user.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Worked On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "workeridname",
+     "SchemaName": "WorkerIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": "workerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "workeridtype",
+     "SchemaName": "WorkerIdType",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": "workerid",
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Worker Type",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "workeridyominame",
+     "SchemaName": "WorkerIdYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": "workerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    }
+   ]
+  }
+ ]
+}

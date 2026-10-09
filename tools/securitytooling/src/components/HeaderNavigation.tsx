@@ -1,5 +1,6 @@
 import React from "react";
 import { Breadcrumb, BreadcrumbButton, BreadcrumbDivider, BreadcrumbItem } from "@fluentui/react-components";
+import { useHeaderNavigationStyles } from "../styles";
 
 export interface IHeaderNavigationItem {
     /** Unique key for the item. */
@@ -19,6 +20,8 @@ export interface IHeaderNavigationProps {
 /** Breadcrumb navigation for the Security Tools header, showing the path from the dashboard down
  * to the currently open module. */
 export const HeaderNavigation: React.FC<IHeaderNavigationProps> = ({ items }) => {
+    const styles = useHeaderNavigationStyles();
+
     return (
         <Breadcrumb aria-label="Security Tools navigation">
             {items.map((item, index) => {
@@ -26,7 +29,11 @@ export const HeaderNavigation: React.FC<IHeaderNavigationProps> = ({ items }) =>
                 return (
                     <React.Fragment key={item.key}>
                         <BreadcrumbItem>
-                            <BreadcrumbButton current={isCurrent} onClick={isCurrent ? undefined : item.onClick}>
+                            <BreadcrumbButton
+                                current={isCurrent}
+                                className={isCurrent ? styles.current : undefined}
+                                onClick={isCurrent ? undefined : item.onClick}
+                            >
                                 {item.label}
                             </BreadcrumbButton>
                         </BreadcrumbItem>
