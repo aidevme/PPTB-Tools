@@ -60,6 +60,8 @@ export default function App() {
     const sink = useMemo(() => new PptbFileSink(), []);
 
     const [projectRoot, setProjectRoot] = useState<string | null>(null);
+    /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
+    const [rememberedFolder, setRememberedFolder] = useState<string | null>(null);
     const [configState, setConfigState] = useState<ProjectConfigState | null>(null);
     const [entities, setEntities] = useState<EntitySummary[]>([]);
     const [operations, setOperations] = useState<OperationSummary[] | null>(null);
@@ -93,7 +95,12 @@ export default function App() {
                 setPlanStale(false);
                 await rememberProjectFolder(connKey, folder);
             } catch (e) {
-                setError(`Could not load ${folder}: ${errorMessage(e)}`);
+                const message = errorMessage(e);
+                setError(
+                    /access denied|permission/i.test(message)
+                        ? `PPTB has not granted this tool access to ${folder}. Click Browse… and select the folder again to grant access.`
+                        : `Could not load ${folder}: ${message}`,
+                );
             }
         },
         [sink, connKey],
@@ -102,17 +109,18 @@ export default function App() {
     const browse = useCallback(async () => {
         if (!window.toolboxAPI) return;
         try {
+            // selectPath is also what grants this tool file-system access to the chosen folder.
             const folder = await window.toolboxAPI.fileSystem.selectPath({
                 type: 'folder',
                 title: 'Select the project folder',
                 message: 'Pick the folder that contains (or should contain) .dataverse-gen.json',
-                defaultPath: projectRoot ?? undefined,
+                defaultPath: projectRoot ?? rememberedFolder ?? undefined,
             });
             if (folder) await loadProject(folder);
         } catch (e) {
             setError(`Could not open the folder picker: ${errorMessage(e)}`);
         }
-    }, [loadProject, projectRoot]);
+    }, [loadProject, projectRoot, rememberedFolder]);
 
     // ----- environment lists ----------------------------------------------------------------------
 
@@ -135,11 +143,11 @@ export default function App() {
         listSolutions()
             .then((list) => !cancelled && setSolutions(list))
             .catch((e) => console.warn('Could not list solutions', e));
-        if (!projectRoot) {
-            getRememberedProjectFolder(connKey).then((folder) => {
-                if (!cancelled && folder) void loadProject(folder);
-            });
-        }
+        // PPTB only grants file access to folders picked with selectPath in the current session, so the
+        // remembered folder cannot be read directly; it only pre-fills the folder picker.
+        getRememberedProjectFolder(connKey).then((folder) => {
+            if (!cancelled) setRememberedFolder(folder ?? null);
+        });
         return () => {
             cancelled = true;
         };
@@ -323,7 +331,7 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} configState={configState} busy={busy || !inPptb} onBrowse={browse} onReload={() => projectRoot && loadProject(projectRoot)} />
+                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={configState} busy={busy || !inPptb} onBrowse={browse} onReload={() => projectRoot && loadProject(projectRoot)} />
                 <SelectionCard
                     entities={entities}
                     operations={operations}

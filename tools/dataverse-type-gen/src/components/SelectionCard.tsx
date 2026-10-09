@@ -157,7 +157,7 @@ export function SelectionCard(props: SelectionCardProps) {
                         >
                             {props.solutions.map((s) => (
                                 <Option key={s.id} value={s.id} text={s.friendlyName}>
-                                    {`${s.friendlyName} (${s.uniqueName}${s.isManaged ? ', managed' : ''})`}
+                                    {`${s.friendlyName} (${s.uniqueName})`}
                                 </Option>
                             ))}
                         </Dropdown>

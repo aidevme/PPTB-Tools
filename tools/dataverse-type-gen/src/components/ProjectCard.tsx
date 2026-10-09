@@ -18,6 +18,8 @@ const useStyles = makeStyles({
 
 export interface ProjectCardProps {
     projectRoot: string | null;
+    /** Folder used last time; PPTB needs it re-selected through Browse before it can be read. */
+    rememberedFolder: string | null;
     configState: ProjectConfigState | null;
     busy: boolean;
     onBrowse: () => void;
@@ -25,7 +27,7 @@ export interface ProjectCardProps {
 }
 
 /** Step 1: pick the project folder and show whether it already has a `.dataverse-gen.json`. */
-export function ProjectCard({ projectRoot, configState, busy, onBrowse, onReload }: ProjectCardProps) {
+export function ProjectCard({ projectRoot, rememberedFolder, configState, busy, onBrowse, onReload }: ProjectCardProps) {
     const styles = useStyles();
     const config = configState?.config;
     const counts = config
@@ -51,6 +53,12 @@ export function ProjectCard({ projectRoot, configState, busy, onBrowse, onReload
                     </Button>
                     {projectRoot ? <span className={styles.path}>{projectRoot}</span> : <Text italic>No project folder selected</Text>}
                 </div>
+                {!projectRoot && rememberedFolder && (
+                    <Text size={200}>
+                        Last used: <span className={styles.path}>{rememberedFolder}</span> Click Browse… to reopen it (the folder picker opens
+                        there, and PPTB needs you to confirm it before the tool can read it).
+                    </Text>
+                )}
                 {configState && (
                     <div className={styles.row}>
                         {configState.exists ? (

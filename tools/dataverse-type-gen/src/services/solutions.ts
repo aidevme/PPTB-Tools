@@ -10,11 +10,11 @@ function api(): typeof window.dataverseAPI {
     return window.dataverseAPI;
 }
 
-/** Visible solutions, sorted by friendly name. */
+/** Visible unmanaged solutions, sorted by friendly name. */
 export async function listSolutions(): Promise<SolutionSummary[]> {
     const result = await api().getSolutions(['solutionid', 'uniquename', 'friendlyname', 'version', 'ismanaged', 'isvisible']);
     return result.value
-        .filter((s) => s.isvisible !== false)
+        .filter((s) => s.isvisible !== false && s.ismanaged !== true)
         .map((s) => ({
             id: s.solutionid as string,
             uniqueName: s.uniquename as string,
