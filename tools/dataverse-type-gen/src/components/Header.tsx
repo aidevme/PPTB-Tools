@@ -30,7 +30,7 @@ export function Header({ connection, canRegenerate, busy, onRegenerate }: Header
         <header className={styles.header}>
             <div className={styles.titleBlock}>
                 <Text size={600} weight="semibold">
-                    Dataverse Type Forge
+                    Dataverse Early-Bound TypeScript Generator
                 </Text>
                 <Text size={200}>Early-bound TypeScript types and metadata for dataverse-ify, from a .dataverse-gen.json project.</Text>
             </div>

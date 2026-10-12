@@ -13,7 +13,7 @@ Tools for Power Platform ToolBox (PPTB) - a comprehensive toolkit for working wi
     - [Overview](#overview)
     - [Tools](#tools)
         - [PCF2BPF](#pcf2bpf)
-        - [Dataverse Type Forge](#dataverse-type-forge)
+        - [Dataverse Early-Bound TypeScript Generator](#dataverse-early-bound-typescript-generator)
     - [Contributing](#contributing)
     - [License](#license)
 
@@ -42,9 +42,9 @@ Not yet implemented: copying a PCF configuration from one form factor to another
 
 **Status:** initial implementation available; not yet validated against a live environment.
 
-### Dataverse Type Forge
+### Dataverse Early-Bound TypeScript Generator
 
-Dataverse Type Forge generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. Its output works with Scott Durow's [dataverse-ify](https://github.com/scottdurow/dataverse-ify), and it shares the `.dataverse-gen.json` project file with his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, whose generator it ports. Source: [tools/dataverse-type-gen](tools/dataverse-type-gen/) · Docs: [docs/pptb-tools/dataverse-type-gen](docs/pptb-tools/dataverse-type-gen/index.md).
+This tool generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. Its output works with Scott Durow's [dataverse-ify](https://github.com/scottdurow/dataverse-ify), and it shares the `.dataverse-gen.json` project file with his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, whose generator it ports. Source: [tools/dataverse-type-gen](tools/dataverse-type-gen/) · Docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator](docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
 - Pick a project folder and load or create `.dataverse-gen.json`.
 - Select tables (with search and a solution filter), actions and functions.

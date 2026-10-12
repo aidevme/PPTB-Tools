@@ -1,4 +1,4 @@
-# Dataverse Type Forge (`dataverse-type-gen`)
+# Dataverse Early-Bound TypeScript Generator (`tools/dataverse-type-gen`)
 
 A Power Platform ToolBox (PPTB) tool that generates early-bound TypeScript types and metadata for
 Dataverse tables, actions and functions. The output is compatible with Scott Durow's
@@ -6,8 +6,8 @@ Dataverse tables, actions and functions. The output is compatible with Scott Dur
 `.dataverse-gen.json` project file as his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, so a
 project can be regenerated from either.
 
-Implementation guide: [docs/pptb-tools/dataverse-type-gen/dataverse-type-forge-implementation-guide.md](../../docs/pptb-tools/dataverse-type-gen/dataverse-type-forge-implementation-guide.md).
-User docs: [docs/pptb-tools/dataverse-type-gen/index.md](../../docs/pptb-tools/dataverse-type-gen/index.md).
+Implementation guide: [docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md).
+User docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
 ## Attribution
 

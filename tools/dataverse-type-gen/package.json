@@ -1,7 +1,7 @@
 {
-    "name": "dataverse-type-gen",
+    "name": "dataverse-early-bound-typescript-generator",
     "version": "0.1.0",
-    "displayName": "Dataverse Type Forge",
+    "displayName": "Dataverse Early-Bound TypeScript Generator",
     "description": "Generate early-bound TypeScript types and metadata for Dataverse, compatible with dataverse-ify and the .dataverse-gen.json config used by dataverse-gen.",
     "main": "index.html",
     "author": "AIDEVME Zsolt Zombik",

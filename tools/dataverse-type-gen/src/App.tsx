@@ -10,7 +10,7 @@ import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolve
 import { useConnection } from './hooks/useConnection';
 import { PptbFileSink } from './services/fileSink';
 import { PptbMetadataProvider } from './services/metadataProvider';
-import { applyWritePlan, createWritePlan } from './services/plan';
+import { applyWritePlan, createWritePlan, resolveOutputRoot } from './services/plan';
 import { loadProjectConfig, saveProjectConfig, type ProjectConfigState } from './services/projectConfig';
 import { connectionKey, getRememberedProjectFolder, rememberProjectFolder } from './services/settings';
 import { getSolutionEntityIds, getSolutionMemberIds, listSolutions } from './services/solutions';
@@ -251,6 +251,16 @@ export default function App() {
     );
 
     const clear = useCallback((kind: SelectionKind) => updateConfig({ [kind]: [] }), [updateConfig]);
+    const clearAll = useCallback(() => updateConfig({ entities: [], actions: [], functions: [] }), [updateConfig]);
+
+    const copyPath = useCallback(async (path: string, label: string) => {
+        try {
+            await window.toolboxAPI.utils.copyToClipboard(path);
+            await window.toolboxAPI.utils.showNotification({ title: 'Copied', body: `${label} copied to the clipboard.`, type: 'info', duration: 2500 });
+        } catch (e) {
+            setError(`Could not copy to the clipboard: ${errorMessage(e)}`);
+        }
+    }, []);
 
     // ----- preview / generate ---------------------------------------------------------------------
 
@@ -304,7 +314,7 @@ export default function App() {
                 });
                 const summary = `${result.written} file(s) written, ${planToApply.counts.unchanged} unchanged, ${planToApply.counts.orphaned} orphaned. Config saved to .dataverse-gen.json.`;
                 setNotice(summary);
-                await window.toolboxAPI?.utils.showNotification({ title: 'Dataverse Type Forge', body: summary, type: 'success' });
+                await window.toolboxAPI?.utils.showNotification({ title: 'Dataverse Early-Bound TypeScript Generator', body: summary, type: 'success' });
             } catch (e) {
                 setError(`Generation failed: ${errorMessage(e)}`);
             } finally {
@@ -378,7 +388,13 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb} onBrowse={browse} onReload={() => projectRoot && loadProject(projectRoot)} />
+                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb} onBrowse={browse}
+                    onReload={() => projectRoot && loadProject(projectRoot)}
+                    outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
+                    hasSelection={hasSelection}
+                    onCopyPath={(path, label) => void copyPath(path, label)}
+                    onClearSelection={clearAll}
+                />
                 <SelectionCard
                     entities={entities}
                     operations={operations}

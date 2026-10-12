@@ -1,5 +1,20 @@
-import { Badge, Button, Card, CardHeader, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { ArrowClockwiseRegular, FolderOpenRegular } from '@fluentui/react-icons';
+import {
+    Badge,
+    Button,
+    Card,
+    CardHeader,
+    Menu,
+    MenuButton,
+    MenuDivider,
+    MenuItem,
+    MenuList,
+    MenuPopover,
+    MenuTrigger,
+    Text,
+    makeStyles,
+    tokens,
+} from '@fluentui/react-components';
+import { ArrowClockwiseRegular, CopyRegular, DismissCircleRegular, DocumentRegular, FolderOpenRegular, FolderRegular } from '@fluentui/react-icons';
 import type { ProjectConfigState } from '../services/projectConfig';
 
 const useStyles = makeStyles({
@@ -24,10 +39,27 @@ export interface ProjectCardProps {
     busy: boolean;
     onBrowse: () => void;
     onReload: () => void;
+    /** Absolute output folder (`output.outputRoot` resolved against the project), when a project is open. */
+    outputFolder: string | null;
+    /** Whether anything is selected, enabling "Clear selection". */
+    hasSelection: boolean;
+    onCopyPath: (path: string, label: string) => void;
+    onClearSelection: () => void;
 }
 
 /** Step 1: pick the project folder and show whether it already has a `.dataverse-gen.json`. */
-export function ProjectCard({ projectRoot, rememberedFolder, configState, busy, onBrowse, onReload }: ProjectCardProps) {
+export function ProjectCard({
+    projectRoot,
+    rememberedFolder,
+    configState,
+    busy,
+    onBrowse,
+    onReload,
+    outputFolder,
+    hasSelection,
+    onCopyPath,
+    onClearSelection,
+}: ProjectCardProps) {
     const styles = useStyles();
     const config = configState?.config;
     const counts = config
@@ -51,6 +83,34 @@ export function ProjectCard({ projectRoot, rememberedFolder, configState, busy, 
                     <Button icon={<ArrowClockwiseRegular />} appearance="subtle" onClick={onReload} disabled={busy || !projectRoot}>
                         Reload config
                     </Button>
+                    <Menu>
+                        <MenuTrigger disableButtonEnhancement>
+                            <MenuButton appearance="subtle" disabled={busy}>
+                                History
+                            </MenuButton>
+                        </MenuTrigger>
+                        <MenuPopover>
+                            <MenuList>
+                                <MenuItem icon={<FolderRegular />} disabled={!projectRoot} onClick={() => projectRoot && onCopyPath(projectRoot, 'Project folder path')}>
+                                    Copy project folder path
+                                </MenuItem>
+                                <MenuItem
+                                    icon={<DocumentRegular />}
+                                    disabled={!configState?.path}
+                                    onClick={() => configState?.path && onCopyPath(configState.path, '.dataverse-gen.json path')}
+                                >
+                                    Copy .dataverse-gen.json path
+                                </MenuItem>
+                                <MenuItem icon={<CopyRegular />} disabled={!outputFolder} onClick={() => outputFolder && onCopyPath(outputFolder, 'Output folder path')}>
+                                    Copy output folder path
+                                </MenuItem>
+                                <MenuDivider />
+                                <MenuItem icon={<DismissCircleRegular />} disabled={!hasSelection} onClick={onClearSelection}>
+                                    Clear selection
+                                </MenuItem>
+                            </MenuList>
+                        </MenuPopover>
+                    </Menu>
                     {projectRoot ? <span className={styles.path}>{projectRoot}</span> : <Text italic>No project folder selected</Text>}
                 </div>
                 {!projectRoot && rememberedFolder && (

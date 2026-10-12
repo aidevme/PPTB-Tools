@@ -7,14 +7,14 @@ export default defineConfig({
         nav: [
             { text: "Home", link: "/" },
             { text: "Security Tools", link: "/pptb-tools/security-tooling/" },
-            { text: "Dataverse Type Forge", link: "/pptb-tools/dataverse-type-gen/" },
+            { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
         ],
         sidebar: [
             {
                 text: "PPTB Tools",
                 items: [
                     { text: "Security Tools", link: "/pptb-tools/security-tooling/" },
-                    { text: "Dataverse Type Forge", link: "/pptb-tools/dataverse-type-gen/" },
+                    { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
                 ],
             },
         ],

@@ -1,4 +1,4 @@
-# Dataverse Type Forge
+# Dataverse Early-Bound TypeScript Generator
 
 A Power Platform ToolBox (PPTB) tool that generates early-bound TypeScript types and metadata for Dataverse
 tables, actions and functions. The generated code works with Scott Durow's
