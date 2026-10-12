@@ -8,8 +8,8 @@ tables, actions and functions. The generated code works with Scott Durow's
 `.dataverse-gen.json` project file as the [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, so
 you can switch between the two.
 
-Source: [tools/dataverse-type-gen](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-type-gen) ·
-[Implementation guide](./dataverse-type-forge-implementation-guide.md)
+Source: [tools/dataverse-early-bound-typescript-generator](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-early-bound-typescript-generator) ·
+[Implementation guide](./dataverse-early-bound-typescript-generator.md)
 
 ## What gets generated
 

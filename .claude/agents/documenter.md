@@ -1,6 +1,6 @@
 ---
 name: documenter
-description: Use proactively after a feature, fix, or scope change in a PPTB tool — or after any .claude/agents/*.md file changes — to keep docs in sync: tools/<name>/README.md, docs/<name>/index.md, the root README.md's tool index/feature list, docs/agents/index.md, and TSDoc comments on new or changed exports in .ts/.tsx files. Do not use to change application logic (see developer) or to judge code quality (see code-reviewer).
+description: Use proactively after a feature, fix, or scope change in a PPTB tool — or after any .claude/agents/*.md file changes — to keep docs in sync: tools/<name>/README.md, docs/pptb-tools/<name>/index.md, the root README.md's tool index/feature list, docs/agents/index.md, and TSDoc comments on new or changed exports in .ts/.tsx files. Do not use to change application logic (see developer) or to judge code quality (see code-reviewer).
 tools: Read, Edit, Write, Grep, Glob
 model: sonnet
 ---
@@ -24,9 +24,9 @@ of TSDoc usage here changes:
   everything else is a tag.
 - Use real block tags where they add information the summary doesn't: `@param`/`@returns` when a
   parameter's shape/units or the return value's meaning isn't obvious from its name and type; `@remarks` for
-  extended explanation (a precondition the caller must uphold, e.g. "`doc` must have been produced by
-  `parseFormXml`") that shouldn't clutter the one-line summary; `@throws` when a function throws under a
-  specific documented condition (this codebase's functions frequently do, e.g. `loadBpfFormXml`);
+  extended explanation (a precondition the caller must uphold, e.g. "`config` must have been passed through
+  `resolveConfig`") that shouldn't clutter the one-line summary; `@throws` when a function throws under a
+  specific documented condition (this codebase's functions frequently do);
   `@deprecated` if something is kept only for a transition period. Don't add a tag with nothing to say —
   a function whose name and types already say everything gets a summary line and no tags.
 - Use `{@link}` to cross-reference another exported symbol (e.g. a type a parameter must satisfy) instead of
@@ -34,19 +34,18 @@ of TSDoc usage here changes:
 - Match this repo's existing comment density: sparse and purposeful. A file with no exported surface worth
   explaining gets no new comments — don't pad every function to "look documented," and don't add tags just to
   look complete.
-- Respect the `src/lib/` vs `components/` split: for `lib/` modules (framework-free domain logic), TSDoc is
-  where non-obvious Dataverse/XML domain facts belong if they're not already covered by the tool's README;
+- Respect the `src/core/` + `src/services/` vs `components/` split: for `core/` and `services/` modules
+  (framework-free domain logic), TSDoc is where non-obvious Dataverse/metadata domain facts belong if they're not already covered by the tool's README;
   don't duplicate the same explanation in both places — link the reader to the other with a short pointer if
   genuinely useful, otherwise pick the one place it belongs.
 
 This repo's doc structure:
 
 - **`tools/<name>/README.md`** — implementation-facing: features, "Not implemented" list (with a one-line
-  reason each, e.g. pcf2bpf's "intentionally out of scope for this first port, matching how PPTB's own
-  sample ported tools scope down XTB plugins"), project structure tree, build/testing-locally instructions,
+  reason each, as in the Early-Bound Generator's README), project structure tree, build/testing-locally instructions,
   and a "How it works" section documenting non-obvious domain facts (entity names, XML structure, API
   quirks) that only exist by reading multiple files together.
-- **`docs/<name>/index.md`** — user-facing: requirements, numbered "How to use" workflow, "Known
+- **`docs/pptb-tools/<name>/index.md`** — user-facing: requirements, numbered "How to use" workflow, "Known
   limitations". Keep this in sync with `tools/<name>/README.md` but written for an end user, not a
   developer — no code/file references beyond a closing pointer back to the tool's README.
 - **root `README.md`** — one entry per tool under `## Tools`, each summarizing implemented functionality,

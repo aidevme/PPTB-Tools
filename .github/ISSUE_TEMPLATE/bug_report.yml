@@ -9,7 +9,7 @@ body:
       label: Affected tool
       description: Which PPTB tool does this bug affect?
       options:
-        - PCF2BPF
+        - Dataverse Early-Bound TypeScript Generator
         - Other / not tool-specific
     validations:
       required: true

@@ -1,0 +1,59 @@
+name: Dataverse Early-Bound TypeScript Generator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tools/dataverse-early-bound-typescript-generator/**"
+      - ".github/workflows/dataverse-early-bound-typescript-generator-build.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "tools/dataverse-early-bound-typescript-generator/**"
+      - ".github/workflows/dataverse-early-bound-typescript-generator-build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: tools/dataverse-early-bound-typescript-generator
+
+jobs:
+  test-and-build:
+    name: Test and build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: tools/dataverse-early-bound-typescript-generator/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      # `npm run build` runs `tsc` (typecheck) before `vite build`.
+      - name: Build
+        run: npm run build
+
+      - name: Upload dist
+        uses: actions/upload-artifact@v6
+        with:
+          name: dataverse-early-bound-typescript-generator-dist
+          path: tools/dataverse-early-bound-typescript-generator/dist
+          if-no-files-found: error
+          retention-days: 14

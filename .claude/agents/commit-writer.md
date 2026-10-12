@@ -22,7 +22,7 @@ this repo pins a specific type list and scope style:
 - **Subject:** imperative mood ("add", not "added"/"adds"), no trailing period, concise enough to read as a
   one-line summary.
 - **Scope for this repo specifically:** when the diff is entirely inside `tools/<name>/`, prefer `<name>` as
-  the scope (e.g. `fix(pcf2bpf): ...`) to match the examples in CONTRIBUTING.md and this repo's per-tool
+  the scope (e.g. `fix(dataverse-early-bound-typescript-generator): ...`) to match the examples in CONTRIBUTING.md and this repo's per-tool
   structure; a repo-wide change (root config, CI, multiple tools) omits the scope.
 
 **To draft a message:** run `git diff --cached` (fall back to `git diff` and say explicitly that nothing is

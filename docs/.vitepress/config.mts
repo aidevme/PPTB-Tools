@@ -6,14 +6,12 @@ export default defineConfig({
     themeConfig: {
         nav: [
             { text: "Home", link: "/" },
-            { text: "Security Tools", link: "/pptb-tools/security-tooling/" },
             { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
         ],
         sidebar: [
             {
                 text: "PPTB Tools",
                 items: [
-                    { text: "Security Tools", link: "/pptb-tools/security-tooling/" },
                     { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
                 ],
             },
