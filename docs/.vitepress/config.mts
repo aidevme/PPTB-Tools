@@ -12,7 +12,38 @@ export default defineConfig({
             {
                 text: "PPTB Tools",
                 items: [
-                    { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
+                    {
+                        text: "Dataverse Early-Bound TypeScript Generator",
+                        link: "/pptb-tools/dataverse-early-bound-typescript-generator/",
+                        items: [
+                            {
+                                text: "Components",
+                                link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/",
+                                collapsed: true,
+                                items: [
+                                    { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/header" },
+                                    { text: "SettingsPanel", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/settings-panel" },
+                                    { text: "ProjectCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/project-card" },
+                                    { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/selection-card" },
+                                    { text: "OptionsCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/options-card" },
+                                    { text: "PreviewCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/preview-card" },
+                                    { text: "CodeViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/code-viewer" },
+                                    { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/footer" },
+                                ],
+                            },
+                            {
+                                text: "Architecture",
+                                link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/",
+                                collapsed: true,
+                                items: [
+                                    { text: "Core", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/core" },
+                                    { text: "Services", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/services" },
+                                    { text: "App state and hooks", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/app-state" },
+                                    { text: "Build and testing", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/build-and-testing" },
+                                ],
+                            },
+                        ],
+                    },
                 ],
             },
         ],
