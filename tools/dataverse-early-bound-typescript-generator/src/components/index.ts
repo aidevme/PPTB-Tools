@@ -1,4 +1,6 @@
 /** Presentational components; all data and callbacks come from `App.tsx` as props. */
+export { CodeViewer } from './CodeViewer';
+export type { ICodeViewerProps } from './CodeViewer';
 export { Footer } from './Footer';
 export { Header } from './Header';
 export type { HeaderProps } from './Header';
