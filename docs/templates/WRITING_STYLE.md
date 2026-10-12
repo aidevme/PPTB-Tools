@@ -1,8 +1,8 @@
 # Writing Style Guide
 
-![Writing style guide banner—an open book with a pen across its pages, connected to icons for page structure, review checklists, and consistent terminology, on a blue-to-purple gradient background](assets/writing_style_guide_page.png)
+![Writing style guide banner—an open book with a pen across its pages, connected to icons for page structure, review checklists, and consistent terminology, on a blue-to-purple gradient background](../../assets/writing_style_guide_page.png)
 
-This guide provides prescriptive instructions for writing accessibility guidance pages in this repository. For scope, frontmatter requirements, environment setup, and how to submit changes, see [CONTRIBUTING.md](CONTRIBUTING.md).
+This guide provides prescriptive instructions for writing accessibility guidance pages in this repository. For scope, frontmatter requirements, environment setup, and how to submit changes, see [CONTRIBUTING.md](https://github.com/aidevme/PPTB-Tools/blob/main/CONTRIBUTING.md).
 
 ## Required Page Structure
 
@@ -95,5 +95,5 @@ End sections that describe actionable guidance with a `- [ ]` checklist the read
 
 ## Additional Resources
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) — scope, frontmatter, submission process, environment setup, and editing tools.
+- [CONTRIBUTING.md](https://github.com/aidevme/PPTB-Tools/blob/main/CONTRIBUTING.md) — scope, frontmatter, submission process, environment setup, and editing tools.
 - [Microsoft Writing Style Guide](https://learn.microsoft.com/style-guide/welcome/) — official Microsoft style and terminology guide.
