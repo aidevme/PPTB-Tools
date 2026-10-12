@@ -6,6 +6,7 @@ import { OptionsCard } from './components/OptionsCard';
 import { PreviewCard } from './components/PreviewCard';
 import { ProjectCard } from './components/ProjectCard';
 import { SelectionCard, type SelectionKind } from './components/SelectionCard';
+import { SettingsPanel } from './components/SettingsPanel';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
 import { useConnection } from './hooks/useConnection';
 import { PptbFileSink } from './services/fileSink';
@@ -58,6 +59,7 @@ export default function App() {
     // A fresh provider (and so a fresh metadata cache) per connection.
     const provider = useMemo(() => new PptbMetadataProvider(), [connKey]); // eslint-disable-line react-hooks/exhaustive-deps
     const sink = useMemo(() => new PptbFileSink(), []);
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     const [projectRoot, setProjectRoot] = useState<string | null>(null);
     /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
@@ -353,7 +355,8 @@ export default function App() {
 
     return (
         <div className={styles.page}>
-            <Header connection={connection} canRegenerate={ready && hasSelection} busy={busy} onRegenerate={regenerate} />
+            <Header connection={connection} canRegenerate={ready && hasSelection} busy={busy} onRegenerate={regenerate} onOpenSettings={() => setSettingsOpen(true)} />
+            <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
             <main className={styles.main}>
                 {!inPptb && (
                     <MessageBar intent="warning">

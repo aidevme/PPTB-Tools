@@ -1,5 +1,5 @@
 import { Badge, Button, Text, Tooltip, makeStyles, tokens } from '@fluentui/react-components';
-import { ArrowSyncRegular } from '@fluentui/react-icons';
+import { ArrowSyncRegular, SettingsRegular } from '@fluentui/react-icons';
 
 const useStyles = makeStyles({
     header: {
@@ -21,10 +21,11 @@ export interface HeaderProps {
     canRegenerate: boolean;
     busy: boolean;
     onRegenerate: () => void;
+    onOpenSettings: () => void;
 }
 
-/** Tool title, active connection badge and the one-click Regenerate action. */
-export function Header({ connection, canRegenerate, busy, onRegenerate }: HeaderProps) {
+/** Tool title, active connection badge, the one-click Regenerate action and the Settings button. */
+export function Header({ connection, canRegenerate, busy, onRegenerate, onOpenSettings }: HeaderProps) {
     const styles = useStyles();
     return (
         <header className={styles.header}>
@@ -50,6 +51,9 @@ export function Header({ connection, canRegenerate, busy, onRegenerate }: Header
                     <Button appearance="primary" icon={<ArrowSyncRegular />} disabled={!canRegenerate || busy} onClick={onRegenerate}>
                         Regenerate
                     </Button>
+                </Tooltip>
+                <Tooltip content="Settings" relationship="label">
+                    <Button appearance="subtle" icon={<SettingsRegular />} onClick={onOpenSettings} />
                 </Tooltip>
             </div>
         </header>
