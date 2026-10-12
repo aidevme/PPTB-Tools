@@ -13,11 +13,13 @@ import {
     Tab,
     TabList,
     Text,
+    Tooltip,
     makeStyles,
     tokens,
     type SelectTabData,
     type SelectTabEvent,
 } from '@fluentui/react-components';
+import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
 import type { EntitySummary, OperationSummary, SolutionSummary } from '../types';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';
@@ -148,9 +150,21 @@ export function SelectionCard(props: SelectionCardProps) {
             />
             <div className={styles.body}>
                 <TabList selectedValue={tab} onTabSelect={onTabSelect}>
-                    <Tab value="entities">Tables</Tab>
-                    <Tab value="actions">Actions</Tab>
-                    <Tab value="functions">Functions</Tab>
+                    <Tooltip content="Dataverse tables to generate early-bound interfaces, metadata and choice enums for" relationship="description" withArrow>
+                        <Tab value="entities" icon={<TableRegular />}>
+                            Tables
+                        </Tab>
+                    </Tooltip>
+                    <Tooltip content="Dataverse actions (custom APIs, custom process actions and built-in messages) to generate request types for" relationship="description" withArrow>
+                        <Tab value="actions" icon={<FlashRegular />}>
+                            Actions
+                        </Tab>
+                    </Tooltip>
+                    <Tooltip content="Dataverse functions (custom APIs and built-in functions) to generate request types for" relationship="description" withArrow>
+                        <Tab value="functions" icon={<MathFormulaRegular />}>
+                            Functions
+                        </Tab>
+                    </Tooltip>
                 </TabList>
                 <div className={styles.toolbar}>
                     <SearchBox

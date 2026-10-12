@@ -1,5 +1,7 @@
 # Dataverse Early-Bound TypeScript Generator
 
+![Dataverse Early-Bound TypeScript Generator banner—a green database with table cards streams data through a crystal prism, which turns it into floating TypeScript interface and enum panels, on a dark blue background](../../../assets/dataverse-early-bound-typescript-generator-preview.png)
+
 A Power Platform ToolBox (PPTB) tool that generates early-bound TypeScript types and metadata for Dataverse
 tables, actions and functions. The generated code works with Scott Durow's
 [dataverse-ify](https://github.com/scottdurow/dataverse-ify) library. The tool uses the same
