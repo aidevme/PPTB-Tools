@@ -47,12 +47,12 @@ export function Header({ connection, canRegenerate, busy, onRegenerate, onOpenSe
                         No connection
                     </Badge>
                 )}
-                <Tooltip content="Load metadata, generate and write all files for the current .dataverse-gen.json in one step" relationship="description">
+                <Tooltip content="Load metadata, generate and write all files for the current .dataverse-gen.json in one step" relationship="description" withArrow>
                     <Button appearance="primary" icon={<ArrowSyncRegular />} disabled={!canRegenerate || busy} onClick={onRegenerate}>
                         Regenerate
                     </Button>
                 </Tooltip>
-                <Tooltip content="Settings" relationship="label">
+                <Tooltip content="Settings" relationship="label" withArrow>
                     <Button appearance="subtle" icon={<SettingsRegular />} onClick={onOpenSettings} />
                 </Tooltip>
             </div>

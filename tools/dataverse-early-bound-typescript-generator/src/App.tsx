@@ -1,20 +1,24 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Footer } from './components/Footer';
-import { Header } from './components/Header';
-import { OptionsCard } from './components/OptionsCard';
-import { PreviewCard } from './components/PreviewCard';
-import { ProjectCard } from './components/ProjectCard';
-import { SelectionCard, type SelectionKind } from './components/SelectionCard';
-import { SettingsPanel } from './components/SettingsPanel';
+import { Footer, Header, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, type SelectionKind } from './components';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
-import { useConnection } from './hooks/useConnection';
-import { PptbFileSink } from './services/fileSink';
-import { PptbMetadataProvider } from './services/metadataProvider';
-import { applyWritePlan, createWritePlan, resolveOutputRoot } from './services/plan';
-import { loadProjectConfig, saveProjectConfig, type ProjectConfigState } from './services/projectConfig';
-import { connectionKey, getRememberedProjectFolder, rememberProjectFolder } from './services/settings';
-import { getSolutionEntityIds, getSolutionMemberIds, listSolutions } from './services/solutions';
+import { useConnection } from './hooks';
+import {
+    PptbFileSink,
+    PptbMetadataProvider,
+    applyWritePlan,
+    connectionKey,
+    createWritePlan,
+    getRememberedProjectFolder,
+    getSolutionEntityIds,
+    getSolutionMemberIds,
+    listSolutions,
+    loadProjectConfig,
+    rememberProjectFolder,
+    resolveOutputRoot,
+    saveProjectConfig,
+    type ProjectConfigState,
+} from './services';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
 
 const useStyles = makeStyles({

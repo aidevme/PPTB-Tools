@@ -15,7 +15,7 @@ import {
     tokens,
 } from '@fluentui/react-components';
 import { ArrowClockwiseRegular, CopyRegular, DismissCircleRegular, DocumentRegular, FolderOpenRegular, FolderRegular } from '@fluentui/react-icons';
-import type { ProjectConfigState } from '../services/projectConfig';
+import type { ProjectConfigState } from '../services';
 
 const useStyles = makeStyles({
     body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },
