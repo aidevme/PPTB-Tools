@@ -9,7 +9,7 @@ body:
       label: Related tool
       description: Which PPTB tool would this enhancement apply to?
       options:
-        - PCF2BPF
+        - Dataverse Early-Bound TypeScript Generator
         - Other / not tool-specific
     validations:
       required: true

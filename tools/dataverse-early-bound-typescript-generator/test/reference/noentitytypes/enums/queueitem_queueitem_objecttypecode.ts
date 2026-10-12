@@ -1,0 +1,33 @@
+/* eslint-disable*/
+// Enum queueitem_queueitem_objecttypecode
+export const enum queueitem_queueitem_objecttypecode {
+  Case = 112,
+  Activity = 4200,
+  Appointment = 4201,
+  Email = 4202,
+  Fax = 4204,
+  Letter = 4207,
+  PhoneCall = 4210,
+  Task = 4212,
+  ServiceActivity = 4214,
+  SocialActivity = 4216,
+  RecurringAppointment = 4251,
+  CampaignResponse = 4401,
+  CampaignActivity = 4402,
+  QuickCampaign = 4406,
+  KnowledgeArticle = 9953,
+  Teamschat = 10085,
+  KnowledgeArticleTemplate = 10099,
+  IoTAlert = 10201,
+  CustomerVoicealert = 10362,
+  CustomerVoicesurveyinvite = 10372,
+  CustomerVoicesurveyresponse = 10374,
+  OverflowActionConfig = 10437,
+  OngoingconversationDeprecated = 10461,
+  Conversation = 10473,
+  Session = 10490,
+  CopilotTranscript = 10808,
+  InviteRedemption = 10876,
+  PortalComment = 10877,
+}
+  

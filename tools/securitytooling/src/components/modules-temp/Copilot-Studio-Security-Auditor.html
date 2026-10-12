@@ -1,0 +1,935 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copilot Studio Agent Security Posture (Preview)</title>
+<!-- MSAL.js (delegated, public client). For production pin a version + SRI. -->
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2/lib/msal-browser.min.js"></script>
+<!-- Leaflet (map) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<style>
+  :root{--bg:#0d1117;--p:#161b22;--b:#30363d;--t:#e6edf3;--m:#8b949e;--blue:#58a6ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--t);font:14px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+  header{padding:18px 28px;border-bottom:1px solid var(--b);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:700}
+  header .sub{color:var(--m);font-size:12px}
+  header .spacer{flex:1}
+  .wrap{padding:20px 28px;max-width:1400px;margin:0 auto}
+  .panel{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:16px 18px;margin-bottom:18px}
+  .panel h2{font-size:13px;margin:0 0 12px;text-transform:uppercase;letter-spacing:.05em;color:var(--m)}
+  label{display:block;font-size:12px;color:var(--m);margin:8px 0 4px}
+  input,select,textarea,button{font:inherit}
+  input[type=text],textarea{width:100%;background:var(--bg);border:1px solid var(--b);color:var(--t);border-radius:7px;padding:8px 10px}
+  textarea{min-height:60px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+  .row>div{flex:1;min-width:240px}
+  button{background:#1f6feb;border:1px solid #388bfd55;color:#fff;border-radius:7px;padding:8px 16px;font-weight:600;cursor:pointer}
+  button.ghost{background:var(--p);border-color:var(--b);color:var(--t)}
+  button:disabled{opacity:.5;cursor:default}
+  .toggles{display:flex;gap:18px;flex-wrap:wrap;margin-top:10px;font-size:13px;color:var(--t)}
+  .toggles label{display:flex;align-items:center;gap:6px;color:var(--t);margin:0}
+  #status{font-size:12px;color:var(--m);margin-top:10px;white-space:pre-wrap;font-family:ui-monospace,Consolas,monospace}
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:18px}
+  @media(max-width:760px){ .kpis{grid-template-columns:repeat(3,1fr)} }
+  @media(max-width:440px){ .kpis{grid-template-columns:repeat(2,1fr)} }
+  .kpi{background:var(--p);border:1px solid var(--b);border-radius:10px;padding:14px 16px}
+  .kpi .n{font-size:26px;font-weight:800;font-family:ui-monospace,Consolas,monospace;line-height:1}
+  .kpi .l{font-size:11px;color:var(--t);text-transform:uppercase;letter-spacing:.05em;margin-top:5px;font-weight:600}
+  .kpi .ctx{font-size:10px;color:var(--m);margin-top:2px;line-height:1.25}
+  .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+  .chip{cursor:pointer;user-select:none;border:1px solid var(--b);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;background:var(--p)}
+  .chip.off{opacity:.35}
+  .ctl-select{background:var(--p);border:1px solid var(--b);color:var(--t);border-radius:7px;padding:6px 10px;font-size:13px}
+  #q{flex:1;min-width:220px;background:var(--p);border:1px solid var(--b);color:var(--t);border-radius:7px;padding:6px 10px}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{text-align:left;color:var(--m);font-size:11px;text-transform:uppercase;letter-spacing:.05em;padding:8px 10px;border-bottom:1px solid var(--b);position:sticky;top:0;background:var(--bg)}
+  td{padding:8px 10px;border-bottom:1px solid rgba(48,54,61,.5);vertical-align:top}
+  tr.corr{background:rgba(248,81,73,.06)}
+  tr.corr td:nth-child(2){font-weight:700}
+  .badge{display:inline-block;border:1px solid;border-radius:5px;padding:1px 8px;font-size:11px;font-weight:800}
+  .detail{color:var(--m);max-width:680px}
+  .reason{display:block;margin:1px 0;color:var(--t)}
+  .reason::before{content:"▸ ";color:var(--m)}
+  .sigwrap{margin-top:4px}
+  .sig{display:inline-block;border:1px solid;border-radius:10px;padding:0 8px;margin:2px 4px 0 0;font-size:10px;font-weight:700}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+  .count{color:var(--m);font-size:12px;margin-left:auto}
+  .hidden{display:none}
+  footer{padding:16px 28px;color:var(--m);font-size:11px;border-top:1px solid var(--b)}
+  a{color:var(--blue)}
+  @keyframes hero-ping{0%{box-shadow:0 0 0 0 rgba(56,139,253,.7)}70%{box-shadow:0 0 0 18px rgba(56,139,253,0)}100%{box-shadow:0 0 0 0 rgba(56,139,253,0)}}
+  @keyframes hero-ring{0%{transform:scale(1);opacity:.7}100%{transform:scale(3.2);opacity:0}}
+  @keyframes egress-flow{to{stroke-dashoffset:-28}}
+  .egress-arc{animation:egress-flow 1.1s linear infinite}
+  table.matrix{border-collapse:collapse;font-size:12px}
+  table.matrix th,table.matrix td{padding:6px 8px;border-bottom:1px solid rgba(48,54,61,.5);white-space:nowrap}
+  table.matrix th{color:var(--m);font-size:10px;text-transform:uppercase;letter-spacing:.04em;text-align:left;position:sticky;top:0;background:var(--p);z-index:2}
+  table.matrix td.ag,table.matrix th.ag{position:sticky;left:0;background:var(--p);font-weight:600;z-index:1}
+  table.matrix th.ag{z-index:3}
+  table.matrix .num{text-align:center}
+  table.matrix .mk{text-align:center;font-size:13px}
+  table.matrix .mk.ok{color:#3fb95055}
+  table.matrix th.vt{height:96px;vertical-align:bottom;text-align:center;padding:4px 2px}
+  table.matrix th.vt span{display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-size:9px;max-height:88px;overflow:hidden;text-overflow:ellipsis}
+  table.matrix tbody tr:hover td{background:rgba(56,139,253,.06)}
+  .leaflet-container{background:#0d1117!important;font-family:inherit}
+  .leaflet-dark-tooltip{background:#161b22!important;border:1px solid #30363d!important;color:#e6edf3!important;font-size:11px;box-shadow:0 2px 8px rgba(0,0,0,.5)!important}
+  .leaflet-dark-tooltip:before{display:none}
+</style>
+</head>
+<body>
+<header>
+  <h1 style="display:flex;align-items:center;gap:10px">
+    <svg width="32" height="32" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-label="logo">
+      <defs>
+        <linearGradient id="lg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#3ce8cf"/><stop offset=".55" stop-color="#29b6f6"/><stop offset="1" stop-color="#1f6feb"/>
+        </linearGradient>
+      </defs>
+      <!-- shield -->
+      <path d="M32 3 L57 12 V31 C57 46 46 56.5 32 61 C18 56.5 7 46 7 31 V12 Z" fill="url(#lg)"/>
+      <path d="M32 3 L57 12 V31 C57 46 46 56.5 32 61 C18 56.5 7 46 7 31 V12 Z" fill="none" stroke="#0d1117" stroke-opacity=".25" stroke-width="1.5"/>
+      <!-- interlocking Copilot Studio-style blocks -->
+      <g>
+        <rect x="19" y="16" width="19" height="15" rx="4.5" fill="#fff" fill-opacity=".95"/>
+        <rect x="26" y="29" width="19" height="15" rx="4.5" fill="#eaf6ff" fill-opacity=".9"/>
+        <path d="M26 29 h12 v2 h-12 z" fill="#0d1117" fill-opacity=".18"/>
+      </g>
+      <!-- check mark -->
+      <path d="M24 47 l5 5 l11 -12" fill="none" stroke="#0d1117" stroke-opacity=".35" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M24 46 l5 5 l11 -12" fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Copilot Studio Agent Security Posture <span style="font-size:12px;font-weight:600;color:var(--m);vertical-align:middle">(Preview)</span></span>
+  </h1>
+  <span class="sub" id="acct"></span>
+  <span class="spacer"></span>
+  <button class="ghost" id="signout" onclick="signOut()" style="display:none">Sign out</button>
+</header>
+
+<div class="wrap">
+  <div class="panel hidden" id="mapPanel">
+    <h2>Tenant data residency</h2>
+    <div style="position:relative">
+      <div id="leafletmap" style="height:320px;border-radius:8px;overflow:hidden;border:1px solid var(--b)"></div>
+      <div id="ipOverlay" style="position:absolute;top:12px;right:16px;text-align:right;z-index:1000;pointer-events:none">
+        <div style="font-size:10px;color:var(--blue);text-transform:uppercase;letter-spacing:.08em">Your Public IP</div>
+        <div id="myip" style="font-size:20px;font-weight:800;font-family:ui-monospace,Consolas,monospace;color:var(--blue);text-shadow:0 1px 4px #000">Detecting…</div>
+        <div id="myloc" style="font-size:11px;color:var(--m);text-shadow:0 1px 4px #000"></div>
+      </div>
+    </div>
+    <div id="regionList" style="margin-top:10px"></div>
+    <div id="modelSummary"></div>
+    <div style="margin-top:10px;font-size:11px;color:var(--m);border-top:1px solid var(--b);padding-top:8px">
+      🟢 EU / EEA data boundary · 🔴 outside EU · ⚪ unverified. <b>Note:</b> region shows where the agent
+      <i>environment</i> is hosted — the AI <b>models</b> agents invoke (e.g. Anthropic Claude, OpenAI) may
+      process prompts <b>outside the EU Data Boundary</b> regardless of tenant region. Verify model residency
+      separately for EU compliance.
+    </div>
+  </div>
+  <div class="panel" id="cfg">
+    <h2 id="cfgHead" onclick="toggleCfg()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;margin:0">
+      <span>Run a live scan (your sign-in, your access)</span>
+      <span id="cfgChevron" style="font-size:14px;color:var(--m)">▾</span>
+    </h2>
+    <div id="cfgBody" style="margin-top:12px">
+      <div class="row">
+        <div style="flex:1;min-width:240px">
+          <label>Application (client) ID</label>
+          <input type="text" id="clientId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
+        </div>
+        <div style="flex:1;min-width:240px">
+          <label>Directory (tenant) ID or domain</label>
+          <input type="text" id="tenantId" placeholder="organizations" autocomplete="off">
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--m);margin:2px 0 10px;line-height:1.5">Pre-filled with the published multi-tenant app. For a <b>single-tenant</b> app registration, enter your own <b>Client ID</b> and its <b>home tenant</b> (ID or domain) — leave the tenant as <b>organizations</b> for a multi-tenant app, otherwise sign-in fails with AADSTS650059.</div>
+      <div class="row">
+        <div>
+          <label>Environment URL(s) — one per line (or use “Discover my environments”)</label>
+          <textarea id="envs" placeholder="https://org.crm.dynamics.com&#10;https://org2.crm4.dynamics.com"></textarea>
+        </div>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="optComponents" checked> Scan agent components (Maker / HTTP / MCP / Send Mail)</label>
+        <label><input type="checkbox" id="optSharing"> Resolve sharing (slower — 1 call per agent)</label>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        <button id="scanBtn" onclick="runScan()">Sign in &amp; scan</button>
+        <button class="ghost" id="discoverBtn" onclick="discoverEnvs()">Discover my environments</button>
+      </div>
+      <details id="regGuide" style="margin-top:14px;border:1px solid var(--bd,#2a3142);border-radius:8px;padding:10px 12px">
+        <summary style="cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--m)">App registration requirements</summary>
+        <div style="font-size:12px;line-height:1.6;margin-top:10px">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+            <span style="color:var(--m)">This tool's own app:</span>
+            <code id="regDefaultCid">96e9b5f4-e974-4355-ae9f-4487099ef210</code>
+            <button class="ghost" style="font-size:11px;padding:3px 9px" onclick="useDefaultClientId()">Use this Client ID</button>
+          </div>
+          <div style="margin-bottom:8px"><b>Platform</b> — <b>Single-page application (SPA)</b>. Add this exact <b>Redirect URI</b>:<br>
+            <code id="regRedirect" style="word-break:break-all">…</code></div>
+          <div><b>API permissions</b> (delegated) — <i>API permissions → Add a permission</i>:</div>
+          <ul style="margin:4px 0 8px 18px;padding:0">
+            <li><b>Microsoft Graph</b> → <code>User.Read</code> — sign-in only.</li>
+            <li><b>Dynamics CRM</b> → <code>user_impersonation</code> — <b>required</b>; reads agents from Dataverse and discovers environments. Found under <i>APIs my organization uses</i> → <b>Dynamics CRM</b> (<code>00000007-0000-0000-c000-000000000000</code>). Without it every environment fails with <code>AADSTS650057</code>.</li>
+          </ul>
+          <div style="color:var(--m)">Then <b>Grant admin consent</b>. Coverage is still limited to environments where your account holds a <b>Dataverse security role</b> — permissions alone don't grant data access.</div>
+        </div>
+      </details>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div id="dash" class="hidden">
+    <div class="panel" style="margin-bottom:18px">
+      <h2>📊 Agent Risk Matrix <span style="font-weight:400;color:var(--m);text-transform:none;letter-spacing:0">— most critical at top</span></h2>
+      <div id="matrix" style="overflow-x:auto"></div>
+    </div>
+    <div class="controls" id="chips"></div>
+    <div class="controls">
+      <input id="q" placeholder="Search agent, finding, detail…" oninput="state.q=this.value;render()">
+      <select id="finding" class="ctl-select" onchange="state.finding=this.value;render()"></select>
+      <select id="env" class="ctl-select" onchange="state.env=this.value;render()"></select>
+      <span class="count"><b id="shown">0</b> shown</span>
+    </div>
+    <table>
+      <thead><tr><th>Severity</th><th>Finding</th><th>Environment</th><th>Agent</th><th>Detail</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  Runs entirely in your browser using your own delegated access — no data leaves this page, nothing is stored server-side.
+  Coverage is limited to environments where your account has a Dataverse security role. <b>Send Mail</b>, <b>Dormant</b> and
+  <b>Hard-coded</b> signals are heuristic. Some signals derive from Preview features whose schema may change.
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+//  Auth (MSAL delegated, multi-tenant public client)
+// ─────────────────────────────────────────────────────────────────────────────
+const REDIRECT = location.origin + location.pathname.replace(/\/{2,}/g, '/');
+// If opened at a URL with a double slash (…//page), the un-normalized redirect wouldn't match the
+// app registration (AADSTS50011). Redirect is normalized above; also clean the address bar.
+if (/\/{2,}/.test(location.pathname)) { try { history.replaceState(null, '', REDIRECT + location.search + location.hash); } catch (e) {} }
+// Your published app's client ID. Public (not a secret) — baked in so users just sign in.
+const DEFAULT_CLIENT_ID = '96e9b5f4-e974-4355-ae9f-4487099ef210';
+// Shadow AI portal handoff: opened via ?clientId=…&redirect=…&hint=… (or, with a
+// bare URL, via the 'sai-portal-handoff' record the portal keeps on this origin)
+// the auditor reuses the portal's app registration + shared localStorage MSAL
+// cache and signs in silently. The portal's redirect URI is used because it is
+// the one registered on that app registration (this page's own URL isn't).
+const _qs = new URLSearchParams(location.search);
+let _portalRec = null;
+try { _portalRec = JSON.parse(localStorage.getItem('sai-portal-handoff') || 'null'); } catch(e){}
+const HANDOFF_CID      = _qs.get('clientId') || (_portalRec && _portalRec.clientId) || null;
+const HANDOFF_REDIRECT = _qs.get('redirect') || (_portalRec && _portalRec.redirect) || null;
+const HANDOFF_HINT     = _qs.get('hint') || null;
+let msalApp = null;
+
+// Tenant for the MSAL authority. 'organizations' (default) routes to the signed-in account's tenant —
+// correct for the multi-tenant app. A single-tenant app must pin its HOME tenant, or Entra returns
+// AADSTS650059 (app not configured for use in the signed-in tenant).
+function getTenant(){
+  return ((document.getElementById('tenantId')?.value || localStorage.getItem('cs_tenantId') || 'organizations').trim()) || 'organizations';
+}
+let msalCid = null, msalTenant = null;   // what the live msalApp was actually built with
+function initMsal(clientId){
+  const redirectUri = (HANDOFF_CID && clientId === HANDOFF_CID && HANDOFF_REDIRECT) ? HANDOFF_REDIRECT : REDIRECT;
+  msalApp = new msal.PublicClientApplication({
+    auth: { clientId, authority: 'https://login.microsoftonline.com/' + getTenant(), redirectUri },
+    // localStorage so a portal handoff can reuse the portal's cached session
+    cache: { cacheLocation: 'localStorage' }
+  });
+  msalCid = clientId; msalTenant = getTenant();
+}
+// Rebuild MSAL whenever the Client ID / tenant in the form no longer matches the
+// instance we built earlier. Without this, a portal handoff pins the page to another
+// app for the whole session — editing the Client ID field had no effect and every
+// Dataverse call kept failing as the handoff app (AADSTS650057).
+function ensureMsal(clientId){
+  if (!msalApp || msalCid !== clientId || msalTenant !== getTenant()) initMsal(clientId);
+}
+async function ensureSignedIn(){
+  if (!msalApp.getAllAccounts().length) {
+    await msalApp.loginPopup({ scopes: ['https://graph.microsoft.com/User.Read'],
+                               ...(HANDOFF_HINT ? { loginHint: HANDOFF_HINT } : {}) });
+  }
+  const accts = msalApp.getAllAccounts();
+  const acct = (HANDOFF_HINT && accts.find(a=>(a.username||'').toLowerCase()===HANDOFF_HINT.toLowerCase())) || accts[0];
+  msalApp.setActiveAccount(acct);
+  document.getElementById('acct').textContent = acct.username;
+  document.getElementById('signout').style.display = '';
+  return acct;
+}
+function signOut(){ if (msalApp) msalApp.logoutPopup(); }
+
+// Dataverse is per-resource: acquire a token scoped to each environment's URL.
+async function getToken(resource){
+  const account = msalApp.getActiveAccount();
+  const req = { scopes: [resource.replace(/\/$/,'') + '/.default'], account };
+  try { return (await msalApp.acquireTokenSilent(req)).accessToken; }
+  catch { return (await msalApp.acquireTokenPopup(req)).accessToken; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dataverse Web API helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function dvHeaders(token){
+  return { Authorization: 'Bearer ' + token, Accept: 'application/json',
+           'OData-MaxVersion': '4.0', 'OData-Version': '4.0',
+           Prefer: 'odata.include-annotations="OData.Community.Display.V1.FormattedValue"' };
+}
+async function dvGet(url, headers){
+  const r = await fetch(url, { headers });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0,200));
+  return r.json();
+}
+async function dvGetAll(url, headers){  // follow @odata.nextLink
+  let out = [], next = url;
+  while (next){ const j = await dvGet(next, headers); out = out.concat(j.value || []); next = j['@odata.nextLink']; }
+  return out;
+}
+
+const AUTHLBL = {0:'Unspecified',1:'None (No authentication)',2:'Integrated',3:'Custom Entra',4:'Generic OAuth2'};
+const MAKER_RX = /connectionProperties[\s\S]{0,300}?mode["'\s]*[:=]["'\s]*maker/i;
+const HTTP_RX  = /HttpRequestAction/i;
+const MCP_RX   = /InvokeExternalAgentTaskAction/i;
+// Best-effort: name the MCP server(s) an agent calls. MCP tools are wired through
+// custom connectors, so the topic data carries a server name / URL / connector
+// reference near the invoke action. High-signal patterns only; [] when nothing
+// identifiable (caller falls back to the generic "present" message).
+const MCP_ID_RX = [
+  /server\s*url["'\s:=]+(https?:\/\/[^\s"'\\}]+)/ig,
+  /server\s*name["'\s:=]+([^\n,"'}\]]{2,80})/ig,
+  /(shared_[A-Za-z0-9][\w.\-]{2,80})/ig,
+];
+function extractMcpServers(d){
+  const out=new Set(); const occ=/InvokeExternalAgentTaskAction/ig; let m;
+  while((m=occ.exec(d))){ const w=d.slice(Math.max(0,m.index-500), m.index+800);
+    for(const rx of MCP_ID_RX){ rx.lastIndex=0; let x;
+      while((x=rx.exec(w))){ const v=(x[1]||'').trim().replace(/^[="'\s]+|["'\s]+$/g,'');
+        if(v && v.toLowerCase()!=='mcp') out.add(v); if(out.size>=4) break; } } }
+  return [...out].slice(0,4);
+}
+const MAIL_RX  = /office365(outlook)?[\s\S]{0,500}?sendemail/i;
+const URL_RX   = /url["'\s]*[:=]["'\s]*(https?:\/\/[^\s"'\\}]+)/ig;
+// AI model — Copilot Studio stores it as "modelNameHint" in the agent JSON
+// (same field your KQL extracts from RawAgentInfo).
+const MODEL_RX = /modelNameHint["':\s=]+([A-Za-z0-9_.\-]+)/i;
+function extractModel(s){ const m=MODEL_RX.exec(s||''); return m?m[1]:null; }
+function modelVendor(m){ const s=(m||'').toLowerCase();
+  if(/^(claude|sonnet|haiku|opus)/.test(s)) return {vendor:'Anthropic Claude', eu:false};
+  if(/^(gpt|o[1-9])/.test(s))               return {vendor:'OpenAI (Microsoft-hosted)', eu:true};
+  return {vendor:'other model', eu:null};
+}
+
+function status(msg){ document.getElementById('status').textContent = msg; }
+
+async function scanEnvironment(orgUrl, opts){
+  const org = orgUrl.replace(/\/$/,'');
+  const api = org + '/api/data/v9.2';
+  const token = await getToken(org);
+  const H = dvHeaders(token);
+  const findings = [];
+  const envName = org.replace(/^https?:\/\//,'').split('.')[0];
+  const add = (Severity,Finding,Agent,Detail,extra)=>findings.push(Object.assign({Severity,Finding,Environment:envName,Agent,Detail},extra||{}));
+  const models = {};   // botid -> {name, model}
+
+  // 1) Agents (bot table) — No Auth, Authentication, Orphaned
+  const bots = await dvGetAll(api + "/bots?$select=name,botid,authenticationmode,authenticationtrigger,authorizedsecuritygroupids,statecode,configuration,_ownerid_value,_createdby_value", H);
+  SCAN_AGENTS = bots.length;   // reported in the scan summary so "0 findings" can be told apart from "no access"
+  for (const b of bots){
+    AGENT_OWNER[envName+'|'+b.name] = b['_ownerid_value@OData.Community.Display.V1.FormattedValue']
+                                   || b['_createdby_value@OData.Community.Display.V1.FormattedValue'] || '';
+    const m = b.authenticationmode;
+    if (m === 0 || m === 1) add(m===1?'High':'Medium','No Authentication',b.name,'authenticationmode='+AUTHLBL[m]);
+    // bot.configuration (JSON) — generative orchestration, multi-tenant sharing
+    const cfg = b.configuration;
+    if (cfg){
+      if (/"GenerativeActionsEnabled"\s*:\s*true/i.test(cfg)) add('Low','Generative Orchestration',b.name,'dynamic tool/knowledge/action selection enabled');
+      if (/"isMultiTenant"\s*:\s*true|any \(multitenant\)/i.test(cfg)) add('High','Multi-tenant Shared',b.name,'configuration indicates multi-tenant / org-wide access (heuristic)');
+    }
+    const mh = extractModel(cfg); if (mh) models[b.botid] = {name:b.name, model:mh};
+  }
+  // Orphaned: owner disabled in Dataverse (batched)
+  const owners = [...new Set(bots.map(b=>b._ownerid_value).filter(Boolean))];
+  const ownerState = {};
+  for (let i=0;i<owners.length;i+=20){
+    const chunk = owners.slice(i,i+20);
+    const filt = chunk.map(id=>"systemuserid eq "+id).join(" or ");
+    const us = await dvGetAll(api+"/systemusers?$select=systemuserid,fullname,isdisabled&$filter="+encodeURIComponent(filt), H);
+    us.forEach(u=>ownerState[u.systemuserid]={name:u.fullname,disabled:u.isdisabled});
+  }
+  for (const b of bots){
+    const o = ownerState[b._ownerid_value];
+    if (o && o.disabled) add('High','Orphaned Agent',b.name,"owner '"+o.name+"' is disabled in Dataverse");
+  }
+
+  // 2) Components — Maker / HTTP / MCP / Send Mail (+ URL & recipient classification)
+  if (opts.components){
+    const flags = {};
+    const comps = await dvGetAll(api + "/botcomponents?$select=componenttype,data,_parentbotid_value", H);
+    for (const c of comps){
+      const d = c.data; if (!d) continue;
+      const bid = c._parentbotid_value; if (!bid) continue;
+      const f = flags[bid] || (flags[bid] = { name: c['_parentbotid_value@OData.Community.Display.V1.FormattedValue'] || '(unknown)', maker:false,http:false,mcp:false,mail:false, urls:new Set(), mailTo:[], mcpServers:new Set() });
+      if (!f.maker && MAKER_RX.test(d)) f.maker = true;
+      if (MCP_RX.test(d)){ f.mcp = true; extractMcpServers(d).forEach(s=>f.mcpServers.add(s)); }
+      if (HTTP_RX.test(d)){ f.http = true; let m; const rx=new RegExp(URL_RX); while((m=rx.exec(d))) f.urls.add(m[1]); }
+      if (MAIL_RX.test(d)){ f.mail = true; let i=d.search(/sendemail/i); if(i>=0){ const w=d.slice(i,i+800); const m=/to["'\s\/]*[:=]["'\s]*([^\n,}{\]]+)/i.exec(w); if(m) f.mailTo.push(m[1].trim().replace(/["']/g,'')); } }
+      if (!models[bid]){ const mh=extractModel(d); if(mh) models[bid]={name:f.name, model:mh}; }
+    }
+    Object.values(flags).forEach(f=>{
+      if (f.maker) add('High','Maker Credentials',f.name,'connector runs in maker auth context (connectionProperties.mode=maker)');
+      if (f.http)  add('Medium','HTTP Requests',f.name,'HttpRequestAction present in agent topics');
+      if (f.mcp){ const s=[...f.mcpServers];
+        add('Medium','MCP Server',f.name, s.length ? 'MCP server: '+s.slice(0,3).join(', ')+(s.length>3?', …':'') : 'InvokeExternalAgentTaskAction (MCP) present'); }
+      if (f.mail)  add('Medium','Send Mail',f.name,'office365/outlook SendEmail referenced (heuristic)');
+      // HTTP URL classification
+      const urls=[...f.urls];
+      const insecure=urls.filter(u=>/^http:\/\//i.test(u));
+      if (insecure.length) add('High','HTTP Non-HTTPS',f.name,'cleartext HTTP request to: '+insecure.slice(0,3).join(', '));
+      const nonstd=urls.filter(u=>{ try{ const p=new URL(u).port; return p && p!=='80' && p!=='443'; }catch{ return false; } });
+      if (nonstd.length) add('Medium','HTTP Non-standard Port',f.name,'request to non-standard port: '+nonstd.slice(0,3).join(', '));
+      // Email recipient classification
+      const seen=new Set();
+      f.mailTo.forEach(to=>{
+        if(seen.has(to)) return; seen.add(to);
+        const dynamic = /^=|\{|@\{|Topic\.|Global\.|System\.|bot\.|Activity\./i.test(to) || !/@/.test(to);
+        if (dynamic){ add('High','Email Dynamic Recipient',f.name,'send-mail recipient is a variable / AI-controlled value: '+to.slice(0,60)); }
+        else { const dom=(to.split('@')[1]||'').toLowerCase().replace(/[>;,\s].*$/,'');
+          if (dom && opts.tenantDomain && dom!==opts.tenantDomain) add('High','Email External',f.name,'send-mail to external domain: '+dom); }
+      });
+    });
+  }
+
+  // 3) AI model per agent (modelNameHint) + EU-boundary note for non-MS-hosted models
+  Object.values(models).forEach(x=>{ const mi=modelVendor(x.model); const ex={ModelVendor:mi.vendor, ModelEu:mi.eu};
+    if (mi.eu===false) add('Low','AI Model',x.name, x.model+' · '+mi.vendor+' — processes OUTSIDE the EU Data Boundary', ex);
+    else               add('Info','AI Model',x.name, x.model+' · '+mi.vendor, ex);
+  });
+
+  // 3) Sharing — RetrieveSharedPrincipalsAndAccess per agent
+  if (opts.sharing){
+    for (const b of bots){
+      const p1 = encodeURIComponent("{'@odata.id':'bots("+b.botid+")'}");
+      try {
+        const j = await dvGet(api+"/RetrieveSharedPrincipalsAndAccess(Target=@p1)?@p1="+p1, H);
+        const sh = j.PrincipalAccesses || [];
+        if (!sh.length) continue;
+        const ptypes = sh.map(x=>(x.Principal&&x.Principal['@odata.type']||'principal').replace('#Microsoft.Dynamics.CRM.',''));
+        const teamCount = ptypes.filter(t=>t==='team').length, userCount = sh.length - teamCount;
+        // A lone team principal with no users is the platform-default owner/business-unit
+        // team that Dataverse auto-attaches to every agent — not a configured share. Skip it.
+        if (sh.length===1 && teamCount===1 && userCount===0) continue;
+        const types = [...new Set(ptypes)];
+        const masks = [...new Set(sh.flatMap(x=>String(x.AccessMask||'').split(',').map(s=>s.trim()).filter(Boolean)))];
+        const team = types.includes('team'), reshare = masks.includes('ShareAccess');
+        const caps = [];
+        if (team)                       caps.push('Team-wide');
+        if (reshare)                    caps.push('Re-share');
+        if (masks.includes('WriteAccess'))  caps.push('Write');
+        if (masks.includes('AssignAccess')) caps.push('Reassign');
+        if (masks.includes('DeleteAccess')) caps.push('Delete');
+        const recip = team ? 'team' : 'user';
+        const detail = 'Shared with '+sh.length+' '+recip+(sh.length!==1?'s':'') + (caps.length?' · '+caps.join(' · '):' · read-only');
+        add((reshare||team)?'High':'Medium','Sharing',b.name,detail,{ShareCaps:caps, ShareRecipient:recip, ShareCount:sh.length});
+      } catch(e){ /* skip agents we can't read sharing for */ }
+    }
+  }
+  return findings;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Risk correlation — escalates dangerous finding combinations per agent
+// ─────────────────────────────────────────────────────────────────────────────
+const SEVRANK = { Critical:5, High:4, Medium:3, Low:2, Info:1 };
+function correlate(findings){
+  const groups = {};
+  findings.forEach(f=>{ const k=f.Environment+'|'+f.Agent; (groups[k]=groups[k]||[]).push(f); });
+  const out=[];
+  for (const k in groups){
+    const g=groups[k], types=new Set(g.map(f=>f.Finding));
+    const has=t=>types.has(t);
+    const noAuth=has('No Authentication'), maker=has('Maker Credentials'), mail=has('Send Mail'),
+          http=has('HTTP Requests'), mcp=has('MCP Server'), hard=has('Hard-coded Credential'),
+          auto=has('Autonomous Agent'), orphan=has('Orphaned Agent'), dormant=has('Dormant Agent'),
+          multitenant=has('Multi-tenant Shared'),
+          emailExfil=has('Email External')||has('Email Dynamic Recipient'),
+          insecureHttp=has('HTTP Non-HTTPS'),
+          reshare=g.some(f=>f.Finding==='Sharing'&&((f.ShareCaps&&f.ShareCaps.includes('Re-share'))||/re-?share/i.test(f.Detail)));
+    const egress = maker||http||mail||hard||emailExfil||insecureHttp;
+    const reasons=[]; let sev='Info';
+    const bump=s=>{ if(SEVRANK[s]>SEVRANK[sev]) sev=s; };
+    if ((noAuth||multitenant) && egress){ reasons.push('anonymous/multi-tenant agent with a privileged action / data-egress path'); bump('Critical'); }
+    if (auto && maker){ reasons.push('autonomous agent runs on maker (standing) credentials'); bump('Critical'); }
+    if (noAuth && mcp){ reasons.push('anonymous agent exposes an MCP tool surface'); bump('Critical'); }
+    if (mcp && maker){ reasons.push('MCP tool runs on maker (standing) credentials'); bump('Critical'); }
+    if (maker && (mail||emailExfil)){ reasons.push('maker-credential agent can send mail (exfiltration path)'); bump('High'); }
+    if (maker && dormant){ reasons.push('dormant agent retains a maker (standing) credential connection'); bump('High'); }
+    if (orphan && (maker||noAuth)){ reasons.push('orphaned agent is still anonymous and/or privileged'); bump('High'); }
+    if (reshare && (noAuth||maker)){ reasons.push('shared with re-share rights while anonymous/privileged'); bump('High'); }
+    if (reasons.length){
+      const [Environment,Agent]=k.split('|');
+      const signals=[...types];
+      out.push({Severity:sev,Finding:'Risk Correlation',Environment,Agent,
+                Detail:reasons.join(' + ')+'  [signals: '+signals.join(', ')+']',
+                Reasons:reasons.slice(), Signals:signals});
+    }
+  }
+  return out;
+}
+function dedupe(findings){
+  const best={};
+  findings.forEach(f=>{ const k=f.Finding+'|'+f.Environment+'|'+f.Agent;
+    if(!best[k]||SEVRANK[f.Severity]>SEVRANK[best[k].Severity]) best[k]=f; });
+  return Object.values(best);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Orchestration
+// ─────────────────────────────────────────────────────────────────────────────
+let DATA = [];
+let AGENT_OWNER = {};   // "env|agent" -> owner display name (for the risk matrix)
+let SCAN_AGENTS = 0;    // agents read from the last-scanned environment (for the scan summary)
+// Turn the raw AAD/Dataverse failures into something actionable. AADSTS650057 in
+// particular means the signed-in app registration has no Dynamics CRM permission —
+// easy to hit when a portal handoff or a stale cs_clientId swaps in another app.
+function dvErrMsg(err){
+  const m = (err && err.message) || String(err);
+  if (/AADSTS650057|Invalid resource/i.test(m)){
+    const c = /Client app ID:\s*([0-9a-f-]{36})\s*(?:\(([^)]*)\))?/i.exec(m) || [];
+    const who = c[1] ? ' "' + (c[2] || c[1]) + '"' : '';
+    return 'app registration' + who + ' has no Dataverse permission (only Microsoft Graph). '
+      + 'Fix: API permissions → Add a permission → APIs my organization uses → Dynamics CRM → '
+      + 'Delegated → user_impersonation → Grant admin consent. Or put the correct Client ID in the field above.';
+  }
+  if (/\b403\b|Forbidden/i.test(m)) return m + ' — your account has no Dataverse security role in this environment.';
+  return m;
+}
+
+async function runScan(){
+  const clientId = document.getElementById('clientId').value.trim();
+  const envs = document.getElementById('envs').value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+  if (!clientId){ status('Enter the app registration Client ID first.'); return; }
+  if (!envs.length){ status('Enter at least one environment URL.'); return; }
+  // Don't persist a portal-handoff clientId: standalone opens would then use a
+  // registration whose redirect URIs don't include this page (AADSTS50011).
+  if (clientId !== HANDOFF_CID) localStorage.setItem('cs_clientId', clientId);
+  localStorage.setItem('cs_tenantId', getTenant());
+  localStorage.setItem('cs_envs', envs.join('\n'));
+  const opts = { components: document.getElementById('optComponents').checked, sharing: document.getElementById('optSharing').checked };
+  const btn = document.getElementById('scanBtn'); btn.disabled = true;
+  try {
+    ensureMsal(clientId);
+    status('Signing in…'); const acct = await ensureSignedIn();
+    opts.tenantDomain = ((acct && acct.username || '').split('@')[1] || '').toLowerCase();
+    status('Detecting tenant region…'); try { await detectAndRenderRegions(envs); } catch(e){ console.warn('region detect failed', e); }
+    AGENT_OWNER = {};
+    let all = [];
+    const failures = [], envStats = [];
+    for (const e of envs){
+      status('Scanning '+e+' …');
+      SCAN_AGENTS = 0;
+      try { const f = await scanEnvironment(e, opts); envStats.push({env:e, agents:SCAN_AGENTS}); all = all.concat(f); }
+      catch(err){ failures.push({env:e, msg:dvErrMsg(err)}); console.error(err); }
+    }
+    all = dedupe(all);
+    all = all.concat(correlate(all));
+    DATA = all;
+    // A bare "0 findings" is ambiguous: a failed environment, an environment with no
+    // agents, and a genuinely clean tenant all looked identical. Spell out which it is.
+    const agentTotal = envStats.reduce((n,s)=>n+s.agents, 0);
+    const lines = ['Done — '+DATA.length+' finding'+(DATA.length===1?'':'s')
+      +' · '+agentTotal+' agent'+(agentTotal===1?'':'s')+' read'
+      +' · '+envStats.length+'/'+envs.length+' environment'+(envs.length===1?'':'s')+' scanned.'];
+    // Only surface the per-environment diagnostics when something actually went wrong —
+    // on a healthy scan they're noise (an environment with no agents is not a problem).
+    const troubled = failures.length > 0 || agentTotal === 0;
+    if (troubled){
+      lines.push('  signed in with app ' + clientId);
+      envStats.forEach(s=>{ if (!s.agents) lines.push('  • '+s.env+' — no Copilot Studio agents visible to your account (bot table empty).'); });
+    }
+    // One cause failing every environment is one problem, not six — collapse it.
+    const uniqErr = [...new Set(failures.map(f=>f.msg))];
+    if (uniqErr.length === 1 && failures.length > 1) lines.push('  ✗ all '+failures.length+' environments — '+uniqErr[0]);
+    else failures.forEach(f=>lines.push('  ✗ '+f.env+' — '+f.msg));
+    if (failures.length && !envStats.length)
+      lines.push('Every environment failed — fix the cause above, then re-scan.');
+    else if (!agentTotal && envStats.length)
+      lines.push('No agents were readable — you likely lack a Dataverse security role in these environments, or they contain no Copilot Studio agents.');
+    else if (!DATA.length && agentTotal)
+      lines.push('Agents were read but none matched a risk check — this is a clean result.');
+    status(lines.join('\n'));
+    showDashboard();
+    renderModelSummary();   // surface AI-model / EU-boundary exposure on the map
+    collapseCfg();   // minimize the scan panel; map + findings take focus
+  } catch(err){ status('Error: '+err.message); console.error(err); }
+  finally { btn.disabled = false; }
+}
+
+// Auto-discover every environment the signed-in user can access (Global
+// Discovery Service — CORS-enabled). Commercial cloud; for GCC/USG/DOD/China
+// swap the globaldisco host.
+const GDS = 'https://globaldisco.crm.dynamics.com';
+async function discoverEnvs(){
+  const clientId = document.getElementById('clientId').value.trim();
+  if (!clientId){ status('Enter the Client ID first.'); return; }
+  const btn = document.getElementById('discoverBtn'); btn.disabled = true;
+  try {
+    ensureMsal(clientId);
+    status('Signing in…'); await ensureSignedIn();
+    status('Discovering environments…');
+    const token = await getToken(GDS);
+    const r = await fetch(GDS + '/api/discovery/v2.0/Instances?$select=ApiUrl,FriendlyName',
+                          { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+    if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0,200));
+    const inst = (await r.json()).value || [];
+    const urls = inst.map(i => (i.ApiUrl||'').replace(/\/$/,'')).filter(Boolean);
+    if (!urls.length){ status('No environments returned for your account (GDS omits disabled accounts and security-group-filtered access).'); return; }
+    document.getElementById('envs').value = urls.join('\n');
+    localStorage.setItem('cs_envs', urls.join('\n'));
+    try { await detectAndRenderRegions(urls); } catch(e){ console.warn('region detect failed', e); }
+    status('Found ' + urls.length + ' environment(s): ' + inst.map(i=>i.FriendlyName).filter(Boolean).join(', ') + '\nReview the list, then Sign in & scan.');
+  } catch(err){ status('Discovery failed — ' + dvErrMsg(err) + '\nYou can still enter environment URLs manually.'); console.error(err); }
+  finally { btn.disabled = false; }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Tenant data residency / world map
+// ─────────────────────────────────────────────────────────────────────────────
+function regionInfo(raw){
+  const r=(raw||'').toLowerCase();
+  const M=[
+    [/\bfra\b|france/,'France',[2,47],true],[/\bger\b|deu|germany/,'Germany',[10,51],true],
+    [/\bche\b|swiss|switz/,'Switzerland',[8,47],true],[/\bnor\b|norway/,'Norway',[9,61],true],
+    [/\bswe\b|sweden/,'Sweden',[15,62],true],[/eur|emea|europe/,'Europe',[10,50],true],
+    [/\bgbr\b|\buk\b|united ?kingdom|britain/,'United Kingdom',[-2,54],false],
+    [/\bcan\b|canada/,'Canada',[-106,56],false],[/\bnam?\b|north ?america|unitedstates|\busa?\b/,'North America',[-100,40],false],
+    [/\bsam\b|south ?america|bra|brazil/,'South America',[-60,-15],false],
+    [/\bjpn\b|japan/,'Japan',[138,36],false],[/\bind\b|india/,'India',[78,22],false],
+    [/\bkor\b|korea/,'Korea',[128,36],false],[/\buae\b|emirates/,'UAE',[54,24],false],
+    [/zaf|south ?africa/,'South Africa',[25,-30],false],[/apac|apj|asia/,'Asia Pacific',[100,30],false],
+    [/oce|\baus\b|australia/,'Australia',[135,-25],false]
+  ];
+  for(const [rx,geo,ll,eu] of M) if(rx.test(r)) return {geo,lng:ll[0],lat:ll[1],eu};
+  return {geo:raw||'Unknown',lng:0,lat:20,eu:null};
+}
+async function detectAndRenderRegions(orgUrls){
+  const token=await getToken(GDS);
+  const inst=((await (await fetch(GDS+'/api/discovery/v2.0/Instances?$select=ApiUrl,FriendlyName,Region',
+                  {headers:{Authorization:'Bearer '+token,Accept:'application/json'}})).json()).value)||[];
+  const byHost={}; inst.forEach(i=>{ byHost[(i.ApiUrl||'').replace(/\/$/,'').toLowerCase()]=i; });
+  const regions=orgUrls.map(e=>{ const i=byHost[e.replace(/\/$/,'').toLowerCase()]||{}; return Object.assign({name:i.FriendlyName||e, raw:i.Region||'?'}, regionInfo(i.Region)); });
+  renderRegionMap(regions);
+}
+// Leaflet map (CartoDB dark) — public-IP marker + per-environment region markers.
+let _map=null, _regionLayer=null, _youMarker=null, _youLatLng=null, _regionCentroids=[];
+const ANTHROPIC_US=[39.5,-98.35];   // geographic center of the contiguous US — Claude is US-hosted
+function ensureMap(){
+  if(_map || typeof L==='undefined') return _map;
+  document.getElementById('mapPanel').classList.remove('hidden');
+  _map=L.map('leafletmap',{attributionControl:false,scrollWheelZoom:false}).setView([30,15],2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19}).addTo(_map);
+  _regionLayer=L.layerGroup().addTo(_map);
+  return _map;
+}
+// Detect & show the public IP of the machine running the app (client-side geo).
+// Browsers can't read their own public IP without an external service, so we try
+// several CORS-enabled providers (with timeouts) and fall back to IP-only.
+async function detectPublicIp(){
+  ensureMap();
+  const ipEl=document.getElementById('myip'), locEl=document.getElementById('myloc');
+  const fj=async u=>{ const c=new AbortController(); const t=setTimeout(()=>c.abort(),6000);
+    try{ const r=await fetch(u,{cache:'no-store',signal:c.signal}); if(!r.ok) throw new Error(r.status); return await r.json(); }
+    finally{ clearTimeout(t); } };
+  const ok=v=>Number.isFinite(v);
+  const providers=[
+    async()=>{ const j=await fj('https://ipwho.is/'); if(j.success===false) throw new Error(j.message||'fail'); return {ip:j.ip,lat:+j.latitude,lon:+j.longitude,city:j.city,country:j.country}; },
+    async()=>{ const j=await fj('https://get.geojs.io/v1/ip/geo.json'); return {ip:j.ip,lat:+j.latitude,lon:+j.longitude,city:j.city,country:j.country}; },
+    async()=>{ const j=await fj('https://ipapi.co/json/'); return {ip:j.ip,lat:+j.latitude,lon:+j.longitude,city:j.city,country:j.country_name}; }
+  ];
+  let g=null;
+  for(const p of providers){ try{ const x=await p(); if(ok(x.lat)&&ok(x.lon)){ g=x; break; } if(x.ip&&!g) g=x; }catch(e){ console.warn('geo provider failed:', e.message||e); } }
+  if(!g || !ok(g.lat)){   // last resort: IP only (most widely reachable)
+    try{ const j=await fj('https://api.ipify.org?format=json'); if(j.ip) g=Object.assign({ip:j.ip}, g||{}); }catch(e){ console.warn('ipify failed:', e.message||e); }
+  }
+  if(!g || !g.ip){ if(ipEl)ipEl.textContent='unavailable'; if(locEl)locEl.textContent='Blocked by network or geo service'; return; }
+  if(ipEl)ipEl.textContent=g.ip;
+  if(locEl)locEl.textContent=[g.city,g.country].filter(Boolean).join(', ') || 'Location unavailable';
+  if(!_map || !ok(g.lat) || !ok(g.lon)) return;
+  _youLatLng=[g.lat,g.lon];
+  if(_youMarker) _map.removeLayer(_youMarker);
+  const icon=L.divIcon({className:'',iconSize:[16,16],iconAnchor:[8,8],html:
+    `<div style="width:16px;height:16px;border-radius:50%;background:rgba(56,139,253,.95);border:2px solid #fff;animation:hero-ping 1.8s ease-out infinite;position:relative">`+
+    `<div style="position:absolute;inset:-10px;border-radius:50%;border:1.5px solid rgba(56,139,253,.5);animation:hero-ring 1.8s ease-out infinite"></div></div>`});
+  _youMarker=L.marker(_youLatLng,{icon}).bindTooltip(`<strong>${g.ip}</strong><br>${[g.city,g.country].filter(Boolean).join(', ')}`,
+    {direction:'top',offset:[0,-10],className:'leaflet-dark-tooltip'}).addTo(_map);
+  _map.flyTo(_youLatLng,5,{duration:1.6});
+}
+function renderRegionMap(regions){
+  ensureMap(); if(!_map) return;
+  // After a scan/discovery, switch from the public-IP view to the tenant
+  // environment view: drop the IP marker and hide the IP overlay.
+  if(_youMarker){ _map.removeLayer(_youMarker); _youMarker=null; }
+  const ov=document.getElementById('ipOverlay'); if(ov) ov.style.display='none';
+  _regionLayer.clearLayers();
+  // Collapse all environments to their distinct geographic regions, then shade
+  // each region as a coloured AREA (not a per-environment dot).
+  const byGeo={};
+  regions.forEach(r=>{ if(r.lat==null||r.lng==null) return;
+    (byGeo[r.geo]=byGeo[r.geo]||{geo:r.geo,eu:r.eu,lat:r.lat,lng:r.lng,raw:r.raw,names:[]}).names.push(r.name); });
+  const geos=Object.values(byGeo);
+  _regionCentroids=geos.map(g=>[g.lat,g.lng]);
+  const shapes=[];
+  geos.forEach(gi=>{
+    const col=gi.eu===true?'#3fb950':(gi.eu===false?'#f85149':'#8b949e');
+    const lbl=gi.eu===true?'EU / EEA data boundary':(gi.eu===false?'outside EU':'region unverified');
+    const area=L.circle([gi.lat,gi.lng],{radius:1300000,color:col,weight:1.5,opacity:.85,fillColor:col,fillOpacity:.18})
+      .bindTooltip(`<strong>${gi.geo}</strong><br>${gi.names.length} environment${gi.names.length!==1?'s':''}<br>${lbl}`,
+        {direction:'top',className:'leaflet-dark-tooltip',sticky:true}).addTo(_regionLayer);
+    L.marker([gi.lat,gi.lng],{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+      html:`<div style="transform:translate(-50%,-50%);color:${col};font-weight:800;font-size:16px;white-space:nowrap;text-shadow:0 1px 5px #000,0 0 2px #000">${gi.geo}</div>`})}).addTo(_regionLayer);
+    shapes.push(area);
+  });
+  document.getElementById('regionList').innerHTML=geos.map(gi=>{ const lbl=gi.eu===true?'EU / EEA data boundary':(gi.eu===false?'outside EU':'region unverified'); const col=gi.eu===true?'#3fb950':(gi.eu===false?'#f85149':'#8b949e');
+    return `<div style="display:flex;gap:8px;align-items:center;margin:3px 0"><span class="sig" style="color:${col};border-color:${col}66;background:${col}1a">${gi.geo}</span>`+
+           `<span style="color:var(--m);font-size:12px">${gi.names.length} environment${gi.names.length!==1?'s':''} — ${lbl} <span style="opacity:.55">(${gi.raw})</span></span></div>`; }).join('');
+  if(shapes.length){ try{ _map.fitBounds(L.featureGroup(shapes).getBounds(),{padding:[20,20],maxZoom:6}); }catch(e){} }
+}
+// Quadratic-bezier arc between two [lat,lng] points (bowed north for transatlantic).
+function curveArc(a,b,steps=28){
+  const ctrl=[Math.max(a[0],b[0])+Math.abs(b[1]-a[1])*0.16,(a[1]+b[1])/2], pts=[];
+  for(let i=0;i<=steps;i++){ const t=i/steps;
+    pts.push([(1-t)*(1-t)*a[0]+2*(1-t)*t*ctrl[0]+t*t*b[0],(1-t)*(1-t)*a[1]+2*(1-t)*t*ctrl[1]+t*t*b[1]]); }
+  return pts;
+}
+// Non-compliance visual: red US (Anthropic) dot + animated arc from each tenant
+// region to the US, shown when any agent uses an Anthropic Claude model.
+function drawClaudeEgress(){
+  if(!_map||!_regionLayer) return;
+  const US=ANTHROPIC_US;
+  L.marker(US,{icon:L.divIcon({className:'',iconSize:[14,14],iconAnchor:[7,7],
+    html:`<div style="width:13px;height:13px;border-radius:50%;background:#f85149;border:2px solid #0d1117;box-shadow:0 0 0 4px #f8514944;animation:hero-ping 1.8s ease-out infinite"></div>`})})
+    .bindTooltip('Anthropic Claude — US (outside EU Data Boundary)',{direction:'top',className:'leaflet-dark-tooltip'}).addTo(_regionLayer);
+  L.marker(US,{interactive:false,icon:L.divIcon({className:'',iconSize:[0,0],
+    html:`<div style="transform:translate(-50%,-170%);color:#f85149;font-weight:800;font-size:13px;white-space:nowrap;text-shadow:0 1px 5px #000">Claude (US)</div>`})}).addTo(_regionLayer);
+  const froms=_regionCentroids.length?_regionCentroids:[[50,10]];
+  const all=[US,...froms];
+  froms.forEach(c=>{ const pts=curveArc(c,US); all.push(...pts);
+    L.polyline(pts,{color:'#f85149',weight:2,opacity:.9,dashArray:'6 8',className:'egress-arc'}).addTo(_regionLayer); });
+  try{ _map.fitBounds(L.latLngBounds(all),{padding:[35,45],maxZoom:5}); }catch(e){}
+}
+// Summarise AI models in use (distinct agents per vendor) under the map — so the
+// Anthropic / outside-EU-boundary exposure is visible without filtering findings.
+function renderModelSummary(){
+  const el=document.getElementById('modelSummary'); if(!el) return;
+  const ms=DATA.filter(d=>d.Finding==='AI Model');
+  if(!ms.length){ el.innerHTML=''; return; }
+  if(ms.some(d=>d.ModelEu===false)) drawClaudeEgress();   // Claude in use → draw US egress
+  const byVendor={};
+  ms.forEach(d=>{ const v=d.ModelVendor||'model';
+    (byVendor[v]=byVendor[v]||{eu:d.ModelEu,agents:new Set()}).agents.add(d.Environment+'|'+d.Agent); });
+  const order=Object.entries(byVendor).sort((a,b)=>(a[1].eu===false?0:1)-(b[1].eu===false?0:1));
+  const chips=order.map(([v,info])=>{ const n=info.agents.size;
+    const col=info.eu===false?'#f85149':(info.eu===true?'#3fb950':'#8b949e');
+    const note=info.eu===false?' — outside EU boundary':'';
+    return `<span class="sig" style="color:${col};border-color:${col}66;background:${col}1a">${n} agent${n!==1?'s':''} · ${v}${note}</span>`; }).join('');
+  el.innerHTML=`<div style="font-size:11px;color:var(--m);margin:10px 0 2px;text-transform:uppercase;letter-spacing:.05em">AI models in use</div><div class="sigwrap">${chips}</div>`;
+}
+
+function collapseCfg(){ const b=document.getElementById('cfgBody'); if(b){ b.style.display='none'; document.getElementById('cfgChevron').textContent='▸'; } }
+function toggleCfg(){ const b=document.getElementById('cfgBody'); if(!b) return; const hidden=b.style.display==='none'; b.style.display=hidden?'':'none'; document.getElementById('cfgChevron').textContent=hidden?'▾':'▸'; }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  Dashboard render — KPIs, severity filter, risk matrix, residency map
+// ─────────────────────────────────────────────────────────────────────────────
+const SEV=['Critical','High','Medium','Low','Info'];
+const COLORS={Critical:'#f85149',High:'#ff7b72',Medium:'#d29922',Low:'#3fb950',Info:'#58a6ff'};
+// Per-finding-type colours for the Risk Correlation signal chips.
+const FINDCOLOR={'No Authentication':'#f85149','Orphaned Agent':'#f85149','Hard-coded Credential':'#f85149',
+  'HTTP Non-HTTPS':'#f85149','Email External':'#f85149','Email Dynamic Recipient':'#f85149','Multi-tenant Shared':'#f85149',
+  'Maker Credentials':'#ff7b72','Sharing':'#bc8cff','Autonomous Agent':'#bc8cff',
+  'Send Mail':'#d29922','HTTP Requests':'#d29922','HTTP Non-standard Port':'#d29922',
+  'MCP Server':'#58a6ff','Generative Orchestration':'#58a6ff','AI Model':'#bc8cff'};
+const findColor=f=>FINDCOLOR[f]||'#8b949e';
+// Sharing capability chips — red = takeover/fan-out, orange = modify.
+const CAPCOLOR={'Team-wide':'#f85149','Re-share':'#f85149','Delete':'#f85149','Write':'#ff7b72','Reassign':'#ff7b72'};
+function parseShareCaps(detail){
+  const caps=[];
+  if(/team-wide|\[team\]|\bteam\b/i.test(detail)) caps.push('Team-wide');
+  if(/re-?share|ShareAccess/i.test(detail))       caps.push('Re-share');
+  if(/WriteAccess|\bWrite\b/i.test(detail))        caps.push('Write');
+  if(/AssignAccess|Reassign/i.test(detail))        caps.push('Reassign');
+  if(/DeleteAccess|\bDelete\b/i.test(detail))      caps.push('Delete');
+  return [...new Set(caps)];
+}
+// Recover reasons/signals from a correlation Detail string (e.g. imported rows).
+function splitCorrelation(detail){
+  const m=/\[signals:\s*([^\]]*)\]\s*$/.exec(detail||'');
+  const signals=m?m[1].split(',').map(s=>s.trim()).filter(Boolean):[];
+  const reasons=(m?detail.slice(0,m.index):detail||'').split(' + ').map(s=>s.trim()).filter(Boolean);
+  return {reasons,signals};
+}
+const state={ sev:new Set(SEV), env:'', finding:'', q:'' };
+function counts(){const c={};SEV.forEach(s=>c[s]=0);DATA.forEach(d=>{if(c[d.Severity]!=null)c[d.Severity]++});return c}
+function distinct(key){return [...new Set(DATA.map(d=>d[key]))].sort()}
+function showDashboard(){ document.getElementById('dash').classList.remove('hidden'); buildMatrix();buildChips();buildSelect('env','All environments','Environment');buildFindingSelect();render(); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+// Per-agent risk matrix: most critical at top. Score = 4·C + 3·H + 2·M + 1·L.
+function buildMatrix(){
+  const el=document.getElementById('matrix'); if(!el) return;
+  const W={Critical:4,High:3,Medium:2,Low:1,Info:0};
+  const ag={};
+  DATA.forEach(d=>{ const k=d.Environment+'|'+d.Agent; (ag[k]=ag[k]||{env:d.Environment,agent:d.Agent,f:[]}).f.push(d); });
+  const types=[...new Set(DATA.map(d=>d.Finding))].filter(f=>f!=='Risk Correlation')
+              .sort((a,b)=>(W[FINDSEV(b)]||0)-(W[FINDSEV(a)]||0)||a.localeCompare(b));
+  const rows=Object.values(ag).map(a=>{
+    const c={Critical:0,High:0,Medium:0,Low:0,Info:0}, byType={};
+    a.f.forEach(f=>{ if(c[f.Severity]!=null)c[f.Severity]++; if(!byType[f.Finding]||W[f.Severity]>W[byType[f.Finding]])byType[f.Finding]=f.Severity; });
+    const score=4*c.Critical+3*c.High+2*c.Medium+1*c.Low;
+    const top=SEV.find(s=>c[s]>0)||'Info';
+    return {env:a.env,agent:a.agent,owner:AGENT_OWNER[a.env+'|'+a.agent]||'',c,score,top,byType};
+  }).sort((x,y)=>y.score-x.score||W[y.top]-W[x.top]||x.agent.localeCompare(y.agent));
+  let h='<table class="matrix"><thead><tr>'+
+    '<th class="ag">Agent</th><th>Owner</th><th>Top severity</th><th class="num">Score</th>'+
+    `<th class="num" style="color:${COLORS.Critical}">C</th><th class="num" style="color:${COLORS.High}">H</th><th class="num" style="color:${COLORS.Medium}">M</th><th class="num" style="color:${COLORS.Low}">L</th>`+
+    types.map(t=>`<th class="vt" title="${esc(t)}"><span>${esc(t)}</span></th>`).join('')+'</tr></thead><tbody>';
+  rows.forEach(r=>{ const tb=COLORS[r.top];
+    h+='<tr>'+
+      `<td class="ag mono">${esc(r.agent)}</td>`+
+      `<td style="color:var(--m)">${esc(r.owner)}</td>`+
+      `<td><span class="badge" style="color:${tb};border-color:${tb}66;background:${tb}22">${r.top.toUpperCase()}</span></td>`+
+      `<td class="num" style="font-weight:800;color:${tb}">${r.score}</td>`+
+      `<td class="num" style="color:${r.c.Critical?COLORS.Critical:'var(--m)'}">${r.c.Critical}</td>`+
+      `<td class="num" style="color:${r.c.High?COLORS.High:'var(--m)'}">${r.c.High}</td>`+
+      `<td class="num" style="color:${r.c.Medium?COLORS.Medium:'var(--m)'}">${r.c.Medium}</td>`+
+      `<td class="num" style="color:${r.c.Low?COLORS.Low:'var(--m)'}">${r.c.Low}</td>`+
+      types.map(t=>{ const s=r.byType[t]; if(!s) return '<td class="mk ok">✓</td>';
+        const col=COLORS[s]; return `<td class="mk" style="background:${col}1a"><span style="color:${col}" title="${esc(t)}: ${s}">⚠</span></td>`; }).join('')+
+      '</tr>';
+  });
+  el.innerHTML=h+'</tbody></table>';
+}
+// Typical severity of a finding type (for ordering matrix columns worst-first).
+const _FINDSEV={'No Authentication':'High','Orphaned Agent':'High','Hard-coded Credential':'High','HTTP Non-HTTPS':'High','Email External':'High','Email Dynamic Recipient':'High','Multi-tenant Shared':'High','Maker Credentials':'High','Sharing':'High','MCP Server':'Medium','HTTP Requests':'Medium','HTTP Non-standard Port':'Medium','Send Mail':'Medium','Generative Orchestration':'Low','Autonomous Agent':'Info','AI Model':'Low'};
+function FINDSEV(t){ return _FINDSEV[t]||'Medium'; }
+function buildChips(){
+  const c=counts();
+  document.getElementById('chips').innerHTML=SEV.map(s=>`<span class="chip" data-s="${s}" style="border-color:${COLORS[s]}66;color:${COLORS[s]}" onclick="toggleSev('${s}')">${s} ${c[s]}</span>`).join('');
+}
+function buildSelect(id,allLabel,key){
+  document.getElementById(id).innerHTML=`<option value="">${allLabel}</option>`+distinct(key).map(v=>`<option>${v}</option>`).join('');
+}
+function buildFindingSelect(){
+  const c={};DATA.forEach(d=>c[d.Finding]=(c[d.Finding]||0)+1);
+  document.getElementById('finding').innerHTML='<option value="">All findings</option>'+distinct('Finding').map(f=>`<option value="${f}">${f} (${c[f]})</option>`).join('');
+}
+function toggleSev(s){ state.sev.has(s)?state.sev.delete(s):state.sev.add(s); document.querySelector(`.chip[data-s="${s}"]`).classList.toggle('off',!state.sev.has(s)); render(); }
+function filtered(){
+  const q=state.q.toLowerCase();
+  return DATA.filter(d=>state.sev.has(d.Severity)&&(!state.env||d.Environment===state.env)&&(!state.finding||d.Finding===state.finding)
+    &&(!q||(d.Agent+' '+d.Finding+' '+d.Detail+' '+d.Environment).toLowerCase().includes(q)));
+}
+function render(){
+  const tb=document.getElementById('rows'); tb.textContent='';
+  const rows=filtered().sort((a,b)=>SEVRANK[b.Severity]-SEVRANK[a.Severity]||(a.Environment+a.Agent).localeCompare(b.Environment+b.Agent));
+  document.getElementById('shown').textContent=rows.length;
+  for(const d of rows){
+    const tr=document.createElement('tr'); if(d.Finding==='Risk Correlation') tr.className='corr';
+    const b=document.createElement('span'); b.className='badge'; b.textContent=d.Severity;
+    b.style.background=COLORS[d.Severity]+'22'; b.style.color=COLORS[d.Severity]; b.style.borderColor=COLORS[d.Severity]+'66';
+    const c0=document.createElement('td'); c0.appendChild(b);
+    const c1=document.createElement('td'); c1.textContent=d.Finding;
+    const c2=document.createElement('td'); c2.textContent=d.Environment;
+    const c3=document.createElement('td'); c3.textContent=d.Agent; c3.className='mono';
+    const c4=document.createElement('td'); c4.className='detail';
+    if(d.Finding==='Risk Correlation'){
+      let reasons=d.Reasons, signals=d.Signals;
+      if(!signals){ const p=splitCorrelation(d.Detail); reasons=p.reasons; signals=p.signals; }
+      (reasons||[]).forEach(r=>{ const e=document.createElement('span'); e.className='reason'; e.textContent=r; c4.appendChild(e); });
+      const sig=(signals||[]).filter(s=>s!=='Authentication');   // drop the always-present info row
+      if(sig.length){
+        const w=document.createElement('div'); w.className='sigwrap';
+        sig.forEach(s=>{ const chip=document.createElement('span'); chip.className='sig'; chip.textContent=s;
+          const col=findColor(s); chip.style.color=col; chip.style.borderColor=col+'66'; chip.style.background=col+'1a'; w.appendChild(chip); });
+        c4.appendChild(w);
+      }
+    } else if(d.Finding==='Sharing'){
+      const caps=d.ShareCaps||parseShareCaps(d.Detail);
+      const recip=d.ShareRecipient||(/team/i.test(d.Detail)?'team':'user');
+      const count=d.ShareCount!=null?d.ShareCount:((/(\d+)/.exec(d.Detail)||[])[1]||'');
+      const line=document.createElement('div'); line.textContent='Shared with '+count+' '+recip+(String(count)!=='1'?'s':''); c4.appendChild(line);
+      const w=document.createElement('div'); w.className='sigwrap';
+      if(caps.length){ caps.forEach(cap=>{ const chip=document.createElement('span'); chip.className='sig'; chip.textContent=cap;
+          const col=CAPCOLOR[cap]||'#8b949e'; chip.style.color=col; chip.style.borderColor=col+'66'; chip.style.background=col+'1a'; w.appendChild(chip); }); }
+      else { const e=document.createElement('span'); e.className='sig'; e.textContent='read-only'; e.style.color='#8b949e'; e.style.borderColor='#8b949e66'; w.appendChild(e); }
+      c4.appendChild(w);
+    } else { c4.textContent=d.Detail; }
+    tr.append(c0,c1,c2,c3,c4); tb.appendChild(tr);
+  }
+}
+
+// Show the exact redirect URI this page needs registered (SPA platform), and let the
+// user snap the Client ID back to this tool's own app — a portal handoff can leave
+// another app's ID in the box, which then has no Dataverse permission (AADSTS650057).
+(function(){
+  const r = document.getElementById('regRedirect'); if (r) r.textContent = REDIRECT;
+  const d = document.getElementById('regDefaultCid'); if (d) d.textContent = DEFAULT_CLIENT_ID;
+})();
+function useDefaultClientId(){
+  document.getElementById('clientId').value = DEFAULT_CLIENT_ID;
+  localStorage.setItem('cs_clientId', DEFAULT_CLIENT_ID);
+  msalApp = null;   // force MSAL to re-init against the new client
+  status('Client ID set to ' + DEFAULT_CLIENT_ID + ' — click “Sign in & scan”.');
+}
+
+// restore last config — a portal handoff clientId takes precedence
+document.getElementById('clientId').value = HANDOFF_CID || localStorage.getItem('cs_clientId') || DEFAULT_CLIENT_ID;
+if (document.getElementById('tenantId')) document.getElementById('tenantId').value = localStorage.getItem('cs_tenantId') || '';
+// Show the public IP + location on a detailed map as soon as the app starts.
+window.addEventListener('load', () => { try { detectPublicIp(); } catch(e){ console.warn('public IP detect failed', e); } });
+document.getElementById('envs').value     = localStorage.getItem('cs_envs')||'';
+
+// Portal handoff boot: pick up the portal's cached session silently, discover
+// the user's environments, and run the scan — one click in the portal lands on
+// live results. Every token here is silent-only; if consent for Dataverse is
+// missing the auto-run stops with a status message and the normal
+// "Sign in & scan" button takes over (its popup can prompt for consent).
+window.addEventListener('load', async () => {
+  if (!HANDOFF_CID) return;
+  try {
+    initMsal(HANDOFF_CID);
+    const accts = msalApp.getAllAccounts();
+    const acct = (HANDOFF_HINT && accts.find(a=>(a.username||'').toLowerCase()===HANDOFF_HINT.toLowerCase())) || accts[0];
+    if (!acct) { status('Opened from the portal but no cached session found — click "Sign in & scan".'); return; }
+    msalApp.setActiveAccount(acct);
+    document.getElementById('acct').textContent = acct.username;
+    document.getElementById('signout').style.display = '';
+    status('Signed in from the portal as ' + acct.username + ' — discovering environments…');
+    const token = (await msalApp.acquireTokenSilent({ scopes: [GDS + '/.default'], account: acct })).accessToken;
+    const r = await fetch(GDS + '/api/discovery/v2.0/Instances?$select=ApiUrl,FriendlyName',
+                          { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+    if (!r.ok) throw new Error('discovery ' + r.status);
+    const inst = (await r.json()).value || [];
+    const urls = inst.map(i => (i.ApiUrl||'').replace(/\/$/,'')).filter(Boolean);
+    if (!urls.length){ status('Signed in as ' + acct.username + ' — no environments returned; enter URLs manually, then scan.'); return; }
+    document.getElementById('envs').value = urls.join('\n');
+    localStorage.setItem('cs_envs', urls.join('\n'));
+    status('Signed in as ' + acct.username + ' — found ' + urls.length + ' environment(s), starting scan…');
+    await runScan();
+  } catch (e) {
+    status('Portal session found, but a silent token was refused (' + (e.message||e) + ').\nClick "Sign in & scan" — the popup can complete any missing consent.');
+  }
+});
+</script>
+<script>/* build stamp — auto from Last-Modified, confirms the deployed version */(function(){function a(){var d=new Date(document.lastModified),s=isNaN(d.getTime())?String(document.lastModified):d.toISOString().slice(0,10),e=document.createElement('div');e.textContent='build '+s;e.title='Build date of this file (from the Last-Modified header) — confirms which deployed version you are viewing.';e.style.cssText='position:fixed;bottom:6px;right:9px;font:11px/1 system-ui,-apple-system,sans-serif;color:var(--muted,#8a8886);opacity:.55;z-index:2147483000;pointer-events:none;letter-spacing:.02em';document.body.appendChild(e);}if(document.body)a();else document.addEventListener('DOMContentLoaded',a);})();</script>
+</body>
+</html>

@@ -1,0 +1,3997 @@
+{
+ "EntityMetadata": [
+  {
+   "LogicalName": "opportunityclose",
+   "SchemaName": "OpportunityClose",
+   "EntitySetName": "opportunitycloses",
+   "PrimaryIdAttribute": null,
+   "Attributes": [
+    {
+     "LogicalName": "activityadditionalparams",
+     "SchemaName": "ActivityAdditionalParams",
+     "AttributeType": "Memo",
+     "AttributeTypeName": {
+      "Value": "MemoType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Additional information provided by the external application as JSON. For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "TextArea",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Activity Additional Parameters",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "activityid",
+     "SchemaName": "ActivityId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Opportunity Close",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "activitytypecode",
+     "SchemaName": "ActivityTypeCode",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Type of activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Activity Type",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "activitypointer_activitytypecode",
+      "IsGlobal": true,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 4204,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Fax",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4210,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Phone Call",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4202,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Email",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4207,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Letter",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4201,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Appointment",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4212,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Task",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4251,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Appointment",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10085,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Teams chat",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4406,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Quick Campaign",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4402,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Campaign Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4401,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Campaign Response",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4206,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Case Resolution",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4214,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Service Activity",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4208,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Opportunity Close",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4209,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Order Close",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4211,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Quote Close",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10362,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice alert",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10372,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice survey invite",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10374,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Customer Voice survey response",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10473,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Conversation",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10490,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Session",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10808,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Copilot Transcript",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10876,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Invite Redemption",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10877,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Portal Comment",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "activitytypecodename",
+     "SchemaName": "ActivityTypeCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "activitytypecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "actualdurationminutes",
+     "SchemaName": "ActualDurationMinutes",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Actual duration of the opportunity close activity in minutes.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Actual Duration",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "actualend",
+     "SchemaName": "ActualEnd",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Actual end time of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Closed On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "actualrevenue",
+     "SchemaName": "ActualRevenue",
+     "AttributeType": "Money",
+     "AttributeTypeName": {
+      "Value": "MoneyType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Actual revenue generated for the opportunity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Actual Revenue",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "actualrevenue_base",
+     "SchemaName": "ActualRevenue_Base",
+     "AttributeType": "Money",
+     "AttributeTypeName": {
+      "Value": "MoneyType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Value of the Actual Revenue in base currency.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Actual Revenue (Base)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "actualstart",
+     "SchemaName": "ActualStart",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Actual start time of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Actual Start",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "bcc",
+     "SchemaName": "BCC",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Blind Carbon-copy (bcc) recipients of the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "BCC",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "category",
+     "SchemaName": "Category",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Category of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Category",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "cc",
+     "SchemaName": "CC",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Carbon-copy (cc) recipients of the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "CC",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "community",
+     "SchemaName": "Community",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows how contact about the social activity originated, such as from Twitter or Facebook. This field is read-only.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Social Channel",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "socialprofile_community",
+      "IsGlobal": true,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 5,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Cortana",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 6,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Direct Line",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 7,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Microsoft Teams",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 8,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Direct Line Speech",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 9,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Email",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 10,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "GroupMe",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 11,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Kik",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 12,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Telegram",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 13,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Skype",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 14,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Slack",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 15,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "WhatsApp",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 16,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Apple Messages For Business",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 17,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Google's Business Messages",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 3,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Line",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Wechat",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Facebook",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Twitter",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Other",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "communityname",
+     "SchemaName": "CommunityName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "community",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "competitorid",
+     "SchemaName": "CompetitorId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "competitor"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the competitor with which the opportunity close activity is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Competitor",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "competitoridname",
+     "SchemaName": "CompetitorIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "competitorid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "competitoridyominame",
+     "SchemaName": "CompetitorIdYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "competitorid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdby",
+     "SchemaName": "CreatedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user who created the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdbyexternalparty",
+     "SchemaName": "CreatedByExternalParty",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "externalparty"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the external party who created the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By (External Party)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdbyexternalpartyname",
+     "SchemaName": "CreatedByExternalPartyName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdbyexternalparty",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdbyexternalpartyyominame",
+     "SchemaName": "CreatedByExternalPartyYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdbyexternalparty",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdbyname",
+     "SchemaName": "CreatedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdbyyominame",
+     "SchemaName": "CreatedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdon",
+     "SchemaName": "CreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the opportunity close activity was created.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfby",
+     "SchemaName": "CreatedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the delegate user who created the opportunityclose.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Created By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyname",
+     "SchemaName": "CreatedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "createdonbehalfbyyominame",
+     "SchemaName": "CreatedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "createdonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "customers",
+     "SchemaName": "Customers",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Customer with which the activity is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Customers",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "deliverylastattemptedon",
+     "SchemaName": "DeliveryLastAttemptedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the delivery of the activity was last attempted.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Date Delivery Last Attempted",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "deliveryprioritycode",
+     "SchemaName": "DeliveryPriorityCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Priority of delivery of the activity to the email server.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Delivery Priority",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "activitypointer_deliveryprioritycode",
+      "IsGlobal": true,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Low",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Normal",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "High",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "deliveryprioritycodename",
+     "SchemaName": "DeliveryPriorityCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "deliveryprioritycode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "description",
+     "SchemaName": "Description",
+     "AttributeType": "Memo",
+     "AttributeTypeName": {
+      "Value": "MemoType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Activity that is created automatically when an opportunity is closed, containing information such as the description of the closing and actual revenue.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Description",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "exchangeitemid",
+     "SchemaName": "ExchangeItemId",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "The message id of activity which is returned from Exchange Server.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Exchange Item ID",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "exchangerate",
+     "SchemaName": "ExchangeRate",
+     "AttributeType": "Decimal",
+     "AttributeTypeName": {
+      "Value": "DecimalType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the conversion rate of the record's currency. The exchange rate is used to convert all money fields in the record from the local currency to the system's default currency.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Exchange Rate",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "exchangeweblink",
+     "SchemaName": "ExchangeWebLink",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the web link of Activity of type email.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Exchange WebLink",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "from",
+     "SchemaName": "From",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Person who the activity is from.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "From",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "importsequencenumber",
+     "SchemaName": "ImportSequenceNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Sequence number of the import that created this record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Import Sequence Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "instancetypecode",
+     "SchemaName": "InstanceTypeCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Type of instance of a recurring series.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Recurring Instance Type",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "_opportunityclose_instancetypecode",
+      "IsGlobal": false,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Not Recurring",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Master",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Instance",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 3,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Exception",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Recurring Future Exception",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "instancetypecodename",
+     "SchemaName": "InstanceTypeCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "instancetypecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "isbilled",
+     "SchemaName": "IsBilled",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Information about whether the opportunity close activity was billed as part of resolving a case.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Is Billed",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "opportunityclose_isbilled",
+      "IsGlobal": false,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "isbilledname",
+     "SchemaName": "IsBilledName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "isbilled",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "ismapiprivate",
+     "SchemaName": "IsMapiPrivate",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Is Private",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "_opportunityclose_ismapiprivate",
+      "IsGlobal": false,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "ismapiprivatename",
+     "SchemaName": "IsMapiPrivateName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "ismapiprivate",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "isregularactivity",
+     "SchemaName": "IsRegularActivity",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Information regarding whether the activity is a regular activity type or event type.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Is Regular Activity",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "activitypointer_isregularactivity",
+      "IsGlobal": true,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "isregularactivityname",
+     "SchemaName": "IsRegularActivityName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "isregularactivity",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "isworkflowcreated",
+     "SchemaName": "IsWorkflowCreated",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Information that specifies if the opportunity close activity was created from a workflow rule.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Is Workflow Created",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "opportunityclose_isworkflowcreated",
+      "IsGlobal": false,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "isworkflowcreatedname",
+     "SchemaName": "IsWorkflowCreatedName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "isworkflowcreated",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "lastonholdtime",
+     "SchemaName": "LastOnHoldTime",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Contains the date and time stamp of the last on hold time.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Last On Hold Time",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "leftvoicemail",
+     "SchemaName": "LeftVoiceMail",
+     "AttributeType": "Boolean",
+     "AttributeTypeName": {
+      "Value": "BooleanType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Left the voice mail",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Left Voice Mail",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "_opportunityclose_leftvoicemail",
+      "IsGlobal": false,
+      "OptionSetType": "Boolean",
+      "Options": []
+     }
+    },
+    {
+     "LogicalName": "leftvoicemailname",
+     "SchemaName": "LeftVoiceMailName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "leftvoicemail",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedby",
+     "SchemaName": "ModifiedBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user who last modified the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedbyexternalparty",
+     "SchemaName": "ModifiedByExternalParty",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "externalparty"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the external party who modified the record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By (External Party)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedbyexternalpartyname",
+     "SchemaName": "ModifiedByExternalPartyName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedbyexternalparty",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedbyexternalpartyyominame",
+     "SchemaName": "ModifiedByExternalPartyYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedbyexternalparty",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedbyname",
+     "SchemaName": "ModifiedByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedbyyominame",
+     "SchemaName": "ModifiedByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedon",
+     "SchemaName": "ModifiedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the opportunity close activity was last modified.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfby",
+     "SchemaName": "ModifiedOnBehalfBy",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the delegate user who last modified the opportunityclose.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Modified By (Delegate)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyname",
+     "SchemaName": "ModifiedOnBehalfByName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "modifiedonbehalfbyyominame",
+     "SchemaName": "ModifiedOnBehalfByYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "modifiedonbehalfby",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "onholdtime",
+     "SchemaName": "OnHoldTime",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows how long, in minutes, that the record was on hold.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "On Hold Time (Minutes)",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "opportunityid",
+     "SchemaName": "OpportunityId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "ApplicationRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "opportunity"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the opportunity closed.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Opportunity",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "opportunityidname",
+     "SchemaName": "OpportunityIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": "opportunityid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "opportunityidtype",
+     "SchemaName": "OpportunityIdType",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": "opportunityid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "opportunitystatecode",
+     "SchemaName": "OpportunityStateCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Status of the opportunity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "OpportunityClose_opportunity_statecode",
+      "IsGlobal": false,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Open",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Won",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Lost",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "opportunitystatecodename",
+     "SchemaName": "opportunitystatecodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "opportunitystatecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "opportunitystatuscode",
+     "SchemaName": "OpportunityStatusCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Status reason of the opportunity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status Reason",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "OpportunityClose_opportunity_statuscode",
+      "IsGlobal": false,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "In Progress",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "On Hold",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 3,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Won",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 4,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Canceled",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 5,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Out-Sold",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "opportunitystatuscodename",
+     "SchemaName": "opportunitystatuscodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "opportunitystatuscode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "optionalattendees",
+     "SchemaName": "OptionalAttendees",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "List of optional attendees for the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Optional Attendees",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "organizer",
+     "SchemaName": "Organizer",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Person who organized the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Organizer",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "overriddencreatedon",
+     "SchemaName": "OverriddenCreatedOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time that the record was migrated.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Record Created On",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "ownerid",
+     "SchemaName": "OwnerId",
+     "AttributeType": "Owner",
+     "AttributeTypeName": {
+      "Value": "OwnerType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser",
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user or team who owns the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owner",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owneridname",
+     "SchemaName": "OwnerIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owneridtype",
+     "SchemaName": "OwnerIdType",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owneridyominame",
+     "SchemaName": "OwnerIdYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "ownerid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owningbusinessunit",
+     "SchemaName": "OwningBusinessUnit",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "businessunit"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the business unit that owns the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning Business Unit",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owningbusinessunitname",
+     "SchemaName": "OwningBusinessUnitName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "owningbusinessunit",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "owningteam",
+     "SchemaName": "OwningTeam",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "team"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the team that owns the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning Team",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "owninguser",
+     "SchemaName": "OwningUser",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the user that owns the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Owning User",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "partners",
+     "SchemaName": "Partners",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Outsource vendor with which activity is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Outsource Vendors",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "postponeactivityprocessinguntil",
+     "SchemaName": "PostponeActivityProcessingUntil",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Delay activity processing until",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "prioritycode",
+     "SchemaName": "PriorityCode",
+     "AttributeType": "Picklist",
+     "AttributeTypeName": {
+      "Value": "PicklistType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Priority of the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Priority",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "_opportunityclose_prioritycode",
+      "IsGlobal": false,
+      "OptionSetType": "Picklist",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Low",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Normal",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "High",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "prioritycodename",
+     "SchemaName": "PriorityCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "prioritycode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "processid",
+     "SchemaName": "ProcessId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the Process.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Process",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "regardingobjectid",
+     "SchemaName": "RegardingObjectId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "bookableresourcebooking",
+      "bookableresourcebookingheader",
+      "bulkoperation",
+      "campaign",
+      "campaignactivity",
+      "entitlement",
+      "entitlementtemplate",
+      "incident",
+      "interactionforemail",
+      "knowledgearticle",
+      "knowledgebaserecord",
+      "lead",
+      "msdyn_customerasset",
+      "msdyn_playbookinstance",
+      "opportunity",
+      "site"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the object with which the activity is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Regarding",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Regarding",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "regardingobjectidname",
+     "SchemaName": "RegardingObjectIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": "regardingobjectid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "regardingobjectidyominame",
+     "SchemaName": "RegardingObjectIdYomiName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": "regardingobjectid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "regardingobjecttypecode",
+     "SchemaName": "RegardingObjectTypeCode",
+     "AttributeType": "EntityName",
+     "AttributeTypeName": {
+      "Value": "EntityNameType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": "regardingobjectid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "requiredattendees",
+     "SchemaName": "RequiredAttendees",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "List of required attendees for the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Required Attendees",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "resources",
+     "SchemaName": "Resources",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "equipment",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Users or facility/equipment that are required for the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Resources",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "scheduleddurationminutes",
+     "SchemaName": "ScheduledDurationMinutes",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled duration of the opportunity close activity, specified in minutes.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled Duration",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "scheduledend",
+     "SchemaName": "ScheduledEnd",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled end time of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled End",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "scheduledstart",
+     "SchemaName": "ScheduledStart",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled start time of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateOnly",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Scheduled Start",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "sendermailboxid",
+     "SchemaName": "SenderMailboxId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "mailbox"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the mailbox associated with the sender of the email message.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Sender's Mailbox",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "sendermailboxidname",
+     "SchemaName": "SenderMailboxIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "sendermailboxid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "senton",
+     "SchemaName": "SentOn",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Date and time when the activity was sent.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Date Sent",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "seriesid",
+     "SchemaName": "SeriesId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Uniqueidentifier specifying the id of recurring series of an instance.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Series Id",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "serviceid",
+     "SchemaName": "ServiceId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "service"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the service with which the opportunity close activity is associated.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Service",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "serviceidname",
+     "SchemaName": "ServiceIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "serviceid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "slaid",
+     "SchemaName": "SLAId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "sla"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Choose the service level agreement (SLA) that you want to apply to the case record.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "SLA",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "slainvokedid",
+     "SchemaName": "SLAInvokedId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "sla"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Last SLA that was applied to this case. This field is for internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Last SLA applied",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "slainvokedidname",
+     "SchemaName": "SLAInvokedIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "slainvokedid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "slaname",
+     "SchemaName": "SLAName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "slaid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "sortdate",
+     "SchemaName": "SortDate",
+     "AttributeType": "DateTime",
+     "AttributeTypeName": {
+      "Value": "DateTimeType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows the date and time by which the activities are sorted.",
+       "LanguageCode": 1033
+      }
+     },
+     "DateTimeBehavior": {
+      "Value": "UserLocal"
+     },
+     "Format": "DateAndTime",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Sort Date",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "stageid",
+     "SchemaName": "StageId",
+     "AttributeType": "Uniqueidentifier",
+     "AttributeTypeName": {
+      "Value": "UniqueidentifierType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Unique identifier of the Stage.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "(Deprecated) Process Stage",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "statecode",
+     "SchemaName": "StateCode",
+     "AttributeType": "State",
+     "AttributeTypeName": {
+      "Value": "StateType"
+     },
+     "RequiredLevel": {
+      "Value": "SystemRequired",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Shows whether the opportunity close activity is open, completed, or canceled.  By default, opportunity close activities are completed unless the opportunity is reactivated,  which updates them to canceled.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "opportunityclose_statecode",
+      "IsGlobal": false,
+      "OptionSetType": "State",
+      "Options": [
+       {
+        "Value": 0,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Open",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Completed",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Canceled",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statecodename",
+     "SchemaName": "StateCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statecode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "statuscode",
+     "SchemaName": "StatusCode",
+     "AttributeType": "Status",
+     "AttributeTypeName": {
+      "Value": "StatusType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Reason for the status of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Status Reason",
+       "LanguageCode": 1033
+      }
+     },
+     "OptionSet": {
+      "Name": "opportunityclose_statuscode",
+      "IsGlobal": false,
+      "OptionSetType": "Status",
+      "Options": [
+       {
+        "Value": 1,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Open",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 2,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Completed",
+          "LanguageCode": 1033
+         }
+        }
+       },
+       {
+        "Value": 3,
+        "Label": {
+         "UserLocalizedLabel": {
+          "Label": "Canceled",
+          "LanguageCode": 1033
+         }
+        }
+       }
+      ]
+     }
+    },
+    {
+     "LogicalName": "statuscodename",
+     "SchemaName": "StatusCodeName",
+     "AttributeType": "Virtual",
+     "AttributeTypeName": {
+      "Value": "VirtualType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": "statuscode",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "subcategory",
+     "SchemaName": "Subcategory",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Subcategory of the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Sub-Category",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "subject",
+     "SchemaName": "Subject",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Subject associated with the opportunity close activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Subject",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "timezoneruleversionnumber",
+     "SchemaName": "TimeZoneRuleVersionNumber",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Time Zone Rule Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "to",
+     "SchemaName": "To",
+     "AttributeType": "PartyList",
+     "AttributeTypeName": {
+      "Value": "PartyListType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": true,
+     "AttributeOf": null,
+     "Targets": [
+      "account",
+      "contact",
+      "lead",
+      "systemuser"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Person who is the receiver of the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "To",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "transactioncurrencyid",
+     "SchemaName": "TransactionCurrencyId",
+     "AttributeType": "Lookup",
+     "AttributeTypeName": {
+      "Value": "LookupType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Targets": [
+      "transactioncurrency"
+     ],
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Choose the local currency for the record to make sure budgets are reported in the correct currency.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Currency",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "transactioncurrencyidname",
+     "SchemaName": "TransactionCurrencyIdName",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": true,
+     "AttributeOf": "transactioncurrencyid",
+     "Description": {
+      "UserLocalizedLabel": null
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": null
+     }
+    },
+    {
+     "LogicalName": "traversedpath",
+     "SchemaName": "TraversedPath",
+     "AttributeType": "String",
+     "AttributeTypeName": {
+      "Value": "StringType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": true,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "For internal use only.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "Text",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "(Deprecated) Traversed Path",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "utcconversiontimezonecode",
+     "SchemaName": "UTCConversionTimeZoneCode",
+     "AttributeType": "Integer",
+     "AttributeTypeName": {
+      "Value": "IntegerType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": 0,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Time zone code that was in use when the record was created.",
+       "LanguageCode": 1033
+      }
+     },
+     "Format": "None",
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "UTC Conversion Time Zone Code",
+       "LanguageCode": 1033
+      }
+     }
+    },
+    {
+     "LogicalName": "versionnumber",
+     "SchemaName": "VersionNumber",
+     "AttributeType": "BigInt",
+     "AttributeTypeName": {
+      "Value": "BigIntType"
+     },
+     "RequiredLevel": {
+      "Value": "None",
+      "CanBeChanged": false,
+      "ManagedPropertyLogicalName": "canmodifyrequirementlevelsettings"
+     },
+     "SourceType": null,
+     "IsLogical": false,
+     "AttributeOf": null,
+     "Description": {
+      "UserLocalizedLabel": {
+       "Label": "Version number of the activity.",
+       "LanguageCode": 1033
+      }
+     },
+     "DisplayName": {
+      "UserLocalizedLabel": {
+       "Label": "Version Number",
+       "LanguageCode": 1033
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

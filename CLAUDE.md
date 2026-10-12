@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repo hosts individual tools that plug into **Power Platform ToolBox (PPTB)**, following the same
 model as XrmToolBox plugins: each tool under `tools/<tool-name>/` is a self-contained add-in for working
 with Microsoft Dataverse / Power Platform. Each tool has its own `package.json`, build, and docs — there is
-no repo-wide build/test command. Docs for each tool live in `docs/<tool-name>/index.md` (user-facing) plus
+no repo-wide build/test command. Docs for each tool live in `docs/pptb-tools/<tool-name>/index.md` (user-facing) plus
 a `tools/<tool-name>/README.md` (implementation details); `README.md` at the repo root indexes all tools.
 
 New tools are frequently **ports of existing XrmToolBox plugins** (see
@@ -22,79 +22,62 @@ This repo defines project subagents (`architect`, `developer`, `tester`, `docume
 workflow. See `docs/agents/index.md` for what each one covers and its boundaries — don't duplicate that
 here.
 
-## PCF2BPF (`tools/pcf2bpf/`)
+## Shared tool conventions
 
-The only tool implemented so far. Lets users add/edit/remove PCF (PowerApps Component Framework) controls
-on Business Process Flow (BPF) fields, per form factor (Web/Phone/Tablet), without hand-editing form XML.
-Port of [Carfup's XTBPlugins.PCF2BPF](https://github.com/carfup/XTBPlugins.PCF2BPF), rewritten in React +
-TypeScript + Fluent UI v9 (`@fluentui/react-components`).
-
-### Commands (run from `tools/pcf2bpf/`)
+Every tool is React + TypeScript + Fluent UI v9 (`@fluentui/react-components`), built with Vite. Run these
+from the tool's own folder:
 
 ```bash
 npm install
-npm run dev      # Vite dev server, for iterating in a regular browser tab
+npm run dev      # Vite dev server, for iterating in a regular browser tab (PPTB APIs are absent)
 npm run build    # tsc typecheck + vite build -> dist/ (single IIFE bundle)
 npm run watch    # rebuild dist/ on change
-npm run preview  # preview the built dist/
+npm test         # only where the tool's package.json defines it
 ```
 
-There is no test suite or lint script configured for this tool; `npm run build` (which runs `tsc`) is the
-correctness check to run after changes.
+`npm run build` (which runs `tsc`) is the correctness check to run after changes; also run `npm test` when
+the tool has one. There is no lint script.
 
 To test inside PPTB itself: build, then in PPTB enable the Debug Menu in Settings, use Debug → Browse to
-point at this tool's directory (or `dist`), connect to a Dataverse environment, and reopen the tool tab
+point at the tool's directory (or `dist`), connect to a Dataverse environment, and reopen the tool tab
 after each rebuild.
 
 ### Build constraint that shapes `vite.config.ts`
 
 PPTB loads tools from a local folder (often `file://` or an iframe `srcdoc`), where `<script type="module">`
-can fail to execute. The custom `fixHtmlForPPTB` Vite plugin in `vite.config.ts` strips `type="module"`/
-`crossorigin` from the built HTML and moves script tags to the end of `<body>`; the Rollup output format is
-forced to `iife` with `inlineDynamicImports: true` so the whole app ships as one script. Don't reintroduce
-code-splitting or ESM output — it will break loading inside PPTB even though `npm run dev` still works fine.
+can fail to execute. Each tool's `vite.config.ts` has a custom `fixHtmlForPPTB` plugin that strips
+`type="module"`/`crossorigin` from the built HTML and moves script tags to the end of `<body>`; the Rollup
+output format is forced to `iife` with `inlineDynamicImports: true` so the whole app ships as one script.
+Don't reintroduce code-splitting or ESM output — it will break loading inside PPTB even though
+`npm run dev` still works fine.
 
-### Architecture
+## Dataverse Early-Bound TypeScript Generator (`tools/dataverse-early-bound-typescript-generator/`)
+
+Generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. A port of
+Scott Durow's [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI: its output works with
+[dataverse-ify](https://github.com/scottdurow/dataverse-ify) and it shares the `.dataverse-gen.json`
+project file. Docs: `docs/pptb-tools/dataverse-early-bound-typescript-generator/`.
 
 ```
 src/
-├── main.tsx      # FluentProvider + theme detection, entry point
-├── App.tsx       # all top-level state + orchestration (no state management library)
-├── hooks/
-│   └── useConnection.ts   # polls window.toolboxAPI for the active Dataverse connection
-├── components/             # presentational; receive data/callbacks from App.tsx as props
-├── types/                   # shared TypeScript interfaces, one per file
-└── services/                 # framework-free: no React/DOM-UI, only DOMParser/XMLSerializer + window.dataverseAPI
-    ├── dataverse.ts   # Dataverse queries: workflow (BPF), systemform, customcontrol, entity metadata
-    ├── formxml.ts     # BPF form XML parsing + customControl XML mutation
-    └── pcfManifest.ts # customcontrol.manifest XML -> parameter definitions
+├── main.tsx / App.tsx  # theme + all top-level state and orchestration (no state management library)
+├── core/               # pure TS: no PPTB, no I/O, no DOM-UI (DOMParser only for the CSDL)
+├── services/           # PPTB adapters: dataverseAPI metadata, toolboxAPI file system, write planning
+├── hooks/              # useConnection: polls window.toolboxAPI for the active connection
+├── components/         # presentational; receive data/callbacks from App.tsx as props
+└── types/
+test/                   # vitest: dataverse-gen fixtures + the real CLI's reference output
 ```
 
-Key domain facts (needed to make sense of `services/dataverse.ts` and `services/formxml.ts`):
+Things that aren't obvious from a single file:
 
-- **Business Process Flows** are `workflow` records with `category = 4`.
-- A BPF's form is the sole `systemform` record whose `objecttypecode` matches the BPF's private entity
-  (named after the BPF's `uniquename`). Since `objecttypecode` filters need the numeric `ObjectTypeCode`
-  rather than the logical name, that entity's metadata is resolved first.
-- Registered PCF controls are `customcontrol` records; `compatibledatatypes` lists the manifest types they
-  support, and `manifest` (XML) is parsed for the control's configurable `<property>` parameters.
-- A field's PCF assignment lives in the form XML under
-  `controlDescriptions/controlDescription[@forControl]/customControl[@formFactor]`, mirroring the
-  original XTB plugin's `FormAttribute.cs`.
-- Some BPFs span more than one entity (e.g. a Lead → Opportunity sales process) — later stages'
-  `<control>` nodes belong to a different entity than `workflow.primaryentity`. Each field's own
-  entity is recoverable from its `<control relationship="...">` attribute (schema name
-  `lk_{bpfUniqueName}_{entityLogicalName}id`); see `getFieldEntityLogicalName` in
-  `services/formxml.ts`. Don't assume every field on a BPF belongs to `primaryentity`.
-
-State management pattern in `App.tsx`: the parsed form XML document is held in a `useRef<XMLDocument>`
-(mutated in place by `services/formxml.ts` functions, matching how the original plugin mutates its in-memory
-`XmlDocument`), alongside a `docVersion` counter state that's incremented after every mutation via the
-`mutateDoc` helper. Since React won't re-render on an in-place mutation of an object it already holds a
-reference to, anything derived from the doc (e.g. `existingAssignment`) must list `docVersion` — not the
-doc itself — in its dependency array.
-
-Because this was reverse-engineered from the original plugin's source rather than validated against
-Microsoft's official form-customization schema, treat generated form XML as unverified in production
-environments — see the "Known limitations" section of `docs/pcf2bpf/index.md` for what's intentionally
-unsupported (copying config across form factors, binding parameters to fields, localized parameter names).
+- **Output must match dataverse-gen byte for byte**, apart from the deliberate deviations listed in the
+  tool's README. The EJS templates are reimplemented as plain functions in `core/templates.ts` (EJS's
+  `new Function` is blocked by the PPTB iframe CSP), and `test/generator.test.ts` compares the output
+  against `test/reference/`.
+- **Each folder has an `index.ts` barrel** (`components`, `hooks`, `services`, `core`, `types`). Add new
+  exports there. Inside `services/`, files import each other directly rather than through the barrel, to
+  avoid cycles.
+- **Private custom APIs aren't in `$metadata`.** They're still listed; their definitions are built from the
+  `customapi` record and its `customapirequestparameters`.
+- **Orphaned files are reported, never deleted** — PPTB's file API has no delete.

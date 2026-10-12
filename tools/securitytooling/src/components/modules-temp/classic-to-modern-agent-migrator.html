@@ -1,0 +1,3108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classic → Modern Agent Migrator (Preview) — Entra Agent ID Blueprint</title>
+<script>
+// Load MSAL from CDN with fallback (same pattern as classic-agent-audit.html)
+(function() {
+  function tryLoad(src, fallback) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onerror = function() { if (fallback) tryLoad(fallback, null); };
+    document.head.appendChild(s);
+  }
+  tryLoad(
+    'https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js',
+    'https://unpkg.com/@azure/msal-browser@2.38.3/lib/msal-browser.min.js'
+  );
+})();
+</script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --surface3: #2a2f47;
+    --border: #2e3350;
+    --accent: #4f8ef7;
+    --accent2: #7c3aed;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #06b6d4;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --copilot: #7c3aed;
+    --foundry: #0ea5e9;
+    --custom: #64748b;
+    --modern: #22c55e;
+    --classic: #f59e0b;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── Login screen ── */
+  #login-screen {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(ellipse at 30% 20%, #1a1d3a 0%, var(--bg) 60%);
+    padding: 24px;
+  }
+  .login-card {
+    width: 620px; max-width: 95vw; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  }
+  .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .login-logo svg { width: 40px; height: 40px; }
+  .login-logo h1 { font-size: 1.3rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .login-logo h1 span { color: var(--modern); }
+  .login-sub { font-size: 0.8rem; color: var(--text3); font-weight: 400; margin-top: 2px; }
+  .login-card p.intro { color: var(--text2); font-size: 0.875rem; line-height: 1.6; margin-bottom: 20px; }
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.8rem; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+  .form-group input {
+    width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 0.875rem; transition: border-color .2s;
+    font-family: monospace;
+  }
+  .form-group input:focus { outline: none; border-color: var(--accent); }
+  .form-group input::placeholder { color: var(--text3); }
+  .form-hint { font-size: 0.72rem; color: var(--text3); margin-top: 4px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border: none; border-radius: var(--radius-sm);
+    font-size: 0.875rem; font-weight: 600; cursor: pointer; transition: all .2s; text-decoration: none;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #3b7de8; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--surface3); color: var(--text); }
+  .btn-success { background: var(--success); color: #06210f; }
+  .btn-success:hover { background: #16a34a; color: #fff; }
+  .btn-success:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+
+  .consent-ok { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.35); color: #86efac; border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.8rem; margin-bottom: 16px; }
+
+  .reg-guide {
+    margin-top: 24px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 18px;
+  }
+  .reg-guide h3 { font-size: 0.85rem; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+  .reg-guide dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 0.8rem; }
+  .reg-guide dt { color: var(--text3); white-space: nowrap; padding-top: 1px; }
+  .reg-guide dd { color: var(--text2); }
+  .reg-guide dd code { background: var(--surface3); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 0.76rem; color: var(--accent); }
+  .reg-guide dd ul { padding-left: 1.1em; }
+  .reg-guide dd ul li { margin-bottom: 4px; }
+  .perm-tag { color: var(--modern); }
+  .perm-read { color: var(--accent); }
+
+  /* ── App shell ── */
+  #app-screen { display: none; flex-direction: column; min-height: 100vh; }
+  header {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 0 24px; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .header-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+  .header-title span { color: var(--modern); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .user-chip { font-size: 0.78rem; color: var(--text2); background: var(--surface2); padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); }
+  main { flex: 1; padding: 24px; max-width: 1600px; margin: 0 auto; width: 100%; }
+
+  /* ── KPI bar ── */
+  .kpi-row { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .kpi-card {
+    flex: 1; min-width: 160px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 20px; position: relative; overflow: hidden;
+  }
+  .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi-card.classic::before { background: var(--classic); }
+  .kpi-card.modern::before { background: var(--modern); }
+  .kpi-card.info::before { background: var(--accent); }
+  .kpi-card.copilot::before { background: var(--copilot); }
+  .kpi-card.neutral::before { background: var(--text3); }
+  .kpi-label { font-size: 0.72rem; color: var(--text3); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px; }
+  .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1; }
+  .kpi-value.classic { color: var(--classic); }
+  .kpi-value.modern { color: var(--modern); }
+  .kpi-sub { font-size: 0.75rem; color: var(--text3); margin-top: 4px; }
+  .kpi-icon { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 1.6rem; opacity: .15; }
+
+  /* ── Progress ── */
+  .progress-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+  .progress-wrap h2 { font-size: 0.95rem; margin-bottom: 12px; color: var(--text); }
+  .progress-bar-outer { background: var(--surface2); border-radius: 6px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar-inner { height: 100%; background: var(--accent); border-radius: 6px; transition: width .3s; }
+  .progress-log { font-size: 0.78rem; color: var(--text2); max-height: 220px; overflow-y: auto; font-family: monospace; }
+  .progress-log div { padding: 2px 0; }
+  .progress-log .log-ok { color: var(--success); }
+  .progress-log .log-warn { color: var(--warning); }
+  .progress-log .log-err { color: var(--danger); }
+
+  /* ── Migration panel ── */
+  .mig-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 24px; }
+  .mig-panel h2 { font-size: 0.95rem; margin-bottom: 4px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .mig-panel .mig-desc { font-size: 0.8rem; color: var(--text3); margin-bottom: 16px; }
+  .mig-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .mig-field label { display: block; font-size: 0.76rem; color: var(--text2); margin-bottom: 6px; font-weight: 600; }
+  .mig-field select, .mig-field input, .mig-field textarea {
+    width: 100%; padding: 9px 12px; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 0.82rem;
+    font-family: inherit; box-sizing: border-box;
+  }
+  .mig-field textarea { min-height: 64px; resize: vertical; line-height: 1.5; }
+  .mig-field select:focus, .mig-field input:focus, .mig-field textarea:focus { outline: none; border-color: var(--accent); }
+  .mig-field .mig-hint { font-size: 0.7rem; color: var(--text3); margin-top: 5px; line-height: 1.4; }
+  .mig-newbp { display: flex; gap: 8px; margin-top: 8px; }
+  .mig-newbp input { flex: 1; }
+  .mig-actions { display: flex; gap: 10px; margin-top: 18px; align-items: center; flex-wrap: wrap; }
+  .mig-summary { font-size: 0.8rem; color: var(--text2); }
+  .mig-summary b { color: var(--modern); }
+  .bp-note { font-size: 0.72rem; color: var(--text3); background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-top: 14px; line-height: 1.5; }
+  .bp-note code { color: var(--accent); font-family: monospace; }
+
+  /* ── Toolbar ── */
+  .toolbar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .search-box {
+    flex: 1; min-width: 220px; padding: 9px 14px 9px 36px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text); font-size: 0.875rem;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.44 1.398A5.5 5.5 0 1 1 8.5 2.5a5.5 5.5 0 0 1-5.198 9.242z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: 12px center;
+  }
+  .search-box:focus { outline: none; border-color: var(--accent); }
+  .filter-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-btn {
+    padding: 7px 14px; border-radius: 20px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--surface); color: var(--text2); transition: all .2s;
+  }
+  .filter-btn:hover { background: var(--surface2); }
+  .filter-btn.active { color: #fff; border-color: transparent; }
+  .filter-btn.f-all.active { background: var(--accent); }
+  .filter-btn.f-notcopied.active { background: var(--classic); color: #111; }
+  .filter-btn.f-copied.active { background: var(--modern); color: #111; }
+  .filter-btn.f-copilot.active { background: var(--copilot); }
+  .filter-btn.f-foundry.active { background: var(--foundry); }
+  .filter-btn.cs-f-all.active { background: var(--accent); }
+  .filter-btn.cs-f-classic.active { background: var(--classic); color: #111; }
+  .filter-btn.cs-f-modern.active { background: var(--modern); color: #111; }
+  .action-bar { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
+  .sel-count { font-size: 0.8rem; color: var(--text2); align-self: center; }
+
+  /* ── Table ── */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .table-scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  thead th {
+    background: var(--surface2); padding: 10px 14px; text-align: left; font-size: 0.72rem;
+    text-transform: uppercase; letter-spacing: .04em; color: var(--text3); font-weight: 600;
+    border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; white-space: nowrap;
+  }
+  thead th:hover { color: var(--text); }
+  thead th.sorted-asc::after { content: ' ↑'; color: var(--accent); }
+  thead th.sorted-desc::after { content: ' ↓'; color: var(--accent); }
+  thead th:first-child { cursor: default; width: 40px; }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; cursor: pointer; }
+  tbody tr:hover { background: var(--surface2); }
+  tbody tr.selected { background: rgba(79,142,247,.08); }
+  tbody tr.expanded-row { background: var(--surface2); cursor: default; }
+  tbody tr.expanded-row:hover { background: var(--surface2); }
+  td { padding: 10px 14px; vertical-align: middle; }
+  td:first-child { text-align: center; }
+  .agent-name { font-weight: 600; color: var(--text); }
+  .cs-name { font-size: 0.7rem; color: #a78bfa; margin-top: 1px; }
+  .agent-id { font-size: 0.7rem; color: var(--text3); font-family: monospace; }
+  .origin-pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; letter-spacing: .03em; }
+  .origin-copilot { background: rgba(124,58,237,.2); color: #a78bfa; border: 1px solid rgba(124,58,237,.3); }
+  .origin-foundry { background: rgba(14,165,233,.2); color: #38bdf8; border: 1px solid rgba(14,165,233,.3); }
+  .origin-custom { background: rgba(100,116,139,.15); color: #94a3b8; border: 1px solid rgba(100,116,139,.2); }
+  .status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 12px; font-size: 0.72rem; font-weight: 700; }
+  .st-copied { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.25); }
+  .st-notcopied { background: rgba(245,158,11,.12); color: #fcd34d; border: 1px solid rgba(245,158,11,.22); }
+  .st-pending { background: rgba(79,142,247,.15); color: #93c5fd; border: 1px solid rgba(79,142,247,.25); }
+  .st-error { background: rgba(239,68,68,.15); color: #fca5a5; border: 1px solid rgba(239,68,68,.25); }
+  .text-muted { color: var(--text3); }
+  input[type=checkbox] { accent-color: var(--accent); width: 15px; height: 15px; cursor: pointer; }
+  .tag { display: inline-block; font-size: 0.68rem; background: var(--surface3); color: var(--text3); padding: 1px 6px; border-radius: 4px; margin: 1px; }
+
+  /* ── Expanded detail ── */
+  .detail-panel { padding: 20px 24px; }
+  .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-bottom: 16px; }
+  .detail-section { background: var(--surface3); border-radius: var(--radius-sm); padding: 14px; }
+  .detail-section h4 { font-size: 0.72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--text3); margin-bottom: 10px; }
+  .detail-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; }
+  .detail-row:last-child { margin-bottom: 0; }
+  .detail-row .dk { color: var(--text3); white-space: nowrap; }
+  .detail-row .dv { color: var(--text2); text-align: right; word-break: break-all; }
+  .detail-row .dv code { font-family: monospace; font-size: 0.72rem; }
+  .perm-list { list-style: none; }
+  .perm-list li { font-size: 0.75rem; color: var(--text2); padding: 2px 0; }
+  .copybox { background: var(--surface3); border-left: 3px solid var(--modern); border-radius: var(--radius-sm); padding: 14px; margin-top: 8px; }
+  .copybox h4 { font-size: 0.8rem; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .copybox pre { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 0.72rem; color: var(--text2); overflow-x: auto; font-family: monospace; line-height: 1.5; }
+
+  /* ── Pagination ── */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-top: 1px solid var(--border); }
+  .pagination-info { font-size: 0.78rem; color: var(--text3); }
+  .pagination-btns { display: flex; gap: 6px; }
+  .page-btn { padding: 5px 11px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface2); color: var(--text2); font-size: 0.78rem; cursor: pointer; }
+  .page-btn:hover { background: var(--surface3); }
+  .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .page-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── States ── */
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--text3); }
+  .empty-state svg { width: 48px; height: 48px; margin: 0 auto 16px; opacity: .3; }
+  .empty-state p { font-size: 0.875rem; }
+  .error-banner { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.8rem; color: #fca5a5; margin-bottom: 16px; }
+  .warn-banner { background: rgba(245,158,11,.08); border: 1px solid rgba(245,158,11,.28); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.8rem; color: #fcd34d; margin-bottom: 16px; line-height: 1.5; }
+  .loading-spin { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Mode tabs ── */
+  .mode-tabs { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+  .mode-tab {
+    flex: 1; min-width: 240px; display: flex; align-items: center; gap: 14px; text-align: left;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; cursor: pointer; transition: all .18s; color: var(--text);
+  }
+  .mode-tab:hover { background: var(--surface2); }
+  .mode-tab.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset, 0 6px 18px rgba(79,142,247,.12); }
+  .mode-tab-icon { font-size: 1.6rem; line-height: 1; display: flex; align-items: center; }
+  .mode-tab-icon svg { width: 1.75rem; height: 1.75rem; display: block; }
+  .mode-tab-text { display: flex; flex-direction: column; gap: 2px; }
+  .mode-tab-text b { font-size: 0.9rem; font-weight: 700; }
+  .mode-tab-text span { font-size: 0.74rem; color: var(--text3); }
+  .mode-tab.active .mode-tab-text b { color: var(--accent); }
+
+  /* ── Migration animation banner ── */
+  .mig-anim {
+    display: flex; align-items: center; gap: 20px; margin-bottom: 24px;
+    background: linear-gradient(90deg, rgba(245,158,11,.06) 0%, rgba(79,142,247,.05) 50%, rgba(34,197,94,.06) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 28px; overflow: hidden;
+  }
+  .anim-node { display: flex; align-items: center; gap: 12px; flex-shrink: 0; min-width: 150px; }
+  .anim-node .node-icon { position: relative; width: 46px; height: 46px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+  .anim-node.classic .node-icon { background: rgba(245,158,11,.14); border: 1px solid rgba(245,158,11,.35); box-shadow: 0 0 18px rgba(245,158,11,.15); }
+  .anim-node.modern .node-icon { background: rgba(34,197,94,.14); border: 1px solid rgba(34,197,94,.35); box-shadow: 0 0 18px rgba(34,197,94,.18); animation: modern-pulse 4s ease-in-out infinite; }
+  .anim-node.modern { margin-left: auto; }
+  .node-label { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+  .anim-node.classic .node-label { color: #fbbf24; }
+  .anim-node.modern .node-label { color: #4ade80; }
+  .node-sub { font-size: 0.68rem; color: var(--text3); text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+  .sp-badge {
+    position: absolute; bottom: -6px; right: -6px; background: var(--classic); color: #1a1204;
+    font-size: 0.52rem; font-weight: 800; padding: 1px 4px; border-radius: 5px; letter-spacing: .04em;
+    border: 1.5px solid var(--bg); line-height: 1.2;
+  }
+
+  .anim-track { position: relative; flex: 1; height: 46px; min-width: 120px; }
+  .track-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .track-base { stroke: var(--border); stroke-width: 1.5; }
+  .track-flow { stroke: url(#none); stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 4 6; opacity: .55; animation: track-dash 1.1s linear infinite; }
+  @keyframes track-dash { to { stroke-dashoffset: -20; } }
+
+  .blueprint-chip {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 20px;
+    padding: 4px 12px; font-size: 0.72rem; font-weight: 700; color: var(--text2); z-index: 2;
+    animation: bp-glow 4s ease-in-out infinite;
+  }
+  .blueprint-chip span { font-size: 0.85rem; }
+
+  .traveler {
+    position: absolute; top: 50%; left: 0; width: 34px; height: 34px; z-index: 3;
+    transform: translate(-50%, -50%);
+    animation: travel 4s cubic-bezier(.55,.15,.45,.85) infinite;
+  }
+  .traveler .face {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    border-radius: 10px; font-size: 1.15rem;
+  }
+  .traveler .face-classic { background: rgba(245,158,11,.9); box-shadow: 0 2px 10px rgba(245,158,11,.5); animation: face-classic 4s ease-in-out infinite; }
+  .traveler .face-modern  { background: rgba(34,197,94,.9);  box-shadow: 0 2px 12px rgba(34,197,94,.55); animation: face-modern 4s ease-in-out infinite; opacity: 0; }
+  .traveler .sp-badge-sm { position: absolute; bottom: -5px; right: -5px; }
+  .traveler .spark {
+    position: absolute; inset: -6px; border-radius: 12px; pointer-events: none;
+    box-shadow: 0 0 0 0 rgba(79,142,247,.6); animation: spark 4s ease-in-out infinite;
+  }
+
+  @keyframes travel {
+    0%   { left: 0%;  }
+    8%   { left: 0%;  }
+    50%  { left: 50%; }
+    92%  { left: 100%; }
+    100% { left: 100%; }
+  }
+  @keyframes face-classic { 0%,42% { opacity: 1; } 52%,100% { opacity: 0; } }
+  @keyframes face-modern  { 0%,44% { opacity: 0; } 56%,100% { opacity: 1; } }
+  @keyframes spark {
+    0%,42% { box-shadow: 0 0 0 0 rgba(79,142,247,0); }
+    50%    { box-shadow: 0 0 0 10px rgba(124,58,237,.35); }
+    60%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+  @keyframes bp-glow {
+    0%,40%,64%,100% { border-color: var(--border); box-shadow: none; color: var(--text2); }
+    50% { border-color: var(--accent2); box-shadow: 0 0 16px rgba(124,58,237,.35); color: var(--text); }
+  }
+  @keyframes modern-pulse {
+    0%,44%   { box-shadow: 0 0 18px rgba(34,197,94,.10); }
+    62%      { box-shadow: 0 0 26px rgba(34,197,94,.45); }
+    80%,100% { box-shadow: 0 0 18px rgba(34,197,94,.18); }
+  }
+  @media (max-width: 640px) {
+    .anim-node .node-text { display: none; }
+    .anim-node { min-width: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .track-flow, .traveler, .blueprint-chip, .anim-node.modern .node-icon, .traveler .face-classic, .traveler .face-modern, .traveler .spark { animation: none; }
+    .traveler .face-modern { opacity: 1; }
+    .traveler .face-classic { opacity: 0; }
+  }
+
+  /* ── Copilot Studio migration-process animation (Read → Recreate → Verify) ── */
+  .cs-anim {
+    display: flex; align-items: stretch; gap: 12px; margin-bottom: 24px;
+    background: linear-gradient(90deg, rgba(124,58,237,.07) 0%, rgba(124,58,237,.03) 55%, rgba(34,197,94,.07) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; overflow: hidden;
+  }
+  .cs-stage {
+    --glow: 124,58,237;
+    position: relative; display: flex; align-items: center; gap: 12px; flex: 1; min-width: 150px;
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+    animation: cs-stage-glow 6s ease-in-out infinite;
+  }
+  .cs-stage[data-step="2"]{ animation-delay: 2s; }
+  .cs-stage[data-step="3"]{ animation-delay: 4s; --glow: 34,197,94; }
+  .cs-step-num {
+    position: absolute; top: -8px; left: -8px; width: 20px; height: 20px; border-radius: 50%;
+    background: rgb(var(--glow)); color: #fff; font-size: .64rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg);
+  }
+  .cs-stage[data-step="3"] .cs-step-num { color: #06210f; }
+  .cs-stage-icon {
+    position: relative; width: 44px; height: 44px; flex-shrink: 0; border-radius: 11px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+    background: rgba(var(--glow),.14); border: 1px solid rgba(var(--glow),.32);
+  }
+  .cs-stage-title { font-size: .84rem; font-weight: 700; color: var(--text); }
+  .cs-stage-sub { font-size: .68rem; color: var(--text3); margin-top: 2px; line-height: 1.35; }
+  .cs-manual-badge {
+    position: absolute; bottom: -6px; right: -6px; background: var(--warning); color: #1a1204;
+    font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 5px; border: 1.5px solid var(--bg); letter-spacing: .03em;
+  }
+  .cs-arrow { flex: 0 0 30px; display: flex; align-items: center; }
+  .cs-arrow svg { width: 100%; height: 14px; }
+  .cs-arrow path { stroke: #a78bfa; stroke-width: 1.5; fill: none; }
+  .cs-arrow .cs-flow { stroke: #a78bfa; stroke-width: 1.6; stroke-dasharray: 4 5; opacity: .6; animation: cs-flow 1s linear infinite; }
+  @keyframes cs-flow { to { stroke-dashoffset: -18; } }
+  @keyframes cs-stage-glow {
+    0%      { border-color: var(--border); box-shadow: none; }
+    6%,27%  { border-color: rgba(var(--glow),.85); box-shadow: 0 0 18px rgba(var(--glow),.3); }
+    33%,100%{ border-color: var(--border); box-shadow: none; }
+  }
+  @media (max-width: 760px){ .cs-anim{ flex-direction: column; } .cs-arrow{ transform: rotate(90deg); align-self: center; } }
+  @media (prefers-reduced-motion: reduce){ .cs-stage, .cs-arrow .cs-flow { animation: none; } }
+
+  /* Foundry variant of the process animation (auto-provisioned, blue theme) */
+  .fdry-anim { background: linear-gradient(90deg, rgba(14,165,233,.07) 0%, rgba(14,165,233,.03) 55%, rgba(34,197,94,.07) 100%); }
+  .fdry-anim .cs-stage { --glow: 14,165,233; }
+  .fdry-anim .cs-stage[data-step="3"]{ --glow: 34,197,94; }
+  .fdry-anim .cs-arrow path, .fdry-anim .cs-arrow .cs-flow { stroke: #38bdf8; }
+  .cs-auto-badge {
+    position: absolute; bottom: -6px; right: -6px; background: var(--modern); color: #06210f;
+    font-size: .5rem; font-weight: 800; padding: 1px 4px; border-radius: 5px; border: 1.5px solid var(--bg); letter-spacing: .03em;
+  }
+  /* "New Foundry" mandatory-setting toggle shown in the Foundry animation */
+  .cs-toggle { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: .62rem; font-weight: 600; color: #c4b5fd; }
+  .cs-toggle b { color: #ddd6fe; }
+  .cs-toggle .sw { width: 24px; height: 13px; border-radius: 7px; flex-shrink: 0; position: relative; background: linear-gradient(90deg, #7c3aed, #a855f7); box-shadow: 0 0 8px rgba(124,58,237,.5); }
+  .cs-toggle .sw::after { content: ''; position: absolute; top: 1.5px; right: 1.5px; width: 10px; height: 10px; border-radius: 50%; background: #fff; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ LOGIN SCREEN ══════════════════════════ -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="40" height="40" rx="9" fill="#1a1d27"/>
+        <path d="M11 20l4 4 4-4" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 24V12" stroke="#f59e0b" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M29 20l-4-4-4 4" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M25 16v12" stroke="#22c55e" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="15" stroke="#4f8ef7" stroke-width="1" stroke-dasharray="2 3" opacity=".5"/>
+      </svg>
+      <div>
+        <h1>Classic → <span>Modern</span> Agent Migrator <span style="font-size:12px;font-weight:600;color:var(--text3);vertical-align:middle">(Preview)</span></h1>
+        <div class="login-sub">Copy classic agent service principals into Entra Agent ID blueprint identities</div>
+      </div>
+    </div>
+    <p class="intro">
+      Discovers <b>classic agents</b> (agents created as service principals — e.g. classic Copilot Studio agents)
+      in your Microsoft Entra tenant and recreates them as <b>modern agents</b> on the Agent Identity Blueprint
+      platform. Because in-place migration isn't supported, each classic agent is copied to a new agent identity —
+      by default named "<i>&lt;original name&gt; (new)</i>". Runs entirely in your browser using your own delegated access.
+    </p>
+
+    <div id="login-error" class="error-banner" style="display:none"></div>
+
+    <div class="form-group">
+      <label for="clientId-input">Application (client) ID</label>
+      <input type="text" id="clientId-input" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off">
+      <div class="form-hint">Pre-filled with this tool's published multi-tenant app. Override with your own registration if you run one — stored locally in your browser.</div>
+    </div>
+    <div class="form-group">
+      <label for="tenantId-input">Directory (tenant) ID or domain</label>
+      <input type="text" id="tenantId-input" placeholder="organizations" autocomplete="off">
+      <div class="form-hint">Leave as <b>organizations</b> for the multi-tenant app. For a <b>single-tenant</b> registration, enter its <b>home tenant</b> ID or domain (the tenant the app is registered in) — otherwise sign-in fails with AADSTS650059.</div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button id="btn-login" class="btn btn-primary" style="flex:1;justify-content:center;" onclick="doLogin()">
+        Sign in with Microsoft
+      </button>
+    </div>
+
+    <div class="reg-guide">
+      <h3>ℹ️ App Registration Requirements</h3>
+      <dl>
+        <dt>Client ID</dt><dd><code>a24693b7-6dd5-49b1-9748-666c5bdb5612</code> (published, baked in)</dd>
+        <dt>Type</dt><dd>Single-page application (SPA) · Single tenant</dd>
+        <dt>Redirect URI</dt><dd><code id="redir-uri">this page's URL</code> (SPA platform)</dd>
+        <dt>Read scopes</dt>
+        <dd>
+          <ul>
+            <li><code class="perm-read">User.Read</code> — identify signed-in user (used as default sponsor/owner)</li>
+            <li><code class="perm-read">Application.Read.All</code> — enumerate classic agent service principals &amp; app registrations</li>
+            <li><code class="perm-read">Directory.Read.All</code> — owners, resolve sponsor/owner user IDs</li>
+            <li><code class="perm-read">AuditLog.Read.All</code> — sign-in activity (optional, for last-used data)</li>
+          </ul>
+          <div style="font-size:.72rem;color:var(--text3);margin:8px 0 4px">Plus these per-resource delegated permissions (added under <b>API permissions → Add a permission → APIs my organization uses</b>, then <b>Grant admin consent</b>). They consent on first use of their tab:</div>
+          <ul>
+            <li><code class="perm-read">Dynamics CRM · user_impersonation</code> — Copilot Studio inventory (Dataverse). API: <b>Dynamics CRM</b> · <code>00000007-0000-0000-c000-000000000000</code></li>
+            <li><code class="perm-read">Foundry data plane · audience https://ai.azure.com</code> — Foundry agent reads. <b>No app-registration permission is used here — paste a token instead:</b> <code>Get-AzAccessToken -ResourceUrl "https://ai.azure.com"</code> (PowerShell / Az) or <code>az account get-access-token --scope https://ai.azure.com/.default</code> → paste into the Foundry tab’s <b>Access token</b> box. The Agents endpoint accepts <b>only</b> the <code>https://ai.azure.com</code> audience (a <b>Microsoft Cognitive Services</b> / <code>cognitiveservices.azure.com</code> token is <code>401</code>-rejected, and <code>https://ai.azure.com</code> has no consentable SP in most tenants). Also needs Azure RBAC <b>Foundry User</b> on the project.</li>
+            <li><code class="perm-read">Azure Service Management · user_impersonation</code> — Foundry project auto-discovery via ARM (audience <code>https://management.azure.com</code>). API: <b>Windows Azure Service Management API</b> · <code>797f4846-ba00-4fd7-ba43-dac1f8f63013</code></li>
+          </ul>
+        </dd>
+        <dt>Create scopes</dt>
+        <dd>
+          <ul>
+            <li><code class="perm-tag">AgentIdentityBlueprint.Create</code> — create an agent identity blueprint</li>
+            <li><code class="perm-tag">AgentIdentityBlueprintPrincipal.Create</code> — create the blueprint's principal</li>
+            <li><code class="perm-tag">AgentIdentity.Create.All</code> — create modern agent identities from a blueprint</li>
+            <li><code class="perm-tag">AgentIdentity.ReadWrite.All</code> — read existing modern agents / manage copies</li>
+          </ul>
+        </dd>
+        <dt>Directory roles</dt>
+        <dd>The signed-in user needs <b>Agent ID Developer</b> or <b>Agent ID Administrator</b> to create blueprints &amp; agent identities. Blueprint <i>owners</i> can create agent identities without a role.</dd>
+        <dt>Admin consent</dt><dd>In your app registration, add the scopes above and click <b>API permissions → Grant admin consent for &lt;tenant&gt;</b> — once, tenant-wide. Include the <b>create</b> scopes if you'll do pro-code migration (not just audit). The three data-plane resources (<b>Dynamics CRM</b>, <b>Microsoft Cognitive Services</b>, <b>Windows Azure Service Management API</b>) are separate APIs — consent them the same way, or each user consents on first use of that tab.</dd>
+      </dl>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ APP SCREEN ══════════════════════════ -->
+<div id="app-screen">
+  <header>
+    <div class="header-left">
+      <div class="header-title">Classic → <span>Modern</span> Agent Migrator <span style="font-size:11px;font-weight:600;color:var(--text3)">(Preview)</span></div>
+    </div>
+    <div class="header-right">
+      <span class="user-chip" id="user-chip">–</span>
+      <button class="btn btn-secondary btn-sm" onclick="doLogout()">Sign out</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Mode tabs -->
+    <div class="mode-tabs">
+      <button id="tab-procode" class="mode-tab active" onclick="switchMode('procode')">
+        <span class="mode-tab-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mt-ent-l" x1=".2" y1="0" x2=".8" y2="1"><stop offset="0" stop-color="#71CDF5"/><stop offset="1" stop-color="#4AB5EC"/></linearGradient><linearGradient id="mt-ent-r" x1=".2" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#2E7DD1"/><stop offset="1" stop-color="#0A3D91"/></linearGradient></defs><path d="M16 3 4.7 14.3a2 2 0 0 0 0 2.9L16 28.5Z" fill="url(#mt-ent-l)"/><path d="M16 3l11.3 11.3a2 2 0 0 1 0 2.9L16 28.5Z" fill="url(#mt-ent-r)"/><path d="M16 11.5 9.6 21l6.4 4.5z" fill="#DCEFFA" opacity=".9"/><path d="M16 11.5 22.4 21 16 25.5z" fill="#9FC1D9" opacity=".8"/></svg></span>
+        <span class="mode-tab-text"><b>Pro-code migration</b><span>Classic SP agents → Entra Agent ID</span></span>
+      </button>
+      <button id="tab-cs" class="mode-tab" onclick="switchMode('cs')">
+        <span class="mode-tab-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mt-cs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5FE0C2"/><stop offset=".5" stop-color="#28B2E4"/><stop offset="1" stop-color="#155FC4"/></linearGradient></defs><rect x="13" y="4" width="15" height="13" rx="4.5" fill="url(#mt-cs)"/><rect x="4" y="15" width="15" height="13" rx="4.5" fill="url(#mt-cs)"/><path d="M13.4 15.1h5.6v1.9h-5.6z" fill="#0a3b7a" opacity=".28"/></svg></span>
+        <span class="mode-tab-text"><b>Copilot Studio inventory</b><span>Read full agent config from Dataverse</span></span>
+      </button>
+      <button id="tab-foundry" class="mode-tab" onclick="switchMode('foundry')">
+        <span class="mode-tab-icon"><svg viewBox="0 0 32 32" aria-hidden="true"><defs><linearGradient id="mt-fd-a" x1=".1" y1="0" x2=".5" y2="1"><stop offset="0" stop-color="#8288EE"/><stop offset="1" stop-color="#3A2FC8"/></linearGradient><linearGradient id="mt-fd-b" x1=".5" y1="0" x2=".9" y2="1"><stop offset="0" stop-color="#5B57D8"/><stop offset="1" stop-color="#241AA0"/></linearGradient></defs><path d="M15.5 4.3c.6-1 2.1-1 2.7.1l.1.3L9.4 26.6c-.3.7-1 1.2-1.7 1.2H5.1c-1.1 0-1.9-1.1-1.5-2.1z" fill="url(#mt-fd-a)"/><path d="M17 6l4.3 11-3.6 2.1-3.4-8.8z" fill="url(#mt-fd-b)" opacity=".9"/><rect x="22.6" y="12" width="6" height="8.6" rx="2.6" fill="url(#mt-fd-b)"/></svg></span>
+        <span class="mode-tab-text"><b>Foundry agents</b><span>Read agent config from Azure AI Foundry</span></span>
+      </button>
+    </div>
+
+    <!-- ═════════════ MODE: PRO-CODE ═════════════ -->
+    <div id="mode-procode">
+    <!-- Progress panel -->
+    <div id="progress-panel" class="progress-wrap" style="display:none">
+      <h2 id="progress-phase">Initialising…</h2>
+      <div class="progress-bar-outer"><div id="progress-bar" class="progress-bar-inner" style="width:0%"></div></div>
+      <div id="progress-log" class="progress-log"></div>
+    </div>
+
+    <!-- KPI bar -->
+    <div id="kpi-row" class="kpi-row" style="display:none">
+      <div class="kpi-card classic">
+        <div class="kpi-label">Classic Agents</div>
+        <div class="kpi-value classic" id="kpi-classic">–</div>
+        <div class="kpi-sub">service-principal agents</div>
+        <div class="kpi-icon">🧩</div>
+      </div>
+      <div class="kpi-card modern">
+        <div class="kpi-label">Already Copied</div>
+        <div class="kpi-value modern" id="kpi-copied">–</div>
+        <div class="kpi-sub">have a modern "(new)" copy</div>
+        <div class="kpi-icon">✅</div>
+      </div>
+      <div class="kpi-card info">
+        <div class="kpi-label">Not Yet Copied</div>
+        <div class="kpi-value" id="kpi-notcopied">–</div>
+        <div class="kpi-sub" id="kpi-notcopied-sub">no modern copy yet</div>
+        <div class="kpi-icon">⬆️</div>
+      </div>
+      <div class="kpi-card copilot">
+        <div class="kpi-label">Copilot Studio</div>
+        <div class="kpi-value" id="kpi-copilot">–</div>
+        <div class="kpi-sub">origin: Copilot Studio</div>
+        <div class="kpi-icon">🧠</div>
+      </div>
+      <div class="kpi-card modern">
+        <div class="kpi-label">Modern Agents</div>
+        <div class="kpi-value" id="kpi-modern">–</div>
+        <div class="kpi-sub">agent identities in tenant</div>
+        <div class="kpi-icon">🤖</div>
+      </div>
+      <div class="kpi-card neutral">
+        <div class="kpi-label">Blueprints</div>
+        <div class="kpi-value" id="kpi-blueprints">–</div>
+        <div class="kpi-sub">agent identity blueprints</div>
+        <div class="kpi-icon">📐</div>
+      </div>
+    </div>
+
+    <div id="error-banner" class="error-banner" style="display:none"></div>
+
+    <!-- Migration animation banner -->
+    <div id="mig-anim" class="mig-anim" style="display:none" aria-hidden="true">
+      <!-- Classic agent node -->
+      <div class="anim-node classic">
+        <div class="node-icon">
+          <span class="node-emoji">🧩</span>
+          <span class="sp-badge" title="Service principal">SP</span>
+        </div>
+        <div class="node-text">
+          <div class="node-label">Classic agent</div>
+          <div class="node-sub">Service principal</div>
+        </div>
+      </div>
+
+      <!-- Track -->
+      <div class="anim-track">
+        <svg class="track-svg" viewBox="0 0 100 24" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <line class="track-base" x1="2" y1="12" x2="98" y2="12"/>
+          <line class="track-flow" x1="2" y1="12" x2="98" y2="12"/>
+        </svg>
+        <div class="blueprint-chip"><span>📐</span> Blueprint</div>
+        <div class="traveler">
+          <span class="face face-classic">🧩<span class="sp-badge sp-badge-sm">SP</span></span>
+          <span class="face face-modern">🤖</span>
+          <span class="spark"></span>
+        </div>
+      </div>
+
+      <!-- Modern agent node -->
+      <div class="anim-node modern">
+        <div class="node-icon"><span class="node-emoji">🤖</span></div>
+        <div class="node-text">
+          <div class="node-label">Modern agent</div>
+          <div class="node-sub">Agent identity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Red banner when no pro-code-eligible (custom-origin) agents exist -->
+    <div id="procode-noeligible" class="error-banner" style="display:none"></div>
+
+    <!-- Migration configuration panel -->
+    <div id="mig-panel" class="mig-panel" style="display:none">
+      <h2>⚙️ Modern copy settings</h2>
+      <div class="mig-desc">Choose which blueprint the modern copies are created from, and who sponsors/owns them. A blueprint is a reusable template — one blueprint can back all your copies.</div>
+      <div class="mig-grid">
+        <div class="mig-field">
+          <label>Agent identity blueprint</label>
+          <select id="blueprint-select">
+            <option value="">— Select an existing blueprint —</option>
+          </select>
+          <div class="mig-hint">Modern agents are created from a blueprint. Pick one, or create a new one on the right.</div>
+        </div>
+        <div class="mig-field">
+          <label>…or create a new blueprint</label>
+          <div class="mig-newbp">
+            <input type="text" id="new-bp-name" placeholder="e.g. Migrated Classic Agents">
+            <button class="btn btn-secondary btn-sm" id="btn-create-bp" onclick="createBlueprint()">Create</button>
+          </div>
+          <div class="mig-hint">Creates the blueprint + its principal, then selects it above.</div>
+        </div>
+        <div class="mig-field">
+          <label>Sponsor (required) — user UPN or object ID</label>
+          <input type="text" id="sponsor-input" placeholder="you@contoso.com">
+          <div class="mig-hint">Defaults to you. Accountable owner of record for the new agent identities.</div>
+        </div>
+        <div class="mig-field">
+          <label>Copy name suffix</label>
+          <input type="text" id="suffix-input" value=" (new)">
+          <div class="mig-hint">Appended to the classic agent's name for each modern copy.</div>
+        </div>
+      </div>
+      <div class="mig-actions">
+        <button class="btn btn-success" id="btn-migrate" onclick="migrateSelected()">⬆️ Create modern copies of selected</button>
+        <span class="mig-summary" id="mig-summary">Select classic agents in the table below.</span>
+      </div>
+      <div class="bp-note" style="border-color:rgba(245,158,11,.35)">
+        <b>⚠️ Only custom-origin agents are eligible.</b> <b>Copilot Studio</b> and <b>Azure AI Foundry</b> agents are
+        managed by their own platforms — each auto-provisions and owns its Entra Agent ID and won't adopt an external one,
+        so a blueprint copy would be an orphan. Those rows are 🔒 locked here; recreate them in Copilot Studio / Foundry
+        instead (use the <b>Copilot Studio inventory</b> tab to capture their config first).
+      </div>
+      <div class="bp-note">
+        <b>How a copy is made:</b> for each selected custom agent, a new agent identity is created from the chosen blueprint via
+        <code>POST /servicePrincipals/microsoft.graph.agentIdentity</code> with the copy's display name, the blueprint's
+        <code>appId</code>, and the sponsor. This is a fresh identity — permissions, connectors and configuration are
+        <b>not</b> carried over and must be re-granted to the modern agent (least-privilege is recommended).
+      </div>
+    </div>
+
+    <!-- Toolbar + table -->
+    <div id="table-section" style="display:none">
+      <div class="toolbar">
+        <input type="text" class="search-box" id="search-box" placeholder="Search classic agents…" oninput="applyFilters()">
+        <div class="filter-group">
+          <button class="filter-btn f-all active" onclick="setFilter('all',this)">All</button>
+          <button class="filter-btn f-notcopied" onclick="setFilter('notcopied',this)">⬆️ Not copied</button>
+          <button class="filter-btn f-copied" onclick="setFilter('copied',this)">✅ Copied</button>
+          <button class="filter-btn f-copilot" onclick="setFilter('copilot-studio',this)">Copilot Studio</button>
+          <button class="filter-btn f-foundry" onclick="setFilter('ai-foundry',this)">AI Foundry</button>
+        </div>
+        <div class="action-bar">
+          <span class="sel-count" id="sel-count" style="display:none"></span>
+          <button class="btn btn-secondary btn-sm" onclick="selectNotCopied()">Select all not-copied</button>
+          <button class="btn btn-secondary btn-sm" onclick="deselectAll()">Deselect all</button>
+          <button class="btn btn-secondary btn-sm" id="btn-match-cs" onclick="matchCopilotNames()" title="Look up each classic agent's current Copilot Studio name from Dataverse (needs Dataverse access)">🔗 Match Copilot Studio names</button>
+          <button class="btn btn-secondary btn-sm" onclick="exportCsv()">Export CSV</button>
+          <button class="btn btn-secondary btn-sm" onclick="refreshData()">↺ Refresh</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-scroll">
+          <table id="agents-table">
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+                <th onclick="sortBy('displayName')">Classic Agent</th>
+                <th onclick="sortBy('origin')">Origin</th>
+                <th onclick="sortBy('_copyStatus')">Modern Copy</th>
+                <th onclick="sortBy('_ownerCount')">Owners</th>
+                <th onclick="sortBy('_lastActivity')">Last Activity</th>
+                <th onclick="sortBy('createdDateTime')">Created</th>
+              </tr>
+            </thead>
+            <tbody id="agents-tbody"></tbody>
+          </table>
+        </div>
+        <div id="empty-state" class="empty-state" style="display:none">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p id="empty-msg">No classic agents found matching your filter.</p>
+        </div>
+        <div class="pagination" id="pagination">
+          <div class="pagination-info" id="page-info"></div>
+          <div class="pagination-btns" id="page-btns"></div>
+        </div>
+      </div>
+    </div>
+    </div><!-- /mode-procode -->
+
+    <!-- ═════════════ MODE: COPILOT STUDIO INVENTORY ═════════════ -->
+    <div id="mode-cs" style="display:none">
+      <!-- Config / scan panel -->
+      <div class="mig-panel" id="cs-config">
+        <h2 onclick="csToggleConfig()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0">
+          <span>🧠 Copilot Studio agent inventory <span style="font-size:.72rem;font-weight:600;color:var(--text3);vertical-align:middle">read-only</span>
+            <span id="cs-config-summary" style="font-size:.75rem;font-weight:500;color:var(--text3);margin-left:8px;display:none"></span></span>
+          <span id="cs-config-chevron" style="font-size:14px;color:var(--text3)">▾</span>
+        </h2>
+        <div id="cs-config-body" style="margin-top:12px">
+          <div class="mig-desc">Reads the full definition of every Copilot Studio agent — description, model, instructions, knowledge, tools, topics, triggers &amp; connections — directly from Dataverse. Coverage is limited to environments where your account has a Dataverse security role. Nothing is written or created.</div>
+          <div class="mig-grid" style="grid-template-columns:1fr">
+            <div class="mig-field">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                <label style="margin:0">Environment URL(s) — one per line</label>
+                <button type="button" class="btn btn-secondary" id="cs-discover-btn" onclick="csDiscoverEnvs()" style="font-size:.72rem;padding:5px 12px">🧭 Discover my environments</button>
+              </div>
+              <textarea id="cs-envs" placeholder="https://org.crm.dynamics.com&#10;https://org2.crm4.dynamics.com"></textarea>
+              <div class="mig-hint">Paste one or more environment URLs, or click <b>Discover</b> to auto-fill them (needs a Dataverse sign-in; coverage is limited to environments where your account has a security role).</div>
+            </div>
+            <div class="mig-field" style="display:none">
+              <label>Dataverse app registration — client ID (optional)</label>
+              <input type="text" id="cs-dv-clientid" oninput="csUpdateDvSigninBtn()" placeholder="reuse an already-consented app (e.g. your Copilot Studio Auditor) — leave blank to use this app">
+              <div class="mig-hint">To avoid granting <b>Dynamics CRM</b> to this app, enter a client ID that <b>already</b> has that permission consented — its consent is reused for the Dataverse read. That app must list this page’s URL as a <b>SPA redirect URI</b>. Auto-filled from a same-origin auditor if found.</div>
+              <button class="btn btn-secondary btn-sm" id="cs-dv-signin-btn" onclick="csDvSignIn()" style="display:none;margin-top:8px">🔑 Sign in to Dataverse app</button>
+            </div>
+          </div>
+          <div class="mig-actions">
+            <button class="btn btn-primary" id="cs-scan-btn" onclick="csRunScan()">🔍 Scan agents</button>
+            <span class="mig-summary" id="cs-status">Enter an environment URL (or use Discover above), then Scan.</span>
+          </div>
+          <div class="bp-note">
+            Copilot Studio agents live in <b>Dataverse</b> (the <code>bot</code> &amp; <code>botcomponent</code> tables), not in Entra — so this uses a per-environment Dataverse token. Your app registration needs the <b>Dynamics CRM → user_impersonation</b> delegated permission (Dataverse) in addition to the Graph scopes.
+          </div>
+        </div>
+      </div>
+
+      <!-- CS migration-process animation: Read → Recreate (manual) → Verify -->
+      <div class="cs-anim" aria-hidden="true">
+        <div class="cs-stage" data-step="1">
+          <span class="cs-step-num">1</span>
+          <div class="cs-stage-icon">🧠</div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Read agent config</div>
+            <div class="cs-stage-sub">description · model · instructions · knowledge · tools · topics</div>
+          </div>
+        </div>
+        <div class="cs-arrow"><svg viewBox="0 0 30 14" preserveAspectRatio="none"><line class="cs-flow" x1="1" y1="7" x2="23" y2="7"/><path d="M22 2 l6 5 l-6 5"/></svg></div>
+        <div class="cs-stage" data-step="2">
+          <span class="cs-step-num">2</span>
+          <div class="cs-stage-icon">🛠️<span class="cs-manual-badge">manual</span></div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Recreate the agent</div>
+            <div class="cs-stage-sub">by hand in Copilot Studio (gets a modern Agent ID)</div>
+          </div>
+        </div>
+        <div class="cs-arrow"><svg viewBox="0 0 30 14" preserveAspectRatio="none"><line class="cs-flow" x1="1" y1="7" x2="23" y2="7"/><path d="M22 2 l6 5 l-6 5"/></svg></div>
+        <div class="cs-stage" data-step="3">
+          <span class="cs-step-num">3</span>
+          <div class="cs-stage-icon">✅</div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Verify configuration</div>
+            <div class="cs-stage-sub">confirm every setting matches the original</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CS progress -->
+      <div id="cs-progress" class="progress-wrap" style="display:none">
+        <h2 id="cs-progress-phase">Scanning…</h2>
+        <div class="progress-bar-outer"><div id="cs-progress-bar" class="progress-bar-inner" style="width:0%"></div></div>
+        <div id="cs-progress-log" class="progress-log"></div>
+      </div>
+
+      <div id="cs-error" class="error-banner" style="display:none"></div>
+
+      <!-- CS KPIs -->
+      <div id="cs-kpi" class="kpi-row" style="display:none">
+        <div class="kpi-card copilot">
+          <div class="kpi-label">Agents</div>
+          <div class="kpi-value" id="cs-kpi-total">–</div>
+          <div class="kpi-sub">Copilot Studio agents</div>
+          <div class="kpi-icon">🧠</div>
+        </div>
+        <div class="kpi-card modern">
+          <div class="kpi-label">Published</div>
+          <div class="kpi-value" id="cs-kpi-published">–</div>
+          <div class="kpi-sub">live to users</div>
+          <div class="kpi-icon">🚀</div>
+        </div>
+        <div class="kpi-card info">
+          <div class="kpi-label">Generative</div>
+          <div class="kpi-value" id="cs-kpi-genai">–</div>
+          <div class="kpi-sub">generative orchestration</div>
+          <div class="kpi-icon">✨</div>
+        </div>
+        <div class="kpi-card classic">
+          <div class="kpi-label">With Knowledge</div>
+          <div class="kpi-value" id="cs-kpi-knowledge">–</div>
+          <div class="kpi-sub">knowledge sources</div>
+          <div class="kpi-icon">📚</div>
+        </div>
+        <div class="kpi-card neutral">
+          <div class="kpi-label">With Tools</div>
+          <div class="kpi-value" id="cs-kpi-tools">–</div>
+          <div class="kpi-sub">actions / HTTP / MCP</div>
+          <div class="kpi-icon">🛠️</div>
+        </div>
+        <div class="kpi-card info">
+          <div class="kpi-label">Environments</div>
+          <div class="kpi-value" id="cs-kpi-envs">–</div>
+          <div class="kpi-sub">scanned</div>
+          <div class="kpi-icon">🌐</div>
+        </div>
+      </div>
+
+      <!-- CS table -->
+      <div id="cs-table-section" style="display:none">
+        <div class="toolbar">
+          <input type="text" class="search-box" id="cs-search" placeholder="Search agents, models, instructions…" oninput="csRender()">
+          <div class="filter-group">
+            <button class="filter-btn cs-f-all active" onclick="csSetFilter('all',this)">All</button>
+            <button class="filter-btn cs-f-classic" onclick="csSetFilter('classic',this)">🧩 Classic</button>
+            <button class="filter-btn cs-f-modern" onclick="csSetFilter('modern',this)">🤖 Modern</button>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-secondary btn-sm" onclick="csExport('csv')">Export CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="csExport('json')">Export JSON package</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table id="cs-agents-table">
+              <thead>
+                <tr>
+                  <th onclick="csSortBy('name')">Agent</th>
+                  <th onclick="csSortBy('environment')">Environment</th>
+                  <th onclick="csSortBy('model')">Model</th>
+                  <th onclick="csSortBy('orchestration')">Orchestration</th>
+                  <th onclick="csSortBy('_knowledgeCount')">Knowledge</th>
+                  <th onclick="csSortBy('_toolCount')">Tools</th>
+                  <th onclick="csSortBy('_topicCount')">Topics</th>
+                  <th onclick="csSortBy('published')">Published</th>
+                  <th onclick="csSortBy('_lastUsed')">Last used</th>
+                  <th onclick="csSortBy('_adviceRank')">Advice</th>
+                </tr>
+              </thead>
+              <tbody id="cs-tbody"></tbody>
+            </table>
+          </div>
+          <div id="cs-empty" class="empty-state" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p id="cs-empty-msg">No Copilot Studio agents found.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /mode-cs -->
+
+    <!-- ═════════════ MODE: FOUNDRY AGENTS INVENTORY ═════════════ -->
+    <div id="mode-foundry" style="display:none">
+      <!-- Config / scan panel -->
+      <div class="mig-panel" id="fdry-config">
+        <h2 onclick="fdryToggleConfig()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0">
+          <span>⚗️ Azure AI Foundry agent inventory <span style="font-size:.72rem;font-weight:600;color:var(--text3);vertical-align:middle">read-only</span>
+            <span id="fdry-config-summary" style="font-size:.75rem;font-weight:500;color:var(--text3);margin-left:8px;display:none"></span></span>
+          <span id="fdry-config-chevron" style="font-size:14px;color:var(--text3)">▾</span>
+        </h2>
+        <div id="fdry-config-body" style="margin-top:12px">
+          <div class="mig-desc">Reads every agent in a Foundry project — model, instructions, tools, knowledge (vector stores &amp; files), metadata &amp; agent identity — directly from the Foundry data plane. Read-only; nothing is written.</div>
+          <div class="mig-grid" style="grid-template-columns:1fr">
+            <div class="mig-field">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                <label style="margin:0">Foundry project endpoint(s) — one per line</label>
+                <button type="button" class="btn btn-secondary" id="fdry-discover-btn" onclick="fdryDiscover()" style="font-size:.72rem;padding:5px 12px">🧭 Discover my Foundry projects</button>
+              </div>
+              <textarea id="fdry-endpoints" placeholder="https://your-resource.services.ai.azure.com/api/projects/your-project"></textarea>
+              <div class="mig-hint">Paste one or more project endpoints, or click <b>Discover</b> to auto-fill them from your Azure subscriptions (needs an ARM sign-in + RBAC <b>Reader</b>).</div>
+            </div>
+            <div class="mig-field">
+              <label>Access token <span style="color:var(--risk-high,#e0a030)">(required)</span></label>
+              <div style="margin:2px 0 6px">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+                  <span style="font-size:.68rem;color:var(--text-muted,#8a94a6)">Run this in <b>PowerShell</b> (Az module) — it copies the token to your clipboard, then paste it below:</span>
+                  <button type="button" onclick="fdryCopyCmd(this)" style="font-size:.68rem;padding:5px 11px;border:1px solid rgba(127,127,127,.3);border-radius:5px;background:transparent;color:inherit;cursor:pointer;white-space:nowrap">Copy command</button>
+                </div>
+                <code id="fdry-cmd-text" style="display:block;font-size:.66rem;line-height:1.5;padding:7px 9px;background:rgba(127,127,127,.12);border:1px solid rgba(127,127,127,.25);border-radius:5px;overflow-x:auto;white-space:pre">$t = Get-AzAccessToken -ResourceUrl "https://ai.azure.com"
+$tok = if ($t.Token -is [System.Security.SecureString]) { [System.Net.NetworkCredential]::new("",$t.Token).Password } else { $t.Token }
+$tok | Set-Clipboard</code>
+              </div>
+              <textarea id="fdry-token" placeholder="Paste the token here…" style="font-size:.74rem;word-break:break-all"></textarea>
+              <div class="mig-hint">The Foundry Agents data plane accepts <b>only</b> the <code>https://ai.azure.com</code> audience, which this app registration can't mint — so the scan reads <b>only</b> from a pasted token (no interactive sign-in). Run <code>Connect-AzAccount -Tenant &lt;tenant&gt;</code> first if needed (or the CLI equivalent <code>az account get-access-token --scope https://ai.azure.com/.default -o tsv</code>). Token expires in ~60–90 min.</div>
+            </div>
+          </div>
+          <div class="mig-actions">
+            <button class="btn btn-primary" id="fdry-scan-btn" onclick="fdryScan()">🔍 Scan agents</button>
+            <span class="mig-summary" id="fdry-status">Paste a project endpoint (or use Discover above), then Scan.</span>
+          </div>
+          <div id="fdry-discovered" style="margin-top:10px"></div>
+          <div class="bp-note">
+            <b>Scan</b> uses a data-plane token (audience <code>https://ai.azure.com</code>) — <b>paste a CLI token</b> above (this app registration can't mint that audience). You still need a Foundry role (e.g. <b>Foundry User</b> / <b>Foundry Agent Consumer</b>) on each project. <b>Discover</b> enumerates every project via Azure Resource Manager using your sign-in — needs the <b>Azure Service Management · user_impersonation</b> permission and Azure RBAC <b>Reader</b> on your subscriptions. Listing tries the classic <code>/assistants</code> API, then the new <code>/agents</code> API.
+          </div>
+        </div>
+      </div>
+
+      <!-- Foundry process animation: Build → Foundry auto-provisions identity → Modern Agent ID -->
+      <div class="cs-anim fdry-anim" aria-hidden="true">
+        <div class="cs-stage" data-step="1">
+          <span class="cs-step-num">1</span>
+          <div class="cs-stage-icon">⚗️</div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Build the agent</div>
+            <div class="cs-stage-sub">model · instructions · tools · knowledge in Azure AI Foundry</div>
+            <div class="cs-toggle"><span class="sw"></span> New Foundry <b>ON</b> — required for a modern agent</div>
+          </div>
+        </div>
+        <div class="cs-arrow"><svg viewBox="0 0 30 14" preserveAspectRatio="none"><line class="cs-flow" x1="1" y1="7" x2="23" y2="7"/><path d="M22 2 l6 5 l-6 5"/></svg></div>
+        <div class="cs-stage" data-step="2">
+          <span class="cs-step-num">2</span>
+          <div class="cs-stage-icon">⚙️<span class="cs-auto-badge">auto</span></div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Foundry provisions the identity</div>
+            <div class="cs-stage-sub">automatic on publish — no manual migration</div>
+          </div>
+        </div>
+        <div class="cs-arrow"><svg viewBox="0 0 30 14" preserveAspectRatio="none"><line class="cs-flow" x1="1" y1="7" x2="23" y2="7"/><path d="M22 2 l6 5 l-6 5"/></svg></div>
+        <div class="cs-stage" data-step="3">
+          <span class="cs-step-num">3</span>
+          <div class="cs-stage-icon">🤖</div>
+          <div class="cs-stage-text">
+            <div class="cs-stage-title">Modern Entra Agent ID</div>
+            <div class="cs-stage-sub">governed · sponsored · Conditional-Access ready</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="fdry-progress" class="progress-wrap" style="display:none">
+        <h2 id="fdry-progress-phase">Scanning…</h2>
+        <div class="progress-bar-outer"><div id="fdry-progress-bar" class="progress-bar-inner" style="width:0%"></div></div>
+        <div id="fdry-progress-log" class="progress-log"></div>
+      </div>
+
+      <div id="fdry-error" class="error-banner" style="display:none"></div>
+
+      <div id="fdry-kpi" class="kpi-row" style="display:none">
+        <div class="kpi-card info">
+          <div class="kpi-label">Agents</div>
+          <div class="kpi-value" id="fdry-kpi-total">–</div>
+          <div class="kpi-sub">Foundry agents</div>
+          <div class="kpi-icon">⚗️</div>
+        </div>
+        <div class="kpi-card neutral">
+          <div class="kpi-label">With Tools</div>
+          <div class="kpi-value" id="fdry-kpi-tools">–</div>
+          <div class="kpi-sub">code / file / function / …</div>
+          <div class="kpi-icon">🛠️</div>
+        </div>
+        <div class="kpi-card classic">
+          <div class="kpi-label">With Knowledge</div>
+          <div class="kpi-value" id="fdry-kpi-knowledge">–</div>
+          <div class="kpi-sub">vector stores / files</div>
+          <div class="kpi-icon">📚</div>
+        </div>
+        <div class="kpi-card modern">
+          <div class="kpi-label">Models</div>
+          <div class="kpi-value" id="fdry-kpi-models">–</div>
+          <div class="kpi-sub">distinct deployments</div>
+          <div class="kpi-icon">🧠</div>
+        </div>
+        <div class="kpi-card info">
+          <div class="kpi-label">Endpoints</div>
+          <div class="kpi-value" id="fdry-kpi-eps">–</div>
+          <div class="kpi-sub">projects scanned</div>
+          <div class="kpi-icon">🌐</div>
+        </div>
+      </div>
+
+      <div id="fdry-table-section" style="display:none">
+        <div class="toolbar">
+          <input type="text" class="search-box" id="fdry-search" placeholder="Search agents, models, instructions, tools…" oninput="fdryRender()">
+          <div class="filter-group">
+            <button class="filter-btn cs-f-all active" onclick="fdrySetFilter('all',this)">All</button>
+            <button class="filter-btn cs-f-classic" onclick="fdrySetFilter('classic',this)">🧩 Classic</button>
+            <button class="filter-btn cs-f-modern" onclick="fdrySetFilter('modern',this)">🤖 Modern</button>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-secondary btn-sm" onclick="fdryExport('csv')">Export CSV</button>
+            <button class="btn btn-secondary btn-sm" onclick="fdryExport('json')">Export JSON package</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-scroll">
+            <table id="fdry-agents-table">
+              <thead>
+                <tr>
+                  <th onclick="fdrySortBy('name')">Agent</th>
+                  <th onclick="fdrySortBy('project')">Project</th>
+                  <th onclick="fdrySortBy('model')">Model</th>
+                  <th onclick="fdrySortBy('_toolCount')">Tools</th>
+                  <th onclick="fdrySortBy('_knowledgeCount')">Knowledge</th>
+                  <th onclick="fdrySortBy('created')">Created</th>
+                </tr>
+              </thead>
+              <tbody id="fdry-tbody"></tbody>
+            </table>
+          </div>
+          <div id="fdry-empty" class="empty-state" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <p id="fdry-empty-msg">No Foundry agents found.</p>
+          </div>
+        </div>
+      </div>
+    </div><!-- /mode-foundry -->
+  </main>
+  <footer style="padding:14px 24px;border-top:1px solid var(--border);color:var(--text3);font-size:.72rem;text-align:center">⚠️ Preview tool — always verify the results and test every change in a non-production environment before you rely on it.</footer>
+</div>
+
+<script>
+'use strict';
+
+// ── App registration ─────────────────────────────────────────────────────────
+// Published multi-tenant SPA registration for this tool. Public (not a secret) —
+// baked in so users just sign in. The input field can override it if you run your
+// own registration; a saved override in localStorage also wins.
+const DEFAULT_CLIENT_ID = 'a24693b7-6dd5-49b1-9748-666c5bdb5612';
+// Collapse duplicate slashes in the path — if the page was opened at a URL like
+// https://host//page.html, an un-normalized redirect URI (host//page.html) won't match the
+// single-slash URI registered on the app, causing AADSTS50011 (redirect URI mismatch).
+const APP_REDIRECT_URI = (location.protocol === 'https:' || location.protocol === 'http:')
+  ? location.origin + location.pathname.replace(/\/{2,}/g, '/')
+  : 'https://blue16.nl/classic-to-modern-agent-migrator.html';
+const APP_URL_HAS_DOUBLE_SLASH = /\/{2,}/.test(location.pathname);
+
+// ── Constants ────────────────────────────────────────────────────────────────
+const GRAPH      = 'https://graph.microsoft.com/v1.0';
+const GRAPH_BETA = 'https://graph.microsoft.com/beta';
+// Split into read vs. create so sign-in (and tenant admin consent) can be scoped.
+// Sign-in and every read/inventory operation use READ_SCOPES only — so read-only
+// users, or a tenant that only granted read consent, can use all inventory modes.
+// The create scopes are requested incrementally, only when a write actually happens.
+const READ_SCOPES = ['User.Read', 'Application.Read.All', 'Directory.Read.All', 'AuditLog.Read.All'];
+const CREATE_SCOPES = ['AgentIdentityBlueprint.Create', 'AgentIdentityBlueprintPrincipal.Create', 'AgentIdentity.Create.All', 'AgentIdentity.ReadWrite.All'];
+const SCOPES = READ_SCOPES;
+
+// Tags marking a "classic" agentic service principal (from classic-agent-audit.html)
+const AGENTIC_TAGS = ['AIAgentBuilder','AgentCreatedBy:CopilotStudio','AgenticApp','AgenticInstance'];
+
+// ── State ────────────────────────────────────────────────────────────────────
+let msalApp = null;
+let accessToken = null;
+let currentAccount = null;
+let currentUser = null;          // { id, displayName, userPrincipalName }
+let allAgents = [];              // classic agents (service principals)
+let modernAgents = [];           // existing agent identities
+let blueprints = [];             // existing agent identity blueprints
+let filtered = [];
+let sortKey = '_copyStatus';
+let sortDir = 1;
+let currentPage = 1;
+let pageSize = 25;
+let activeFilter = 'all';
+let expandedRow = null;
+let selected = new Set();
+
+// ── MSAL helpers ─────────────────────────────────────────────────────────────
+function getClientId() {
+  return (document.getElementById('clientId-input')?.value || localStorage.getItem('c2m_clientId') || DEFAULT_CLIENT_ID || '').trim();
+}
+// Tenant for the MSAL authority. 'organizations' (default) routes to the signed-in account's tenant —
+// correct for the multi-tenant app. A single-tenant app must pin its HOME tenant here, or Entra returns
+// AADSTS650059 (app not configured for use in the signed-in tenant).
+function getTenant() {
+  return ((document.getElementById('tenantId-input')?.value || localStorage.getItem('c2m_tenantId') || 'organizations').trim()) || 'organizations';
+}
+
+
+function buildMsal(clientId) {
+  return new msal.PublicClientApplication({
+    auth: {
+      clientId,
+      authority: 'https://login.microsoftonline.com/' + getTenant(),
+      redirectUri: APP_REDIRECT_URI,
+    },
+    cache: { cacheLocation: 'localStorage' },
+  });
+}
+
+async function doLogin() {
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+
+  const clientId = getClientId();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId)) {
+    showLoginErr('Enter a valid Application (client) ID GUID for your app registration first.');
+    return;
+  }
+  localStorage.setItem('c2m_clientId', clientId);
+  localStorage.setItem('c2m_tenantId', getTenant());
+
+  if (typeof msal === 'undefined') {
+    showLoginErr('MSAL library failed to load. Check your internet connection and reload the page.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading-spin"></span> Signing in…';
+
+  try {
+    msalApp = buildMsal(clientId);
+    await msalApp.initialize();
+
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    const loginReq = { scopes: SCOPES };
+    let result;
+    if (isMobile) {
+      await msalApp.loginRedirect(loginReq);
+      return; // page reloads
+    } else {
+      result = await msalApp.loginPopup(loginReq);
+    }
+
+    currentAccount = result.account;
+    accessToken = result.accessToken;
+    showApp();
+    startDiscovery();
+  } catch (e) {
+    showLoginErr(e.message || String(e));
+    btn.disabled = false;
+    btn.innerHTML = 'Sign in with Microsoft';
+  }
+}
+
+async function doLogout() {
+  if (msalApp && currentAccount) {
+    await msalApp.logoutPopup({ account: currentAccount }).catch(() => {});
+  }
+  location.reload();
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // If the page was opened at a URL with a double slash (…//page.html), clean the address bar to the
+  // normalized single-slash URL so the redirect URI matches the app registration, and warn the user.
+  if (APP_URL_HAS_DOUBLE_SLASH) {
+    try { history.replaceState(null, '', location.origin + location.pathname.replace(/\/{2,}/g, '/') + location.search + location.hash); } catch (e) {}
+    showLoginErr('This page was opened at a URL with a double slash (…//). Entra requires an exact redirect-URI match, so the address bar was corrected to ' + APP_REDIRECT_URI + '. Use that (single-slash) URL — if sign-in still fails with AADSTS50011, that exact URL must be registered under the app’s Single-page application platform.');
+  }
+  const saved = localStorage.getItem('c2m_clientId');
+  document.getElementById('clientId-input').value = saved || DEFAULT_CLIENT_ID;
+  const savedTenant = localStorage.getItem('c2m_tenantId');
+  if (document.getElementById('tenantId-input')) document.getElementById('tenantId-input').value = savedTenant || '';
+  // Dataverse reads use this app's own consent (hardcoded main client). The reuse
+  // field is hidden; left blank so csEnsureDvAuth uses the main app registration.
+  const dvInput = document.getElementById('cs-dv-clientid');
+  if (dvInput) dvInput.value = '';
+  if (typeof csUpdateDvSigninBtn === 'function') csUpdateDvSigninBtn();
+  const ru = document.getElementById('redir-uri');
+  if (ru && (location.protocol === 'https:' || location.protocol === 'http:')) ru.textContent = APP_REDIRECT_URI;
+
+  // Returning from the admin-consent endpoint? Show the outcome.
+  const qs = new URLSearchParams(location.search);
+  if (qs.has('admin_consent') || qs.get('error')) {
+    const ok = (qs.get('admin_consent') || '').toLowerCase() === 'true';
+    const level = (qs.get('state') || '').startsWith('full') ? 'full (read + create)' : 'read-only';
+    const card = document.querySelector('.login-card');
+    const banner = document.createElement('div');
+    banner.className = ok ? 'consent-ok' : 'error-banner';
+    banner.style.display = 'block';
+    banner.textContent = ok
+      ? `✅ Tenant-wide ${level} consent granted. You can close this tab and sign in on the main tab.`
+      : `Consent was not completed: ${qs.get('error_description') || qs.get('error')}`;
+    card.insertBefore(banner, card.querySelector('#login-error').nextSibling);
+    history.replaceState(null, '', location.pathname);
+  }
+});
+
+// ── Screen transitions ───────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  const app = document.getElementById('app-screen');
+  app.style.display = 'flex';
+  document.getElementById('user-chip').textContent = currentAccount?.username || currentAccount?.name || '–';
+}
+
+// ── Token acquisition ────────────────────────────────────────────────────────
+async function getToken(scopes = SCOPES) {
+  try {
+    const r = await msalApp.acquireTokenSilent({ scopes, account: currentAccount });
+    accessToken = r.accessToken;
+    return r.accessToken;
+  } catch {
+    const r = await msalApp.acquireTokenPopup({ scopes, account: currentAccount });
+    accessToken = r.accessToken;
+    return r.accessToken;
+  }
+}
+
+// ── Graph fetch helpers ──────────────────────────────────────────────────────
+async function gget(url, useConsistency = false) {
+  const token = await getToken();
+  const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  if (useConsistency) headers['ConsistencyLevel'] = 'eventual';
+  const r = await fetch(url, { headers });
+  if (!r.ok) {
+    const body = await r.json().catch(() => ({}));
+    throw new Error(`${r.status} ${body?.error?.message || r.statusText}`);
+  }
+  return r.json();
+}
+
+async function ggetAll(url, maxPages = 20, useConsistency = false) {
+  const items = [];
+  let next = url, page = 0;
+  while (next && page < maxPages) {
+    const data = await gget(next, useConsistency);
+    if (Array.isArray(data.value)) items.push(...data.value);
+    next = data['@odata.nextLink'] || null;
+    page++;
+  }
+  return items;
+}
+
+// POST helper for create operations (blueprint / principal / agent identity).
+// The agent-identity cast endpoints require the OData-Version: 4.0 header.
+async function gpost(url, body, extraHeaders = {}, scopes = null) {
+  const token = await getToken(scopes || SCOPES);
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'OData-Version': '4.0',
+      ...extraHeaders,
+    },
+    body: JSON.stringify(body),
+  });
+  const text = await r.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch { /* non-JSON */ }
+  if (!r.ok) {
+    const msg = data?.error?.message || text || r.statusText;
+    throw new Error(`${r.status} ${msg}`);
+  }
+  return data;
+}
+
+async function batchRequest(requests) {
+  const results = {};
+  for (let i = 0; i < requests.length; i += 20) {
+    const chunk = requests.slice(i, i + 20);
+    const token = await getToken();
+    const r = await fetch(`${GRAPH}/$batch`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: chunk }),
+    });
+    const data = await r.json();
+    for (const resp of (data.responses || [])) results[resp.id] = resp;
+  }
+  return results;
+}
+
+// ── Progress UI ──────────────────────────────────────────────────────────────
+function setProgress(pct, phase, msg, cls) {
+  document.getElementById('progress-panel').style.display = 'block';
+  if (pct != null) document.getElementById('progress-bar').style.width = pct + '%';
+  if (phase) document.getElementById('progress-phase').textContent = phase;
+  if (msg) {
+    const log = document.getElementById('progress-log');
+    const div = document.createElement('div');
+    div.className = cls || '';
+    div.textContent = msg;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+}
+function hideProgress() { document.getElementById('progress-panel').style.display = 'none'; }
+
+// ── Origin detection (from classic-agent-audit.html) ─────────────────────────
+function detectOrigin(agent) {
+  const tags  = (agent.tags || []).map(t => t.toLowerCase());
+  const name  = (agent.displayName || '').toLowerCase();
+  const notes = (agent.notes || '').toLowerCase();
+  if (tags.includes('agentcreatedby:copilot studio') || tags.some(t => t === 'agentcreatedby:copilotstudio') ||
+      tags.some(t => t.startsWith('power-virtual-agents')) || /\(microsoft copilot studio\)/i.test(agent.displayName || '')) {
+    return 'copilot-studio';
+  }
+  if (tags.some(t => t.includes('foundry') || t.includes('azureml')) ||
+      /foundry|azure.?ai|\/projects\//i.test(name) || /foundry/i.test(notes)) {
+    return 'ai-foundry';
+  }
+  return 'custom';
+}
+function originLabel(o) { return o === 'copilot-studio' ? 'Copilot Studio' : o === 'ai-foundry' ? 'Azure AI Foundry' : 'Custom'; }
+function originClass(o) { return o === 'copilot-studio' ? 'origin-copilot' : o === 'ai-foundry' ? 'origin-foundry' : 'origin-custom'; }
+
+// ── Discovery of classic agents ──────────────────────────────────────────────
+async function discoverClassicAgents() {
+  setProgress(5, 'Phase 1 · Discover classic agents', 'Querying agentic service principals by tags…');
+  const fields = 'id,displayName,appId,tags,createdDateTime,accountEnabled,servicePrincipalType,publisherName,notes';
+
+  const queries = AGENTIC_TAGS.map(tag =>
+    ggetAll(`${GRAPH}/servicePrincipals?$filter=tags/any(t: t eq '${encodeURIComponent(tag)}')&$top=999&$count=true&$select=${fields}`, 20, true).catch(() => [])
+  );
+  const results = await Promise.all(queries);
+
+  const spMap = new Map();
+  results.flat().forEach(sp => { if (sp?.id) spMap.set(sp.id, sp); });
+  const agents = [...spMap.values()];
+  setProgress(20, 'Phase 1 · Discover classic agents', `Found ${agents.length} classic (service-principal) agents.`, 'log-ok');
+  return agents;
+}
+
+// ── Read modern agents (agent identities) + blueprints ───────────────────────
+// Agent identities are service principals of type agentIdentity; blueprints are
+// applications of type agentIdentityBlueprint. Try the v1.0 cast first, then beta.
+async function discoverModernAgents() {
+  setProgress(28, 'Phase 2 · Read modern agents', 'Reading existing agent identities & blueprints…');
+  const aiFields = 'id,appId,displayName,createdDateTime,tags,agentIdentityBlueprintId';
+
+  let identities = [];
+  const idAttempts = [
+    `${GRAPH}/servicePrincipals/microsoft.graph.agentIdentity?$select=${aiFields}&$top=999`,
+    `${GRAPH_BETA}/servicePrincipals/microsoft.graph.agentIdentity?$select=${aiFields}&$top=999`,
+    // Fallback: filter service principals by the agent-identity SP type
+    `${GRAPH}/servicePrincipals?$filter=servicePrincipalType eq 'ServiceIdentity'&$select=id,appId,displayName,createdDateTime,tags&$top=999`,
+  ];
+  for (const url of idAttempts) {
+    try { identities = await ggetAll(url, 20, true); break; }
+    catch (e) { /* try next shape */ }
+  }
+  modernAgents = identities || [];
+
+  let bps = [];
+  const bpAttempts = [
+    `${GRAPH}/applications/microsoft.graph.agentIdentityBlueprint?$select=id,appId,displayName&$top=999`,
+    `${GRAPH_BETA}/applications/microsoft.graph.agentIdentityBlueprint?$select=id,appId,displayName&$top=999`,
+  ];
+  for (const url of bpAttempts) {
+    try { bps = await ggetAll(url, 20, true); break; }
+    catch (e) { /* try next shape */ }
+  }
+  blueprints = bps || [];
+
+  setProgress(40, 'Phase 2 · Read modern agents',
+    `Found ${modernAgents.length} modern agent identities and ${blueprints.length} blueprints.`, 'log-ok');
+}
+
+// ── Enrichment: owners + sign-in activity (lightweight) ──────────────────────
+async function enrichClassicAgents(agents) {
+  setProgress(45, 'Phase 3 · Enrich', `Fetching owners & activity for ${agents.length} classic agents…`);
+
+  // Recent SP sign-ins (near real-time) → map spId → last datetime
+  const recentSignIns = new Map();
+  try {
+    const siData = await gget(
+      `${GRAPH_BETA}/auditLogs/signIns?$filter=signInEventTypes/any(t: t eq 'servicePrincipal')` +
+      `&$orderby=createdDateTime desc&$top=500&$select=id,createdDateTime,servicePrincipalId`, true);
+    for (const si of (siData?.value || [])) {
+      if (si.servicePrincipalId && !recentSignIns.has(si.servicePrincipalId)) recentSignIns.set(si.servicePrincipalId, si.createdDateTime);
+    }
+  } catch (e) {
+    setProgress(null, null, `Sign-in log unavailable (${e.message}); continuing without last-used data.`, 'log-warn');
+  }
+
+  const batchReqs = [];
+  for (const a of agents) {
+    batchReqs.push({ id: `owners_${a.id}`, method: 'GET', url: `/servicePrincipals/${a.id}/owners?$select=id,displayName,userPrincipalName&$top=10` });
+  }
+  const batchResults = await batchRequest(batchReqs);
+
+  for (const a of agents) {
+    a._owners = batchResults[`owners_${a.id}`]?.body?.value || [];
+    a._ownerCount = a._owners.length;
+    a._lastActivity = recentSignIns.get(a.id) || null;
+  }
+  setProgress(65, 'Phase 3 · Enrich', 'Enrichment complete.', 'log-ok');
+}
+
+// ── Copy naming ───────────────────────────────────────────────────────────────
+// Prefer the current Copilot Studio name (if matched via appId) over the stale
+// Entra service-principal display name, so copies get meaningful, distinct names.
+function copyBaseName(a) { return a._copilotName || a.displayName || ''; }
+
+// ── Migration eligibility ─────────────────────────────────────────────────────
+// Only custom / pro-code agents can be validly recreated as a blueprint agent
+// identity. Copilot Studio and Azure AI Foundry both auto-provision AND own their
+// agents' Entra Agent IDs — they won't adopt an externally-created identity, so a
+// blueprint copy for those is an orphan. Those must be recreated on their platform.
+function isMigratable(a) { return a.origin === 'custom'; }
+
+function recreateGuidanceHtml(a) {
+  if (a.origin === 'copilot-studio') {
+    return `<div class="copybox" style="border-left-color:var(--copilot)">
+      <h4>🔒 Managed by Copilot Studio — recreate there</h4>
+      <p style="font-size:.8rem;color:var(--text2);line-height:1.6">
+        Copilot Studio provisions this agent's Entra Agent ID itself (under its global blueprint) and won't adopt an
+        external identity, so a blueprint copy here would be an orphan. To modernise it, <b>recreate the agent in
+        Copilot Studio</b> — or move its definition with a Power Platform <b>solution export/import</b> — and it gets a
+        modern identity automatically. Use the <b>Copilot Studio inventory</b> tab to capture its full config first.
+      </p>
+    </div>`;
+  }
+  if (a.origin === 'ai-foundry') {
+    return `<div class="copybox" style="border-left-color:var(--foundry)">
+      <h4>🔒 Managed by Azure AI Foundry — recreate there</h4>
+      <p style="font-size:.8rem;color:var(--text2);line-height:1.6">
+        Azure AI Foundry automatically provisions and manages this agent's identity (blueprint + agent identity) when
+        you create or publish the agent. Recreate/publish it in Foundry rather than copying the identity here — a manual
+        blueprint copy won't be used by Foundry.
+      </p>
+    </div>`;
+  }
+  return '';
+}
+
+// ── Match classic agents to existing modern copies ───────────────────────────
+function computeCopyStatus() {
+  const suffix = (document.getElementById('suffix-input')?.value || ' (new)');
+  const norm = s => (s || '').trim().toLowerCase();
+  const modernNames = new Map();
+  modernAgents.forEach(m => modernNames.set(norm(m.displayName), m));
+
+  for (const a of allAgents) {
+    if (a._copyStatus === 'pending' || a._copyStatus === 'error') continue; // preserve in-session results
+    // Match copies made under either the Copilot Studio name or the Entra name.
+    const bases = [...new Set([norm(copyBaseName(a)), norm(a.displayName)].filter(Boolean))];
+    const targets = bases.map(b => b + norm(suffix));
+    const baseMatch = targets.map(t => modernNames.get(t)).find(Boolean)
+      || modernAgents.find(m => { const mn = norm(m.displayName); return bases.some(b => mn.startsWith(b) && mn !== b); });
+    if (baseMatch) { a._copyStatus = 'copied'; a._modernCopy = baseMatch; }
+    else { a._copyStatus = 'notcopied'; a._modernCopy = null; }
+  }
+}
+
+// ── Main discovery flow ──────────────────────────────────────────────────────
+async function startDiscovery() {
+  document.getElementById('progress-panel').style.display = 'block';
+  document.getElementById('kpi-row').style.display = 'none';
+  document.getElementById('mig-anim').style.display = 'none';
+  document.getElementById('mig-panel').style.display = 'none';
+  document.getElementById('table-section').style.display = 'none';
+  document.getElementById('error-banner').style.display = 'none';
+  document.getElementById('progress-log').innerHTML = '';
+  allAgents = []; selected.clear(); expandedRow = null;
+
+  try {
+    // Signed-in user (default sponsor/owner)
+    try {
+      currentUser = await gget(`${GRAPH}/me?$select=id,displayName,userPrincipalName`);
+      const sp = document.getElementById('sponsor-input');
+      if (sp && !sp.value) sp.value = currentUser.userPrincipalName || currentUser.id;
+    } catch { currentUser = null; }
+
+    const agents = await discoverClassicAgents();
+    await discoverModernAgents();
+
+    if (agents.length) await enrichClassicAgents(agents);
+
+    setProgress(75, 'Phase 4 · Correlate', 'Matching classic agents to existing modern copies…');
+    agents.forEach(a => a.origin = detectOrigin(a));
+    allAgents = agents;
+    computeCopyStatus();
+
+    setProgress(90, 'Phase 5 · Render', 'Building table…');
+    populateBlueprintSelect();
+    renderKpis();
+    applyFilters();
+    setProgress(100, 'Done', 'Discovery complete.', 'log-ok');
+
+    setTimeout(hideProgress, 1200);
+    document.getElementById('kpi-row').style.display = 'flex';
+    document.getElementById('mig-anim').style.display = 'flex';
+    document.getElementById('mig-panel').style.display = 'block';
+    document.getElementById('table-section').style.display = 'block';
+
+    if (!agents.length) showEmpty('No classic (service-principal) agents found in this tenant.');
+  } catch (e) {
+    hideProgress();
+    const err = document.getElementById('error-banner');
+    err.textContent = 'Discovery failed: ' + (e.message || String(e));
+    err.style.display = 'block';
+  }
+}
+
+async function refreshData() { await startDiscovery(); }
+
+// ── Blueprint dropdown ───────────────────────────────────────────────────────
+function populateBlueprintSelect() {
+  const sel = document.getElementById('blueprint-select');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— Select an existing blueprint —</option>';
+  blueprints.forEach(bp => {
+    const opt = document.createElement('option');
+    // We key on the blueprint appId — that's what agentIdentityBlueprintId expects.
+    opt.value = bp.appId || '';
+    opt.textContent = `${bp.displayName || '(unnamed)'} — ${bp.appId || bp.id}`;
+    sel.appendChild(opt);
+  });
+  if (prev && [...sel.options].some(o => o.value === prev)) sel.value = prev;
+}
+
+// ── Create a new blueprint (+ its principal) ─────────────────────────────────
+async function createBlueprint() {
+  const name = (document.getElementById('new-bp-name').value || '').trim();
+  if (!name) { alert('Enter a display name for the new blueprint.'); return; }
+  const sponsorBind = await resolveSponsorBind();
+  if (!sponsorBind) return;
+
+  const btn = document.getElementById('btn-create-bp');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    setProgress(0, 'Creating blueprint', `Creating agent identity blueprint "${name}"…`);
+    document.getElementById('progress-log').innerHTML = '';
+
+    // 1) Create the blueprint application
+    const bp = await gpost(`${GRAPH}/applications/microsoft.graph.agentIdentityBlueprint`, {
+      displayName: name,
+      'sponsors@odata.bind': [sponsorBind],
+      ...(currentUser ? { 'owners@odata.bind': [`${GRAPH}/users/${currentUser.id}`] } : {}),
+    }, {}, CREATE_SCOPES);
+    setProgress(50, 'Creating blueprint', `Blueprint created (appId ${bp.appId}). Creating its principal…`, 'log-ok');
+
+    // 2) Create the blueprint principal
+    try {
+      await gpost(`${GRAPH}/servicePrincipals/microsoft.graph.agentIdentityBlueprintPrincipal`, { appId: bp.appId }, {}, CREATE_SCOPES);
+      setProgress(100, 'Creating blueprint', 'Blueprint principal created.', 'log-ok');
+    } catch (e) {
+      setProgress(100, 'Creating blueprint', `Blueprint made, but principal creation returned: ${e.message}`, 'log-warn');
+    }
+
+    blueprints.push({ id: bp.id, appId: bp.appId, displayName: bp.displayName || name });
+    populateBlueprintSelect();
+    document.getElementById('blueprint-select').value = bp.appId;
+    document.getElementById('new-bp-name').value = '';
+    renderKpis();
+    updateMigSummary();
+    setTimeout(hideProgress, 1500);
+  } catch (e) {
+    setProgress(100, 'Creating blueprint', `Failed: ${e.message}`, 'log-err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create';
+  }
+}
+
+// ── Resolve the sponsor input to an @odata.bind reference ─────────────────────
+async function resolveSponsorBind() {
+  const raw = (document.getElementById('sponsor-input').value || '').trim();
+  if (!raw) {
+    if (currentUser) return `${GRAPH}/users/${currentUser.id}`;
+    alert('Enter a sponsor (UPN or object ID).'); return null;
+  }
+  // GUID → use directly
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) return `${GRAPH}/users/${raw}`;
+  // UPN → resolve to id
+  try {
+    const u = await gget(`${GRAPH}/users/${encodeURIComponent(raw)}?$select=id`);
+    return `${GRAPH}/users/${u.id}`;
+  } catch (e) {
+    alert(`Could not resolve sponsor "${raw}": ${e.message}`); return null;
+  }
+}
+
+// ── Migrate (create modern copies of) selected classic agents ────────────────
+async function migrateSelected() {
+  const blueprintAppId = document.getElementById('blueprint-select').value;
+  if (!blueprintAppId) { alert('Select or create an agent identity blueprint first.'); return; }
+  const selectedAgents = allAgents.filter(a => selected.has(a.id));
+  const targets = selectedAgents.filter(isMigratable);
+  const blocked = selectedAgents.filter(a => !isMigratable(a));
+  if (!targets.length) {
+    alert(blocked.length
+      ? 'Only custom-origin agents can be pro-code migrated. Copilot Studio and Azure AI Foundry agents are managed by their platforms — recreate them there instead.'
+      : 'Select at least one custom-origin classic agent to copy.');
+    return;
+  }
+
+  const sponsorBind = await resolveSponsorBind();
+  if (!sponsorBind) return;
+  const suffix = document.getElementById('suffix-input').value || ' (new)';
+
+  const alreadyCopied = targets.filter(a => a._copyStatus === 'copied');
+  const proceed = confirm(
+    `Create ${targets.length} modern agent identit${targets.length === 1 ? 'y' : 'ies'} from the selected blueprint?` +
+    (alreadyCopied.length ? `\n\n${alreadyCopied.length} of these already appear to have a modern copy and will be duplicated.` : '') +
+    `\n\nEach new identity is a blank agent — permissions/config are NOT copied.`);
+  if (!proceed) return;
+
+  const btn = document.getElementById('btn-migrate');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  document.getElementById('progress-log').innerHTML = '';
+  setProgress(0, 'Creating modern copies', `Creating ${targets.length} agent identities from blueprint ${blueprintAppId}…`);
+
+  let done = 0, ok = 0, fail = 0;
+  for (const a of targets) {
+    a._copyStatus = 'pending';
+    updateRowStatus(a);
+    const copyName = copyBaseName(a) + suffix;
+    try {
+      const created = await gpost(`${GRAPH}/servicePrincipals/microsoft.graph.agentIdentity`, {
+        displayName: copyName,
+        agentIdentityBlueprintId: blueprintAppId,
+        'sponsors@odata.bind': [sponsorBind],
+      }, {}, CREATE_SCOPES);
+      a._copyStatus = 'copied';
+      a._modernCopy = { id: created.id, appId: created.appId, displayName: created.displayName || copyName, agentIdentityBlueprintId: blueprintAppId };
+      modernAgents.push(a._modernCopy);
+      ok++;
+      setProgress(null, null, `✓ ${a.displayName} → "${copyName}" (id ${created.id})`, 'log-ok');
+    } catch (e) {
+      a._copyStatus = 'error';
+      a._copyError = e.message;
+      fail++;
+      setProgress(null, null, `✗ ${a.displayName}: ${e.message}`, 'log-err');
+    }
+    done++;
+    setProgress(Math.round((done / targets.length) * 100), 'Creating modern copies');
+    updateRowStatus(a);
+  }
+
+  setProgress(100, 'Done', `Created ${ok} modern copies, ${fail} failed.`, fail ? 'log-warn' : 'log-ok');
+  btn.disabled = false; btn.textContent = '⬆️ Create modern copies of selected';
+  renderKpis();
+  updateMigSummary();
+  if (fail === 0) setTimeout(hideProgress, 2500);
+}
+
+// ── KPI rendering ────────────────────────────────────────────────────────────
+function renderKpis() {
+  const classic = allAgents.length;
+  const copied = allAgents.filter(a => a._copyStatus === 'copied').length;
+  const notcopied = allAgents.filter(a => a._copyStatus === 'notcopied').length;
+  const copilot = allAgents.filter(a => a.origin === 'copilot-studio').length;
+  document.getElementById('kpi-classic').textContent = classic;
+  document.getElementById('kpi-copied').textContent = copied;
+  document.getElementById('kpi-notcopied').textContent = notcopied;
+  document.getElementById('kpi-copilot').textContent = copilot;
+  document.getElementById('kpi-modern').textContent = modernAgents.length;
+  document.getElementById('kpi-blueprints').textContent = blueprints.length;
+  const eligible = allAgents.filter(a => isMigratable(a) && a._copyStatus !== 'copied').length;
+  const sub = document.getElementById('kpi-notcopied-sub');
+  if (sub) sub.textContent = eligible ? `${eligible} custom-origin eligible` : 'none pro-code eligible';
+
+  // Red banner when the tenant has classic agents but none are pro-code-eligible.
+  const customCount = allAgents.filter(isMigratable).length;
+  const noEl = document.getElementById('procode-noeligible');
+  if (noEl) {
+    if (allAgents.length && customCount === 0) {
+      noEl.innerHTML = `🚫 <b>No pro-code (custom-origin) agents discovered.</b> All ${allAgents.length} classic agents in this tenant are Copilot Studio or Azure AI Foundry — both auto-provision and own their Entra Agent ID, so pro-code migration doesn't apply (a blueprint copy would be an orphan). Use the <b>Copilot Studio inventory</b> and <b>Foundry agents</b> tabs instead.`;
+      noEl.style.display = 'block';
+    } else {
+      noEl.style.display = 'none';
+    }
+  }
+}
+
+// ── Filters & sort ───────────────────────────────────────────────────────────
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPage = 1;
+  applyFilters();
+}
+
+function applyFilters() {
+  const q = (document.getElementById('search-box').value || '').toLowerCase();
+  filtered = allAgents.filter(a => {
+    if (activeFilter !== 'all') {
+      if (activeFilter === 'copied' && a._copyStatus !== 'copied') return false;
+      if (activeFilter === 'notcopied' && !(a._copyStatus === 'notcopied' || a._copyStatus === 'error')) return false;
+      if ((activeFilter === 'copilot-studio' || activeFilter === 'ai-foundry') && a.origin !== activeFilter) return false;
+    }
+    if (q) {
+      const hay = [(a.displayName||''), (a.appId||''), (a.id||''), originLabel(a.origin)].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+  sortAgents();
+  currentPage = 1;
+  renderTable();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  sortAgents();
+  renderTable();
+}
+
+function sortAgents() {
+  const statusOrder = { notcopied: 0, error: 1, pending: 2, copied: 3 };
+  filtered.sort((a, b) => {
+    let av = a[sortKey], bv = b[sortKey];
+    if (sortKey === '_copyStatus') { av = statusOrder[av] ?? 9; bv = statusOrder[bv] ?? 9; }
+    if (sortKey === '_lastActivity' || sortKey === 'createdDateTime') {
+      av = av ? new Date(av).getTime() : 0; bv = bv ? new Date(bv).getTime() : 0;
+    }
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return -sortDir;
+    if (av > bv) return sortDir;
+    return 0;
+  });
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    const k = th.getAttribute('onclick')?.match(/sortBy\('(.+?)'\)/)?.[1];
+    if (k === sortKey) th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+  });
+}
+
+// ── Table rendering ──────────────────────────────────────────────────────────
+function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function fmtDate(d) {
+  if (!d) return '<span class="text-muted">—</span>';
+  const dt = new Date(d), days = Math.floor((Date.now() - dt.getTime()) / 86400e3);
+  if (days === 0) return 'Today';
+  if (days < 7) return days + 'd ago';
+  if (days < 30) return Math.floor(days / 7) + 'w ago';
+  if (days < 365) return Math.floor(days / 30) + 'mo ago';
+  return Math.floor(days / 365) + 'y ago';
+}
+
+function statusPill(a) {
+  if (a._copyStatus === 'copied')  return `<span class="status-pill st-copied">✅ Copied</span>`;
+  if (a._copyStatus === 'pending') return `<span class="status-pill st-pending"><span class="loading-spin" style="width:11px;height:11px;border-width:2px"></span> Creating…</span>`;
+  if (a._copyStatus === 'error')   return `<span class="status-pill st-error" title="${esc(a._copyError||'')}">⚠️ Failed</span>`;
+  return `<span class="status-pill st-notcopied">⬆️ Not copied</span>`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('agents-tbody');
+  const emptyEl = document.getElementById('empty-state');
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  if (currentPage > totalPages) currentPage = totalPages;
+
+  if (!filtered.length) {
+    tbody.innerHTML = '';
+    emptyEl.style.display = 'block';
+    document.getElementById('empty-msg').textContent =
+      allAgents.length ? 'No classic agents match your filter.' : 'No classic (service-principal) agents found in this tenant.';
+    renderPagination(0, 0);
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  const start = (currentPage - 1) * pageSize;
+  const page = filtered.slice(start, start + pageSize);
+
+  tbody.innerHTML = page.map(a => {
+    const isSel = selected.has(a.id);
+    const canMig = isMigratable(a);
+    return `<tr onclick="handleRowClick(event, '${esc(a.id)}')" class="${isSel ? 'selected' : ''}" data-id="${esc(a.id)}">
+      <td onclick="event.stopPropagation()">${canMig
+        ? `<input type="checkbox" ${isSel ? 'checked' : ''} onchange="toggleSelect('${esc(a.id)}',this)" onclick="event.stopPropagation()">`
+        : `<span title="${esc(originLabel(a.origin))} manages its own identity — recreate it there instead of copying" style="color:var(--text3);cursor:not-allowed">🔒</span>`}</td>
+      <td>
+        <div class="agent-name">${esc(a.displayName || '—')}</div>
+        ${a._copilotName ? `<div class="cs-name">🧠 Copilot Studio: ${esc(a._copilotName)}${a._copilotEnv ? ` · ${esc(a._copilotEnv)}` : ''}</div>` : ''}
+        <div class="agent-id">${esc(a.appId || a.id)}</div>
+      </td>
+      <td><span class="origin-pill ${originClass(a.origin)}">${esc(originLabel(a.origin))}</span></td>
+      <td data-status-for="${esc(a.id)}">${statusPill(a)}</td>
+      <td>${a._ownerCount > 0 ? a._ownerCount : '<span class="text-muted">0</span>'}</td>
+      <td>${fmtDate(a._lastActivity)}</td>
+      <td>${fmtDate(a.createdDateTime)}</td>
+    </tr>`;
+  }).join('');
+
+  if (expandedRow && page.find(a => a.id === expandedRow)) {
+    const tr = tbody.querySelector(`tr[data-id="${CSS.escape(expandedRow)}"]`);
+    if (tr) insertDetailRow(tr, allAgents.find(a => a.id === expandedRow));
+  }
+
+  renderPagination(start, filtered.length);
+  updateSelCount();
+}
+
+function updateRowStatus(a) {
+  const cell = document.querySelector(`td[data-status-for="${CSS.escape(a.id)}"]`);
+  if (cell) cell.innerHTML = statusPill(a);
+}
+
+function insertDetailRow(tr, agent) {
+  const detailTr = document.createElement('tr');
+  detailTr.className = 'expanded-row';
+  detailTr.dataset.expandedFor = agent.id;
+  detailTr.innerHTML = `<td colspan="7">${buildDetailHtml(agent)}</td>`;
+  tr.after(detailTr);
+}
+
+function handleRowClick(e, agentId) {
+  if (e.target.tagName === 'INPUT') return;
+  const agent = allAgents.find(a => a.id === agentId);
+  if (!agent) return;
+  const tbody = document.getElementById('agents-tbody');
+  const existing = tbody.querySelector(`tr[data-expanded-for="${CSS.escape(agentId)}"]`);
+  if (expandedRow === agentId) { existing?.remove(); expandedRow = null; }
+  else {
+    if (expandedRow) tbody.querySelector(`tr[data-expanded-for="${CSS.escape(expandedRow)}"]`)?.remove();
+    expandedRow = agentId;
+    const tr = tbody.querySelector(`tr[data-id="${CSS.escape(agentId)}"]`);
+    if (tr) insertDetailRow(tr, agent);
+  }
+}
+
+function buildDetailHtml(a) {
+  const created = a.createdDateTime ? new Date(a.createdDateTime).toLocaleString() : '—';
+  const ownersHtml = (a._owners || []).length
+    ? a._owners.map(o => `<div class="tag">${esc(o.userPrincipalName || o.displayName || o.id)}</div>`).join('')
+    : '<span class="text-muted">No owners</span>';
+  const tagsHtml = (a.tags || []).length ? a.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('') : '<span class="text-muted">—</span>';
+
+  const suffix = document.getElementById('suffix-input')?.value || ' (new)';
+  const copyName = copyBaseName(a) + suffix;
+  const blueprintAppId = document.getElementById('blueprint-select')?.value || '<blueprint-appId>';
+
+  let copySection;
+  if (a._modernCopy) {
+    copySection = `<div class="copybox">
+      <h4>✅ Modern copy</h4>
+      <div class="detail-row"><span class="dk">Name</span><span class="dv">${esc(a._modernCopy.displayName)}</span></div>
+      <div class="detail-row"><span class="dk">Object ID</span><span class="dv"><code>${esc(a._modernCopy.id||'—')}</code></span></div>
+      <div class="detail-row"><span class="dk">App ID</span><span class="dv"><code>${esc(a._modernCopy.appId||'—')}</code></span></div>
+      <div class="detail-row"><span class="dk">Blueprint</span><span class="dv"><code>${esc(a._modernCopy.agentIdentityBlueprintId||'—')}</code></span></div>
+      <p style="font-size:.75rem;color:var(--text3);margin-top:8px">Re-grant permissions & connectors on this modern identity; the copy is created empty.</p>
+    </div>`;
+  } else if (!isMigratable(a)) {
+    copySection = recreateGuidanceHtml(a);
+  } else {
+    copySection = `<div class="copybox">
+      <h4>⬆️ Will be created as</h4>
+      <p style="font-size:.8rem;color:var(--text2);margin-bottom:8px">Select this agent and click <b>Create modern copies</b>. Request sent to Microsoft Graph:</p>
+      <pre>POST ${GRAPH}/servicePrincipals/microsoft.graph.agentIdentity
+OData-Version: 4.0
+Content-Type: application/json
+
+{
+  "displayName": "${esc(copyName)}",
+  "agentIdentityBlueprintId": "${esc(blueprintAppId)}",
+  "sponsors@odata.bind": [
+    "${GRAPH}/users/&lt;sponsor-id&gt;"
+  ]
+}</pre>
+    </div>`;
+  }
+
+  return `<div class="detail-panel">
+    <div class="detail-grid">
+      <div class="detail-section">
+        <h4>Classic identity</h4>
+        <div class="detail-row"><span class="dk">Display Name</span><span class="dv">${esc(a.displayName||'—')}</span></div>
+        <div class="detail-row"><span class="dk">App ID</span><span class="dv"><code>${esc(a.appId||'—')}</code></span></div>
+        <div class="detail-row"><span class="dk">Object ID</span><span class="dv"><code>${esc(a.id||'—')}</code></span></div>
+        <div class="detail-row"><span class="dk">SP Type</span><span class="dv">${esc(a.servicePrincipalType||'—')}</span></div>
+        <div class="detail-row"><span class="dk">Enabled</span><span class="dv">${a.accountEnabled === null ? '—' : a.accountEnabled ? '✅ Yes' : '❌ No'}</span></div>
+        <div class="detail-row"><span class="dk">Publisher</span><span class="dv">${esc(a.publisherName||'—')}</span></div>
+        <div class="detail-row"><span class="dk">Created</span><span class="dv">${created}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Classification</h4>
+        <div class="detail-row"><span class="dk">Origin</span><span class="dv">${esc(originLabel(a.origin))}</span></div>
+        <div class="detail-row"><span class="dk">Copilot Studio name</span><span class="dv">${a._copilotName ? esc(a._copilotName) + (a._copilotEnv ? ` (${esc(a._copilotEnv)})` : '') : '<span class="text-muted">— run “Match Copilot Studio names”</span>'}</span></div>
+        <div class="detail-row"><span class="dk">Copy status</span><span class="dv">${a._copyStatus === 'copied' ? 'Copied' : a._copyStatus === 'error' ? 'Failed' : a._copyStatus === 'pending' ? 'Creating' : 'Not copied'}</span></div>
+        <div class="detail-row"><span class="dk">Last activity</span><span class="dv">${a._lastActivity ? new Date(a._lastActivity).toLocaleString() : '—'}</span></div>
+        <div class="detail-row"><span class="dk">Tags</span><span class="dv" style="text-align:left">${tagsHtml}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Owners (${(a._owners||[]).length})</h4>
+        ${ownersHtml}
+      </div>
+    </div>
+    ${copySection}
+  </div>`;
+}
+
+// ── Pagination ───────────────────────────────────────────────────────────────
+function renderPagination(start, total) {
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  document.getElementById('page-info').textContent =
+    total ? `Showing ${start + 1}–${Math.min(start + pageSize, total)} of ${total}` : 'No results';
+  const btns = document.getElementById('page-btns');
+  btns.innerHTML = '';
+  const addBtn = (label, page, active, disabled) => {
+    const b = document.createElement('button');
+    b.className = 'page-btn' + (active ? ' active' : '');
+    b.disabled = disabled; b.textContent = label;
+    if (!disabled && !active) b.onclick = () => { currentPage = page; renderTable(); };
+    btns.appendChild(b);
+  };
+  addBtn('‹', currentPage - 1, false, currentPage === 1);
+  const range = pageRange(currentPage, totalPages);
+  let prev = null;
+  for (const p of range) {
+    if (prev !== null && p - prev > 1) {
+      const e = document.createElement('span'); e.textContent = '…'; e.style.cssText = 'padding:5px 4px;color:var(--text3);font-size:.78rem;';
+      btns.appendChild(e);
+    }
+    addBtn(p, p, p === currentPage, false); prev = p;
+  }
+  addBtn('›', currentPage + 1, false, currentPage === totalPages);
+}
+
+function pageRange(cur, total) {
+  const delta = 2, left = Math.max(1, cur - delta), right = Math.min(total, cur + delta), range = [];
+  for (let i = left; i <= right; i++) range.push(i);
+  if (range[0] > 1) range.unshift(1);
+  if (range[range.length - 1] < total) range.push(total);
+  return [...new Set(range)];
+}
+
+// ── Selection ────────────────────────────────────────────────────────────────
+function toggleSelect(id, cb) {
+  if (cb.checked) selected.add(id); else selected.delete(id);
+  updateSelCount();
+  const row = document.querySelector(`tr[data-id="${CSS.escape(id)}"]`);
+  if (row) row.classList.toggle('selected', cb.checked);
+}
+function toggleAll(masterCb) {
+  const page = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  page.filter(isMigratable).forEach(a => { if (masterCb.checked) selected.add(a.id); else selected.delete(a.id); });
+  renderTable();
+}
+function selectNotCopied() {
+  allAgents.filter(a => isMigratable(a) && (a._copyStatus === 'notcopied' || a._copyStatus === 'error')).forEach(a => selected.add(a.id));
+  renderTable();
+}
+function deselectAll() { selected.clear(); renderTable(); }
+function updateSelCount() {
+  const el = document.getElementById('sel-count');
+  if (selected.size > 0) { el.textContent = `${selected.size} selected`; el.style.display = 'inline'; }
+  else el.style.display = 'none';
+  updateMigSummary();
+}
+function updateMigSummary() {
+  const el = document.getElementById('mig-summary');
+  if (!el) return;
+  const n = selected.size;
+  const bp = document.getElementById('blueprint-select')?.value;
+  if (!n) { el.innerHTML = 'Select classic agents in the table below.'; return; }
+  el.innerHTML = `<b>${n}</b> custom agent${n === 1 ? '' : 's'} selected` + (bp ? '' : ' · <span style="color:var(--warning)">pick a blueprint first</span>');
+}
+
+function showEmpty(msg) {
+  document.getElementById('empty-state').style.display = 'block';
+  document.getElementById('empty-msg').textContent = msg;
+  document.getElementById('agents-tbody').innerHTML = '';
+}
+
+// ── CSV export ───────────────────────────────────────────────────────────────
+function exportCsv() {
+  const source = filtered.length ? filtered : allAgents;
+  if (!source.length) { alert('Nothing to export.'); return; }
+  const headers = ['ClassicName','CopilotStudioName','CopilotStudioEnv','ClassicAppId','ClassicObjectId','Origin','CopyStatus','ModernCopyName','ModernCopyId','Owners','Created'];
+  const rows = source.map(a => [
+    a.displayName || '', a._copilotName || '', a._copilotEnv || '', a.appId || '', a.id || '', originLabel(a.origin), a._copyStatus || '',
+    a._modernCopy?.displayName || '', a._modernCopy?.id || '',
+    (a._owners || []).map(o => o.userPrincipalName || o.displayName || o.id).join('; '),
+    a.createdDateTime || '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const el = document.createElement('a');
+  el.href = url; el.download = `classic-to-modern-agents-${new Date().toISOString().slice(0,10)}.csv`;
+  el.click(); URL.revokeObjectURL(url);
+}
+
+// Refresh copy-status matching + summary when settings change
+document.addEventListener('change', e => {
+  if (e.target && (e.target.id === 'suffix-input' || e.target.id === 'blueprint-select')) {
+    if (e.target.id === 'suffix-input') computeCopyStatus();
+    renderKpis(); applyFilters(); updateMigSummary();
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+//  MODE SWITCHING
+// ════════════════════════════════════════════════════════════════════════════
+let currentMode = 'procode';
+function switchMode(mode) {
+  currentMode = mode;
+  ['procode', 'cs', 'foundry'].forEach(m => {
+    const sec = document.getElementById('mode-' + m);
+    const tab = document.getElementById('tab-' + m);
+    if (sec) sec.style.display = (m === mode) ? 'block' : 'none';
+    if (tab) tab.classList.toggle('active', m === mode);
+  });
+  if (mode === 'cs' && typeof csUpdateDvSigninBtn === 'function') csUpdateDvSigninBtn();
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  COPILOT STUDIO INVENTORY (read-only, Dataverse)
+// ════════════════════════════════════════════════════════════════════════════
+const CS_GDS = 'https://globaldisco.crm.dynamics.com';
+let csAgents = [];
+let csFiltered = [];
+let csSortKey = 'name';
+let csSortDir = 1;
+let csExpanded = null;
+let csEnvCount = 0;
+
+// Reused heuristics (aligned with Copilot-Studio-Security-Auditor.html)
+const CS_MODEL_RX = /modelNameHint["':\s=]+([A-Za-z0-9_.\-]+)/i;
+const CS_HTTP_RX  = /HttpRequestAction/i;
+const CS_MCP_RX   = /InvokeExternalAgentTaskAction/i;
+const CS_SKILL_RX = /InvokeSkillAction/i;
+const CS_PROMPT_RX= /InvokeAIBuilderModelAction/i;
+const CS_MAIL_RX  = /office365(outlook)?[\s\S]{0,500}?sendemail/i;
+const CS_TASK_RX  = /TaskDialog/i;
+const CS_KNOW_RX  = /KnowledgeSourceConfiguration|searchAndSummarizeContent/i;
+
+function csExtractModel(s){ const m = CS_MODEL_RX.exec(s || ''); return m ? m[1] : null; }
+
+// Pull the "instructions" block out of a Custom GPT component's YAML data (best-effort).
+function csExtractInstructions(yaml){
+  if (!yaml) return '';
+  const lines = String(yaml).split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(\s*)instructions:\s*(.*)$/.exec(lines[i]);
+    if (!m) continue;
+    const indent = m[1].length;
+    const inline = m[2].replace(/^[|>][-+]?\s*$/, '').trim();
+    if (inline && !/^[|>]/.test(m[2].trim())) return inline.replace(/^["']|["']$/g, '');
+    const block = [];
+    for (let j = i + 1; j < lines.length; j++) {
+      if (lines[j].trim() === '') { block.push(''); continue; }
+      const li = lines[j].match(/^(\s*)/)[1].length;
+      if (li <= indent) break;
+      block.push(lines[j].slice(indent + 2));
+    }
+    return block.join('\n').trim();
+  }
+  return '';
+}
+
+// Turn common Dataverse auth failures into an actionable instruction.
+function csAuthHint(msg){
+  msg = String(msg || '');
+  if (/650057|invalid resource|invalid_client/i.test(msg))
+    return ' → Your app registration is missing the Dataverse permission. In Entra: App registrations → this app → API permissions → Add a permission → Dynamics CRM → Delegated → user_impersonation → Add, then Grant admin consent, and retry.';
+  if (/AADSTS65001|consent_required|AADSTS65004|interaction_required/i.test(msg))
+    return ' → Consent required: an admin must grant consent for the Dynamics CRM (Dataverse) permission, then retry.';
+  if (/AADSTS50011|redirect|reply url/i.test(msg))
+    return ' → The reused Dataverse app registration (' + (csGetDvClientId() || '?') + ') must list this page’s URL (' + APP_REDIRECT_URI + ') as a SPA redirect URI. Add it there, or clear the Dataverse client ID field to use this app instead.';
+  return '';
+}
+
+let csFilter = 'all';
+function csSetFilter(f, btn){
+  csFilter = f;
+  document.querySelectorAll('#mode-cs .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  csRender();
+}
+
+// Get the set of modern agent-identity appIds from Entra (reuse pro-code data if
+// already loaded, else query Graph). Returns { set, ok } — ok=false if unresolved.
+async function csGetModernAppIds(){
+  let set = new Set(modernAgents.map(m => (m.appId || '').toLowerCase()).filter(Boolean));
+  if (set.size) return { set, ok: true };
+  const attempts = [
+    `${GRAPH}/servicePrincipals/microsoft.graph.agentIdentity?$select=appId&$top=999`,
+    `${GRAPH_BETA}/servicePrincipals/microsoft.graph.agentIdentity?$select=appId&$top=999`,
+  ];
+  for (const url of attempts){
+    try { const items = await ggetAll(url, 20, true); items.forEach(i => { if (i.appId) set.add(String(i.appId).toLowerCase()); }); return { set, ok: true }; }
+    catch (e){ /* try next */ }
+  }
+  return { set, ok: false };
+}
+
+// Classify each scanned agent as classic (app registration) or modern (Entra Agent ID),
+// by testing its appId against the modern agent-identity set.
+async function csClassifyAgents(){
+  let res; try { res = await csGetModernAppIds(); } catch { res = { set: new Set(), ok: false }; }
+  let withAppId = 0;
+  for (const a of csAgents){
+    const id = (a.appId || '').toLowerCase();
+    if (id) withAppId++;
+    a._agentClass = !res.ok ? 'unknown' : (!id ? 'unknown' : (res.set.has(id) ? 'modern' : 'classic'));
+    csAdvise(a);
+  }
+  return { withAppId, modernSet: res.set.size, ok: res.ok };
+}
+
+// Lifecycle-based recommendation. "Last used" is proxied by the most recent
+// authoring event (published/modified) since end-user usage isn't in the bot table.
+// A short-lived, long-dormant agent is a candidate to simply DISABLE rather than recreate.
+const CS_ADVICE_RANK = { disable: 0, review: 1, recreate: 2, active: 2 };
+function csAdvise(a){
+  const now = Date.now();
+  const t = d => d ? new Date(d).getTime() : 0;
+  const createdT = t(a.created);
+  const lastUsedT = Math.max(t(a.publishedOn), t(a.modified), createdT) || 0;
+  a._lastUsed = lastUsedT || null;
+  a._idleDays = lastUsedT ? Math.floor((now - lastUsedT) / 86400e3) : null;
+  a._activeDays = (createdT && lastUsedT) ? Math.max(0, Math.floor((lastUsedT - createdT) / 86400e3)) : null;
+
+  const idle = a._idleDays, active = a._activeDays;
+  // Modern agents already have a modern Entra Agent ID — there is nothing to
+  // migrate. Migration advice (Recreate, and the dormancy prompts framed around
+  // recreating) is only meaningful for Classic agents. Govern modern agents in
+  // the Blueprint scanner instead.
+  if (a._agentClass === 'modern'){
+    a._advice = { level: 'active', label: '✓ Modern',
+      reason: 'Already a modern Entra Agent ID — no migration needed. Govern it in the Blueprint Security Posture scanner.' };
+  } else if (idle != null && idle >= 90 && (active == null || active <= 14)){
+    a._advice = { level: 'disable', label: '🗑️ Disable',
+      reason: `Short-lived (~${active != null ? active : '?'}d active) and dormant for ${idle}d — looks abandoned. Disable/decommission instead of recreating.` };
+  } else if (idle != null && idle >= 90){
+    a._advice = { level: 'review', label: '⚠️ Review',
+      reason: `Dormant for ${idle}d — confirm it's still used before recreating.` };
+  } else if (a.published){
+    a._advice = { level: 'recreate', label: '⬆️ Recreate',
+      reason: 'Active & published classic agent — recreate in Copilot Studio to modernise (gets a modern Agent ID).' };
+  } else {
+    a._advice = { level: 'review', label: '🔍 Review',
+      reason: 'Classic agent, never published — review whether to keep before investing in migration.' };
+  }
+  a._adviceRank = CS_ADVICE_RANK[a._advice.level] ?? 9;
+}
+function csAdviceBadge(a){
+  if (!a._advice) return '<span class="text-muted">—</span>';
+  const lv = a._advice.level;
+  const cls = lv === 'disable' ? 'st-error' : (lv === 'recreate' || lv === 'active') ? 'st-copied' : 'st-notcopied';
+  return `<span class="status-pill ${cls}" title="${esc(a._advice.reason)}">${a._advice.label}</span>`;
+}
+
+// Robustly pull the Entra app/identity ID out of a bot record. The documented
+// source is bot.synchronizationstatus JSON → applicationId, but it can be nested,
+// so deep-search the parsed JSON and fall back to a regex over the raw string.
+function csDeepFindKey(obj, keyLc){
+  if (!obj || typeof obj !== 'object') return null;
+  for (const k of Object.keys(obj)){
+    if (k.toLowerCase() === keyLc && typeof obj[k] === 'string' &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(obj[k])) return obj[k];
+  }
+  for (const k of Object.keys(obj)){
+    const v = obj[k];
+    if (v && typeof v === 'object'){ const r = csDeepFindKey(v, keyLc); if (r) return r; }
+  }
+  return null;
+}
+function csExtractAppId(b){
+  const raw = b.synchronizationstatus || '';
+  if (!raw) return null;
+  try { const j = JSON.parse(raw); const r = csDeepFindKey(j, 'applicationid'); if (r) return r; } catch {}
+  const m = /"applicationId"\s*:\s*"([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"/i.exec(raw);
+  return m ? m[1] : null;
+}
+
+// Collapse/expand the scan panel so results take focus after a scan.
+function csSetConfigCollapsed(collapsed, summary){
+  const body = document.getElementById('cs-config-body');
+  const chev = document.getElementById('cs-config-chevron');
+  const sum  = document.getElementById('cs-config-summary');
+  if (!body) return;
+  body.style.display = collapsed ? 'none' : '';
+  if (chev) chev.textContent = collapsed ? '▸' : '▾';
+  if (sum){
+    sum.textContent = collapsed && summary ? summary : '';
+    sum.style.display = collapsed && summary ? 'inline' : 'none';
+  }
+}
+function csToggleConfig(){
+  const body = document.getElementById('cs-config-body');
+  csSetConfigCollapsed(body && body.style.display !== 'none');
+}
+
+function csStatus(msg){ const el = document.getElementById('cs-status'); if (el) el.textContent = msg; }
+function csSetProgress(pct, phase, msg, cls){
+  document.getElementById('cs-progress').style.display = 'block';
+  if (pct != null) document.getElementById('cs-progress-bar').style.width = pct + '%';
+  if (phase) document.getElementById('cs-progress-phase').textContent = phase;
+  if (msg){ const log = document.getElementById('cs-progress-log'); const d = document.createElement('div'); d.className = cls || ''; d.textContent = msg; log.appendChild(d); log.scrollTop = log.scrollHeight; }
+}
+
+// Dataverse is per-resource: acquire a token scoped to each environment's URL.
+// Optional: read Dataverse under a DIFFERENT app registration that already has the
+// Dynamics CRM consent (e.g. the Copilot Studio Auditor), so this app never needs it.
+let csDvMsal = null, csDvAccount = null, csDvClientId = null;
+function csGetDvClientId(){ return (document.getElementById('cs-dv-clientid')?.value || '').trim() || null; }
+
+// Lazily build (and cache) the second MSAL client for the override app, reusing a
+// cached account for the current user if one exists.
+async function csBuildDvMsal(cid){
+  if (!csDvMsal || csDvClientId !== cid){
+    csDvClientId = cid;
+    csDvMsal = new msal.PublicClientApplication({
+      auth: { clientId: cid, authority: 'https://login.microsoftonline.com/' + getTenant(), redirectUri: APP_REDIRECT_URI },
+      cache: { cacheLocation: 'localStorage' },
+    });
+    await csDvMsal.initialize();
+    const hint = (currentAccount && currentAccount.username) || null;
+    const accts = csDvMsal.getAllAccounts();
+    csDvAccount = (hint && accts.find(a => (a.username || '').toLowerCase() === hint.toLowerCase())) || accts[0] || null;
+    if (csDvAccount) csDvMsal.setActiveAccount(csDvAccount);
+  }
+  return csDvMsal;
+}
+
+// Return the MSAL app + account for Dataverse tokens. With an override client we
+// only ever do SILENT auth here (ssoSilent) — never a popup mid-flow, since a popup
+// after awaits gets blocked (window.open null). If silent fails we throw
+// DV_SIGNIN_REQUIRED so the caller can prompt the explicit sign-in button.
+async function csEnsureDvAuth(){
+  const cid = csGetDvClientId();
+  if (!cid || cid === getClientId()) return { app: msalApp, account: currentAccount };
+  await csBuildDvMsal(cid);
+  if (!csDvAccount){
+    const hint = (currentAccount && currentAccount.username) || null;
+    try { csDvAccount = (await csDvMsal.ssoSilent({ scopes: ['https://graph.microsoft.com/User.Read'], loginHint: hint })).account; csDvMsal.setActiveAccount(csDvAccount); }
+    catch { throw new Error('DV_SIGNIN_REQUIRED'); }
+  }
+  csUpdateDvSigninBtn();
+  return { app: csDvMsal, account: csDvAccount };
+}
+
+// Explicit, user-gesture sign-in for the override app (popup opens directly on click).
+async function csDvSignIn(){
+  const cid = csGetDvClientId();
+  if (!cid){ csStatus('Enter a Dataverse app client ID first, or clear it to use this app.'); return; }
+  const btn = document.getElementById('cs-dv-signin-btn'); if (btn){ btn.disabled = true; btn.textContent = 'Signing in…'; }
+  try {
+    await csBuildDvMsal(cid);
+    const hint = (currentAccount && currentAccount.username) || null;
+    const r = await csDvMsal.loginPopup({ scopes: ['https://graph.microsoft.com/User.Read'], ...(hint ? { loginHint: hint } : {}) });
+    csDvAccount = r.account; csDvMsal.setActiveAccount(csDvAccount);
+    csStatus('Signed in to the Dataverse app ✓ — now Discover or Scan agents.');
+  } catch(e){
+    const m = e.errorMessage || e.message || String(e);
+    csStatus('Dataverse app sign-in failed: ' + m + csAuthHint(m));
+  } finally { if (btn){ btn.disabled = false; btn.textContent = '🔑 Sign in to Dataverse app'; } csUpdateDvSigninBtn(); }
+}
+
+// Show the explicit sign-in button only when an override client is set but not yet signed in.
+function csUpdateDvSigninBtn(){
+  const btn = document.getElementById('cs-dv-signin-btn'); if (!btn) return;
+  const cid = csGetDvClientId();
+  btn.style.display = (cid && cid !== getClientId() && !csDvAccount) ? '' : 'none';
+}
+
+// Map DV_SIGNIN_REQUIRED to a friendly prompt; returns true if it handled the error.
+function csHandleDvSignin(e, setter){
+  if (String(e && e.message) === 'DV_SIGNIN_REQUIRED'){
+    csUpdateDvSigninBtn();
+    setter('Click “🔑 Sign in to Dataverse app” first (reusing ' + (csGetDvClientId() || '') + '), then retry.');
+    return true;
+  }
+  return false;
+}
+
+async function csGetToken(resource){
+  const { app, account } = await csEnsureDvAuth();
+  const req = { scopes: [resource.replace(/\/$/, '') + '/.default'], account };
+  try { return (await app.acquireTokenSilent(req)).accessToken; }
+  catch { return (await app.acquireTokenPopup(req)).accessToken; }
+}
+function csDvHeaders(token){
+  return { Authorization: 'Bearer ' + token, Accept: 'application/json',
+           'OData-MaxVersion': '4.0', 'OData-Version': '4.0',
+           Prefer: 'odata.include-annotations="OData.Community.Display.V1.FormattedValue"' };
+}
+async function csDvGet(url, headers){
+  const r = await fetch(url, { headers });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+  return r.json();
+}
+async function csDvGetAll(url, headers){
+  let out = [], next = url;
+  while (next){ const j = await csDvGet(next, headers); out = out.concat(j.value || []); next = j['@odata.nextLink']; }
+  return out;
+}
+
+// List every environment the signed-in user can access (Global Discovery Service).
+async function csListEnvUrls(){
+  const token = await csGetToken(CS_GDS);
+  const r = await fetch(CS_GDS + '/api/discovery/v2.0/Instances?$select=ApiUrl,FriendlyName',
+                        { headers: { Authorization: 'Bearer ' + token, Accept: 'application/json' } });
+  if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+  const inst = (await r.json()).value || [];
+  return { urls: inst.map(i => (i.ApiUrl || '').replace(/\/$/, '')).filter(Boolean),
+           names: inst.map(i => i.FriendlyName).filter(Boolean) };
+}
+
+// Auto-discover every environment the signed-in user can access.
+async function csDiscoverEnvs(){
+  const btn = document.getElementById('cs-discover-btn'); btn.disabled = true;
+  try {
+    if (!msalApp) { csStatus('Sign in first.'); return; }
+    csStatus('Discovering environments…');
+    const { urls, names } = await csListEnvUrls();
+    if (!urls.length){ csStatus('No environments returned for your account.'); return; }
+    document.getElementById('cs-envs').value = urls.join('\n');
+    csStatus('Found ' + urls.length + ' environment(s): ' + names.join(', ') + '. Review, then Scan agents.');
+  } catch (e){ if (!csHandleDvSignin(e, csStatus)) csStatus('Discovery failed: ' + e.message + csAuthHint(e.message) + ' (You can still enter URLs manually.)'); }
+  finally { btn.disabled = false; }
+}
+
+// Build an appId → { name, environment } map of Copilot Studio bots (bot.synchronizationstatus.applicationId).
+// Reuses any full inventory already scanned; otherwise does a light bots-only query per environment.
+async function csBuildAppIdMap(envs, log){
+  const map = new Map();
+  for (const a of csAgents){ if (a.appId) map.set(String(a.appId).toLowerCase(), { name: a.name, environment: a.environment }); }
+  for (const env of envs){
+    const org = env.replace(/\/$/, ''); const api = org + '/api/data/v9.2';
+    const envName = org.replace(/^https?:\/\//, '').split('.')[0];
+    if (log) log('Reading agent names from ' + envName + ' …');
+    const token = await csGetToken(org); const H = csDvHeaders(token);
+    const bots = await csDvGetAll(api + "/bots?$select=name,botid,synchronizationstatus", H);
+    for (const b of bots){
+      const appId = csExtractAppId(b);
+      if (appId) map.set(String(appId).toLowerCase(), { name: b.name, environment: envName });
+    }
+  }
+  return map;
+}
+
+// Pro-code mode: enrich classic agents with their real Copilot Studio names (joined by appId via Dataverse).
+async function matchCopilotNames(){
+  const btn = document.getElementById('btn-match-cs');
+  if (btn){ btn.disabled = true; btn.textContent = 'Matching…'; }
+  document.getElementById('progress-log').innerHTML = '';
+  try {
+    if (!msalApp){ setProgress(100, 'Match Copilot Studio names', 'Sign in first.', 'log-err'); return; }
+    let envs = document.getElementById('cs-envs').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+    setProgress(10, 'Match Copilot Studio names', envs.length ? 'Using entered environments…' : 'Discovering Dataverse environments…');
+    if (!envs.length){ const d = await csListEnvUrls(); envs = d.urls; document.getElementById('cs-envs').value = envs.join('\n'); }
+    if (!envs.length) throw new Error('No Dataverse environments found for your account (Copilot Studio matching needs Dataverse access).');
+    const map = await csBuildAppIdMap(envs, m => setProgress(null, null, m));
+    let matched = 0;
+    for (const a of allAgents){
+      const hit = a.appId ? map.get(String(a.appId).toLowerCase()) : null;
+      a._copilotName = hit ? hit.name : null;
+      a._copilotEnv = hit ? hit.environment : null;
+      if (hit) matched++;
+    }
+    setProgress(100, 'Match Copilot Studio names', `Matched ${matched} of ${allAgents.length} classic agents to their Copilot Studio names.`, 'log-ok');
+    applyFilters();
+    setTimeout(hideProgress, 2000);
+  } catch (e){
+    if (String(e && e.message) === 'DV_SIGNIN_REQUIRED'){
+      csUpdateDvSigninBtn();
+      setProgress(100, 'Match Copilot Studio names', 'Open the Copilot Studio tab and click “🔑 Sign in to Dataverse app” first (reusing ' + (csGetDvClientId() || '') + '), then retry.', 'log-warn');
+    } else {
+      setProgress(100, 'Match Copilot Studio names', 'Failed: ' + e.message + csAuthHint(e.message), 'log-err');
+    }
+  } finally {
+    if (btn){ btn.disabled = false; btn.textContent = '🔗 Match Copilot Studio names'; }
+  }
+}
+
+async function csRunScan(){
+  const envs = document.getElementById('cs-envs').value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  if (!envs.length){ csStatus('Enter at least one environment URL (or discover them).'); return; }
+  const btn = document.getElementById('cs-scan-btn'); btn.disabled = true;
+  document.getElementById('cs-progress-log').innerHTML = '';
+  document.getElementById('cs-error').style.display = 'none';
+  document.getElementById('cs-kpi').style.display = 'none';
+  document.getElementById('cs-table-section').style.display = 'none';
+  csAgents = []; csExpanded = null; csEnvCount = 0;
+
+  // Preflight Dataverse auth so a required sign-in is surfaced once (not per-env).
+  try { await csEnsureDvAuth(); }
+  catch (e){ if (csHandleDvSignin(e, csStatus)){ btn.disabled = false; return; } }
+
+  try {
+    let done = 0;
+    for (const env of envs){
+      csSetProgress(Math.round((done / envs.length) * 100), 'Scanning environments', 'Reading ' + env + ' …');
+      try {
+        const list = await csScanEnvironment(env);
+        csAgents.push(...list);
+        csEnvCount++;
+        csSetProgress(null, null, `  ${env}: ${list.length} agent(s).`, 'log-ok');
+      } catch (e){
+        csSetProgress(null, null, `  ${env} failed: ${e.message}${csAuthHint(e.message)}`, 'log-err');
+      }
+      done++;
+    }
+    csSetProgress(95, 'Classifying', 'Classifying agents as classic (app registration) vs modern (Entra Agent ID)…');
+    const diag = await csClassifyAgents();
+    const nClassic = csAgents.filter(a => a._agentClass === 'classic').length;
+    const nModern  = csAgents.filter(a => a._agentClass === 'modern').length;
+    csSetProgress(100, 'Done', `Inventoried ${csAgents.length} agent(s) across ${csEnvCount} environment(s): ${nClassic} classic, ${nModern} modern.`, 'log-ok');
+    if (nClassic === 0 && nModern === 0){
+      const syncPresent = csAgents.filter(a => a._syncPresent).length;
+      const syncAppId   = csAgents.filter(a => a._syncHasAppId).length;
+      csSetProgress(null, null,
+        `Diagnostics: Entra app ID resolved on ${diag.withAppId}/${csAgents.length}; ` +
+        `modern-identity set ${diag.ok ? '= ' + diag.modernSet : 'unavailable (Graph lookup failed)'}; ` +
+        `synchronizationstatus present on ${syncPresent}, contains "applicationId" on ${syncAppId}.`,
+        'log-warn');
+    }
+    csRenderKpis();
+    csRender();
+    document.getElementById('cs-kpi').style.display = 'flex';
+    document.getElementById('cs-table-section').style.display = 'block';
+    csStatus(`Done — ${csAgents.length} agent(s) (${nClassic} classic, ${nModern} modern).`);
+    // Collapse the scan panel so results take focus (header reopens it for a re-scan).
+    csSetConfigCollapsed(true, `${csEnvCount} environment${csEnvCount === 1 ? '' : 's'} · ${csAgents.length} agents — click to change`);
+    setTimeout(() => { document.getElementById('cs-progress').style.display = 'none'; }, 1800);
+  } catch (e){
+    const el = document.getElementById('cs-error'); el.textContent = 'Scan failed: ' + e.message; el.style.display = 'block';
+  } finally { btn.disabled = false; }
+}
+
+async function csScanEnvironment(orgUrl){
+  const org = orgUrl.replace(/\/$/, '');
+  const api = org + '/api/data/v9.2';
+  const envName = org.replace(/^https?:\/\//, '').split('.')[0];
+  const token = await csGetToken(org);
+  const H = csDvHeaders(token);
+
+  const bots = await csDvGetAll(api + "/bots?$select=name,botid,schemaname,_ownerid_value,_createdby_value,createdon,modifiedon,publishedon,configuration,statecode,authenticationmode,synchronizationstatus", H);
+  const comps = await csDvGetAll(api + "/botcomponents?$select=componenttype,name,description,data,_parentbotid_value", H);
+
+  const byBot = {};
+  for (const b of bots){
+    byBot[b.botid] = {
+      name: b.name, botid: b.botid, schemaName: b.schemaname || '',
+      environment: envName, environmentUrl: org,
+      owner: b['_ownerid_value@OData.Community.Display.V1.FormattedValue'] || b['_createdby_value@OData.Community.Display.V1.FormattedValue'] || '',
+      appId: csExtractAppId(b),
+      _syncPresent: !!b.synchronizationstatus,
+      _syncHasAppId: /applicationId/i.test(b.synchronizationstatus || ''),
+      created: b.createdon || null, modified: b.modifiedon || null, publishedOn: b.publishedon || null,
+      published: !!b.publishedon,
+      orchestration: /"GenerativeActionsEnabled"\s*:\s*true/i.test(b.configuration || '') ? 'Generative' : 'Classic',
+      model: csExtractModel(b.configuration) || null,
+      usesModelKnowledge: /"useModelKnowledge"\s*:\s*true/i.test(b.configuration || ''),
+      description: '', instructions: '',
+      topics: [], knowledge: [], tools: new Set(), triggers: [], connections: new Set(),
+    };
+  }
+
+  for (const c of comps){
+    const bid = c._parentbotid_value; const rec = byBot[bid]; if (!rec) continue;
+    const typeName = (c['componenttype@OData.Community.Display.V1.FormattedValue'] || '').toString();
+    const data = c.data || '';
+
+    if (/custom gpt/i.test(typeName) || c.componenttype === 15){
+      if (c.description && !rec.description) rec.description = c.description;
+      const instr = csExtractInstructions(data); if (instr && !rec.instructions) rec.instructions = instr;
+    }
+    if (/^topic/i.test(typeName) || /kind:\s*AdaptiveDialog/i.test(data)) { if (c.name) rec.topics.push(c.name); }
+    if (/knowledge|file attachment/i.test(typeName) || CS_KNOW_RX.test(data)) { rec.knowledge.push(c.name || typeName || 'Knowledge source'); }
+    if (/external trigger/i.test(typeName) || /"componenttype"\s*:\s*17/.test(data)) { rec.triggers.push(c.name || 'Trigger'); }
+
+    if (CS_HTTP_RX.test(data))  rec.tools.add('HTTP request');
+    if (CS_MCP_RX.test(data))   rec.tools.add('MCP server');
+    if (CS_SKILL_RX.test(data)) rec.tools.add('Connected agent / skill');
+    if (CS_PROMPT_RX.test(data))rec.tools.add('AI Builder prompt');
+    if (CS_MAIL_RX.test(data))  rec.tools.add('Send mail');
+    if (CS_TASK_RX.test(data))  rec.tools.add('Action / tool');
+    if (!rec.model){ const mh = csExtractModel(data); if (mh) rec.model = mh; }
+
+    let m; const crx = /connectionreference["'\s:=]+([A-Za-z0-9_.\-]{2,80})/ig;
+    while ((m = crx.exec(data))) rec.connections.add(m[1]);
+  }
+
+  return Object.values(byBot).map(r => {
+    r.tools = [...r.tools]; r.connections = [...r.connections];
+    r._topicCount = r.topics.length; r._knowledgeCount = r.knowledge.length; r._toolCount = r.tools.length;
+    if (!r.model) r.model = '—';
+    return r;
+  });
+}
+
+function csRenderKpis(){
+  document.getElementById('cs-kpi-total').textContent     = csAgents.length;
+  document.getElementById('cs-kpi-published').textContent = csAgents.filter(a => a.published).length;
+  document.getElementById('cs-kpi-genai').textContent     = csAgents.filter(a => a.orchestration === 'Generative').length;
+  document.getElementById('cs-kpi-knowledge').textContent = csAgents.filter(a => a._knowledgeCount > 0).length;
+  document.getElementById('cs-kpi-tools').textContent     = csAgents.filter(a => a._toolCount > 0).length;
+  document.getElementById('cs-kpi-envs').textContent      = csEnvCount;
+}
+
+function csSortBy(key){
+  if (csSortKey === key) csSortDir *= -1; else { csSortKey = key; csSortDir = 1; }
+  csRender();
+}
+
+function csRender(){
+  const q = (document.getElementById('cs-search').value || '').toLowerCase();
+  csFiltered = csAgents.filter(a => {
+    if (csFilter !== 'all' && a._agentClass !== csFilter) return false;
+    if (!q) return true;
+    return [a.name, a.environment, a.model, a.orchestration, a.description, a.instructions, (a.tools||[]).join(' '), (a.knowledge||[]).join(' ')]
+      .join(' ').toLowerCase().includes(q);
+  });
+  csFiltered.sort((a, b) => {
+    let av = a[csSortKey], bv = b[csSortKey];
+    if (csSortKey === 'published'){ av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return -csSortDir; if (av > bv) return csSortDir; return 0;
+  });
+  document.querySelectorAll('#cs-agents-table thead th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    const k = th.getAttribute('onclick')?.match(/csSortBy\('(.+?)'\)/)?.[1];
+    if (k === csSortKey) th.classList.add(csSortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+  });
+
+  const tbody = document.getElementById('cs-tbody');
+  const empty = document.getElementById('cs-empty');
+  if (!csFiltered.length){ tbody.innerHTML = ''; empty.style.display = 'block'; document.getElementById('cs-empty-msg').textContent = csAgents.length ? 'No agents match your search.' : 'No Copilot Studio agents found.'; return; }
+  empty.style.display = 'none';
+
+  const clsBadge = c => c === 'classic' ? `<span class="tag" style="color:#fbbf24;border:1px solid #f59e0b55">Classic</span>`
+    : c === 'modern' ? `<span class="tag" style="color:#4ade80;border:1px solid #22c55e55">Modern</span>`
+    : `<span class="tag" title="No linked Entra app ID resolved">Unknown</span>`;
+  tbody.innerHTML = csFiltered.map(a => `
+    <tr onclick="csToggleRow('${esc(a.botid)}')" data-cs-id="${esc(a.botid)}" style="cursor:pointer">
+      <td><div class="agent-name">${esc(a.name || '—')} ${clsBadge(a._agentClass)}</div><div class="agent-id">${esc(a.schemaName || a.botid)}</div></td>
+      <td>${esc(a.environment)}</td>
+      <td>${a.model && a.model !== '—' ? `<span class="tag">${esc(a.model)}</span>` : '<span class="text-muted">—</span>'}</td>
+      <td>${a.orchestration === 'Generative' ? '<span class="status-pill st-pending">✨ Generative</span>' : '<span class="text-muted">Classic</span>'}</td>
+      <td>${a._knowledgeCount || '<span class="text-muted">0</span>'}</td>
+      <td>${a._toolCount || '<span class="text-muted">0</span>'}</td>
+      <td>${a._topicCount || '<span class="text-muted">0</span>'}</td>
+      <td>${a.published ? '<span class="status-pill st-copied">🚀 Yes</span>' : '<span class="text-muted">No</span>'}</td>
+      <td>${a._lastUsed ? fmtDate(a._lastUsed) : '<span class="text-muted">—</span>'}</td>
+      <td>${csAdviceBadge(a)}</td>
+    </tr>`).join('');
+
+  if (csExpanded && csFiltered.find(a => a.botid === csExpanded)){
+    const tr = tbody.querySelector(`tr[data-cs-id="${CSS.escape(csExpanded)}"]`);
+    if (tr) csInsertDetail(tr, csAgents.find(a => a.botid === csExpanded));
+  }
+}
+
+function csToggleRow(id){
+  const tbody = document.getElementById('cs-tbody');
+  const existing = tbody.querySelector(`tr[data-cs-detail="${CSS.escape(id)}"]`);
+  if (csExpanded === id){ existing?.remove(); csExpanded = null; return; }
+  if (csExpanded) tbody.querySelector(`tr[data-cs-detail="${CSS.escape(csExpanded)}"]`)?.remove();
+  csExpanded = id;
+  const tr = tbody.querySelector(`tr[data-cs-id="${CSS.escape(id)}"]`);
+  if (tr) csInsertDetail(tr, csAgents.find(a => a.botid === id));
+}
+
+function csInsertDetail(tr, a){
+  const list = arr => arr && arr.length ? arr.map(x => `<span class="tag">${esc(x)}</span>`).join('') : '<span class="text-muted">None</span>';
+  const detail = document.createElement('tr');
+  detail.className = 'expanded-row'; detail.dataset.csDetail = a.botid;
+  const adviceColor = a._advice && a._advice.level === 'disable' ? 'var(--danger)'
+    : a._advice && (a._advice.level === 'recreate' || a._advice.level === 'active') ? 'var(--modern)' : 'var(--warning)';
+  detail.innerHTML = `<td colspan="10"><div class="detail-panel">
+    <div class="detail-grid">
+      <div class="detail-section">
+        <h4>Agent</h4>
+        <div class="detail-row"><span class="dk">Name</span><span class="dv">${esc(a.name || '—')}</span></div>
+        <div class="detail-row"><span class="dk">Schema</span><span class="dv"><code>${esc(a.schemaName || '—')}</code></span></div>
+        <div class="detail-row"><span class="dk">Bot ID</span><span class="dv"><code>${esc(a.botid)}</code></span></div>
+        <div class="detail-row"><span class="dk">Environment</span><span class="dv">${esc(a.environment)}</span></div>
+        <div class="detail-row"><span class="dk">Owner</span><span class="dv">${esc(a.owner || '—')}</span></div>
+        <div class="detail-row"><span class="dk">Model</span><span class="dv">${esc(a.model || '—')}</span></div>
+        <div class="detail-row"><span class="dk">Orchestration</span><span class="dv">${esc(a.orchestration)}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Lifecycle</h4>
+        <div class="detail-row"><span class="dk">Created</span><span class="dv">${a.created ? new Date(a.created).toLocaleDateString() : '—'}</span></div>
+        <div class="detail-row"><span class="dk">Last used</span><span class="dv">${a._lastUsed ? new Date(a._lastUsed).toLocaleDateString() : '—'}${a._idleDays != null ? ` <span class="text-muted">(${a._idleDays}d idle)</span>` : ''}</span></div>
+        <div class="detail-row"><span class="dk">Active span</span><span class="dv">${a._activeDays != null ? a._activeDays + 'd' : '—'}</span></div>
+        <div class="detail-row"><span class="dk">Published</span><span class="dv">${a.published ? '🚀 ' + (a.publishedOn ? new Date(a.publishedOn).toLocaleDateString() : 'Yes') : 'No'}</span></div>
+        <div class="detail-row"><span class="dk">Modified</span><span class="dv">${a.modified ? new Date(a.modified).toLocaleDateString() : '—'}</span></div>
+        <div style="margin-top:8px;padding:8px 10px;border-radius:6px;background:var(--surface3);border-left:3px solid ${adviceColor}">
+          <div style="font-weight:700;font-size:.78rem;color:var(--text)">${a._advice ? a._advice.label : '—'}</div>
+          <div style="font-size:.72rem;color:var(--text2);margin-top:3px;line-height:1.4">${a._advice ? esc(a._advice.reason) : ''}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h4>Knowledge (${a._knowledgeCount})</h4>${list(a.knowledge)}
+        <h4 style="margin-top:12px">Tools (${a._toolCount})</h4>${list(a.tools)}
+        <h4 style="margin-top:12px">Triggers</h4>${list(a.triggers)}
+        <h4 style="margin-top:12px">Connections</h4>${list(a.connections)}
+      </div>
+      <div class="detail-section">
+        <h4>Topics (${a._topicCount})</h4>${list(a.topics)}
+      </div>
+    </div>
+    <div class="copybox" style="border-left-color:var(--copilot)">
+      <h4>📝 Description</h4>
+      <p style="font-size:.8rem;color:var(--text2);white-space:pre-wrap">${esc(a.description || '— none —')}</p>
+      <h4 style="margin-top:12px">🧭 Instructions</h4>
+      <pre>${esc(a.instructions || '— none —')}</pre>
+    </div>
+  </div></td>`;
+  tr.after(detail);
+}
+
+function csExport(kind){
+  if (!csAgents.length){ alert('Nothing to export — run a scan first.'); return; }
+  const stamp = new Date().toISOString().slice(0, 10);
+  if (kind === 'json'){
+    const pkg = csAgents.map(a => ({
+      name: a.name, schemaName: a.schemaName, environment: a.environment, botId: a.botid, entraAppId: a.appId || null,
+      agentClass: a._agentClass || 'unknown',
+      description: a.description, model: a.model, orchestration: a.orchestration,
+      instructions: a.instructions, knowledge: a.knowledge, tools: a.tools, topics: a.topics,
+      triggers: a.triggers, connections: a.connections, published: a.published,
+      created: a.created, lastUsed: a._lastUsed ? new Date(a._lastUsed).toISOString() : null,
+      idleDays: a._idleDays, activeDays: a._activeDays,
+      advice: a._advice ? a._advice.level : null, adviceReason: a._advice ? a._advice.reason : null,
+    }));
+    const blob = new Blob([JSON.stringify({ generated: new Date().toISOString(), agents: pkg }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const el = document.createElement('a');
+    el.href = url; el.download = `copilot-studio-agents-${stamp}.json`; el.click(); URL.revokeObjectURL(url);
+    return;
+  }
+  const headers = ['Name','Class','Environment','Model','Orchestration','Published','Created','LastUsed','IdleDays','ActiveDays','Advice','AdviceReason','KnowledgeCount','ToolCount','TopicCount','Tools','Knowledge','Description','Instructions'];
+  const rows = csAgents.map(a => [
+    a.name || '', a._agentClass || 'unknown', a.environment, a.model || '', a.orchestration, a.published,
+    a.created || '', a._lastUsed ? new Date(a._lastUsed).toISOString().slice(0, 10) : '', a._idleDays ?? '', a._activeDays ?? '',
+    a._advice ? a._advice.level : '', a._advice ? a._advice.reason : '',
+    a._knowledgeCount, a._toolCount, a._topicCount,
+    (a.tools || []).join('; '), (a.knowledge || []).join('; '),
+    (a.description || '').replace(/\s+/g, ' ').slice(0, 500), (a.instructions || '').replace(/\s+/g, ' ').slice(0, 1000),
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob); const el = document.createElement('a');
+  el.href = url; el.download = `copilot-studio-agents-${stamp}.csv`; el.click(); URL.revokeObjectURL(url);
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+//  AZURE AI FOUNDRY AGENTS INVENTORY (read-only, data plane)
+// ════════════════════════════════════════════════════════════════════════════
+let fdryAgents = [];
+let fdryFiltered = [];
+let fdryEpCount = 0;
+let fdrySortKey = 'name';
+let fdrySortDir = 1;
+let fdryExpanded = null;
+
+function fdryStatus(msg){ const el = document.getElementById('fdry-status'); if (el) el.textContent = msg; }
+function fdrySetProgress(pct, phase, msg, cls){
+  document.getElementById('fdry-progress').style.display = 'block';
+  if (pct != null) document.getElementById('fdry-progress-bar').style.width = pct + '%';
+  if (phase) document.getElementById('fdry-progress-phase').textContent = phase;
+  if (msg){ const log = document.getElementById('fdry-progress-log'); const d = document.createElement('div'); d.className = cls || ''; d.textContent = msg; log.appendChild(d); log.scrollTop = log.scrollHeight; }
+}
+function fdrySetConfigCollapsed(collapsed, summary){
+  const body = document.getElementById('fdry-config-body');
+  const chev = document.getElementById('fdry-config-chevron');
+  const sum  = document.getElementById('fdry-config-summary');
+  if (!body) return;
+  body.style.display = collapsed ? 'none' : '';
+  if (chev) chev.textContent = collapsed ? '▸' : '▾';
+  if (sum){ sum.textContent = collapsed && summary ? summary : ''; sum.style.display = collapsed && summary ? 'inline' : 'none'; }
+}
+function fdryToggleConfig(){ const body = document.getElementById('fdry-config-body'); fdrySetConfigCollapsed(body && body.style.display !== 'none'); }
+
+function fdryAuthHint(msg){
+  msg = String(msg || '');
+  if (/650057|invalid resource|invalid_client/i.test(msg))
+    return ' → App registration is missing an Azure AI / Cognitive Services delegated permission. Add it + grant admin consent, then retry.';
+  if (/consent|AADSTS65001/i.test(msg))
+    return ' → Consent required for the Azure AI scope; grant admin consent and retry.';
+  if (/\b403\b|forbidden/i.test(msg))
+    return ' → You lack a Foundry role (e.g. Foundry User / Foundry Agent Consumer) on this project.';
+  if (/\b401\b|unauthorized/i.test(msg))
+    return ' → Token audience/permission issue; the token must target https://ai.azure.com and you need a Foundry role on the project.';
+  return '';
+}
+
+// Copy the CLI command that mints a Foundry data-plane token (audience https://ai.azure.com).
+// The Foundry agent scan reads ONLY from a pasted token — this app registration can't mint an
+// ai.azure.com token (no consentable SP in most tenants), so interactive sign-in is not used here.
+function fdryCopyCmd(btn){
+  const t = document.getElementById('fdry-cmd-text');
+  const txt = t ? t.textContent : '';
+  const flash = (label) => { const o = btn.getAttribute('data-orig') || btn.textContent; btn.setAttribute('data-orig', o); btn.textContent = label; setTimeout(() => { btn.textContent = o; btn.removeAttribute('data-orig'); }, 1300); };
+  const fallback = () => {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = txt; ta.style.position = 'fixed'; ta.style.top = '-1000px'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      flash(ok ? 'Copied' : 'Copy failed — select it');
+    } catch (e) { flash('Copy failed — select it'); }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => flash('Copied')).catch(fallback);
+  } else { fallback(); }
+}
+
+// ── ARM auto-discovery of Foundry projects ───────────────────────────────────
+// Enumerates subscriptions → Microsoft.CognitiveServices AIServices accounts →
+// projects, and builds each project's data-plane endpoint. Control-plane token
+// (audience https://management.azure.com) + Azure RBAC Reader required.
+async function fdryGetArmToken(){
+  const scopes = ['https://management.azure.com/.default'];
+  try { return (await msalApp.acquireTokenSilent({ scopes, account: currentAccount })).accessToken; }
+  catch { return (await msalApp.acquireTokenPopup({ scopes, account: currentAccount })).accessToken; }
+}
+async function armGetAll(url, token){
+  const items = []; let next = url, pages = 0;
+  while (next && pages < 50){
+    const r = await fetch(next, { headers: { Authorization: 'Bearer ' + token } });
+    if (!r.ok) throw new Error(r.status + ' ' + (await r.text()).slice(0, 200));
+    const j = await r.json();
+    if (Array.isArray(j.value)) items.push(...j.value);
+    next = j.nextLink || null; pages++;
+  }
+  return items;
+}
+// Derive the services.ai.azure.com base for a Foundry account.
+function fdryAccountBase(acc){
+  const pick = () => {
+    const eps = (acc.properties && acc.properties.endpoints) || {};
+    for (const k in eps){ const v = eps[k]; if (typeof v === 'string' && /services\.ai\.azure\.com/i.test(v)) return v; }
+    const ep = acc.properties && acc.properties.endpoint;
+    if (ep && /services\.ai\.azure\.com/i.test(ep)) return ep;
+    return 'https://' + acc.name + '.services.ai.azure.com';
+  };
+  try { return new URL(pick()).origin; } catch { return 'https://' + acc.name + '.services.ai.azure.com'; }
+}
+// Repair an endpoint whose project path got nested: /api/projects/{account}/{project} → /api/projects/{project}.
+function fdryNormalizeEndpoint(s){
+  let ep = String(s || '').trim().replace(/\/+$/, '');
+  if (!ep) return '';
+  const m = ep.match(/^(https?:\/\/[^/]+\/api\/projects)\/(.+)$/i);
+  if (m){ const parts = m[2].split('/').filter(Boolean); ep = m[1] + '/' + parts[parts.length - 1]; }
+  return ep;
+}
+function fdryArmHint(msg){
+  msg = String(msg || '');
+  if (/650057|invalid resource|invalid_client/i.test(msg))
+    return ' → App registration is missing the "Azure Service Management · user_impersonation" permission. Add it + grant admin consent, then retry.';
+  if (/consent|AADSTS65001/i.test(msg))
+    return ' → Consent required for the Azure Service Management scope; grant admin consent and retry.';
+  if (/\b403\b|Authorization(Failed)?/i.test(msg))
+    return ' → You need Azure RBAC Reader on the subscription(s) / Foundry account(s).';
+  return '';
+}
+async function fdryDiscover(){
+  const btn = document.getElementById('fdry-discover-btn'); btn.disabled = true;
+  try {
+    if (!msalApp || !currentAccount) throw new Error('Sign in first (use the Pro-code tab), then return here.');
+    fdryStatus('Acquiring Azure Resource Manager token…');
+    const token = await fdryGetArmToken().catch(e => { throw new Error('__ARM__' + (e.errorMessage || e.message || e)); });
+
+    fdryStatus('Listing subscriptions…');
+    const subs = await armGetAll('https://management.azure.com/subscriptions?api-version=2020-01-01', token);
+    if (!subs.length){ fdryStatus('No subscriptions visible to your account.'); return; }
+
+    const endpoints = []; const found = []; const seen = new Set(); let accCount = 0;
+    for (const s of subs){
+      const sid = s.subscriptionId;
+      fdryStatus(`Scanning subscription ${s.displayName || sid} …`);
+      let accts = [];
+      try { accts = await armGetAll(`https://management.azure.com/subscriptions/${sid}/providers/Microsoft.CognitiveServices/accounts?api-version=2024-10-01`, token); }
+      catch(e){ continue; } // no access to this subscription's Cognitive Services
+      for (const acc of accts){
+        if ((acc.kind || '').toLowerCase() !== 'aiservices') continue; // Foundry accounts only
+        accCount++;
+        const base = fdryAccountBase(acc);
+        let projs = [];
+        try { projs = await armGetAll(`https://management.azure.com${acc.id}/projects?api-version=2025-06-01`, token); }
+        catch(e){ continue; } // account without the projects sub-resource
+        for (const p of projs){
+          const projName = String(p.name || '').split('/').pop(); // ARM returns "{account}/{project}"
+          const ep = `${base}/api/projects/${projName}`;
+          if (!seen.has(ep)){ seen.add(ep); endpoints.push(ep); found.push({ name: projName, account: acc.name, endpoint: ep }); }
+        }
+      }
+    }
+
+    if (!endpoints.length){ fdryStatus(`No Foundry projects found across ${subs.length} subscription(s). You may need Azure RBAC Reader on the accounts.`); return; }
+    const existing = document.getElementById('fdry-endpoints').value.split(/\r?\n/).map(x => x.trim()).filter(Boolean);
+    const merged = [...new Set([...existing, ...endpoints])];
+    document.getElementById('fdry-endpoints').value = merged.join('\n');
+    const disc = document.getElementById('fdry-discovered');
+    if (disc) disc.innerHTML =
+      '<div style="font-size:.72rem;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px">Discovered projects (' + found.length + ')</div>' +
+      found.map(f => `<span class="tag" title="${esc(f.endpoint)}" style="margin:2px 4px 2px 0">${esc(f.name)} · ${esc(f.account)}</span>`).join('');
+    fdryStatus(`Found ${endpoints.length} project(s) across ${accCount} Foundry account(s) in ${subs.length} subscription(s). Review, then Scan agents.`);
+  } catch(e){
+    const msg = String(e.message || e);
+    if (msg.startsWith('__ARM__')) fdryStatus('Could not get an ARM token: ' + msg.slice(7) + fdryArmHint(msg.slice(7)));
+    else fdryStatus('Discovery failed: ' + msg + fdryArmHint(msg));
+  } finally { btn.disabled = false; }
+}
+
+function fdryToolLabel(t){
+  const type = (t && t.type) || 'tool';
+  if (type === 'function') return 'Function: ' + ((t.function && t.function.name) || '?');
+  if (type === 'openapi')  return 'OpenAPI: ' + ((t.openapi && t.openapi.name) || '?');
+  const map = {
+    code_interpreter:'Code interpreter', file_search:'File search', azure_ai_search:'Azure AI Search',
+    bing_grounding:'Bing grounding', bing_custom_search:'Bing custom search', azure_function:'Azure Function',
+    sharepoint_grounding:'SharePoint', microsoft_fabric:'Fabric', connected_agent:'Connected agent',
+    mcp:'MCP', browser_automation:'Browser automation', computer_use_preview:'Computer use', deep_research:'Deep research',
+  };
+  return map[type] || type;
+}
+
+// Normalise both the classic (Assistants) and new (/agents) shapes into one record.
+function fdryNormalize(a, project, endpoint, source){
+  const def = a.definition || {};
+  const rawTools = a.tools || def.tools || [];
+  const tools = rawTools.map(fdryToolLabel);
+  const tr = a.tool_resources || def.tool_resources || {};
+  const vectorStores = (tr.file_search && tr.file_search.vector_store_ids) || [];
+  const ciFiles = (tr.code_interpreter && tr.code_interpreter.file_ids) || [];
+  let created = null;
+  if (a.created_at) created = new Date(a.created_at * 1000).toISOString();
+  else if (a.createdAt || a.created) created = a.createdAt || a.created;
+  const id = a.id || a.name;
+  const instanceId = (a.instance_identity && a.instance_identity.principal_id) || null;
+  // classic = Assistants API (asst_* ids, no Entra Agent ID); modern = new /agents API (blueprint-provisioned Agent ID).
+  const cls = instanceId ? 'modern' : (source || (/^asst_/i.test(id || '') ? 'classic' : 'modern'));
+  return {
+    id, name: a.name || a.id || '(unnamed)',
+    project, endpoint,
+    model: a.model || def.model || '—',
+    description: a.description || def.description || '',
+    instructions: a.instructions || def.instructions || '',
+    tools, vectorStores, ciFiles,
+    metadata: a.metadata || def.metadata || {},
+    instanceIdentity: instanceId,
+    created,
+    _toolCount: tools.length,
+    _knowledgeCount: vectorStores.length + ciFiles.length,
+    _agentClass: cls,
+  };
+}
+
+// List agents for one project endpoint. Tries the classic Assistants API (paginated),
+// then the new /agents API. Returns { agents, usedApi }.
+async function fdryListAgents(endpoint, token, log){
+  const base = endpoint.replace(/\/+$/, '');
+  const projName = decodeURIComponent((base.match(/\/projects\/([^\/?]+)/) || [])[1] || base);
+  const agents = [];
+  let usedApi = null; const tried = [];
+  const seen = new Set();
+  const addAll = (list, source) => (list || []).forEach(a => { const n = fdryNormalize(a, projName, base, source); if (n.id && !seen.has(n.id)){ seen.add(n.id); agents.push(n); } });
+
+  // 1) Assistants / Agent Service (asst_* ids). Try several paths & api-versions.
+  const paths = [ p => `${base}/assistants?api-version=${p}`, p => `${base}/openai/assistants?api-version=${p}` ];
+  const versions = ['2025-05-01', '2025-05-15-preview', '2024-12-01-preview', '2025-04-01-preview'];
+  outer:
+  for (const mk of paths){
+    for (const ver of versions){
+      try {
+        let after = null, pages = 0, ok2xx = false;
+        do {
+          const url = mk(ver) + '&limit=100' + (after ? '&after=' + encodeURIComponent(after) : '');
+          const r = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+          if (!r.ok){ if (pages === 0) tried.push(mk(ver).replace(base, '').split('&')[0] + ' → ' + r.status); break; }
+          ok2xx = true;
+          const j = await r.json(); addAll(j.data || j.value || [], 'classic');
+          after = j.has_more ? j.last_id : null; pages++;
+        } while (after && pages < 20);
+        if (ok2xx){ usedApi = mk(ver).replace(base, '').split('?')[0] + ' @' + ver; break outer; }
+      } catch(e){ tried.push('assistants@' + ver + ' → ' + (e.message || e)); }
+    }
+  }
+
+  // 2) New Foundry /agents API (kind-based). Merge any additional.
+  try {
+    const r = await fetch(`${base}/agents?api-version=v1`, { headers: { Authorization: 'Bearer ' + token } });
+    if (r.ok){ const j = await r.json(); addAll(j.value || j.data || [], 'modern'); if (!usedApi) usedApi = '/agents @v1'; }
+    else tried.push('/agents@v1 → ' + r.status);
+  } catch(e){ tried.push('/agents@v1 → ' + (e.message || e)); }
+
+  return { agents, usedApi, tried };
+}
+
+async function fdryScan(){
+  const endpoints = document.getElementById('fdry-endpoints').value.split(/\r?\n/).map(s => fdryNormalizeEndpoint(s)).filter(Boolean);
+  if (!endpoints.length){ fdryStatus('Enter at least one Foundry project endpoint.'); return; }
+  const btn = document.getElementById('fdry-scan-btn'); btn.disabled = true;
+  document.getElementById('fdry-progress-log').innerHTML = '';
+  document.getElementById('fdry-error').style.display = 'none';
+  document.getElementById('fdry-kpi').style.display = 'none';
+  document.getElementById('fdry-table-section').style.display = 'none';
+  fdryAgents = []; fdryExpanded = null; fdryEpCount = 0;
+
+  try {
+    const token = (document.getElementById('fdry-token').value || '').trim();
+    if (!token) {
+      throw new Error('Paste a Foundry access token above first. This app registration can’t mint an https://ai.azure.com token, so the agent scan reads only from a pasted token — run the PowerShell command above (the Copy button copies it; it puts the token on your clipboard via Set-Clipboard) and paste it in.');
+    }
+    fdrySetProgress(5, 'Using pasted token', 'Using the pasted access token…');
+
+    let done = 0;
+    for (const ep of endpoints){
+      fdrySetProgress(Math.round((done / endpoints.length) * 90) + 5, 'Scanning projects', 'Reading ' + ep + ' …');
+      try {
+        const { agents, usedApi, tried } = await fdryListAgents(ep, token, (m, c) => fdrySetProgress(null, null, m, c));
+        fdryAgents.push(...agents); fdryEpCount++;
+        fdrySetProgress(null, null, `  ${ep}: ${agents.length} agent(s)${usedApi ? ' via ' + usedApi : ''}.`, agents.length ? 'log-ok' : 'log-warn');
+        if (!agents.length && tried.length) fdrySetProgress(null, null, `     tried: ${tried.join('  ·  ')}`, 'log-warn');
+      } catch(e){
+        fdrySetProgress(null, null, `  ${ep} failed: ${e.message}${fdryAuthHint(e.message)}`, 'log-err');
+      }
+      done++;
+    }
+    fdrySetProgress(100, 'Done', `Inventoried ${fdryAgents.length} agent(s) across ${fdryEpCount} endpoint(s).`, fdryAgents.length ? 'log-ok' : 'log-warn');
+    if (!fdryAgents.length){
+      const el = document.getElementById('fdry-error');
+      const logTxt = document.getElementById('fdry-progress-log').innerText;
+      const all401 = /→ 401/.test(logTxt) && !/→ 40[034]\b/.test(logTxt);
+      el.innerHTML = all401
+        ? '<b>All requests returned 401 — token audience rejected.</b> The Foundry Agents data plane accepts <b>only</b> the <code>https://ai.azure.com</code> audience, but the pasted token targets a different resource (e.g. a <b>Cognitive Services</b> token). Fix: paste an <code>ai.azure.com</code> token into the <b>Access token</b> box above — use the <b>PowerShell</b> command above (<code>Get-AzAccessToken -ResourceUrl "https://ai.azure.com"</code> → <code>Set-Clipboard</code>) and Scan again.'
+        : '0 agents returned. Common causes: (1) the scanned project isn’t the one holding your agents — <b>paste the exact endpoint</b> from Foundry portal → your project → Overview; (2) missing <b>Foundry User / Foundry Agent Consumer</b> RBAC; (3) token/path issue — see the “tried” HTTP codes (401/403 = auth, 404 = wrong path/version).';
+      el.style.display = 'block';
+    }
+    fdryRenderKpis();
+    fdryRender();
+    document.getElementById('fdry-kpi').style.display = 'flex';
+    document.getElementById('fdry-table-section').style.display = 'block';
+    fdryStatus(`Done — ${fdryAgents.length} agent(s).`);
+    fdrySetConfigCollapsed(true, `${fdryEpCount} endpoint${fdryEpCount === 1 ? '' : 's'} · ${fdryAgents.length} agents — click to change`);
+    if (fdryAgents.length) setTimeout(() => { document.getElementById('fdry-progress').style.display = 'none'; }, 1800);
+  } catch(e){
+    const msg = String(e.message || e);
+    const el = document.getElementById('fdry-error');
+    if (msg.startsWith('__TOKEN__')) el.innerHTML = 'Could not get an Azure AI token: ' + esc(msg.slice(9)) + fdryAuthHint(msg.slice(9));
+    else el.textContent = 'Scan failed: ' + msg;
+    el.style.display = 'block';
+    document.getElementById('fdry-progress').style.display = 'none';
+  } finally { btn.disabled = false; }
+}
+
+function fdryRenderKpis(){
+  document.getElementById('fdry-kpi-total').textContent     = fdryAgents.length;
+  document.getElementById('fdry-kpi-tools').textContent     = fdryAgents.filter(a => a._toolCount > 0).length;
+  document.getElementById('fdry-kpi-knowledge').textContent = fdryAgents.filter(a => a._knowledgeCount > 0).length;
+  document.getElementById('fdry-kpi-models').textContent    = new Set(fdryAgents.map(a => a.model).filter(m => m && m !== '—')).size;
+  document.getElementById('fdry-kpi-eps').textContent       = fdryEpCount;
+}
+
+function fdrySortBy(k){ if (fdrySortKey === k) fdrySortDir *= -1; else { fdrySortKey = k; fdrySortDir = 1; } fdryRender(); }
+
+let fdryFilter = 'all';
+function fdrySetFilter(f, btn){
+  fdryFilter = f;
+  document.querySelectorAll('#mode-foundry .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  fdryRender();
+}
+function fdryClsBadge(c){
+  return c === 'classic' ? `<span class="tag" style="color:#fbbf24;border:1px solid #f59e0b55">Classic</span>`
+    : c === 'modern' ? `<span class="tag" style="color:#4ade80;border:1px solid #22c55e55">Modern</span>`
+    : `<span class="tag">—</span>`;
+}
+function fdryRender(){
+  const q = (document.getElementById('fdry-search').value || '').toLowerCase();
+  fdryFiltered = fdryAgents.filter(a => {
+    if (fdryFilter !== 'all' && a._agentClass !== fdryFilter) return false;
+    return !q || [a.name, a.project, a.model, a.instructions, a.description, (a.tools||[]).join(' ')].join(' ').toLowerCase().includes(q);
+  });
+  fdryFiltered.sort((a, b) => {
+    let av = a[fdrySortKey], bv = b[fdrySortKey];
+    if (fdrySortKey === 'created'){ av = av ? new Date(av).getTime() : 0; bv = bv ? new Date(bv).getTime() : 0; }
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return -fdrySortDir; if (av > bv) return fdrySortDir; return 0;
+  });
+  document.querySelectorAll('#fdry-agents-table thead th').forEach(th => {
+    th.classList.remove('sorted-asc', 'sorted-desc');
+    const k = th.getAttribute('onclick')?.match(/fdrySortBy\('(.+?)'\)/)?.[1];
+    if (k === fdrySortKey) th.classList.add(fdrySortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+  });
+
+  const tbody = document.getElementById('fdry-tbody');
+  const empty = document.getElementById('fdry-empty');
+  if (!fdryFiltered.length){ tbody.innerHTML = ''; empty.style.display = 'block'; document.getElementById('fdry-empty-msg').textContent = fdryAgents.length ? 'No agents match your search.' : 'No Foundry agents found.'; return; }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = fdryFiltered.map(a => `
+    <tr onclick="fdryToggleRow('${esc(a.id)}')" data-fdry-id="${esc(a.id)}" style="cursor:pointer">
+      <td><div class="agent-name">${esc(a.name)} ${fdryClsBadge(a._agentClass)}</div><div class="agent-id">${esc(a.id)}</div></td>
+      <td>${esc(a.project)}</td>
+      <td>${a.model && a.model !== '—' ? `<span class="tag">${esc(a.model)}</span>` : '<span class="text-muted">—</span>'}</td>
+      <td>${a._toolCount || '<span class="text-muted">0</span>'}</td>
+      <td>${a._knowledgeCount || '<span class="text-muted">0</span>'}</td>
+      <td>${a.created ? fmtDate(a.created) : '<span class="text-muted">—</span>'}</td>
+    </tr>`).join('');
+
+  if (fdryExpanded && fdryFiltered.find(a => a.id === fdryExpanded)){
+    const tr = tbody.querySelector(`tr[data-fdry-id="${CSS.escape(fdryExpanded)}"]`);
+    if (tr) fdryInsertDetail(tr, fdryAgents.find(a => a.id === fdryExpanded));
+  }
+}
+
+function fdryToggleRow(id){
+  const tbody = document.getElementById('fdry-tbody');
+  const existing = tbody.querySelector(`tr[data-fdry-detail="${CSS.escape(id)}"]`);
+  if (fdryExpanded === id){ existing?.remove(); fdryExpanded = null; return; }
+  if (fdryExpanded) tbody.querySelector(`tr[data-fdry-detail="${CSS.escape(fdryExpanded)}"]`)?.remove();
+  fdryExpanded = id;
+  const tr = tbody.querySelector(`tr[data-fdry-id="${CSS.escape(id)}"]`);
+  if (tr) fdryInsertDetail(tr, fdryAgents.find(a => a.id === id));
+}
+
+function fdryInsertDetail(tr, a){
+  const list = arr => arr && arr.length ? arr.map(x => `<span class="tag">${esc(x)}</span>`).join('') : '<span class="text-muted">None</span>';
+  const meta = Object.keys(a.metadata || {}).length ? Object.entries(a.metadata).map(([k, v]) => `<span class="tag">${esc(k)}: ${esc(String(v))}</span>`).join('') : '<span class="text-muted">None</span>';
+  const detail = document.createElement('tr');
+  detail.className = 'expanded-row'; detail.dataset.fdryDetail = a.id;
+  detail.innerHTML = `<td colspan="6"><div class="detail-panel">
+    <div class="detail-grid">
+      <div class="detail-section">
+        <h4>Agent</h4>
+        <div class="detail-row"><span class="dk">Name</span><span class="dv">${esc(a.name)}</span></div>
+        <div class="detail-row"><span class="dk">ID</span><span class="dv"><code>${esc(a.id)}</code></span></div>
+        <div class="detail-row"><span class="dk">Project</span><span class="dv">${esc(a.project)}</span></div>
+        <div class="detail-row"><span class="dk">Model</span><span class="dv">${esc(a.model)}</span></div>
+        <div class="detail-row"><span class="dk">Created</span><span class="dv">${a.created ? new Date(a.created).toLocaleString() : '—'}</span></div>
+        <div class="detail-row"><span class="dk">Type</span><span class="dv">${a._agentClass === 'classic' ? '🧩 Classic (Assistants API — no Agent ID)' : '🤖 Modern (blueprint Agent ID)'}</span></div>
+        <div class="detail-row"><span class="dk">Agent identity</span><span class="dv">${a.instanceIdentity ? `<code>${esc(a.instanceIdentity)}</code>` : '<span class="text-muted">—</span>'}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Tools (${a._toolCount})</h4>${list(a.tools)}
+        <h4 style="margin-top:12px">Knowledge (${a._knowledgeCount})</h4>
+        <div class="detail-row"><span class="dk">Vector stores</span><span class="dv">${a.vectorStores.length ? a.vectorStores.map(esc).join(', ') : '—'}</span></div>
+        <div class="detail-row"><span class="dk">Code-interpreter files</span><span class="dv">${a.ciFiles.length || '—'}</span></div>
+      </div>
+      <div class="detail-section">
+        <h4>Metadata</h4>${meta}
+      </div>
+    </div>
+    <div class="copybox" style="border-left-color:var(--foundry)">
+      <h4>📝 Description</h4>
+      <p style="font-size:.8rem;color:var(--text2);white-space:pre-wrap">${esc(a.description || '— none —')}</p>
+      <h4 style="margin-top:12px">🧭 Instructions</h4>
+      <pre>${esc(a.instructions || '— none —')}</pre>
+    </div>
+  </div></td>`;
+  tr.after(detail);
+}
+
+function fdryExport(kind){
+  if (!fdryAgents.length){ alert('Nothing to export — run a scan first.'); return; }
+  const stamp = new Date().toISOString().slice(0, 10);
+  if (kind === 'json'){
+    const pkg = fdryAgents.map(a => ({
+      name: a.name, id: a.id, class: a._agentClass, project: a.project, endpoint: a.endpoint, model: a.model,
+      description: a.description, instructions: a.instructions, tools: a.tools,
+      vectorStores: a.vectorStores, codeInterpreterFiles: a.ciFiles.length,
+      metadata: a.metadata, agentIdentity: a.instanceIdentity, created: a.created,
+    }));
+    const blob = new Blob([JSON.stringify({ generated: new Date().toISOString(), agents: pkg }, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob); const el = document.createElement('a');
+    el.href = url; el.download = `foundry-agents-${stamp}.json`; el.click(); URL.revokeObjectURL(url);
+    return;
+  }
+  const headers = ['Name','ID','Class','Project','Model','ToolCount','KnowledgeCount','Tools','VectorStores','Description','Instructions','Created'];
+  const rows = fdryAgents.map(a => [
+    a.name, a.id, a._agentClass, a.project, a.model, a._toolCount, a._knowledgeCount,
+    (a.tools || []).join('; '), (a.vectorStores || []).join('; '),
+    (a.description || '').replace(/\s+/g, ' ').slice(0, 500), (a.instructions || '').replace(/\s+/g, ' ').slice(0, 1000), a.created || '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob); const el = document.createElement('a');
+  el.href = url; el.download = `foundry-agents-${stamp}.csv`; el.click(); URL.revokeObjectURL(url);
+}
+</script>
+<script>/* build stamp — auto from Last-Modified, confirms the deployed version */(function(){function a(){var d=new Date(document.lastModified),s=isNaN(d.getTime())?String(document.lastModified):d.toISOString().slice(0,10),e=document.createElement('div');e.textContent='build '+s;e.title='Build date of this file (from the Last-Modified header) — confirms which deployed version you are viewing.';e.style.cssText='position:fixed;bottom:6px;right:9px;font:11px/1 system-ui,-apple-system,sans-serif;color:var(--muted,#8a8886);opacity:.55;z-index:2147483000;pointer-events:none;letter-spacing:.02em';document.body.appendChild(e);}if(document.body)a();else document.addEventListener('DOMContentLoaded',a);})();</script>
+</body>
+</html>

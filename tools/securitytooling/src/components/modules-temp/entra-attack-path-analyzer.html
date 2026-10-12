@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Blue16 Entra Attack Path Analyzer (Preview)</title>
+<!-- Favicon: three nodes escalating along a path into a shield — the tool's thesis (walkable path to Tier-0). -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M17 3 29 7v8c0 7-4.9 12.4-12 14-1.2-.3-2.3-.7-3.4-1.2' fill='none' stroke='%23a4262c' stroke-width='2'/%3E%3Ccircle cx='5' cy='24' r='3' fill='%230f6cbd'/%3E%3Ccircle cx='13' cy='17' r='3' fill='%230f6cbd'/%3E%3Cpath d='M7.1 21.9 10.9 19M15.5 15 20 11' stroke='%23605e5c' stroke-width='1.6'/%3E%3Cpath d='M23 4 31 6.7v5.3c0 4.6-3.3 8.2-8 9-4.7-.8-8-4.4-8-9V6.7z' fill='%23a4262c'/%3E%3Cpath d='m20 9 2.2 2.4L27 7' stroke='%23fff' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+<!-- MSAL pinned with Subresource Integrity (SRI). Hash is for @azure/msal-browser@3.28.1.
+     If you BUMP the version you MUST recompute the hash on BOTH script tags or sign-in silently breaks. -->
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"
+        integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY"
+        crossorigin="anonymous"></script>
+<script>
+  // Fallback to a second CDN if the first is blocked. Same package@version → byte-identical, same SRI hash.
+  if (typeof msal === "undefined") {
+    document.write('<script src="https://unpkg.com/@azure/msal-browser@3.28.1/lib/msal-browser.min.js" integrity="sha384-B5PXeUfgiegchZiX5iMRssMrHd9NfPhFnITob1HyW1CY76udptWpBsniaDsH/+BY" crossorigin="anonymous"><\/script>');
+  }
+</script>
+<script>
+  // Apply saved / preferred theme before first paint to avoid a flash.
+  (function () {
+    var t = localStorage.getItem("aib_theme")
+      || ((window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", t);
+  })();
+</script>
+<style>
+  :root {
+    --bg: #f3f2f1; --card: #ffffff; --border: #e1dfdd; --text: #201f1e; --muted: #605e5c;
+    --accent: #0f6cbd; --accent-dark: #115ea3;
+    --green: #0e700e; --green-bg: #dff6dd;
+    --red: #a4262c; --red-bg: #fde7e9; --on-red: #ffffff;
+    --amber: #8a6d00; --amber-bg: #fff4ce;
+    --input-bg: #ffffff; --input-border: #8a8886; --hover: #faf9f8;
+    --code-bg: #edebe9; --cert-bg: #deecf9;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.13), 0 .3px .9px rgba(0,0,0,.11);
+  }
+  html[data-theme="dark"] {
+    --bg: #1b1a19; --card: #262523; --border: #3b3a38; --text: #f3f2f1; --muted: #a6a4a1;
+    --accent: #4aa0e6; --accent-dark: #79bce9;
+    --green: #6ccb6c; --green-bg: #16331a;
+    --red: #f1707a; --red-bg: #3a1d20; --on-red: #1b1a19;
+    --amber: #e9c46a; --amber-bg: #3a300f;
+    --input-bg: #1b1a19; --input-border: #605e5c; --hover: #2f2e2c;
+    --code-bg: #333230; --cert-bg: #14324d;
+    --shadow: 0 1.6px 3.6px rgba(0,0,0,.45), 0 .3px .9px rgba(0,0,0,.4);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: "Segoe UI", system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  header { background: var(--accent); color: #fff; padding: 18px 28px; display: flex; align-items: center; justify-content: space-between; box-shadow: var(--shadow); }
+  header h1 { font-size: 18px; margin: 0; font-weight: 600; display: flex; align-items: center; gap: 11px; }
+  .applogo { width: 28px; height: 28px; flex-shrink: 0; }
+  .applogo .sh { fill: rgba(255,255,255,.18); stroke: #fff; stroke-width: 1.6; }
+  .applogo .nd { fill: #fff; }
+  .applogo .ln { stroke: #fff; stroke-width: 1.5; fill: none; stroke-linecap: round; }
+  .applogo .ck { stroke: var(--accent); stroke-width: 1.9; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  .pv { font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4); padding: 2px 7px; border-radius: 10px; line-height: 1.4; }
+  header .right { display: flex; align-items: center; gap: 16px; }
+  header .who { font-size: 13px; opacity: .95; text-align: right; }
+  .theme-btn { background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 6px; padding: 6px 11px; cursor: pointer; font-size: 16px; line-height: 1; font-weight: 600; }
+  .theme-btn:hover { background: rgba(255,255,255,.28); }
+  main { max-width: 1560px; margin: 0 auto; padding: 24px 28px 60px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow); padding: 20px 22px; margin-bottom: 22px; }
+  .card h2 { font-size: 15px; margin: 0 0 14px; font-weight: 600; }
+  label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 4px; font-weight: 600; }
+  input, select { width: 100%; padding: 8px 10px; border: 1px solid var(--input-border); border-radius: 4px; font-size: 14px; font-family: inherit; background: var(--input-bg); color: var(--text); }
+  input:focus, select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .row-actions { margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button { background: var(--accent); color: #fff; border: none; border-radius: 4px; padding: 9px 18px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  button:hover { background: var(--accent-dark); }
+  button.secondary { background: var(--card); color: var(--text); border: 1px solid var(--input-border); }
+  button.secondary:hover { background: var(--hover); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  code { background: var(--code-bg); color: var(--text); padding: 1px 5px; border-radius: 3px; font-size: 12px; font-family: "Cascadia Code", Consolas, monospace; }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .stat { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .stat.clickable { cursor: pointer; transition: border-color .15s, background .15s; }
+  .stat.clickable:hover { border-color: var(--accent); background: var(--hover); }
+  .stat.active { border-color: var(--accent); box-shadow: inset 0 0 0 2px var(--accent); }
+  .stat .n { font-size: 30px; font-weight: 700; line-height: 1; }
+  .stat .n.crit { color: var(--red); }
+  .stat .l { font-size: 12px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: .4px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .3px; font-weight: 600; }
+  th.sortable { cursor: pointer; user-select: none; white-space: nowrap; }
+  th.sortable:hover { color: var(--accent); }
+  th .arrow { font-size: 10px; margin-left: 3px; opacity: .7; }
+  tbody tr.rowx { cursor: pointer; }
+  tbody tr.rowx:hover { background: var(--hover); }
+  tbody tr.rowx:focus-within { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .chev { width: 22px; text-align: center; color: var(--accent); font-weight: 600; }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 12px; font-weight: 600; margin: 2px 4px 2px 0; white-space: nowrap; }
+  .b-crit { background: var(--red); color: var(--on-red); }
+  .b-high { background: var(--red-bg); color: var(--red); }
+  .b-med  { background: var(--amber-bg); color: var(--amber); }
+  .b-low  { background: var(--green-bg); color: var(--green); }
+  /* Grouped-by-principal view */
+  .rolechips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .rolechip { font-size: 11px; padding: 2px 8px; border-radius: 11px; font-weight: 600; white-space: nowrap; }
+  .riskscore { font-size: 18px; font-weight: 800; padding: 2px 10px; border-radius: 8px; display: inline-block; min-width: 34px; text-align: center; }
+  .risklbl { font-size: 10px; opacity: .7; text-align: center; margin-top: 3px; letter-spacing: .03em; }
+  .pgroup-head { font-size: 12.5px; color: var(--muted); margin: 0 0 12px; line-height: 1.5; }
+  .ppath { border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; background: var(--card-2, transparent); }
+  .ppath-top { margin-bottom: 8px; font-size: 13px; }
+  .b-user { background: var(--cert-bg); color: var(--accent-dark); }
+  .b-sp   { background: var(--amber-bg); color: var(--amber); }
+  .b-group{ background: var(--hover); color: var(--muted); }
+  .b-rel-high { background: var(--red-bg); color: var(--red); }
+  .b-rel-cond { background: var(--hover); color: var(--muted); }
+  .b-ms   { background: var(--cert-bg); color: var(--accent-dark); }
+  .badge[title] { cursor: help; }
+  .mono { font-family: "Cascadia Code", Consolas, monospace; font-size: 12px; color: var(--muted); }
+  .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+  .toolbar input, .toolbar select { width: auto; }
+  .toolbar #fltSearch { flex: 1 1 220px; min-width: 200px; max-width: 340px; }
+  .toolbar .count { margin-left: auto; font-size: 12px; color: var(--muted); }
+  /* path chain rendering */
+  .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 12.5px; line-height: 1.6; }
+  .node { background: var(--code-bg); border: 1px solid var(--border); border-radius: 5px; padding: 1px 7px; white-space: nowrap; }
+  .node.src { border-color: var(--accent); }
+  .node.tgt { background: var(--red-bg); border-color: var(--red); color: var(--red); font-weight: 600; }
+  .edge { color: var(--muted); font-size: 11px; font-style: italic; white-space: nowrap; }
+  .edge::before { content: "→ "; font-style: normal; color: var(--accent); font-weight: 700; }
+  .edge::after { content: " →"; font-style: normal; color: var(--accent); font-weight: 700; }
+  /* detail panel */
+  .dpanel { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 12px; align-items: start; padding: 4px 2px 8px; }
+  .dsec { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 11px 13px; }
+  .dsec-wide { grid-column: 1 / -1; }
+  .dhead { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 0 0 8px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .dlist { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7; }
+  .dlist li { margin-bottom: 4px; }
+  .dlist.steps { counter-reset: step; list-style: none; padding-left: 0; }
+  .dlist.steps li { counter-increment: step; position: relative; padding-left: 26px; margin-bottom: 7px; }
+  .dlist.steps li::before { content: counter(step); position: absolute; left: 0; top: -1px; width: 18px; height: 18px; background: var(--accent); color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .mitre-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+  .mitre { font-size: 11px; background: var(--red-bg); border: 1px solid var(--red); color: var(--red); padding: 3px 8px; border-radius: 5px; }
+  .mitre b { font-weight: 700; }
+  .evidence { font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .evidence b { color: var(--text); }
+  /* remediation queue */
+  .rq { border: 1px solid var(--border); border-left-width: 4px; border-radius: 6px; padding: 11px 14px; margin: 0 0 10px; }
+  .rq.crit { border-left-color: var(--red); }
+  .rq.high { border-left-color: var(--amber); }
+  .rq.med  { border-left-color: var(--accent); }
+  .rq-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 4px; }
+  .rq-fix { font-weight: 600; font-size: 13.5px; }
+  .rq-count { font-size: 12px; color: var(--muted); }
+  .rq-count b { color: var(--red); }
+  .rq-why { font-size: 12.5px; color: var(--muted); line-height: 1.55; }
+  .notice { border: 1px solid var(--border); border-left-width: 3px; border-radius: 6px; padding: 9px 12px; margin: 0 0 10px; font-size: 12.5px; line-height: 1.5; }
+  .notice-warn { border-left-color: var(--amber); background: var(--amber-bg); }
+  .notice-info { border-left-color: var(--accent); background: var(--hover); color: var(--muted); }
+  .notice-ok { border-left-color: var(--green); background: var(--green-bg); }
+  #status { font-size: 13px; }
+  #status.err { color: var(--red); }
+  .spinner { display: inline-block; width: 15px; height: 15px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -3px; margin-right: 6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .hidden { display: none; }
+  a { color: var(--accent); }
+  .attrib { color: var(--accent-dark); font-weight: 600; }
+  .expander { cursor: pointer; user-select: none; color: var(--accent); font-weight: 600; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>
+    <svg class="applogo" viewBox="0 0 32 32" role="img" aria-label="Entra Attack Path Analyzer logo">
+      <circle class="nd" cx="5" cy="25" r="2.7" />
+      <circle class="nd" cx="14" cy="17.5" r="2.7" />
+      <path class="ln" d="M7 23.2 12 19" />
+      <path class="ln" d="M16.2 15.6 21 11.5" />
+      <path class="sh" d="M23.5 4 31 6.6v5.2c0 4.6-3.2 8.2-7.5 9-4.3-.8-7.5-4.4-7.5-9V6.6z" />
+      <path class="ck" d="m20.4 9.2 2.3 2.5L27.3 7" />
+    </svg>
+    <span>Entra Attack Path Analyzer</span>
+    <span class="pv">Preview</span>
+  </h1>
+  <div class="right">
+    <div class="who" id="who"></div>
+    <button id="themeToggle" class="theme-btn" title="Toggle light / dark mode" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<main>
+  <!-- Configuration / sign-in -->
+  <section class="card" id="configCard">
+    <div id="connectForm">
+    <h2>1 · Connect to your tenant</h2>
+    <div class="grid">
+      <div>
+        <label for="clientId">Application (client) ID</label>
+        <input id="clientId" placeholder="00000000-0000-0000-0000-000000000000" autocomplete="off" />
+        <div class="hint">An app registration of type <b>SPA</b> with delegated, <b>read-only</b> permissions
+          <code>Directory.Read.All</code>, <code>RoleManagement.Read.All</code>,
+          <code>Application.Read.All</code>, <code>User.Read</code>. All require admin consent.
+          <br><b>Optional (each degrades gracefully):</b> <code>Policy.Read.All</code> adds Conditional Access
+          gap edges (uncovered admins, legacy-auth bypass); <code>AuditLog.Read.All</code> adds per-admin
+          MFA-method posture (phishing-resistant registered vs weak vs none); PIM eligibility
+          (<code>roleEligibilityScheduleInstances</code>) needs Entra ID P2.</div>
+      </div>
+      <div>
+        <label for="tenantId">Directory (tenant) ID or domain</label>
+        <input id="tenantId" placeholder="contoso.onmicrosoft.com or tenant GUID" autocomplete="off" />
+        <div class="hint">Use <code>organizations</code> if unsure.</div>
+      </div>
+      <div>
+        <label for="graphVer">Graph API version</label>
+        <select id="graphVer">
+          <option value="v1.0">v1.0 (GA)</option>
+          <option value="beta">beta</option>
+        </select>
+        <div class="hint">Role &amp; PIM APIs are GA on <code>v1.0</code>.</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:12px">
+      Register this page's URL as a <b>Single-page application</b> redirect URI:
+      <code id="redirectUri"></code>
+    </div>
+    </div><!-- /connectForm -->
+    <div class="row-actions">
+      <button id="signInBtn">Sign in</button>
+      <button id="signOutBtn" class="secondary hidden">Sign out</button>
+      <span id="status" aria-live="polite"></span>
+    </div>
+  </section>
+
+  <!-- Results -->
+  <section id="results" class="hidden">
+    <div class="row-actions" style="margin-bottom:18px">
+      <button id="loadBtn">Analyze / refresh attack paths</button>
+      <span style="flex:1"></span>
+      <button id="exportCsv" class="secondary" style="padding:7px 14px">Export CSV</button>
+      <button id="exportJson" class="secondary" style="padding:7px 14px">Export JSON</button>
+    </div>
+
+    <div id="notices"></div>
+    <div class="summary" id="summary"></div>
+
+    <!-- Remediation queue -->
+    <div class="card" id="rqCard">
+      <h2 style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+        <span>Remediation queue — choke points, ranked by paths collapsed</span>
+        <span class="expander" id="rqToggle">hide ▴</span>
+      </h2>
+      <div class="hint" style="margin:0 0 14px">Each item is a single change that severs multiple attack paths at once. Fix from the top down.</div>
+      <div id="rqBody"></div>
+    </div>
+
+    <!-- Paths table -->
+    <div class="card">
+      <h2>Attack paths to privileged roles</h2>
+      <div class="toolbar">
+        <input id="fltSearch" placeholder="Filter by principal, role, technique…" autocomplete="off" />
+        <select id="fltSev">
+          <option value="">All severities</option>
+          <option value="critical">Critical only</option>
+          <option value="high">High and above</option>
+        </select>
+        <select id="fltType">
+          <option value="">All source types</option>
+          <option value="user">User</option>
+          <option value="servicePrincipal">Service principal</option>
+          <option value="group">Group</option>
+          <option value="external">External (CA gap)</option>
+        </select>
+        <select id="fltRel">
+          <option value="">All reliability</option>
+          <option value="high">Confirmed</option>
+          <option value="conditional">Conditional</option>
+        </select>
+        <span class="count" id="tableCount"></span>
+      </div>
+      <div class="hint" style="margin:-4px 0 10px">Each row is <b>one source principal</b>, scored by risk, showing <b>every privileged role it can reach</b>. Click a row to expand all of that principal's verified paths — each with technique, MITRE mapping, evidence and the specific fix.</div>
+      <div style="overflow-x:auto">
+        <table id="table">
+          <thead>
+            <tr>
+              <th style="width:22px"></th>
+              <th class="sortable" data-key="risk">Risk <span class="arrow">▼</span></th>
+              <th class="sortable" data-key="source">Source principal <span class="arrow"></span></th>
+              <th class="sortable" data-key="roles">Reachable privileged roles <span class="arrow"></span></th>
+              <th class="sortable" data-key="paths" style="text-align:center">Paths <span class="arrow"></span></th>
+              <th>Reliability</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+"use strict";
+
+const $ = (id) => document.getElementById(id);
+const enc = encodeURIComponent;
+const redirectUri = window.location.origin + window.location.pathname;
+$("redirectUri").textContent = redirectUri;
+
+function escapeHtml(s) {
+  if (s == null) return "";
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+// ---- theme toggle ----
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  $("themeToggle").textContent = t === "dark" ? "◑" : "◐";
+}
+applyTheme(document.documentElement.getAttribute("data-theme") || "light");
+$("themeToggle").addEventListener("click", () => {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  localStorage.setItem("aib_theme", next);
+  applyTheme(next);
+});
+
+// Entra only accepts https redirect URIs, or http on loopback.
+(function checkScheme() {
+  const proto = window.location.protocol, host = window.location.hostname;
+  const loopback = host === "localhost" || host === "127.0.0.1" || host === "[::1]";
+  if (!(proto === "https:" || (proto === "http:" && loopback))) {
+    const warn = document.createElement("div");
+    warn.className = "notice notice-warn";
+    warn.style.marginTop = "10px";
+    warn.innerHTML = "This page is served from <code>" + escapeHtml(redirectUri) + "</code>. Microsoft Entra rejects this "
+      + "(AADSTS500111 — invalid scheme). Open it over <b>http://localhost:&lt;port&gt;</b> or an <b>https://</b> URL — "
+      + "not <code>file://</code> and not a machine name/IP over http.";
+    $("redirectUri").closest(".hint").after(warn);
+  }
+})();
+
+const SCOPES = ["User.Read", "Directory.Read.All", "RoleManagement.Read.All", "Application.Read.All"];
+
+// ---- restore saved config ----
+["clientId", "tenantId", "graphVer"].forEach((k) => { const v = localStorage.getItem("apa_" + k); if (v) $(k).value = v; });
+if (!$("tenantId").value) $("tenantId").value = "organizations";
+
+let msalInstance = null, msalConfigKey = null, account = null;
+function configKey() { return $("clientId").value.trim() + "|" + ($("tenantId").value.trim() || "organizations"); }
+function graphBase() { return "https://graph.microsoft.com/" + ($("graphVer").value || "v1.0"); }
+
+function setStatus(msg, isErr = false, busy = false) {
+  const el = $("status");
+  el.className = isErr ? "err" : "";
+  el.innerHTML = (busy ? '<span class="spinner"></span>' : "") + (msg || "");
+}
+
+function buildMsal() {
+  if (typeof msal === "undefined") { setStatus("The MSAL sign-in library failed to load — check your network / CDN access, then reload.", true); return null; }
+  const clientId = $("clientId").value.trim();
+  const tenantId = $("tenantId").value.trim() || "organizations";
+  if (!clientId) { setStatus("Enter an Application (client) ID first.", true); return null; }
+  localStorage.setItem("apa_clientId", clientId);
+  localStorage.setItem("apa_tenantId", tenantId);
+  localStorage.setItem("apa_graphVer", $("graphVer").value);
+  return new msal.PublicClientApplication({
+    auth: { clientId, authority: "https://login.microsoftonline.com/" + tenantId, redirectUri },
+    cache: { cacheLocation: "sessionStorage" }
+  });
+}
+
+async function ensureInstance() {
+  if (msalInstance && msalConfigKey !== configKey()) { msalInstance = null; msalConfigKey = null; account = null; }
+  if (!msalInstance) {
+    const inst = buildMsal();
+    if (!inst) return false;
+    msalInstance = inst; msalConfigKey = configKey();
+    await msalInstance.initialize();
+    const existing = msalInstance.getAllAccounts();
+    account = existing.length ? existing[0] : null;
+  }
+  return true;
+}
+
+async function signIn() {
+  try {
+    setStatus("Signing in…", false, true);
+    if (!(await ensureInstance())) return;
+    const res = await msalInstance.loginPopup({ scopes: SCOPES, prompt: "select_account" });
+    account = res.account;
+    onSignedIn();
+  } catch (e) { setStatus("Sign-in failed: " + escapeHtml(e.message || String(e)), true); }
+}
+
+function signOut() {
+  if (msalInstance && account) msalInstance.logoutPopup({ account });
+  account = null;
+  $("who").textContent = "";
+  $("results").classList.add("hidden");
+  $("connectForm").classList.remove("hidden");
+  $("signInBtn").classList.remove("hidden");
+  $("signOutBtn").classList.add("hidden");
+  setStatus("Signed out.");
+}
+
+function onSignedIn() {
+  $("who").innerHTML = "Signed in as <b>" + escapeHtml(account.name || account.username) + "</b><br>" + escapeHtml(account.username);
+  $("results").classList.remove("hidden");
+  $("connectForm").classList.add("hidden");
+  $("signInBtn").classList.add("hidden");
+  $("signOutBtn").classList.remove("hidden");
+  setStatus("Connected. Click “Analyze attack paths”.");
+  analyze();
+}
+
+async function token() {
+  try { return (await msalInstance.acquireTokenSilent({ scopes: SCOPES, account })).accessToken; }
+  catch { return (await msalInstance.acquireTokenPopup({ scopes: SCOPES, account })).accessToken; }
+}
+
+// Optional scope. Requested silently so a tenant that never consented Policy.Read.All still gets
+// every other feature — Conditional Access edges just don't appear, with a notice explaining why.
+const CA_SCOPES = ["Policy.Read.All"];
+// Optional too — authentication-method registration (per-user MFA posture of privileged accounts).
+const AUTH_SCOPES = ["AuditLog.Read.All"];
+async function optionalToken(scopes) {
+  try { return (await msalInstance.acquireTokenSilent({ scopes, account })).accessToken; }
+  catch { return null; }
+}
+
+// Which registered methods are phishing-resistant. userRegistrationDetails.methodsRegistered strings vary
+// by tenant/version, so match by pattern: FIDO2 keys, Windows Hello for Business, passkeys, certificate/x509.
+const PHISH_RESISTANT_RX = /fido2|windowshello|passkey|certificate|x509/i;
+function classifyMfa(reg) {
+  if (!reg) return { level: "unknown", methods: [] };
+  const methods = reg.methodsRegistered || [];
+  if (methods.some((m) => PHISH_RESISTANT_RX.test(m))) return { level: "phishres", methods };
+  if (reg.isMfaRegistered && methods.length) return { level: "weak", methods };
+  return { level: "nomfa", methods };
+}
+
+// ---- Graph helpers ----
+async function graphGetAll(url, accessToken) {
+  let out = [], next = url;
+  while (next) {
+    const resp = await fetch(next, { headers: { Authorization: "Bearer " + accessToken, ConsistencyLevel: "eventual" } });
+    if (!resp.ok) {
+      let detail = ""; try { detail = (await resp.json()).error?.message || ""; } catch {}
+      throw new Error("HTTP " + resp.status + " on " + next.replace(graphBase(), "") + (detail ? " — " + detail : ""));
+    }
+    const json = await resp.json();
+    out = out.concat(json.value || []);
+    next = json["@odata.nextLink"];
+  }
+  return out;
+}
+
+// Run async fn over items with bounded concurrency; failures resolve to fallback.
+async function mapPool(items, size, fn, fallback) {
+  const out = [];
+  for (let i = 0; i < items.length; i += size) {
+    const slice = items.slice(i, i + size);
+    const res = await Promise.all(slice.map((it) => fn(it).catch(() => fallback)));
+    res.forEach((r) => out.push(r));
+  }
+  return out;
+}
+
+// ============================================================================
+//  Reference data
+// ============================================================================
+
+// Privileged Entra directory roles by built-in template GUID.
+// tier 0 = crown-jewel / effective Global Admin; tier 1 = high; tier 2 = sensitive-read.
+const PRIV_ROLES = {
+  "62e90394-69f5-4237-9190-012177145e10": { name: "Global Administrator", tier: 0 },
+  "e8611ab8-c189-46e8-94e1-60213ab1f814": { name: "Privileged Role Administrator", tier: 0 },
+  "7be44c8a-adaf-4e2a-84d6-ab2649e08a13": { name: "Privileged Authentication Administrator", tier: 0 },
+  "9b895d92-2cd3-44c7-9d02-a6ac2d5ea5c3": { name: "Application Administrator", tier: 0 },
+  "158c047a-c907-4556-b7ef-446551a6b5f7": { name: "Cloud Application Administrator", tier: 0 },
+  "8ac3fc64-6eca-42ea-9e69-59f4c7b60eb2": { name: "Hybrid Identity Administrator", tier: 0 },
+  "c4e39bd9-1100-46d3-8c65-fb160da0071f": { name: "Authentication Administrator", tier: 1 },
+  "fe930be7-5e62-47db-91af-98c3a49a38b1": { name: "User Administrator", tier: 1 },
+  "194ae4cb-b126-40b2-bd5b-6091b380977d": { name: "Security Administrator", tier: 1 },
+  "b1be1c3e-b65d-4f19-8427-f6fa0d97feb9": { name: "Conditional Access Administrator", tier: 1 },
+  "3a2c62db-5318-420d-8d74-23affee5d9d5": { name: "Intune Administrator", tier: 1 },
+  "29232cdf-9323-42fd-ade2-1d097af3e4de": { name: "Exchange Administrator", tier: 1 },
+  "f28a1f50-f6e7-4571-818b-6a12f2af6b6c": { name: "SharePoint Administrator", tier: 1 },
+  "fdd7a751-b60b-444a-984c-02652fe8fa1c": { name: "Groups Administrator", tier: 1 },
+  "729827e3-9c14-49f7-bb1b-9608f156bbb8": { name: "Helpdesk Administrator", tier: 1 },
+  "966707d0-3269-4727-9be2-8c3a10f19b9d": { name: "Password Administrator", tier: 1 },
+  "9360feb5-f418-4baa-8175-e2a00bac4301": { name: "Directory Writers", tier: 1 },
+  "e6d1a23a-da11-4be4-9570-befc86d067a7": { name: "Compliance Administrator", tier: 1 },
+  "f2ef992c-3afb-46b9-b7cf-a126ee74c451": { name: "Global Reader", tier: 2 },
+  "88d8e3e3-8f55-4a1e-953a-9b9898b8876b": { name: "Directory Readers", tier: 2 }
+};
+
+// Microsoft Graph application permissions (app roles) that enable privilege escalation.
+// tier drives target severity; path is the human-readable abuse.
+const DANGEROUS_APPROLES = {
+  "RoleManagement.ReadWrite.Directory": { tier: 0, path: "Grant any Entra role — including Global Administrator — to any principal, including itself." },
+  "AppRoleAssignment.ReadWrite.All":    { tier: 0, path: "Grant itself any application permission (e.g. RoleManagement.ReadWrite.Directory), then escalate to Global Administrator." },
+  "Application.ReadWrite.All":          { tier: 0, path: "Add credentials to any app registration or service principal — including highly-privileged ones — and authenticate as them." },
+  "PrivilegedAccess.ReadWrite.AzureAD": { tier: 1, path: "Manage PIM role assignments and settings — assign eligibility to a controlled account." },
+  "RoleManagement.ReadWrite.Exchange":  { tier: 1, path: "Assign Exchange admin roles — mailbox access and transport rule control across the org." },
+  "Directory.ReadWrite.All":            { tier: 1, path: "Modify most directory objects, user properties, and non-role-assignable group membership used to gate access." },
+  "Group.ReadWrite.All":                { tier: 1, path: "Add itself to any non-role-assignable security group that gates application or resource access." },
+  "GroupMember.ReadWrite.All":          { tier: 1, path: "Add itself to any non-role-assignable group membership that gates access." },
+  "User.ReadWrite.All":                 { tier: 2, path: "Modify user accounts and properties org-wide." }
+};
+
+const SEV = { critical: { cls: "b-crit", rank: 3, key: "critical" }, high: { cls: "b-high", rank: 2, key: "high" }, medium: { cls: "b-med", rank: 1, key: "medium" } };
+function tierToSev(tier) { return tier === 0 ? "critical" : tier === 1 ? "high" : "medium"; }
+// PIM policy: roles whose activation must require ADMIN APPROVAL. All other roles may self-activate
+// (self-approval) as long as phishing-resistant MFA is enforced on activation. Edit this set to match
+// your tenant's PIM standard. Default per current policy: approval reserved for Global Administrator only.
+const APPROVAL_REQUIRED_ROLES = new Set(["Global Administrator"]);
+const requiresApproval = (roleName) => APPROVAL_REQUIRED_ROLES.has(roleName);
+
+const MITRE = {
+  memberOf:    { id: "T1078.004", name: "Valid Accounts: Cloud Accounts", tactic: "Privilege Escalation" },
+  addMember:   { id: "T1098.003", name: "Account Manipulation: Additional Cloud Roles", tactic: "Persistence" },
+  addCred:     { id: "T1098.001", name: "Account Manipulation: Additional Cloud Credentials", tactic: "Persistence" },
+  grantRole:   { id: "T1098.003", name: "Account Manipulation: Additional Cloud Roles", tactic: "Privilege Escalation" },
+  pim:         { id: "T1078.004", name: "Valid Accounts: Cloud Accounts (PIM activation)", tactic: "Privilege Escalation" },
+  phish:       { id: "T1566", name: "Phishing", tactic: "Initial Access" },
+  spray:       { id: "T1110.003", name: "Brute Force: Password Spraying", tactic: "Credential Access" },
+  validAcct:   { id: "T1078.004", name: "Valid Accounts: Cloud Accounts", tactic: "Initial Access" }
+};
+
+// ---- Conditional Access evaluation (heuristic, not Microsoft's What-If) -----------
+// A policy "enforces strong auth" if it is enabled (report-only / disabled do NOT enforce),
+// grants (not blocks) with mfa / compliant / hybrid-joined device / an authentication strength.
+function policyStrongAuth(p) {
+  const gc = p.grantControls;
+  if (!gc) return { enforcing: false, reportOnly: false };
+  const c = gc.builtInControls || [];
+  if (c.indexOf("block") >= 0) return { enforcing: false, reportOnly: false }; // block policies handled separately
+  const strong = c.indexOf("mfa") >= 0 || c.indexOf("compliantDevice") >= 0 || c.indexOf("domainJoinedDevice") >= 0 || !!(gc.authenticationStrength && gc.authenticationStrength.id);
+  if (!strong) return { enforcing: false, reportOnly: false };
+  if (p.state === "enabled") return { enforcing: true, reportOnly: false };
+  if (p.state === "enabledForReportingButNotEnforced") return { enforcing: false, reportOnly: true };
+  return { enforcing: false, reportOnly: false };
+}
+function caCoversAllApps(p) { const inc = (p.conditions && p.conditions.applications && p.conditions.applications.includeApplications) || []; return inc.indexOf("All") >= 0; }
+function caCoversInteractive(p) { const t = (p.conditions && p.conditions.clientAppTypes) || ["all"]; return t.indexOf("all") >= 0 || t.indexOf("browser") >= 0 || t.indexOf("mobileAppsAndDesktopClients") >= 0; }
+// u = { id, groups:Set(groupIds), roles:Set(roleTemplateIds) }
+function caIncludes(p, u) {
+  const c = (p.conditions && p.conditions.users) || {};
+  if ((c.includeUsers || []).indexOf("All") >= 0) return true;
+  if ((c.includeUsers || []).indexOf(u.id) >= 0) return true;
+  if ((c.includeGroups || []).some((g) => u.groups.has(g))) return true;
+  if ((c.includeRoles || []).some((r) => u.roles.has(r))) return true;
+  return false;
+}
+function caExcludes(p, u) {
+  const c = (p.conditions && p.conditions.users) || {};
+  if ((c.excludeUsers || []).indexOf(u.id) >= 0) return true;
+  if ((c.excludeGroups || []).some((g) => u.groups.has(g))) return true;
+  if ((c.excludeRoles || []).some((r) => u.roles.has(r))) return true;
+  return false;
+}
+// Returns { covered, reportOnly, excluded } for a user against the full policy set.
+function caCoverage(policies, u) {
+  let covered = false, reportOnly = false, excluded = false;
+  policies.forEach((p) => {
+    const sa = policyStrongAuth(p);
+    if (!sa.enforcing && !sa.reportOnly) return;
+    if (!caCoversAllApps(p) || !caCoversInteractive(p)) return;
+    if (!caIncludes(p, u)) return;
+    if (caExcludes(p, u)) { if (sa.enforcing) excluded = true; return; }
+    if (sa.enforcing) covered = true; else if (sa.reportOnly) reportOnly = true;
+  });
+  return { covered, reportOnly, excluded };
+}
+// Is legacy authentication blocked tenant-wide? (broad enabled block policy targeting legacy clients)
+function caBlocksLegacyAuth(policies) {
+  return policies.some((p) => {
+    if (p.state !== "enabled") return false;
+    const gc = p.grantControls;
+    if (!gc || (gc.builtInControls || []).indexOf("block") < 0) return false;
+    const t = (p.conditions && p.conditions.clientAppTypes) || [];
+    const legacy = t.indexOf("exchangeActiveSync") >= 0 || t.indexOf("other") >= 0;
+    const allUsers = ((p.conditions && p.conditions.users && p.conditions.users.includeUsers) || []).indexOf("All") >= 0;
+    return legacy && caCoversAllApps(p) && allUsers;
+  });
+}
+
+// ============================================================================
+//  Analysis
+// ============================================================================
+
+let MODEL = { paths: [], tier0Holders: [], stats: {}, pimAvailable: true, generatedAt: null };
+let sortState = { key: "risk", dir: -1 };
+let activeStat = null;
+
+function principalType(p) {
+  const t = (p && p["@odata.type"]) || "";
+  if (t.indexOf("servicePrincipal") >= 0) return "servicePrincipal";
+  if (t.indexOf("group") >= 0) return "group";
+  if (t.indexOf("user") >= 0) return "user";
+  return "unknown";
+}
+function principalLabel(p) { return (p && (p.displayName || p.userPrincipalName || p.appDisplayName)) || "(unknown principal)"; }
+
+async function analyze() {
+  try {
+    $("loadBtn").disabled = true;
+    $("notices").innerHTML = "";
+    setStatus("Acquiring token…", false, true);
+    const at = await token();
+    const base = graphBase();
+
+    // 1 · Microsoft Graph service principal + its app-role catalog -----------------
+    setStatus("Resolving Microsoft Graph app roles…", false, true);
+    const graphSps = await graphGetAll(base + "/servicePrincipals?$filter=" + enc("appId eq '00000000-0000-0000-c000-000000000000'") + "&$select=id,appRoles", at);
+    const graphSp = graphSps[0];
+    const dangerousRoleIdToValue = {};
+    if (graphSp) (graphSp.appRoles || []).forEach((r) => { if (DANGEROUS_APPROLES[r.value]) dangerousRoleIdToValue[r.id] = r.value; });
+
+    // 2 · Active privileged role assignments --------------------------------------
+    setStatus("Fetching directory role assignments…", false, true);
+    let assignments = await graphGetAll(base + "/roleManagement/directory/roleAssignments?$expand=principal", at);
+    assignments = assignments.filter((a) => PRIV_ROLES[a.roleDefinitionId]);
+
+    // 3 · PIM-eligible privileged assignments (optional / P2) ----------------------
+    setStatus("Fetching PIM-eligible assignments…", false, true);
+    let eligible = [];
+    try {
+      eligible = await graphGetAll(base + "/roleManagement/directory/roleEligibilityScheduleInstances?$expand=principal", at);
+      eligible = eligible.filter((a) => PRIV_ROLES[a.roleDefinitionId]);
+      MODEL.pimAvailable = true;
+    } catch (e) { MODEL.pimAvailable = false; }
+
+    // 4 · Abusable service principals (dangerous Graph app roles) ------------------
+    setStatus("Fetching Microsoft Graph app-role assignments…", false, true);
+    let abusableAssignedTo = [];
+    if (graphSp) {
+      const all = await graphGetAll(base + "/servicePrincipals/" + graphSp.id + "/appRoleAssignedTo?$top=999", at);
+      abusableAssignedTo = all.filter((a) => dangerousRoleIdToValue[a.appRoleId]);
+    }
+
+    // ---- Build the graph model --------------------------------------------------
+    const paths = [];
+    const tier0Holders = [];
+    const directUserHolders = {}; // userId -> most-privileged direct role held (for CA evaluation)
+    let pid = 0;
+    const nextId = () => "p" + ++pid;
+
+    // (a) Direct role holders -----------------------------------------------------
+    // Users/SPs holding a privileged role directly. Groups are handled in (b).
+    const privGroupRole = {}; // groupId -> [{roleName, tier, via}]
+    function noteHolder(princ, roleName, tier, via) {
+      const kind = principalType(princ);
+      if (kind === "group") {
+        (privGroupRole[princ.id] = privGroupRole[princ.id] || []).push({ roleName, tier, via });
+        return;
+      }
+      const rec = { type: kind, name: principalLabel(princ), id: princ.id, upn: princ.userPrincipalName || princ.appId || "", roleName, tier, via };
+      if (tier === 0) tier0Holders.push(rec);
+      // Track every user who holds a privileged role directly, keeping their most-privileged role
+      // (lowest tier number). CA evaluation turns any of these that lack MFA into initial-access paths.
+      if (kind === "user" && princ.id) {
+        const cur = directUserHolders[princ.id];
+        if (!cur || tier < cur.tier) directUserHolders[princ.id] = { id: princ.id, name: principalLabel(princ), upn: princ.userPrincipalName || "", tier, roleName };
+      }
+    }
+    assignments.forEach((a) => noteHolder(a.principal || { id: a.principalId }, PRIV_ROLES[a.roleDefinitionId].name, PRIV_ROLES[a.roleDefinitionId].tier, "active"));
+    eligible.forEach((a) => {
+      const r = PRIV_ROLES[a.roleDefinitionId];
+      const princ = a.principal || { id: a.principalId };
+      const kind = principalType(princ);
+      if (kind === "group") { (privGroupRole[princ.id] = privGroupRole[princ.id] || []).push({ roleName: r.name, tier: r.tier, via: "eligible" }); return; }
+      // PIM-eligible principal → activate → hold role
+      const reqAppr = requiresApproval(r.name);
+      paths.push({
+        id: nextId(), sourceType: kind, source: principalLabel(princ), sourceId: princ.id, sourceUpn: princ.userPrincipalName || "",
+        target: r.name, tier: r.tier, sev: tierToSev(r.tier), reliability: "high",
+        hops: 1, technique: "PIM self-activation",
+        edges: [{ label: "eligible for → activates", node: r.name }],
+        mitre: [MITRE.pim],
+        evidence: "Principal has an <b>eligible</b> PIM assignment for " + escapeHtml(r.name) + ". Activation is self-service; "
+          + (reqAppr
+              ? "per policy this role must require <b>admin approval</b> — without an approval gate (and phishing-resistant MFA) on activation it is a single step to the active role."
+              : "under your PIM policy self-activation is acceptable for this role (approval is reserved for Global Administrator) — ensure <b>phishing-resistant MFA</b> is enforced on activation so the single step still requires a strong credential."),
+        remediation: reqAppr
+          ? [
+            "Require <b>admin approval</b> and phishing-resistant MFA on activation of " + escapeHtml(r.name) + " in PIM.",
+            "Scope activation with justification + ticketing, and shorten the maximum activation duration.",
+            "Review whether this principal needs eligibility at all — remove if unused (check PIM activation history)."
+          ]
+          : [
+            "Enforce <b>phishing-resistant MFA</b> on activation of " + escapeHtml(r.name) + " in PIM. Self-service activation (no approval) is acceptable for this role under your policy — approval is reserved for Global Administrator.",
+            "Scope activation with justification + ticketing, and shorten the maximum activation duration.",
+            "Review whether this principal needs eligibility at all — remove if unused (check PIM activation history)."
+          ],
+        chokeKey: "pim:" + princ.id + ":" + a.roleDefinitionId,
+        chokeFix: reqAppr
+          ? "Require admin approval + phishing-resistant MFA on PIM activation of " + r.name + " for " + principalLabel(princ)
+          : "Enforce phishing-resistant MFA on PIM activation of " + r.name + " for " + principalLabel(princ) + " (self-approval per policy)",
+        chokeSev: tierToSev(r.tier)
+      });
+    });
+
+    // (b) Role-assignable groups that hold a privileged role → members + owners ----
+    const privGroupIds = Object.keys(privGroupRole);
+    setStatus("Resolving members & owners of " + privGroupIds.length + " privileged group(s)…", false, true);
+    const groupData = await mapPool(privGroupIds, 6, async (gid) => {
+      const [meta, members, owners] = await Promise.all([
+        graphGetAll(base + "/groups/" + gid + "?$select=id,displayName,isAssignableToRole", at).catch(() => [{ id: gid, displayName: "(group)" }]),
+        graphGetAll(base + "/groups/" + gid + "/members?$select=id,displayName,userPrincipalName,appId&$top=999", at).catch(() => []),
+        graphGetAll(base + "/groups/" + gid + "/owners?$select=id,displayName,userPrincipalName&$top=999", at).catch(() => [])
+      ]);
+      const m = Array.isArray(meta) ? meta[0] : meta;
+      return { gid, name: (m && m.displayName) || "(group)", members, owners };
+    }, null);
+
+    (groupData || []).forEach((g) => {
+      if (!g) return;
+      const roles = privGroupRole[g.gid] || [];
+      // pick the most privileged role the group grants
+      const top = roles.slice().sort((a, b) => a.tier - b.tier)[0];
+      const roleNames = roles.map((r) => r.roleName).join(", ");
+      // members → hold the role by membership
+      (g.members || []).forEach((m) => {
+        const kind = principalType(m) === "unknown" ? (m.appId ? "servicePrincipal" : "user") : principalType(m);
+        paths.push({
+          id: nextId(), sourceType: kind, source: principalLabel(m), sourceId: m.id, sourceUpn: m.userPrincipalName || "",
+          target: top.roleName, tier: top.tier, sev: tierToSev(top.tier), reliability: "high",
+          hops: 2, technique: "Role via group membership",
+          edges: [{ label: "member of", node: g.name }, { label: "assigned", node: roleNames }],
+          mitre: [MITRE.memberOf],
+          evidence: "This principal is a direct member of role-assignable group <b>" + escapeHtml(g.name) + "</b>, which holds <b>" + escapeHtml(roleNames) + "</b>. Membership confers the role — no further action required.",
+          remediation: [
+            "Remove this principal from " + escapeHtml(g.name) + " if it does not require " + escapeHtml(top.roleName) + ".",
+            "Convert the group to PIM for Groups so membership is eligible/just-in-time rather than standing.",
+            "Prefer assigning roles to individuals via PIM over role-assignable groups where the group adds no management value."
+          ],
+          chokeKey: "group:" + g.gid,
+          chokeFix: "Review membership of role-assignable group " + g.name + " (holds " + roleNames + ")",
+          chokeSev: tierToSev(top.tier)
+        });
+      });
+      // owners → can influence membership (RBAC-restricted for role-assignable groups → conditional)
+      (g.owners || []).forEach((o) => {
+        paths.push({
+          id: nextId(), sourceType: "user", source: principalLabel(o), sourceId: o.id, sourceUpn: o.userPrincipalName || "",
+          target: top.roleName, tier: top.tier, sev: tierToSev(top.tier), reliability: "conditional",
+          hops: 3, technique: "Group owner adds member",
+          edges: [{ label: "owns", node: g.name }, { label: "adds self, gains", node: roleNames }],
+          mitre: [MITRE.addMember, MITRE.memberOf],
+          evidence: "Owner of role-assignable group <b>" + escapeHtml(g.name) + "</b> (holds " + escapeHtml(roleNames) + "). <b>Conditional:</b> Entra restricts membership changes on role-assignable groups to Privileged Role Administrators/Global Admins, so this path is only walkable if that restriction is not enforced for owners in your tenant — verify before relying on it.",
+          remediation: [
+            "Remove unnecessary owners from " + escapeHtml(g.name) + " — owners are a standing escalation surface even where membership is RBAC-gated.",
+            "Confirm role-assignable group membership management is restricted to Privileged Role Administrators.",
+            "Move the group under PIM for Groups so ownership does not translate into standing role access."
+          ],
+          chokeKey: "group:" + g.gid,
+          chokeFix: "Review ownership of role-assignable group " + g.name + " (holds " + roleNames + ")",
+          chokeSev: tierToSev(top.tier)
+        });
+      });
+    });
+
+    // (c) Abusable service principals + their owners ------------------------------
+    // group appRoleAssignedTo by the holding principal (the SP), collect its dangerous perms
+    const bySp = {};
+    abusableAssignedTo.forEach((a) => {
+      const k = a.principalId;
+      if (!bySp[k]) bySp[k] = { id: a.principalId, name: a.principalDisplayName || "(service principal)", perms: [] };
+      bySp[k].perms.push(dangerousRoleIdToValue[a.appRoleId]);
+    });
+    const abusableSps = Object.values(bySp);
+    setStatus("Resolving owners of " + abusableSps.length + " over-privileged service principal(s)…", false, true);
+    const spOwnerData = await mapPool(abusableSps, 6, async (sp) => {
+      const owners = await graphGetAll(base + "/servicePrincipals/" + sp.id + "/owners?$select=id,displayName,userPrincipalName&$top=999", at).catch(() => []);
+      return { id: sp.id, owners };
+    }, null);
+    const ownersBySp = {}; (spOwnerData || []).forEach((d) => { if (d) ownersBySp[d.id] = d.owners; });
+
+    abusableSps.forEach((sp) => {
+      const perms = Array.from(new Set(sp.perms));
+      const topTier = Math.min.apply(null, perms.map((p) => DANGEROUS_APPROLES[p].tier));
+      const sev = tierToSev(topTier);
+      const target = topTier === 0 ? "Global Administrator (effective)" : "Privileged (effective)";
+      const permList = perms.map((p) => "<code>" + escapeHtml(p) + "</code> — " + escapeHtml(DANGEROUS_APPROLES[p].path)).join("<br>");
+      // The SP itself is a standing escalation node (whoever controls its credentials owns this path).
+      paths.push({
+        id: nextId(), sourceType: "servicePrincipal", source: sp.name, sourceId: sp.id, sourceUpn: "",
+        target, tier: topTier, sev, reliability: "high",
+        hops: 1, technique: "Over-privileged app permission",
+        edges: [{ label: "holds", node: perms.join(", ") }, { label: "→", node: target }],
+        mitre: [MITRE.grantRole],
+        evidence: "Service principal holds Microsoft Graph application permission(s):<br>" + permList,
+        remediation: [
+          "Revoke the app-role assignment(s) unless the workload genuinely requires them; prefer least-privilege scopes.",
+          "If required, isolate the credential in a hardened vault, enforce short-lived certs over long-lived secrets, and monitor sign-ins.",
+          "Apply a Conditional Access policy for workload identities to restrict where this SP can authenticate from."
+        ],
+        chokeKey: "sp:" + sp.id,
+        chokeFix: "Revoke " + perms.join(" / ") + " from service principal " + sp.name,
+        chokeSev: sev
+      });
+      // Owners of the abusable SP → add credential → act as SP → its capability
+      (ownersBySp[sp.id] || []).forEach((o) => {
+        paths.push({
+          id: nextId(), sourceType: "user", source: principalLabel(o), sourceId: o.id, sourceUpn: o.userPrincipalName || "",
+          target, tier: topTier, sev, reliability: "high",
+          hops: 3, technique: "SP owner adds credential",
+          edges: [{ label: "owns", node: sp.name }, { label: "adds credential, acts as SP", node: perms.join(", ") }, { label: "→", node: target }],
+          mitre: [MITRE.addCred, MITRE.grantRole],
+          evidence: "Owner of service principal <b>" + escapeHtml(sp.name) + "</b>, which holds " + escapeHtml(perms.join(", ")) + ". An owner can add a client secret or certificate to the SP, authenticate as it, and inherit its escalation capability — a confirmed, standing path.",
+          remediation: [
+            "Remove this owner from " + escapeHtml(sp.name) + " — SP owners can mint credentials for it at will.",
+            "Reduce the SP's permissions (see the SP's own row) so ownership no longer confers escalation.",
+            "Alert on new credential (addPassword / addKey) events for this SP in the audit log."
+          ],
+          chokeKey: "sp:" + sp.id,
+          chokeFix: "Reduce permissions / owners of service principal " + sp.name,
+          chokeSev: sev
+        });
+      });
+    });
+
+    // (d) Conditional Access gap edges (optional — needs Policy.Read.All) ---------
+    // CA weaknesses are the "initial access" layer: an admin with no enforced MFA is a walkable
+    // path from the internet to their role; unblocked legacy auth lets password spray bypass MFA.
+    MODEL.caAvailable = false;
+    MODEL.caStats = { uncoveredAdmins: 0, legacyOpen: false, evaluated: 0, truncated: false };
+    setStatus("Evaluating Conditional Access coverage…", false, true);
+    const caToken = await optionalToken(CA_SCOPES);
+    if (caToken) {
+      try {
+        const policies = await graphGetAll(base + "/identity/conditionalAccess/policies", caToken);
+        MODEL.caAvailable = true;
+
+        // Legacy-auth bypass — a single tenant-wide finding.
+        if (!caBlocksLegacyAuth(policies)) {
+          MODEL.caStats.legacyOpen = true;
+          const reachTier0 = tier0Holders.length > 0;
+          paths.push({
+            id: nextId(), sourceType: "external", source: "Any password-only attacker", sourceId: "", sourceUpn: "",
+            target: reachTier0 ? "Account takeover (MFA bypass)" : "Account takeover (MFA bypass)", tier: reachTier0 ? 0 : 1,
+            sev: reachTier0 ? "critical" : "high", reliability: "high", hops: 2, technique: "Legacy authentication not blocked",
+            edges: [{ label: "legacy endpoint (IMAP/POP/SMTP/EAS)", node: "password spray — MFA not evaluated" }, { label: "→", node: "any account with a password" }],
+            mitre: [MITRE.spray, MITRE.validAcct],
+            evidence: "No enabled Conditional Access policy blocks legacy authentication tenant-wide. Legacy protocols do not support modern auth, so per-user MFA and CA grant controls are <b>never evaluated</b> — a password-spray or basic-auth login succeeds with credentials alone" + (reachTier0 ? ", including against the " + tier0Holders.length + " Tier-0 account(s) below." : "."),
+            remediation: [
+              "Create an enabled Conditional Access policy: All users, All cloud apps, client apps = Exchange ActiveSync + Other, grant = Block.",
+              "Confirm no service account still depends on basic auth before enforcing (check sign-in logs, client app = 'Other').",
+              "Disable per-protocol legacy auth in Exchange Online (authentication policies) as defence in depth."
+            ],
+            chokeKey: "ca:legacy", chokeFix: "Block legacy authentication tenant-wide via Conditional Access", chokeSev: reachTier0 ? "critical" : "high"
+          });
+        }
+
+        // Per-principal MFA coverage for privileged accounts + user path-sources.
+        const relevant = new Map();
+        Object.values(directUserHolders).forEach((u) => relevant.set(u.id, { id: u.id, name: u.name, upn: u.upn }));
+        paths.forEach((p) => { if (p.sourceType === "user" && p.sourceId && !relevant.has(p.sourceId)) relevant.set(p.sourceId, { id: p.sourceId, name: p.source, upn: p.sourceUpn }); });
+        let relArr = Array.from(relevant.values());
+        if (relArr.length > 300) { relArr = relArr.slice(0, 300); MODEL.caStats.truncated = true; }
+        MODEL.caStats.evaluated = relArr.length;
+
+        setStatus("Resolving Conditional Access scope for " + relArr.length + " privileged account(s)…", false, true);
+        const membership = await mapPool(relArr, 8, async (u) => {
+          const objs = await graphGetAll(base + "/users/" + u.id + "/transitiveMemberOf?$select=id,roleTemplateId&$top=999", at).catch(() => []);
+          const groups = new Set(), roles = new Set();
+          objs.forEach((o) => { if (o.roleTemplateId) roles.add(o.roleTemplateId); else if (o.id) groups.add(o.id); });
+          return { id: u.id, groups, roles };
+        }, null);
+        const membById = {}; (membership || []).forEach((m) => { if (m) membById[m.id] = m; });
+
+        relArr.forEach((u) => {
+          const scope = membById[u.id] || { id: u.id, groups: new Set(), roles: new Set() };
+          const cov = caCoverage(policies, scope);
+          if (cov.covered) return; // protected by an enforcing policy
+          const dh = directUserHolders[u.id];
+          // A direct privileged holder with no enforced MFA → standalone internet-to-role path.
+          if (dh) {
+            MODEL.caStats.uncoveredAdmins++;
+            const sev = tierToSev(dh.tier);
+            const why = cov.excluded
+              ? "This account is explicitly <b>excluded</b> from an otherwise-enforcing MFA policy — a common backdoor left on admin or break-glass accounts."
+              : cov.reportOnly
+                ? "The only in-scope MFA policy is in <b>report-only</b> mode, so nothing is actually enforced."
+                : "No enabled Conditional Access policy requires MFA or strong auth for this account on interactive sign-in.";
+            paths.push({
+              id: nextId(), sourceType: "user", source: dh.name, sourceId: u.id, sourceUpn: dh.upn,
+              target: dh.roleName, tier: dh.tier, sev, reliability: cov.reportOnly ? "conditional" : "high",
+              hops: 2, technique: "Privileged account not covered by MFA", internetReachable: true,
+              edges: [{ label: "internet sign-in, password only", node: "account takeover (phish / spray)" }, { label: "holds", node: dh.roleName }],
+              mitre: [MITRE.phish, MITRE.spray, MITRE.validAcct],
+              evidence: why + " With a single credential-phishing or password-spray step an attacker operates directly as <b>" + escapeHtml(dh.roleName) + "</b> — no escalation required.",
+              remediation: [
+                "Bring this account into an enforced Conditional Access policy requiring phishing-resistant MFA.",
+                cov.excluded ? "Remove this account from the exclusion list of the MFA policy; use a monitored break-glass exception instead." : "Scope the admin-MFA policy to the Directory Roles this account holds so coverage follows the role, not a static list.",
+                "Place the role under PIM so the standing account carries no privilege at rest."
+              ],
+              chokeKey: "ca:admin-mfa", chokeFix: "Enforce phishing-resistant MFA for all privileged roles via Conditional Access", chokeSev: "critical"
+            });
+          } else {
+            // Not a direct holder but the source of an escalation path → mark those paths internet-reachable.
+            paths.forEach((p) => {
+              if (p.sourceId === u.id && !p.internetReachable && p.chokeKey.indexOf("ca:") !== 0) {
+                p.internetReachable = true;
+                p.caNote = "Source account is also not covered by MFA — this escalation path is reachable directly from the internet, no prior foothold needed.";
+              }
+            });
+          }
+        });
+      } catch (e) { MODEL.caAvailable = false; MODEL.caError = e.message || String(e); }
+    }
+
+    // (e) Authentication-method posture (optional — needs AuditLog.Read.All) --------
+    // Per-user MFA registration for privileged accounts: is a phishing-resistant method registered,
+    // only weak MFA, or none? NOTE: registered ≠ enforced — the CA authentication-strength check (d) is
+    // authoritative for what is actually required; this shows capability/hygiene per admin.
+    MODEL.authAvailable = false;
+    MODEL.authStats = { phishres: 0, weak: 0, nomfa: 0, unknown: 0 };
+    MODEL.authPosture = {};
+    setStatus("Reading authentication-method registration…", false, true);
+    const authToken = await optionalToken(AUTH_SCOPES);
+    if (authToken) {
+      try {
+        const regs = await graphGetAll(base + "/reports/authenticationMethods/userRegistrationDetails?$select=id,userPrincipalName,methodsRegistered,isMfaRegistered,isMfaCapable,isPasswordlessCapable&$top=999", authToken);
+        MODEL.authAvailable = true;
+        regs.forEach((u) => { MODEL.authPosture[u.id] = classifyMfa(u); });
+        const privUserIds = new Set();
+        Object.values(directUserHolders).forEach((u) => privUserIds.add(u.id));
+        paths.forEach((p) => { if (p.sourceType === "user" && p.sourceId) privUserIds.add(p.sourceId); });
+        privUserIds.forEach((id) => { const lvl = (MODEL.authPosture[id] || { level: "unknown" }).level; MODEL.authStats[lvl] = (MODEL.authStats[lvl] || 0) + 1; });
+      } catch (e) { MODEL.authAvailable = false; MODEL.authError = e.message || String(e); }
+    }
+
+    MODEL.paths = paths;
+    MODEL.tier0Holders = tier0Holders;
+    MODEL.generatedAt = new Date();
+    computeStats();
+    render();
+    setStatus("Analysis complete — " + paths.length + " path(s) across " + Object.keys(MODEL.stats.chokes || {}).length + " choke point(s).");
+  } catch (e) {
+    setStatus("Analysis failed: " + escapeHtml(e.message || String(e)), true);
+    console.error(e);
+  } finally {
+    $("loadBtn").disabled = false;
+  }
+}
+
+function computeStats() {
+  const p = MODEL.paths;
+  const chokes = {};
+  p.forEach((x) => {
+    if (!chokes[x.chokeKey]) chokes[x.chokeKey] = { key: x.chokeKey, fix: x.chokeFix, sev: x.chokeSev, count: 0, sample: x };
+    chokes[x.chokeKey].count++;
+    // keep the highest severity seen for the choke
+    if (SEV[x.chokeSev].rank > SEV[chokes[x.chokeKey].sev].rank) chokes[x.chokeKey].sev = x.chokeSev;
+  });
+  MODEL.stats = {
+    total: p.length,
+    critical: p.filter((x) => x.sev === "critical").length,
+    tier0Direct: MODEL.tier0Holders.length,
+    abusableSp: new Set(p.filter((x) => x.chokeKey.startsWith("sp:")).map((x) => x.chokeKey)).size,
+    chokes
+  };
+}
+
+// ============================================================================
+//  Render
+// ============================================================================
+
+function render() {
+  renderNotices();
+  renderSummary();
+  renderQueue();
+  renderTable();
+}
+
+function renderNotices() {
+  const n = [];
+  if (!MODEL.caAvailable) {
+    n.push('<div class="notice notice-warn">Conditional Access not evaluated — grant <code>Policy.Read.All</code> (admin consent) so no-MFA admins and legacy-auth bypass surface as paths.'
+      + (MODEL.caError ? ' <span class="mono">(' + escapeHtml(MODEL.caError) + ')</span>' : "") + '</div>');
+  } else {
+    const c = MODEL.caStats || {};
+    n.push('<div class="notice notice-info">Conditional Access evaluated for ' + (c.evaluated || 0) + ' privileged account(s)'
+      + (c.truncated ? ' (capped at 300)' : "") + '. Coverage is a heuristic evaluation, not Microsoft’s What-If — verify flagged accounts before reporting.</div>');
+  }
+  if (!MODEL.authAvailable) {
+    n.push('<div class="notice notice-warn">Authentication-method posture not read — grant <code>AuditLog.Read.All</code> (admin consent) to show, per admin, whether a phishing-resistant method (FIDO2 / Windows Hello / passkey / certificate) is registered.'
+      + (MODEL.authError ? ' <span class="mono">(' + escapeHtml(MODEL.authError) + ')</span>' : "") + '</div>');
+  } else {
+    const a = MODEL.authStats || {};
+    n.push('<div class="notice notice-info">MFA registration read: ' + (a.phishres || 0) + ' admin(s) with a phishing-resistant method, ' + (a.weak || 0) + ' weak-only, ' + (a.nomfa || 0) + ' none. <b>Registered ≠ enforced</b> — the Conditional Access authentication-strength check is authoritative; use this for capability/hygiene.</div>');
+  }
+  $("notices").innerHTML = n.join("");
+}
+
+function statTile(id, n, label, crit) {
+  return '<div class="stat clickable' + (activeStat === id ? " active" : "") + '" data-stat="' + id + '">'
+    + '<div class="n' + (crit ? " crit" : "") + '">' + n + '</div><div class="l">' + label + '</div></div>';
+}
+
+function renderSummary() {
+  const s = MODEL.stats;
+  const chokeCount = Object.keys(s.chokes || {}).length;
+  const ca = MODEL.caStats || {};
+  $("summary").innerHTML =
+    statTile("all", s.total, "Attack paths", false)
+    + statTile("critical", s.critical, "Critical (to Tier-0)", s.critical > 0)
+    + statTile("tier0", s.tier0Direct, "Tier-0 role holders", false)
+    + statTile("sp", s.abusableSp, "Over-privileged SPs", s.abusableSp > 0)
+    + (MODEL.caAvailable ? statTile("ca", ca.uncoveredAdmins || 0, "No-MFA admins", (ca.uncoveredAdmins || 0) > 0) : "")
+    + (MODEL.authAvailable ? statTile("weakmfa", (MODEL.authStats.weak || 0) + (MODEL.authStats.nomfa || 0), "Admins w/o phishing-resistant MFA", ((MODEL.authStats.weak || 0) + (MODEL.authStats.nomfa || 0)) > 0) : "")
+    + statTile("choke", chokeCount, "Choke points", false);
+  $("summary").querySelectorAll(".stat").forEach((el) => el.addEventListener("click", () => {
+    const id = el.getAttribute("data-stat");
+    if (id === "all") { activeStat = null; $("fltSev").value = ""; $("fltType").value = ""; }
+    else if (id === "critical") { activeStat = null; $("fltSev").value = "critical"; $("fltType").value = ""; }
+    else if (id === "sp") { activeStat = null; $("fltSev").value = ""; $("fltType").value = "servicePrincipal"; }
+    else if (id === "ca") { activeStat = "ca"; $("fltSev").value = ""; $("fltType").value = ""; }
+    else if (id === "weakmfa") { activeStat = "weakmfa"; $("fltSev").value = ""; $("fltType").value = ""; }
+    else if (id === "tier0" || id === "choke") { activeStat = id; document.getElementById(id === "choke" ? "rqCard" : "table").scrollIntoView({ behavior: "smooth" }); }
+    renderSummary(); renderTable();
+  }));
+}
+
+function renderQueue() {
+  const chokes = Object.values(MODEL.stats.chokes || {}).sort((a, b) => (SEV[b.sev].rank - SEV[a.sev].rank) || (b.count - a.count));
+  if (!chokes.length) { $("rqBody").innerHTML = '<div class="notice notice-ok">No walkable escalation paths to privileged roles were found. Tier-0 role holders are still listed below — keep them under PIM with phishing-resistant MFA.</div>'; return; }
+  $("rqBody").innerHTML = chokes.slice(0, 12).map((c) => {
+    const cls = c.sev === "critical" ? "crit" : c.sev === "high" ? "high" : "med";
+    return '<div class="rq ' + cls + '">'
+      + '<div class="rq-top">'
+      + '<span class="badge ' + SEV[c.sev].cls + '">' + c.sev.toUpperCase() + '</span>'
+      + '<span class="rq-fix">' + escapeHtml(c.fix) + '</span>'
+      + '<span class="rq-count">collapses <b>' + c.count + '</b> path' + (c.count === 1 ? "" : "s") + '</span>'
+      + '</div>'
+      + '<div class="rq-why">' + escapeHtml(c.sample.remediation[0]) + '</div>'
+      + '</div>';
+  }).join("");
+}
+
+// Aggregate the flat path list into one entry per SOURCE PRINCIPAL, keeping every reachable role and path.
+function groupByPrincipal(paths) {
+  const map = {};
+  paths.forEach((p) => {
+    const key = p.sourceId || (p.sourceType + ":" + p.source);
+    let g = map[key];
+    if (!g) g = map[key] = { key, source: p.source, sourceType: p.sourceType, sourceId: p.sourceId || "", sourceUpn: p.sourceUpn || "", internetReachable: false, paths: [], roles: {}, anyConfirmed: false };
+    g.paths.push(p);
+    if (p.internetReachable) g.internetReachable = true;
+    if (p.reliability === "high") g.anyConfirmed = true;
+    const cur = g.roles[p.target];
+    if (!cur || p.tier < cur.tier) g.roles[p.target] = { name: p.target, tier: p.tier, sev: p.sev };
+  });
+  const groups = Object.values(map);
+  groups.forEach((g) => {
+    g.roleList = Object.values(g.roles).sort((a, b) => a.tier - b.tier); // most privileged first
+    g.topSev = g.roleList.length ? g.roleList[0].sev : "medium";
+    g.minHops = Math.min.apply(null, g.paths.map((p) => p.hops));
+    g.pathCount = g.paths.length;
+    g.mfa = (MODEL.authAvailable && g.sourceType === "user" && g.sourceId) ? (MODEL.authPosture[g.sourceId] || { level: "unknown", methods: [] }) : null;
+    g.risk = principalRisk(g);
+    g.paths.sort((a, b) => (SEV[b.sev].rank - SEV[a.sev].rank) || (a.hops - b.hops));
+  });
+  return groups;
+}
+// Risk score 0-100: highest role reached + breadth of roles + internet reachability + confirmed + how few hops.
+function principalRisk(g) {
+  const sevBase = { critical: 60, high: 40, medium: 22 }[g.topSev] || 22;
+  const breadth = Math.min(20, (g.roleList.length - 1) * 5);
+  const reach = g.internetReachable ? 25 : 0;
+  const confirmed = g.anyConfirmed ? 8 : 0;
+  const hopsBonus = g.minHops <= 1 ? 7 : g.minHops === 2 ? 4 : 0;
+  // MFA posture: no phishing-resistant method makes the account more phishable; a registered
+  // phishing-resistant method lowers it. Only applied when auth data was available.
+  const mfaAdj = g.mfa ? (g.mfa.level === "nomfa" ? 12 : g.mfa.level === "weak" ? 6 : g.mfa.level === "phishres" ? -10 : 0) : 0;
+  return Math.max(1, Math.min(100, sevBase + breadth + reach + confirmed + hopsBonus + mfaAdj));
+}
+function riskTier(score) { return score >= 65 ? "critical" : score >= 40 ? "high" : "medium"; }
+
+function filtered() {
+  const q = $("fltSearch").value.toLowerCase().trim();
+  const fSev = $("fltSev").value, fType = $("fltType").value, fRel = $("fltRel").value;
+  let groups = groupByPrincipal(MODEL.paths);
+  if (activeStat === "ca") groups = groups.filter((g) => g.internetReachable);
+  if (activeStat === "weakmfa") groups = groups.filter((g) => g.mfa && (g.mfa.level === "weak" || g.mfa.level === "nomfa"));
+  if (q) groups = groups.filter((g) => (g.source + " " + g.sourceUpn + " " + g.roleList.map((r) => r.name).join(" ") + " " + g.paths.map((p) => p.technique + " " + p.edges.map((e) => e.node).join(" ")).join(" ")).toLowerCase().indexOf(q) >= 0);
+  if (fSev === "critical") groups = groups.filter((g) => g.topSev === "critical");
+  if (fSev === "high") groups = groups.filter((g) => SEV[g.topSev].rank >= 2);
+  if (fType) groups = groups.filter((g) => g.sourceType === fType);
+  if (fRel === "high") groups = groups.filter((g) => g.anyConfirmed);
+  if (fRel === "conditional") groups = groups.filter((g) => !g.anyConfirmed);
+  const key = sortState.key, dir = sortState.dir;
+  groups.sort((a, b) => {
+    let av, bv;
+    if (key === "source") { av = a.source.toLowerCase(); bv = b.source.toLowerCase(); }
+    else if (key === "roles") { av = a.roleList.length; bv = b.roleList.length; }
+    else if (key === "paths") { av = a.pathCount; bv = b.pathCount; }
+    else { av = a.risk; bv = b.risk; }
+    return av < bv ? -dir : av > bv ? dir : 0;
+  });
+  return groups;
+}
+
+const typeBadge = (t) => t === "user" ? '<span class="badge b-user">User</span>' : t === "servicePrincipal" ? '<span class="badge b-sp">Service principal</span>' : t === "external" ? '<span class="badge b-high">External</span>' : '<span class="badge b-group">Group</span>';
+function mfaBadge(mfa) {
+  if (!mfa) return "";
+  const t = mfa.methods && mfa.methods.length ? ' title="Registered: ' + escapeHtml(mfa.methods.join(", ")) + '"' : "";
+  if (mfa.level === "phishres") return ' <span class="badge b-low"' + t + '>Phishing-resistant MFA</span>';
+  if (mfa.level === "weak") return ' <span class="badge b-med"' + t + '>Weak MFA only</span>';
+  if (mfa.level === "nomfa") return ' <span class="badge b-crit">No MFA registered</span>';
+  return "";
+}
+const reachBadge = '<span class="badge b-crit" title="Account is not covered by an enforced MFA policy — reachable directly from the internet">No MFA · internet-reachable</span>';
+
+function chainHtml(r) {
+  let h = '<div class="chain"><span class="node src">' + escapeHtml(r.source) + '</span>';
+  r.edges.forEach((e) => { h += '<span class="edge">' + escapeHtml(e.label) + '</span><span class="node' + (e === r.edges[r.edges.length - 1] ? " tgt" : "") + '">' + escapeHtml(e.node) + '</span>'; });
+  return h + '</div>';
+}
+
+function renderTable() {
+  const groups = filtered();
+  const totalPrincipals = groupByPrincipal(MODEL.paths).length;
+  const tb = $("table").querySelector("tbody");
+  tb.innerHTML = groups.map((g, gi) => {
+    const rt = riskTier(g.risk);
+    const relBadge = g.anyConfirmed
+      ? '<span class="badge b-rel-high" title="At least one path is fully confirmed — every edge backed by a live directory fact">Confirmed</span>'
+      : '<span class="badge b-rel-cond" title="Only conditional paths — walkable if a tenant RBAC restriction is not enforced; verify">Conditional</span>';
+    const roleChips = g.roleList.map((r) => '<span class="rolechip ' + SEV[r.sev].cls + '" title="' + r.sev.toUpperCase() + '">' + escapeHtml(r.name) + '</span>').join(" ");
+    return '<tr class="rowx" data-id="' + gi + '">'
+      + '<td class="chev">▸</td>'
+      + '<td><span class="riskscore ' + SEV[rt].cls + '">' + g.risk + '</span><div class="risklbl">' + rt.toUpperCase() + '</div></td>'
+      + '<td>' + escapeHtml(g.source) + '<br>' + typeBadge(g.sourceType) + (g.internetReachable ? " " + reachBadge : "") + mfaBadge(g.mfa) + (g.sourceUpn ? '<div class="mono">' + escapeHtml(g.sourceUpn) + '</div>' : "") + '</td>'
+      + '<td><div class="rolechips">' + roleChips + '</div></td>'
+      + '<td style="text-align:center">' + g.pathCount + '<div class="mono" style="font-size:11px;opacity:.7">min ' + g.minHops + ' hop' + (g.minHops === 1 ? "" : "s") + '</div></td>'
+      + '<td>' + relBadge + '</td>'
+      + '</tr>'
+      + '<tr class="detail hidden" data-detail="' + gi + '"><td colspan="6">' + principalDetailHtml(g) + '</td></tr>';
+  }).join("");
+  $("tableCount").textContent = groups.length + " of " + totalPrincipals + " principal" + (totalPrincipals === 1 ? "" : "s");
+  tb.querySelectorAll("tr.rowx").forEach((tr) => tr.addEventListener("click", () => {
+    const d = tb.querySelector('tr[data-detail="' + tr.getAttribute("data-id") + '"]');
+    const open = !d.classList.contains("hidden");
+    d.classList.toggle("hidden", open);
+    tr.querySelector(".chev").textContent = open ? "▸" : "▾";
+  }));
+}
+
+// One principal's expanded view: a summary line + every underlying path in full.
+function principalDetailHtml(g) {
+  return '<div class="pgroup">'
+    + '<div class="pgroup-head"><b>' + g.pathCount + '</b> verified path' + (g.pathCount === 1 ? "" : "s") + ' from <b>' + escapeHtml(g.source) + '</b> · risk score <b>' + g.risk + '</b> (' + riskTier(g.risk).toUpperCase() + ')'
+    + (g.internetReachable ? ' · <b style="color:var(--red)">internet-reachable / no enforced MFA</b>' : "")
+    + ' · reaches: ' + g.roleList.map((r) => escapeHtml(r.name)).join(", ") + '</div>'
+    + (g.mfa ? '<div class="pgroup-head" style="margin-top:-6px">Registered MFA: ' + (
+        g.mfa.level === "phishres" ? '<b style="color:var(--green)">phishing-resistant</b> (' + escapeHtml((g.mfa.methods || []).join(", ")) + ')'
+        : g.mfa.level === "weak" ? '<b style="color:var(--amber)">weak methods only</b> (' + escapeHtml((g.mfa.methods || []).join(", ") || "—") + ') — phishable; register FIDO2 / Windows Hello / passkey'
+        : g.mfa.level === "nomfa" ? '<b style="color:var(--red)">none registered</b>'
+        : 'unknown')
+      + ' <span style="opacity:.7">· registered ≠ enforced — a CA authentication-strength policy is what actually requires it</span></div>' : "")
+    + g.paths.map((p) => '<div class="ppath">'
+        + '<div class="ppath-top"><span class="badge ' + SEV[p.sev].cls + '">' + p.sev.toUpperCase() + '</span> <b>→ ' + escapeHtml(p.target) + '</b> <span class="mono" style="opacity:.7">· ' + escapeHtml(p.technique) + ' · ' + p.hops + ' hop' + (p.hops === 1 ? "" : "s") + '</span></div>'
+        + chainHtml(p)
+        + detailHtml(p)
+      + '</div>').join("")
+    + '</div>';
+}
+
+function detailHtml(r) {
+  const mitre = r.mitre.map((m) => '<span class="mitre"><b>' + escapeHtml(m.id) + '</b> ' + escapeHtml(m.name) + ' <span style="opacity:.8">· ' + escapeHtml(m.tactic) + '</span></span>').join("");
+  const rem = r.remediation.map((x) => "<li>" + x + "</li>").join("");
+  return '<div class="dpanel">'
+    + '<div class="dsec dsec-wide"><div class="dhead">Technique — ' + escapeHtml(r.technique) + '</div>'
+    + '<div class="evidence">' + r.evidence + (r.caNote ? '<br><br><b>Conditional Access:</b> ' + escapeHtml(r.caNote) : "") + '</div></div>'
+    + '<div class="dsec"><div class="dhead">Attack steps</div><ol class="dlist steps">'
+    + '<li>Start from control of <b>' + escapeHtml(r.source) + '</b>.</li>'
+    + r.edges.map((e) => "<li>" + escapeHtml(e.label) + " <b>" + escapeHtml(e.node) + "</b>.</li>").join("")
+    + '<li>Operate with the privileges of <b>' + escapeHtml(r.target) + '</b>.</li>'
+    + '</ol></div>'
+    + '<div class="dsec"><div class="dhead">Remediation</div><ul class="dlist">' + rem + '</ul></div>'
+    + '<div class="dsec dsec-wide"><div class="dhead">MITRE ATT&amp;CK</div><div class="mitre-wrap">' + mitre + '</div></div>'
+    + '</div>';
+}
+
+// ---- exports ----
+function exportJson() {
+  const blob = new Blob([JSON.stringify({ generatedAt: MODEL.generatedAt, stats: { total: MODEL.stats.total, critical: MODEL.stats.critical }, conditionalAccess: { available: MODEL.caAvailable, ...(MODEL.caStats || {}) }, paths: MODEL.paths, tier0Holders: MODEL.tier0Holders }, null, 2)], { type: "application/json" });
+  triggerDownload(blob, "entra-attack-paths-" + new Date().toISOString().slice(0, 10) + ".json");
+}
+function exportCsv() {
+  const cols = ["severity", "reliability", "sourceType", "source", "sourceUpn", "technique", "path", "target", "hops", "internetReachable", "recommendedFix"];
+  const lines = [cols.join(",")];
+  MODEL.paths.forEach((r) => {
+    const path = r.source + " " + r.edges.map((e) => e.label + " " + e.node).join(" ");
+    const row = [r.sev, r.reliability, r.sourceType, r.source, r.sourceUpn, r.technique, path, r.target, r.hops, r.internetReachable ? "yes" : "", r.chokeFix];
+    lines.push(row.map((v) => { v = v == null ? "" : String(v).replace(/"/g, '""'); return /[",\n]/.test(v) ? '"' + v + '"' : v; }).join(","));
+  });
+  triggerDownload(new Blob([lines.join("\n")], { type: "text/csv" }), "entra-attack-paths-" + new Date().toISOString().slice(0, 10) + ".csv");
+}
+function triggerDownload(blob, name) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ---- wiring ----
+$("signInBtn").addEventListener("click", signIn);
+$("signOutBtn").addEventListener("click", signOut);
+$("loadBtn").addEventListener("click", analyze);
+$("exportCsv").addEventListener("click", exportCsv);
+$("exportJson").addEventListener("click", exportJson);
+$("fltSearch").addEventListener("input", renderTable);
+$("fltSev").addEventListener("change", renderTable);
+$("fltType").addEventListener("change", renderTable);
+$("fltRel").addEventListener("change", renderTable);
+$("rqToggle").addEventListener("click", () => {
+  const b = $("rqBody"), t = $("rqToggle");
+  const hidden = b.classList.toggle("hidden");
+  t.textContent = hidden ? "show ▾" : "hide ▴";
+});
+$("table").querySelectorAll("th.sortable").forEach((th) => th.addEventListener("click", () => {
+  const k = th.getAttribute("data-key");
+  if (sortState.key === k) sortState.dir *= -1; else { sortState.key = k; sortState.dir = k === "source" ? 1 : -1; }
+  $("table").querySelectorAll("th .arrow").forEach((a) => (a.textContent = ""));
+  th.querySelector(".arrow").textContent = sortState.dir === 1 ? "▲" : "▼";
+  renderTable();
+}));
+</script>
+</body>
+</html>

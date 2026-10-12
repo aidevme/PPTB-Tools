@@ -9,7 +9,7 @@
   // MD033/no-inline-html: allow inline HTML (e.g. <br>, callout markup) where useful.
   "MD033": false,
 
-  // MD025/single-title: our page template (WRITING_STYLE.md) intentionally repeats
+  // MD025/single-title: our page template (docs/templates/WRITING_STYLE.md) intentionally repeats
   // the frontmatter `title` as a body H1 — don't count the frontmatter title as a heading.
   "MD025": {
     "front_matter_title": ""
