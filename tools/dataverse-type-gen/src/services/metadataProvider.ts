@@ -5,7 +5,7 @@
  * Everything is cached per instance; the app creates a new instance whenever the active connection
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
-import { parseCsdl, type AttributeMetadataInput, type EdmxSchema, type EntityMetadataInput, type OptionSetInput } from '../core';
+import { parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary } from '../types';
 import { mapWithConcurrency } from './concurrency';
 
@@ -36,6 +36,7 @@ export class PptbMetadataProvider {
     private csdl?: Promise<string>;
     private schema?: Promise<EdmxSchema>;
     private readonly entityCache = new Map<string, Promise<EntityMetadataInput>>();
+    private customApis?: Promise<CustomApiRecord[]>;
     /** Whether the bulk `queryData` option-set query works on this host; `undefined` until tried. */
     private bulkOptionSetsSupported?: boolean;
 
@@ -93,13 +94,84 @@ export class PptbMetadataProvider {
 
     /** Actions and functions from the CSDL, for the Select step. */
     async listOperations(): Promise<OperationSummary[]> {
-        const schema = await this.getSchema();
+        const [schema, customApis, processActions] = await Promise.all([this.getSchema(), this.getCustomApis(), listProcessActions()]);
+        const customByName = new Map(customApis.map((c) => [c.uniqueName, c]));
+        const processByName = new Map(processActions.map((p) => [p.uniqueName, p]));
         const summarize = (kind: 'action' | 'function') => (op: EdmxSchema['actions'][number]): OperationSummary => {
             const first = op.Parameters[0];
             const boundTo = op.IsBound && first ? first.Type.replace(/^Collection\((.*)\)$/, '$1').split('.').pop() : undefined;
-            return { name: op.Name, kind, isBound: op.IsBound, boundTo, parameterCount: op.Parameters.length };
+            const custom = customByName.get(op.Name);
+            const process = custom ? undefined : processByName.get(op.Name);
+            return {
+                name: op.Name,
+                kind,
+                isBound: op.IsBound,
+                boundTo,
+                parameterCount: op.Parameters.length,
+                isCustomApi: !!custom,
+                isProcessAction: !!process,
+                displayName: custom?.displayName ?? process?.displayName,
+                componentId: custom?.id ?? process?.id,
+                isPrivate: custom?.isPrivate ?? false,
+                inMetadata: true,
+            };
         };
-        return [...schema.actions.map(summarize('action')), ...schema.functions.map(summarize('function'))];
+        const operations = [...schema.actions.map(summarize('action')), ...schema.functions.map(summarize('function'))];
+
+        // Custom APIs missing from $metadata (private ones) are listed so users can see why they cannot be picked.
+        const listed = new Set(operations.map((o) => o.name));
+        for (const custom of customApis) {
+            if (listed.has(custom.uniqueName)) continue;
+            operations.push({
+                name: custom.uniqueName,
+                kind: custom.isFunction ? 'function' : 'action',
+                isBound: custom.boundEntity !== undefined,
+                boundTo: custom.boundEntity,
+                parameterCount: 0,
+                isCustomApi: true,
+                isProcessAction: false,
+                isPrivate: custom.isPrivate,
+                displayName: custom.displayName,
+                componentId: custom.id,
+                inMetadata: false,
+            });
+        }
+        return operations;
+    }
+
+    /** Custom API records, fetched once per connection. */
+    getCustomApis(): Promise<CustomApiRecord[]> {
+        if (!this.customApis) this.customApis = listCustomApis();
+        return this.customApis;
+    }
+
+    /**
+     * The CSDL schema plus definitions for any selected custom API that `$metadata` does not contain
+     * (private custom APIs, or ones created after the environment's metadata cache was built). Those are
+     * built from the `customapi` record and its request parameters.
+     */
+    async getSchemaForSelection(actions: readonly string[], functions: readonly string[]): Promise<EdmxSchema> {
+        const schema = await this.getSchema();
+        const known = new Set([...schema.actions, ...schema.functions].map((o) => o.Name));
+        const wanted = [...actions, ...functions].filter((name) => !known.has(name));
+        if (wanted.length === 0) return schema;
+
+        const customApis = await this.getCustomApis();
+        const extraActions: EdmxOperation[] = [];
+        const extraFunctions: EdmxOperation[] = [];
+        for (const name of wanted) {
+            const custom = customApis.find((c) => c.uniqueName === name);
+            if (!custom) continue;
+            const operation = await buildCustomApiOperation(custom);
+            (custom.isFunction ? extraFunctions : extraActions).push(operation);
+        }
+        if (extraActions.length === 0 && extraFunctions.length === 0) return schema;
+        const byName = (a: EdmxOperation, b: EdmxOperation) => (a.Name > b.Name ? 1 : -1);
+        return {
+            ...schema,
+            actions: [...schema.actions, ...extraActions].sort(byName),
+            functions: [...schema.functions, ...extraFunctions].sort(byName),
+        };
     }
 
     /** Entity + attributes + option sets for one table (cached). */
@@ -129,6 +201,7 @@ export class PptbMetadataProvider {
         this.csdl = undefined;
         this.schema = undefined;
         this.entityCache.clear();
+        this.customApis = undefined;
         this.bulkOptionSetsSupported = undefined;
     }
 
@@ -207,6 +280,128 @@ export class PptbMetadataProvider {
         throw new Error(
             `Could not load the option set for ${logicalName}.${attribute.LogicalName}: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
         );
+    }
+}
+
+interface CustomApiRecord {
+    id: string;
+    uniqueName: string;
+    displayName?: string;
+    isFunction: boolean;
+    isPrivate: boolean;
+    /** 0 = Global, 1 = Entity, 2 = EntityCollection */
+    bindingType: number;
+    boundEntity?: string;
+}
+
+/**
+ * Custom API records, used to flag operations as custom and to surface private ones that `$metadata`
+ * leaves out. Failure (e.g. no read privilege on `customapi`) is not fatal: the CSDL list still works.
+ */
+async function listCustomApis(): Promise<CustomApiRecord[]> {
+    try {
+        const result = await api().queryData('customapis?$select=customapiid,uniquename,displayname,isfunction,isprivate,bindingtype,boundentitylogicalname');
+        return result.value.map((row) => ({
+            id: row.customapiid as string,
+            uniqueName: row.uniquename as string,
+            displayName: (row.displayname as string | null) || undefined,
+            isFunction: row.isfunction === true,
+            isPrivate: row.isprivate === true,
+            bindingType: typeof row.bindingtype === 'number' ? row.bindingtype : 0,
+            // bindingtype: 0 = Global, 1 = Entity, 2 = EntityCollection
+            boundEntity: row.bindingtype === 0 ? undefined : ((row.boundentitylogicalname as string | null) ?? undefined),
+        }));
+    } catch (error) {
+        console.warn('Could not list custom APIs', error);
+        return [];
+    }
+}
+
+/**
+ * Custom API request parameter `type` option values mapped to the EDM type `$metadata` would publish.
+ * `mscrm.crmbaseentity` is used when no table is specified (the generator maps it to `any`).
+ */
+function customApiParameterType(type: number, logicalEntityName: string | null | undefined): string {
+    const entity = logicalEntityName ? `mscrm.${logicalEntityName}` : 'mscrm.crmbaseentity';
+    switch (type) {
+        case 0:
+            return 'Edm.Boolean';
+        case 1:
+            return 'Edm.DateTimeOffset';
+        case 2: // Decimal
+        case 8: // Money
+            return 'Edm.Decimal';
+        case 3: // Entity
+        case 5: // EntityReference
+            return entity;
+        case 4: // EntityCollection
+            return `Collection(${entity})`;
+        case 6:
+            return 'Edm.Double';
+        case 7: // Integer
+        case 9: // Picklist
+            return 'Edm.Int32';
+        case 11:
+            return 'Collection(Edm.String)';
+        case 12:
+            return 'Edm.Guid';
+        case 10:
+        default:
+            return 'Edm.String';
+    }
+}
+
+/** Build an operation definition from a `customapi` record and its request parameters. */
+async function buildCustomApiOperation(custom: CustomApiRecord): Promise<EdmxOperation> {
+    const result = await api().queryData(
+        `customapirequestparameters?$select=uniquename,type,isoptional,logicalentityname&$filter=_customapiid_value eq ${custom.id}`,
+    );
+    const parameters: EdmxParameter[] = [];
+    const bound = custom.bindingType !== 0 && !!custom.boundEntity;
+    if (bound) {
+        // $metadata names the binding parameter `entity` (single record) or `entityset` (collection).
+        const collection = custom.bindingType === 2;
+        parameters.push({
+            Name: collection ? 'entityset' : 'entity',
+            Type: collection ? `Collection(mscrm.${custom.boundEntity})` : `mscrm.${custom.boundEntity}`,
+            Nullable: false,
+        });
+    }
+    const requestParameters = result.value
+        .map((row) => ({
+            Name: row.uniquename as string,
+            Type: customApiParameterType(Number(row.type), row.logicalentityname as string | null),
+            Nullable: row.isoptional === true,
+        }))
+        .sort((a, b) => a.Name.localeCompare(b.Name));
+    parameters.push(...requestParameters);
+    return { Name: custom.uniqueName, IsBound: bound, ReturnsCollection: false, Parameters: parameters };
+}
+
+interface ProcessActionRecord {
+    id: string;
+    /** Message name of the action (the workflow's unique name, e.g. `new_DoSomething`). */
+    uniqueName: string;
+    displayName?: string;
+}
+
+/**
+ * Classic custom process actions (workflow category 3, definition rows only). Their message name is the
+ * workflow's unique name. Failure is not fatal.
+ */
+async function listProcessActions(): Promise<ProcessActionRecord[]> {
+    try {
+        const result = await api().queryData('workflows?$select=workflowid,uniquename,name&$filter=category eq 3 and type eq 1');
+        return result.value
+            .filter((row) => typeof row.uniquename === 'string' && row.uniquename)
+            .map((row) => ({
+                id: row.workflowid as string,
+                uniqueName: row.uniquename as string,
+                displayName: (row.name as string | null) || undefined,
+            }));
+    } catch (error) {
+        console.warn('Could not list custom process actions', error);
+        return [];
     }
 }
 

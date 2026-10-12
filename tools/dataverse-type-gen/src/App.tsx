@@ -6,14 +6,14 @@ import { OptionsCard } from './components/OptionsCard';
 import { PreviewCard } from './components/PreviewCard';
 import { ProjectCard } from './components/ProjectCard';
 import { SelectionCard, type SelectionKind } from './components/SelectionCard';
-import { buildSchemaModel, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
+import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
 import { useConnection } from './hooks/useConnection';
 import { PptbFileSink } from './services/fileSink';
 import { PptbMetadataProvider } from './services/metadataProvider';
 import { applyWritePlan, createWritePlan } from './services/plan';
 import { loadProjectConfig, saveProjectConfig, type ProjectConfigState } from './services/projectConfig';
 import { connectionKey, getRememberedProjectFolder, rememberProjectFolder } from './services/settings';
-import { getSolutionEntityIds, listSolutions } from './services/solutions';
+import { getSolutionEntityIds, getSolutionMemberIds, listSolutions } from './services/solutions';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
 
 const useStyles = makeStyles({
@@ -62,7 +62,9 @@ export default function App() {
     const [projectRoot, setProjectRoot] = useState<string | null>(null);
     /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
     const [rememberedFolder, setRememberedFolder] = useState<string | null>(null);
-    const [configState, setConfigState] = useState<ProjectConfigState | null>(null);
+    // Until a project folder is picked this holds an in-memory draft, so tables, actions and functions
+    // can be selected first; the draft selection is merged into the folder's config when it is loaded.
+    const [configState, setConfigState] = useState<ProjectConfigState>(() => ({ path: '', exists: false, config: createDefaultConfig() }));
     const [entities, setEntities] = useState<EntitySummary[]>([]);
     const [operations, setOperations] = useState<OperationSummary[] | null>(null);
     const [solutions, setSolutions] = useState<SolutionSummary[]>([]);
@@ -77,8 +79,12 @@ export default function App() {
     const [error, setError] = useState<string | null>(null);
     const [notice, setNotice] = useState<string | null>(null);
     const solutionCache = useRef(new Map<string, Set<string>>());
+    /** Component ids (custom APIs, process actions) of the selected solution; `null` when not filtering. */
+    const [solutionComponentIds, setSolutionComponentIds] = useState<Set<string> | null>(null);
+    const [loadingSolutionOperations, setLoadingSolutionOperations] = useState(false);
+    const solutionOperationCache = useRef(new Map<string, Set<string>>());
 
-    const config = configState?.config;
+    const config = configState.config;
     const busy = progress !== null;
 
     // ----- project folder -------------------------------------------------------------------------
@@ -89,6 +95,16 @@ export default function App() {
             setNotice(null);
             try {
                 const state = await loadProjectConfig(sink, folder);
+                if (!projectRoot) {
+                    // Keep anything selected before the folder was picked.
+                    const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
+                    state.config = {
+                        ...state.config,
+                        entities: merge(state.config.entities, config.entities),
+                        actions: merge(state.config.actions, config.actions),
+                        functions: merge(state.config.functions, config.functions),
+                    };
+                }
                 setProjectRoot(folder);
                 setConfigState(state);
                 setPlan(null);
@@ -103,7 +119,7 @@ export default function App() {
                 );
             }
         },
-        [sink, connKey],
+        [sink, connKey, projectRoot, config],
     );
 
     const browse = useCallback(async () => {
@@ -132,7 +148,9 @@ export default function App() {
         setSolutions([]);
         setSelectedSolutionId(null);
         setSolutionEntityIds(null);
+        setSolutionComponentIds(null);
         solutionCache.current.clear();
+        solutionOperationCache.current.clear();
         setPlan(null);
         setLoadingEntities(true);
         provider
@@ -188,17 +206,44 @@ export default function App() {
         }
     }, []);
 
+    // Solution membership of actions/functions: needs both a solution and the operation list.
+    useEffect(() => {
+        if (!selectedSolutionId || !operations) {
+            setSolutionComponentIds(null);
+            return;
+        }
+        const cached = solutionOperationCache.current.get(selectedSolutionId);
+        if (cached) {
+            setSolutionComponentIds(cached);
+            return;
+        }
+        let cancelled = false;
+        const solutionId = selectedSolutionId;
+        const ids = operations.map((o) => o.componentId).filter((id): id is string => !!id);
+        setLoadingSolutionOperations(true);
+        getSolutionMemberIds(solutionId, ids)
+            .then((members) => {
+                solutionOperationCache.current.set(solutionId, members);
+                if (!cancelled) setSolutionComponentIds(members);
+            })
+            .catch((e) => !cancelled && setError(`Could not load the solution's actions and functions: ${errorMessage(e)}`))
+            .finally(() => !cancelled && setLoadingSolutionOperations(false));
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedSolutionId, operations]);
+
     // ----- config edits ---------------------------------------------------------------------------
 
     const updateConfig = useCallback((update: Partial<DataverseGenConfig>) => {
-        setConfigState((state) => (state ? { ...state, config: { ...state.config, ...update } } : state));
+        setConfigState((state) => ({ ...state, config: { ...state.config, ...update } }));
         setPlanStale(true);
         setNotice(null);
     }, []);
 
     const toggle = useCallback(
         (kind: SelectionKind, name: string, checked: boolean) => {
-            const current = config?.[kind] ?? [];
+            const current = config[kind] ?? [];
             const next = checked ? (current.includes(name) ? current : [...current, name]) : current.filter((n) => n !== name);
             updateConfig({ [kind]: next });
         },
@@ -210,13 +255,13 @@ export default function App() {
     // ----- preview / generate ---------------------------------------------------------------------
 
     const runPreview = useCallback(async (): Promise<WritePlan | null> => {
-        if (!projectRoot || !config) return null;
+        if (!projectRoot) return null;
         setError(null);
         setNotice(null);
         try {
             const resolved = resolveConfig(config);
             setProgress({ message: 'Loading the $metadata document…', completed: 0, total: 1 });
-            const schema = await provider.getSchema();
+            const schema = await provider.getSchemaForSelection(resolved.actions, resolved.functions);
             const selection = resolveSelection(schema, resolved);
             const names = selection.entities.map((e) => e.Name);
             setProgress({ message: `Loading metadata for ${names.length} table(s)…`, completed: 0, total: names.length });
@@ -242,7 +287,7 @@ export default function App() {
 
     const runGenerate = useCallback(
         async (planToApply: WritePlan) => {
-            if (!projectRoot || !config) return;
+            if (!projectRoot) return;
             setError(null);
             try {
                 setProgress({ message: 'Writing files…', completed: 0, total: planToApply.counts.new + planToApply.counts.changed });
@@ -250,7 +295,7 @@ export default function App() {
                     setProgress({ message: `Wrote ${file.relativePath}`, completed, total }),
                 );
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
-                setConfigState((state) => (state ? { ...state, exists: true, path: configPath } : state));
+                setConfigState((state) => ({ ...state, exists: true, path: configPath }));
                 // Everything written is now unchanged.
                 setPlan({
                     ...planToApply,
@@ -292,7 +337,9 @@ export default function App() {
     }, [entities, operations, selected]);
 
     const hasSelection = selected.entities.length + selected.actions.length + selected.functions.length > 0;
-    const ready = inPptb && !!connection && !!projectRoot && !!config;
+    /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
+    const canSelect = inPptb && !!connection;
+    const ready = canSelect && !!projectRoot;
 
     return (
         <div className={styles.page}>
@@ -331,26 +378,27 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={configState} busy={busy || !inPptb} onBrowse={browse} onReload={() => projectRoot && loadProject(projectRoot)} />
+                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb} onBrowse={browse} onReload={() => projectRoot && loadProject(projectRoot)} />
                 <SelectionCard
                     entities={entities}
                     operations={operations}
                     solutions={solutions}
                     solutionEntityIds={solutionEntityIds}
+                    solutionComponentIds={solutionComponentIds}
                     selectedSolutionId={selectedSolutionId}
                     loadingEntities={loadingEntities}
                     loadingOperations={loadingOperations}
-                    loadingSolution={loadingSolution}
+                    loadingSolution={loadingSolution || loadingSolutionOperations}
                     selected={selected}
                     missing={missing}
-                    disabled={!ready || busy}
+                    disabled={!canSelect || busy}
                     onToggle={toggle}
                     onClear={clear}
                     onSolutionChange={changeSolution}
                     onEnsureOperations={ensureOperations}
                 />
-                {config && <OptionsCard config={config} disabled={!ready || busy} onChange={updateConfig} />}
-                <PreviewCard plan={plan} stale={planStale} canPreview={ready && hasSelection} busy={busy} onPreview={() => void runPreview()} onGenerate={() => plan && void runGenerate(plan)} />
+                <OptionsCard config={config} disabled={!canSelect || busy} onChange={updateConfig} />
+                <PreviewCard plan={plan} stale={planStale} canPreview={ready && hasSelection} needsProject={canSelect && !projectRoot} busy={busy} onPreview={() => void runPreview()} onGenerate={() => plan && void runGenerate(plan)} />
             </main>
             <Footer />
         </div>

@@ -84,6 +84,9 @@ into its own package when the CLI is built.
   `EntityDefinitions(...)/Attributes/Microsoft.Dynamics.CRM.<Type>AttributeMetadata?$expand=OptionSet,GlobalOptionSet`
   query per choice type through `queryData`. If the host rejects that URL shape it falls back to one request per
   attribute. This has not been verified against a live PPTB host yet.
+- **Custom APIs missing from `$metadata`.** Private custom APIs, and ones the environment's metadata cache does not
+  include yet, are still listed and selectable. Their definitions are built from the `customapi` record and its
+  `customapirequestparameters`, mapped to the EDM types `$metadata` would publish.
 - **Concurrency.** Entity metadata is fetched four entities at a time, with progress shown.
 - **File-name casing.** An existing file whose name differs only in casing is reused, and the module specifiers
   in `index.ts` and `metadata.ts` are rewritten to match.

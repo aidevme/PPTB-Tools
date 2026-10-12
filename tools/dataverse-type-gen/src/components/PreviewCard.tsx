@@ -58,13 +58,15 @@ export interface PreviewCardProps {
     /** Whether the plan is stale because the selection or options changed since it was computed. */
     stale: boolean;
     canPreview: boolean;
+    /** True when everything is ready except the project folder; shows a hint next to the buttons. */
+    needsProject: boolean;
     busy: boolean;
     onPreview: () => void;
     onGenerate: () => void;
 }
 
 /** Steps 4 and 5: diff the generated files against the project folder, then write them. */
-export function PreviewCard({ plan, stale, canPreview, busy, onPreview, onGenerate }: PreviewCardProps) {
+export function PreviewCard({ plan, stale, canPreview, needsProject, busy, onPreview, onGenerate }: PreviewCardProps) {
     const styles = useStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileStatus | 'all'>('all');
@@ -101,6 +103,11 @@ export function PreviewCard({ plan, stale, canPreview, busy, onPreview, onGenera
                             Generate
                         </Button>
                     </Tooltip>
+                    {needsProject && (
+                        <Badge appearance="tint" color="warning">
+                            Choose a project folder (step 1) to preview and generate
+                        </Badge>
+                    )}
                     {plan && stale && (
                         <Badge appearance="tint" color="warning">
                             Selection changed, preview again

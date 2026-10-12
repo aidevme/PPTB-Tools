@@ -25,6 +25,26 @@ export async function listSolutions(): Promise<SolutionSummary[]> {
         .sort((a, b) => a.friendlyName.localeCompare(b.friendlyName));
 }
 
+/** How many object ids go into one `solutioncomponents` query, to keep the URL short. */
+const OBJECT_ID_CHUNK = 40;
+
+/**
+ * Which of the given component record ids (custom API ids, process-action workflow ids, …) are part of
+ * a solution. Queried in chunks by id rather than listing every component of the solution, which can be
+ * tens of thousands of rows for the Default solution.
+ */
+export async function getSolutionMemberIds(solutionId: string, objectIds: readonly string[]): Promise<Set<string>> {
+    const members = new Set<string>();
+    const unique = [...new Set(objectIds.map((id) => id.toLowerCase()))];
+    for (let i = 0; i < unique.length; i += OBJECT_ID_CHUNK) {
+        const chunk = unique.slice(i, i + OBJECT_ID_CHUNK);
+        const idFilter = chunk.map((id) => `objectid eq ${id}`).join(' or ');
+        const result = await api().queryData(`solutioncomponents?$select=objectid&$filter=_solutionid_value eq ${solutionId} and (${idFilter})`);
+        for (const row of result.value) members.add(String(row.objectid).toLowerCase());
+    }
+    return members;
+}
+
 /** `MetadataId`s of the tables that are components of a solution. */
 export async function getSolutionEntityIds(solutionId: string): Promise<Set<string>> {
     const result = await api().queryData(

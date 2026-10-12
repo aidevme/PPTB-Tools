@@ -54,6 +54,8 @@ export interface SelectionCardProps {
     solutions: SolutionSummary[];
     /** Entity `MetadataId`s in the chosen solution, or `null` when no solution filter is active. */
     solutionEntityIds: Set<string> | null;
+    /** Ids of custom API / process-action records in the chosen solution, or `null` when not filtering. */
+    solutionComponentIds: Set<string> | null;
     selectedSolutionId: string | null;
     loadingEntities: boolean;
     loadingOperations: boolean;
@@ -75,6 +77,7 @@ export function SelectionCard(props: SelectionCardProps) {
     const [tab, setTab] = useState<SelectionKind>('entities');
     const [search, setSearch] = useState('');
     const [selectedOnly, setSelectedOnly] = useState(false);
+    const [customApisOnly, setCustomApisOnly] = useState(false);
 
     const selectedSet = useMemo(() => new Set(props.selected[tab]), [props.selected, tab]);
     const term = search.trim().toLowerCase();
@@ -96,15 +99,25 @@ export function SelectionCard(props: SelectionCardProps) {
         const kind = tab === 'actions' ? 'action' : 'function';
         return (props.operations ?? [])
             .filter((o) => o.kind === kind)
+            .filter((o) => !customApisOnly || o.isCustomApi || o.isProcessAction)
+            .filter((o) => !props.selectedSolutionId || (!!props.solutionComponentIds && !!o.componentId && props.solutionComponentIds.has(o.componentId.toLowerCase())))
             .filter((o) => !selectedOnly || selectedSet.has(o.name))
-            .filter((o) => matches(o.name, o.boundTo))
-            .map((o) => ({
-                key: o.name,
-                primary: o.name,
-                secondary: o.isBound ? `bound to ${o.boundTo ?? '?'} · ${o.parameterCount} parameters` : `unbound · ${o.parameterCount} parameters`,
-                tag: o.isBound ? 'bound' : undefined,
-            }));
-    }, [tab, term, selectedOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds]);
+            .filter((o) => matches(o.name, o.boundTo, o.displayName))
+            // Custom APIs first, then case-insensitive by name (a plain sort puts lowercase publisher
+            // prefixes after hundreds of built-in PascalCase messages, past the row limit).
+            .sort((a, b) => Number(b.isCustomApi || b.isProcessAction) - Number(a.isCustomApi || a.isProcessAction) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
+            .map((o) => {
+                const binding = o.isBound ? `bound to ${o.boundTo ?? '?'}` : 'unbound';
+                return {
+                    key: o.name,
+                    primary: o.displayName && o.displayName !== o.name ? `${o.displayName} (${o.name})` : o.name,
+                    secondary: o.inMetadata
+                        ? `${binding} · ${o.parameterCount} parameters`
+                        : `${binding} · not in $metadata, types are built from the custom API definition`,
+                    tag: o.isCustomApi ? (o.isPrivate ? 'private custom API' : 'custom API') : o.isProcessAction ? 'custom action' : o.isBound ? 'bound' : undefined,
+                };
+            });
+    }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId]);
 
     const onTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
         const next = data.value as SelectionKind;
@@ -142,27 +155,28 @@ export function SelectionCard(props: SelectionCardProps) {
                 <div className={styles.toolbar}>
                     <SearchBox
                         className={styles.search}
-                        placeholder={tab === 'entities' ? 'Search by display or logical name' : 'Search by name'}
+                        placeholder={tab === 'entities' ? 'Search by display or logical name' : 'Search by name or display name'}
                         value={search}
                         onChange={(_, data) => setSearch(data.value)}
                     />
-                    {tab === 'entities' && (
-                        <Dropdown
-                            placeholder="All solutions"
-                            clearable
-                            selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}
-                            value={props.solutions.find((s) => s.id === props.selectedSolutionId)?.friendlyName ?? ''}
-                            onOptionSelect={(_, data) => props.onSolutionChange(data.optionValue ?? null)}
-                            disabled={props.solutions.length === 0}
-                        >
-                            {props.solutions.map((s) => (
-                                <Option key={s.id} value={s.id} text={s.friendlyName}>
-                                    {`${s.friendlyName} (${s.uniqueName})`}
-                                </Option>
-                            ))}
-                        </Dropdown>
+                    <Dropdown
+                        placeholder="All solutions"
+                        clearable
+                        selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}
+                        value={props.solutions.find((s) => s.id === props.selectedSolutionId)?.friendlyName ?? ''}
+                        onOptionSelect={(_, data) => props.onSolutionChange(data.optionValue ?? null)}
+                        disabled={props.solutions.length === 0}
+                    >
+                        {props.solutions.map((s) => (
+                            <Option key={s.id} value={s.id} text={s.friendlyName}>
+                                {`${s.friendlyName} (${s.uniqueName})`}
+                            </Option>
+                        ))}
+                    </Dropdown>
+                    {props.loadingSolution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
+                    {tab !== 'entities' && (
+                        <Switch label="Custom only" checked={customApisOnly} onChange={(_, data) => setCustomApisOnly(data.checked)} />
                     )}
-                    {props.loadingSolution && <Spinner size="tiny" label="Loading solution tables…" labelPosition="after" />}
                     <Switch label="Selected only" checked={selectedOnly} onChange={(_, data) => setSelectedOnly(data.checked)} />
                     <Button appearance="subtle" size="small" disabled={props.disabled || props.selected[tab].length === 0} onClick={() => props.onClear(tab)}>
                         Clear {tab}
