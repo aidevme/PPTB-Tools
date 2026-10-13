@@ -15,6 +15,7 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 | `projectConfig.ts` | Reads and writes `.dataverse-gen.json` through a `FileSink`. |
 | `settings.ts` | PPTB's per-tool settings: the project folder used with each connection, and the tool config: Settings-panel values and saved projects (`loadToolConfig` / `saveToolConfig`, applied over the defaults in `src/config/`). |
 | `paths.ts` | Absolute host path helpers. PPTB's file API only accepts absolute paths in the host OS's format. |
+| `notifications.ts` | `notifyProjectLoaded`: the info notification after a saved project opens ("*Project* loaded" with its counts, 5 seconds). Best effort: failures are only logged. |
 | `concurrency.ts` | `mapWithConcurrency` runs async work with a cap on how many run at once. |
 
 ## Metadata provider

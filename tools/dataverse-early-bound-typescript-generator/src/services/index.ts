@@ -1,5 +1,6 @@
 /** PPTB-facing services: file system, Dataverse metadata and solutions, project config and write plans. */
 export { mapWithConcurrency } from './concurrency';
+export { notifyProjectLoaded, projectLoadedMessage, PROJECT_LOADED_DURATION } from './notifications';
 export { PptbFileSink, InMemoryFileSink } from './fileSink';
 export type { DirectoryEntry, FileSink } from './fileSink';
 export { PptbMetadataProvider, METADATA_CONCURRENCY } from './metadataProvider';

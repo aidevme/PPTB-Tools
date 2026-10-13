@@ -17,6 +17,7 @@ import {
     listSolutions,
     loadProjectConfig,
     loadToolConfig,
+    notifyProjectLoaded,
     rememberProjectFolder,
     resolveOutputRoot,
     saveProjectConfig,
@@ -114,7 +115,7 @@ export default function App() {
 
     // ----- project folder -------------------------------------------------------------------------
 
-    /** Opens `folder` as the project and reads its `.dataverse-gen.json`; throws when it can't be read. */
+    /** Opens `folder` as the project and reads its `.dataverse-gen.json`; throws when it can't be read. Returns what was loaded. */
     const openProjectFolder = useCallback(
         async (folder: string) => {
             const state = await loadProjectConfig(sink, folder);
@@ -135,6 +136,7 @@ export default function App() {
             setPlan(null);
             setPlanStale(false);
             await rememberProjectFolder(connKey, folder);
+            return state;
         },
         [sink, connKey, projectRoot, config, toolSettings.projectDefaults],
     );
@@ -171,7 +173,7 @@ export default function App() {
                 // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
                 // otherwise just look like a new project.
                 await window.toolboxAPI.fileSystem.readDirectory(project.location);
-                await openProjectFolder(project.location);
+                void notifyProjectLoaded(project.name, await openProjectFolder(project.location));
                 return true;
             } catch (e) {
                 if (!/access denied|permission|not allowed|not permitted/i.test(errorMessage(e))) throw e;
@@ -183,7 +185,7 @@ export default function App() {
                 defaultPath: project.location,
             });
             if (!folder) return false;
-            await openProjectFolder(folder);
+            void notifyProjectLoaded(project.name, await openProjectFolder(folder));
             return true;
         },
         [openProjectFolder],

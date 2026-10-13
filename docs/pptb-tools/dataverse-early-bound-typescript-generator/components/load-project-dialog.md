@@ -35,7 +35,9 @@ Source: [`src/components/dialogs/LoadProjectDialog.tsx`](https://github.com/aide
   dialog. Nothing is selected when it opens.
 - With no saved projects, it says to create one with New Project.
 - **Opening a project:** `App.tsx` (`openSavedProject`) sets the project's location as the project folder and
-  reads its `.dataverse-gen.json`, like **Reload config**, then the dialog closes.
+  reads its `.dataverse-gen.json`, like **Reload config**, then the dialog closes. A PPTB info notification
+  (5 seconds) confirms it: "*Project* loaded", with the table, action and function counts, or that there's no
+  `.dataverse-gen.json` yet.
 - **If PPTB refuses access** to that folder (it may only allow folders picked in the current session), the
   folder picker opens at the saved location for the user to confirm, and the confirmed folder is loaded.
   Cancelling the picker leaves the dialog open. Other errors, such as a folder that no longer exists, are
