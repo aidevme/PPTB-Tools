@@ -26,6 +26,7 @@
     ],
     "configurations": {
         "repository": "https://github.com/aidevme/PPTB-Tools",
+        "website": "https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/",
         "readmeUrl": "https://raw.githubusercontent.com/aidevme/PPTB-Tools/main/tools/dataverse-early-bound-typescript-generator/README.md"
     },
     "features": {
