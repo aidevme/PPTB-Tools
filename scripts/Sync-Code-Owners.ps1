@@ -30,10 +30,10 @@
     Show the lines that would be added/removed without writing to disk.
 
 .EXAMPLE
-    .\sync-code-owners.ps1
-    .\sync-code-owners.ps1 -Check
-    .\sync-code-owners.ps1 -WhatIf
-    .\sync-code-owners.ps1 -Owner '@aidevme/docs-team'
+    .\Sync-Code-Owners.ps1
+    .\Sync-Code-Owners.ps1 -Check
+    .\Sync-Code-Owners.ps1 -WhatIf
+    .\Sync-Code-Owners.ps1 -Owner '@aidevme/docs-team'
 #>
 param(
     [string]$Owner = '@aidevme',
@@ -124,7 +124,7 @@ if (-not (Compare-Object $existingBlock $generatedLines -SyncWindow 0)) {
 }
 
 if ($Check) {
-    Write-Host "CODEOWNERS docs/ section is out of date. Run scripts/sync-code-owners.ps1 to fix." -ForegroundColor Red
+    Write-Host "CODEOWNERS docs/ section is out of date. Run scripts/Sync-Code-Owners.ps1 to fix." -ForegroundColor Red
     Write-Host "`nExpected:" -ForegroundColor Yellow
     $generatedLines | ForEach-Object { Write-Host "  $_" }
     exit 1

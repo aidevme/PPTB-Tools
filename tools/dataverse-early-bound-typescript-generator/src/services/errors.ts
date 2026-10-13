@@ -114,16 +114,21 @@ const retryingProxies = new WeakMap<object, object>();
 /**
  * A view of `api` whose methods run through {@link withRetry}, so every call retries transient failures. Non-function
  * properties pass through unchanged. One proxy is cached per underlying object.
+ *
+ * The proxy wraps an empty object and reads from `api`, rather than wrapping `api` itself: PPTB exposes its APIs
+ * through Electron's contextBridge, which freezes them, and a proxy over a frozen object must return each
+ * property's actual value, so returning a wrapped method from it throws on every call.
  */
 export function withRetries<T extends object>(api: T, options?: RetryOptions): T {
     const cached = retryingProxies.get(api);
     if (cached && !options) return cached as T;
-    const proxy = new Proxy(api, {
-        get(target, property, receiver) {
-            const value = Reflect.get(target, property, receiver);
+    const proxy = new Proxy({} as T, {
+        get(_target, property) {
+            const value = Reflect.get(api, property);
             if (typeof value !== 'function') return value;
-            return (...args: unknown[]) => withRetry(() => Promise.resolve(value.apply(target, args)), options);
+            return (...args: unknown[]) => withRetry(() => Promise.resolve(value.apply(api, args)), options);
         },
+        has: (_target, property) => Reflect.has(api, property),
     });
     if (!options) retryingProxies.set(api, proxy);
     return proxy;

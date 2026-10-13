@@ -17,9 +17,9 @@
     Markdown files in the repository.
 
 .EXAMPLE
-    .\sync-cspell.ps1
-    .\sync-cspell.ps1 -AutoAdd
-    .\sync-cspell.ps1 -MarkdownPath templates/workflows/codeql/README.md -AutoAdd
+    .\Sync-Cspell.ps1
+    .\Sync-Cspell.ps1 -AutoAdd
+    .\Sync-Cspell.ps1 -MarkdownPath templates/workflows/codeql/README.md -AutoAdd
 #>
 param(
     [switch]$AutoAdd,

@@ -127,4 +127,20 @@ describe('retries', () => {
         await expect(retrying.queryData('accounts')).resolves.toEqual({ query: 'accounts' });
         expect(calls).toBe(2);
     });
+
+    it('works on frozen API objects, as PPTB exposes them through contextBridge', async () => {
+        vi.spyOn(console, 'warn').mockImplementation(() => {});
+        let calls = 0;
+        const frozen = Object.freeze({
+            async getAllEntitiesMetadata() {
+                calls++;
+                if (calls === 1) throw ipc('HTTP 429');
+                return { value: [] };
+            },
+        });
+        const retrying = withRetries(frozen, { sleep });
+        await expect(retrying.getAllEntitiesMetadata()).resolves.toEqual({ value: [] });
+        expect(calls).toBe(2);
+        expect('getAllEntitiesMetadata' in retrying).toBe(true);
+    });
 });

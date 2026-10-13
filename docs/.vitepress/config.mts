@@ -2,6 +2,8 @@ import { defineConfig } from "vitepress";
 
 export default defineConfig({
     title: "PPTB Tools",
+    // Published as a GitHub Pages project site at https://aidevme.github.io/PPTB-Tools/.
+    base: "/PPTB-Tools/",
     description: "Documentation for Power Platform ToolBox (PPTB) tools.",
     themeConfig: {
         nav: [
