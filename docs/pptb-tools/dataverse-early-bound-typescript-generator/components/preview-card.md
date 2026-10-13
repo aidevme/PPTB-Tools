@@ -28,7 +28,8 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Out of date:** when the selection or options changed since the preview, a warning bar says so and has a
   **Preview again** button.
 - **After Generate:** a success bar shows the result, for example "1 file written · 279 unchanged · 9
-  orphaned · .dataverse-gen.json saved". It stays until the next preview. PPTB also shows a notification.
+  orphaned · .dataverse-gen.json saved". It stays until the next preview. PPTB also shows the same line in a
+  "Generation complete" success notification for 3 seconds (`summarizeGeneration` builds both).
 
 ## Action bar
 
@@ -41,7 +42,8 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 ## Summary and status tiles
 
 - **Summary:** one sentence saying what Generate would do, for example "1 new file will be created and 1 file
-  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan`).
+  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan` in `services/plan.ts`). The same
+  sentence appears in a PPTB info notification, "Preview ready", for 5 seconds after each successful preview.
 - **Tiles:** **New**, **Changed**, **Unchanged** and **Orphaned**, each with an icon, a large count and a
   colored left edge. A tooltip explains what Generate does with that status.
 - **Tiles as filters:** clicking a tile shows only that status, and the tile is highlighted (`aria-pressed`).

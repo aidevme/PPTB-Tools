@@ -15,7 +15,8 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 | `projectConfig.ts` | Reads and writes `.dataverse-gen.json` through a `FileSink`. |
 | `settings.ts` | PPTB's per-tool settings: the project folder used with each connection, and the tool config: Settings-panel values and saved projects (`loadToolConfig` / `saveToolConfig`, applied over the defaults in `src/config/`). |
 | `paths.ts` | Absolute host path helpers. PPTB's file API only accepts absolute paths in the host OS's format. |
-| `notifications.ts` | `notifyProjectLoaded`: the info notification after a saved project opens ("*Project* loaded" with its counts, 5 seconds). Best effort: failures are only logged. |
+| `errors.ts` | Error handling per PPTB's guide: `errorStatus` reads the HTTP status from PPTB's error messages and known Dataverse codes; `friendlyError` maps it to a user message; `reportError` logs with context, shows a persistent error notification and returns the error bar text; `withRetry` / `withRetries` retry 429, 502, 503 and 504 failures with growing delays. |
+| `notifications.ts` | PPTB notifications. `NOTIFICATION_TYPES` defines the four presets (success 3 s, info 5 s, warning and error persistent), and `notificationOptions(kind, body, title?)` builds `showNotification` options from one. It also shows `notifyProjectLoaded` (info) after a saved project opens, `notifyPreviewReady` (info) after a preview succeeds, and `notifyGenerationComplete` (success) after Generate. Best effort: failures are only logged. |
 | `concurrency.ts` | `mapWithConcurrency` runs async work with a cap on how many run at once. |
 
 ## Metadata provider

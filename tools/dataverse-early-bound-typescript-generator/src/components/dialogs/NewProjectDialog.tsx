@@ -16,6 +16,7 @@ import {
 import { FolderOpenRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useNewProjectDialogStyles } from '../../styles';
+import { reportError } from '../../services';
 
 /** The values the dialog collects; the id and creation time are added when saving. */
 export type NewProject = Pick<ProjectEntry, 'name' | 'description' | 'location'>;
@@ -59,7 +60,7 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLo
             const folder = await onBrowseLocation(location);
             if (folder) setLocation(folder);
         } catch (error) {
-            setSaveError(`Could not open the folder picker: ${error instanceof Error ? error.message : String(error)}`);
+            setSaveError(reportError(`Could not open the folder picker`, error, undefined, { notify: false }));
         }
     };
 
@@ -70,7 +71,7 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLo
             await onSave({ name: trimmedName, description: description.trim(), location: location.trim() });
             onOpenChange(false);
         } catch (error) {
-            setSaveError(`Could not save the project: ${error instanceof Error ? error.message : String(error)}`);
+            setSaveError(reportError(`Could not save the project`, error, undefined, { notify: false }));
         } finally {
             setSaving(false);
         }

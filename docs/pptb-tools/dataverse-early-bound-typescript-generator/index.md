@@ -28,6 +28,8 @@ Tables used by a selected action or function are included automatically.
 
 ## How to use it
 
+New to the tool? [Getting started](./getting-started/) walks through every step in detail.
+
 1. **Project.** Click **New Project**, give the project a name and pick its location: the folder that holds,
    or should hold, `.dataverse-gen.json`. Then click **Load Existing Project**, choose the project and click
    **Load**. The tool remembers the folder for the current connection.

@@ -38,6 +38,7 @@ import {
     TextBulletListLtrRegular,
 } from '@fluentui/react-icons';
 import type { FileStatus, PlannedFile, WritePlan } from '../../types';
+import { summarizePlan } from '../../services';
 import { usePreviewCardStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
 import { STATUS_META, STATUS_ORDER, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
@@ -46,6 +47,7 @@ import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 
 export { fileType } from '../shared/generatedFiles';
+export { summarizePlan } from '../../services';
 
 type SortColumn = 'name' | 'type' | 'status';
 
@@ -90,16 +92,6 @@ export function visibleFiles(files: PlannedFile[], filter: FileFilter): PlannedF
 }
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
-
-/** One sentence saying what Generate would do with a plan. */
-export function summarizePlan(counts: WritePlan['counts']): string {
-    const parts: string[] = [];
-    if (counts.new) parts.push(`${plural(counts.new, 'new file', 'new files')} will be created`);
-    if (counts.changed) parts.push(`${plural(counts.changed, 'file', 'files')} will be updated`);
-    const writes = parts.length ? parts.join(' and ') : 'Everything is up to date; nothing will be written';
-    const orphans = counts.orphaned ? `, and ${plural(counts.orphaned, 'orphaned file', 'orphaned files')} will be left untouched` : '';
-    return `${writes}${orphans}.`;
-}
 
 /** Explanations shown in the header cells' tooltips. */
 const HEADER_HELP: Record<SortColumn, JSX.Element> = {

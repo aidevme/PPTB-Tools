@@ -22,6 +22,7 @@ import { CodeRegular, DismissRegular, OptionsRegular, WrenchRegular } from '@flu
 import { toolConfigEquals, type ProjectDefaults, type ToolConfig } from '../../config';
 import { infoLabel } from '../shared/infoLabel';
 import { useSettingsPanelStyles } from '../../styles';
+import { reportError } from '../../services';
 
 type SettingsTab = 'general' | 'options' | 'schemaGeneration';
 
@@ -65,7 +66,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
             await onSave(draft);
             onOpenChange(false);
         } catch (error) {
-            setSaveError(`Could not save the settings: ${error instanceof Error ? error.message : String(error)}`);
+            setSaveError(reportError(`Could not save the settings`, error, undefined, { notify: false }));
         } finally {
             setSaving(false);
         }

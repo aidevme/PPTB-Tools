@@ -17,11 +17,16 @@ import {
     listSolutions,
     loadProjectConfig,
     loadToolConfig,
+    notifyGenerationComplete,
+    notifyPreviewReady,
     notifyProjectLoaded,
     rememberProjectFolder,
+    reportError,
     resolveOutputRoot,
     saveProjectConfig,
     saveToolConfig,
+    summarizeGeneration,
+    technicalMessage,
     type ProjectConfigState,
 } from './services';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
@@ -46,16 +51,6 @@ const useStyles = makeStyles({
 const METADATA_FALLBACK_WARNING_MS = 5000;
 
 const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions: [], functions: [] };
-
-function errorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
-    if (typeof error === 'string') return error;
-    try {
-        return JSON.stringify(error);
-    } catch {
-        return String(error);
-    }
-}
 
 /**
  * Top-level state and orchestration. Holds the project folder and its `.dataverse-gen.json`, the
@@ -148,12 +143,7 @@ export default function App() {
             try {
                 await openProjectFolder(folder);
             } catch (e) {
-                const message = errorMessage(e);
-                setError(
-                    /access denied|permission/i.test(message)
-                        ? `PPTB has not granted this tool access to ${folder}. Open it again with Load Existing Project to grant access.`
-                        : `Could not load ${folder}: ${message}`,
-                );
+                setError(reportError(`Could not load ${folder}`, e, { folder }));
             }
         },
         [openProjectFolder],
@@ -176,7 +166,7 @@ export default function App() {
                 void notifyProjectLoaded(project.name, await openProjectFolder(project.location));
                 return true;
             } catch (e) {
-                if (!/access denied|permission|not allowed|not permitted/i.test(errorMessage(e))) throw e;
+                if (!/access denied|permission|not allowed|not permitted/i.test(technicalMessage(e))) throw e;
             }
             const folder = await window.toolboxAPI.fileSystem.selectPath({
                 type: 'folder',
@@ -270,7 +260,7 @@ export default function App() {
         provider
             .listEntities()
             .then((list) => !cancelled && setEntities(list))
-            .catch((e) => !cancelled && setError(`Could not list tables: ${errorMessage(e)}`))
+            .catch((e) => !cancelled && setError(reportError(`Could not list tables`, e)))
             .finally(() => !cancelled && setLoadingEntities(false));
         listSolutions()
             .then((list) => !cancelled && setSolutions(list))
@@ -295,7 +285,7 @@ export default function App() {
                 setOperations(list);
                 setMetadataFallback(provider.usesMetadataFallback);
             })
-            .catch((e) => setError(`Could not load the $metadata document: ${errorMessage(e)}`))
+            .catch((e) => setError(reportError(`Could not load the $metadata document`, e)))
             .finally(() => setLoadingOperations(false));
     }, [operations, loadingOperations, inPptb, provider]);
 
@@ -316,7 +306,7 @@ export default function App() {
             solutionCache.current.set(solutionId, ids);
             setSolutionEntityIds(ids);
         } catch (e) {
-            setError(`Could not load the solution's tables: ${errorMessage(e)}`);
+            setError(reportError(`Could not load the solution's tables`, e));
             setSelectedSolutionId(null);
         } finally {
             setLoadingSolution(false);
@@ -343,7 +333,7 @@ export default function App() {
                 solutionOperationCache.current.set(solutionId, members);
                 if (!cancelled) setSolutionComponentIds(members);
             })
-            .catch((e) => !cancelled && setError(`Could not load the solution's actions and functions: ${errorMessage(e)}`))
+            .catch((e) => !cancelled && setError(reportError(`Could not load the solution's actions and functions`, e)))
             .finally(() => !cancelled && setLoadingSolutionOperations(false));
         return () => {
             cancelled = true;
@@ -375,7 +365,7 @@ export default function App() {
             await window.toolboxAPI.utils.copyToClipboard(path);
             await window.toolboxAPI.utils.showNotification({ title: 'Copied', body: `${label} copied to the clipboard.`, type: 'info', duration: 2500 });
         } catch (e) {
-            setError(`Could not copy to the clipboard: ${errorMessage(e)}`);
+            setError(reportError(`Could not copy to the clipboard`, e));
         }
     }, []);
 
@@ -406,9 +396,10 @@ export default function App() {
             setPreviewedAt(new Date().toISOString());
             setLastResult(null);
             setPlanStale(false);
+            void notifyPreviewReady(nextPlan);
             return nextPlan;
         } catch (e) {
-            setError(errorMessage(e));
+            setError(reportError('Preview failed', e, { projectRoot }));
             return null;
         } finally {
             setProgress(null);
@@ -462,13 +453,11 @@ export default function App() {
                     files: planToApply.files.map((f) => (f.status === 'new' || f.status === 'changed' ? { ...f, status: 'unchanged', existingContent: f.content } : f)),
                     counts: { new: 0, changed: 0, unchanged: planToApply.counts.unchanged + result.written, orphaned: planToApply.counts.orphaned },
                 });
-                const summary = `${result.written} file(s) written, ${planToApply.counts.unchanged} unchanged, ${planToApply.counts.orphaned} orphaned. Config saved to .dataverse-gen.json.`;
-                setLastResult(
-                    `${result.written} ${result.written === 1 ? 'file' : 'files'} written · ${planToApply.counts.unchanged} unchanged · ${planToApply.counts.orphaned} orphaned · .dataverse-gen.json saved`,
-                );
-                await window.toolboxAPI?.utils.showNotification({ title: 'Dataverse Early-Bound TypeScript Generator', body: summary, type: 'success' });
+                setLastResult(summarizeGeneration(result.written, planToApply.counts));
+                // Not awaited, and it never throws: a failed notification mustn't report a successful write as "Generation failed".
+                void notifyGenerationComplete(result.written, planToApply.counts);
             } catch (e) {
-                setError(`Generation failed: ${errorMessage(e)}`);
+                setError(reportError(`Generation failed`, e));
             } finally {
                 setProgress(null);
             }
@@ -505,7 +494,7 @@ export default function App() {
 
     /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
     const openRecent = (target: ProjectOpenTarget) => {
-        openSavedProject(target).catch((e: unknown) => setError(`Could not open ${target.name}: ${errorMessage(e)}`));
+        openSavedProject(target).catch((e: unknown) => setError(reportError(`Could not open ${target.name}`, e, { location: target.location })));
     };
 
     return (

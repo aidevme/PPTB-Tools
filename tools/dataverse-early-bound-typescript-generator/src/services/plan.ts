@@ -25,6 +25,23 @@ function splitRelative(relativePath: string): { dir: string; name: string } {
     return index === -1 ? { dir: '', name: relativePath } : { dir: relativePath.substring(0, index), name: relativePath.substring(index + 1) };
 }
 
+const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+
+/** One sentence saying what Generate would do with a plan. */
+export function summarizePlan(counts: WritePlan['counts']): string {
+    const parts: string[] = [];
+    if (counts.new) parts.push(`${plural(counts.new, 'new file', 'new files')} will be created`);
+    if (counts.changed) parts.push(`${plural(counts.changed, 'file', 'files')} will be updated`);
+    const writes = parts.length ? parts.join(' and ') : 'Everything is up to date; nothing will be written';
+    const orphans = counts.orphaned ? `, and ${plural(counts.orphaned, 'orphaned file', 'orphaned files')} will be left untouched` : '';
+    return `${writes}${orphans}.`;
+}
+
+/** One line saying what a finished Generate run did, e.g. `2 files written · 279 unchanged · 9 orphaned · .dataverse-gen.json saved`. */
+export function summarizeGeneration(written: number, counts: WritePlan['counts']): string {
+    return `${plural(written, 'file', 'files')} written · ${counts.unchanged} unchanged · ${counts.orphaned} orphaned · .dataverse-gen.json saved`;
+}
+
 /** Absolute output root for a project (`output.outputRoot` is relative to the project folder). */
 export function resolveOutputRoot(projectRoot: string, config: ResolvedConfig): string {
     return joinPath(projectRoot, config.output.outputRoot);

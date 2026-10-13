@@ -26,6 +26,7 @@ import { DeleteRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useLoadProjectDialogStyles } from '../../styles';
 import { ConfirmationDialog } from './ConfirmationDialog';
+import { reportError } from '../../services';
 
 export interface ILoadProjectDialogProps {
     open: boolean;
@@ -124,7 +125,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
         try {
             if (await onLoad(project)) onOpenChange(false);
         } catch (error) {
-            setLoadError(`Could not open ${project.name}: ${error instanceof Error ? error.message : String(error)}`);
+            setLoadError(reportError(`Could not open ${project.name}`, error, undefined, { notify: false }));
         } finally {
             setLoading(false);
         }
@@ -139,7 +140,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
             await onDelete(project);
             if (selectedId === project.id) setSelectedId('');
         } catch (error) {
-            setLoadError(`Could not delete ${project.name}: ${error instanceof Error ? error.message : String(error)}`);
+            setLoadError(reportError(`Could not delete ${project.name}`, error, undefined, { notify: false }));
         } finally {
             setDeleting(false);
             setPendingDelete(null);

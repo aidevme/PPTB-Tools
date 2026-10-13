@@ -48,6 +48,25 @@ the connection changes, and a single `PptbFileSink`.
 
 ## Errors and notifications
 
-- Failures are shown in an error message bar at the top of the page (`error` state).
-- When files are written, the summary appears in a success message bar and as a PPTB notification.
-- Copying a path shows a short "Copied" notification.
+Error handling follows PPTB's [error-handling guide](https://docs.powerplatformtoolbox.com/tool-development/api-reference/error-handling),
+through `src/services/errors.ts`:
+
+- **Every failure goes through `reportError(operation, error, context?)`.** It:
+  - logs the full error to the console with the operation, a timestamp, the HTTP status and any context
+    (folder, project location);
+  - shows a persistent PPTB **error notification** titled with the operation;
+  - returns the text for the red error bar at the top of the page. Both stay, so the problem is still
+    visible after the notification is dismissed.
+- **Friendly messages** (`friendlyError`) replace technical details:
+  - HTTP statuses and well-known Dataverse codes use the guide's messages, for example 403 "You don't have
+    permission to perform this action." and 429 "Too many requests. Please wait a moment and try again.";
+  - invalid `.dataverse-gen.json` JSON, folder access and network failures get their own messages;
+  - other errors keep their own message without PPTB's "Error invoking remote method" prefix.
+- **Dialogs and the Settings panel** show their errors in place, so they call `reportError` with
+  `{ notify: false }`: logged and friendly, without a second notification.
+- **Retries:** the metadata provider and the solutions service reach Dataverse through `withRetries`. Each call
+  is retried up to 3 times, after 500 ms and then 1 s, but only for throttling and temporary unavailability
+  (429, 502, 503, 504).
+- **Success and info notifications:** "*Project* loaded" (info) after a saved project opens, "Preview ready"
+  (info) after a preview, and "Generation complete" (success) after Generate. The Preview card also shows the
+  Generate result as a success message. Copying a path shows a short "Copied" notification.

@@ -8,6 +8,7 @@
 import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary } from '../types';
 import { mapWithConcurrency } from './concurrency';
+import { withRetries } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
 const OPTION_SET_CASTS: Record<string, string> = {
@@ -26,9 +27,10 @@ function label(value: unknown): string {
     return l?.UserLocalizedLabel?.Label ?? '';
 }
 
+/** PPTB's Dataverse API, with throttling and temporary-unavailability errors retried (see `withRetries`). */
 function api(): typeof window.dataverseAPI {
     if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
-    return window.dataverseAPI;
+    return withRetries(window.dataverseAPI);
 }
 
 /**
