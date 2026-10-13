@@ -14,7 +14,7 @@ This guide ensures only @aidevme can approve PRs, merge code, and deploy to npm.
 
 2. Click **"Add branch protection rule"** (or edit existing rule for `main`)
 
-3. **Branch name pattern**: `main`
+3. **Branch name pattern**: `main-protection`
 
 4. **Enable these settings:**
 
