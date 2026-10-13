@@ -12,17 +12,10 @@ import {
     MessageBar,
     MessageBarBody,
     Textarea,
-    makeStyles,
-    tokens,
 } from '@fluentui/react-components';
 import { FolderOpenRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
-
-const useStyles = makeStyles({
-    form: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM },
-    location: { display: 'flex', gap: tokens.spacingHorizontalS },
-    locationInput: { flexGrow: 1, minWidth: 0 },
-});
+import { useNewProjectDialogStyles } from '../../styles';
 
 /** The values the dialog collects; the id and creation time are added when saving. */
 export type NewProject = Pick<ProjectEntry, 'name' | 'description' | 'location'>;
@@ -40,7 +33,7 @@ export interface INewProjectDialogProps {
 
 /** Modal dialog for creating a new project: name, description and location, saved with Save. */
 export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLocation, onSave }: INewProjectDialogProps) {
-    const styles = useStyles();
+    const styles = useNewProjectDialogStyles();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');

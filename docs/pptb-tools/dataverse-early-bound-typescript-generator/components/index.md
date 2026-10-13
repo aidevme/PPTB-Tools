@@ -11,16 +11,20 @@ callbacks down as props. Everything is exported from the folder's `index.ts` bar
 
 | Order | Component | Role |
 | --- | --- | --- |
-| — | [Header](./header.md) | Title, connection badge, Regenerate and Settings buttons |
+| — | [Header](./header.md) | App icon, title and version, connection status, and the Settings button |
+| — | [WorkflowProgress](./workflow-progress.md) | The four steps across the top of the page; click one to scroll to its card |
 | — | [SettingsPanel](./settings-panel.md) | Drawer opened from the header's Settings button |
 | 1 | [ProjectCard](./project-card.md) | Pick the project folder and load `.dataverse-gen.json` |
 | — | [NewProjectDialog](./new-project-dialog.md) | Dialog opened from ProjectCard's New Project button |
 | — | [LoadProjectDialog](./load-project-dialog.md) | Dialog opened from ProjectCard's Load Existing Project button |
+| — | [ConfirmationDialog](./confirmation-dialog.md) | Reusable confirm/cancel dialog, used before deleting a saved project |
 | 2 | [SelectionCard](./selection-card.md) | Choose tables, actions and functions |
 | 3 | [OptionsCard](./options-card.md) | Output folder and which files to generate |
 | 4 | [PreviewCard](./preview-card.md) | Compare generated files with disk, then write them |
+| — | [FileViewer](./file-viewer.md) | The selected file's header, changes and content, inside PreviewCard |
 | — | [CodeViewer](./code-viewer.md) | Syntax-highlighted file view inside PreviewCard |
-| — | [Footer](./footer.md) | Attribution to dataverse-gen and dataverse-ify |
+| — | [StepCard](./step-card.md) | Shared frame for the four step cards: step header, status badge, active-step accent |
+| — | [Footer](./footer.md) | Tool name and version, credits to dataverse-ify and dataverse-gen, and Documentation and GitHub links |
 
 ## Conventions
 

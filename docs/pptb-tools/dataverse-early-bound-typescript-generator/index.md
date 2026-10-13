@@ -40,8 +40,6 @@ Tables used by a selected action or function are included automatically.
    unchanged or orphaned. Click a file to view its content.
 5. **Generate.** Writes the new and changed files and saves `.dataverse-gen.json`.
 
-Once a project has a config, **Regenerate** in the header runs preview and generate in one step.
-
 ## Using the output
 
 ```ts

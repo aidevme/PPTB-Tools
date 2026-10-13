@@ -20,28 +20,12 @@ import {
     TableSelectionCell,
     Text,
     Tooltip,
-    makeStyles,
-    tokens,
     type SortDirection,
 } from '@fluentui/react-components';
 import { DeleteRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
-
-const useStyles = makeStyles({
-    surface: { maxWidth: '1000px', width: '90vw' },
-    tableWrapper: {
-        maxHeight: '360px',
-        overflow: 'auto',
-        border: `1px solid ${tokens.colorNeutralStroke2}`,
-        borderRadius: tokens.borderRadiusMedium,
-    },
-    row: { cursor: 'pointer' },
-    headerCell: { fontWeight: tokens.fontWeightSemibold },
-    actionsCell: { width: '48px' },
-    path: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200, wordBreak: 'break-all' },
-    muted: { color: tokens.colorNeutralForeground3 },
-    empty: { color: tokens.colorNeutralForeground3 },
-});
+import { useLoadProjectDialogStyles } from '../../styles';
+import { ConfirmationDialog } from './ConfirmationDialog';
 
 export interface ILoadProjectDialogProps {
     open: boolean;
@@ -100,7 +84,7 @@ const DEFAULT_SORT: { column: ColumnKey; direction: SortDirection } = { column: 
  * project; clicking a project's name opens it directly.
  */
 export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete }: ILoadProjectDialogProps) {
-    const styles = useStyles();
+    const styles = useLoadProjectDialogStyles();
     const [selectedId, setSelectedId] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -287,27 +271,17 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                     </DialogBody>
                 </DialogSurface>
             </Dialog>
-            <Dialog open={pendingDelete !== null} onOpenChange={(_, data) => !data.open && !deleting && setPendingDelete(null)}>
-                <DialogSurface>
-                    <DialogBody>
-                        <DialogTitle>Delete project?</DialogTitle>
-                        <DialogContent>
-                            <Text>
-                                {pendingDelete?.name} will be removed from your saved projects. Files in {pendingDelete?.location} aren't
-                                touched.
-                            </Text>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button appearance="primary" icon={<DeleteRegular />} disabled={deleting} onClick={() => void confirmDelete()}>
-                                {deleting ? 'Deleting…' : 'Delete'}
-                            </Button>
-                            <Button appearance="secondary" disabled={deleting} onClick={() => setPendingDelete(null)}>
-                                Cancel
-                            </Button>
-                        </DialogActions>
-                    </DialogBody>
-                </DialogSurface>
-            </Dialog>
+            <ConfirmationDialog
+                open={pendingDelete !== null}
+                title="Delete project?"
+                message={`${pendingDelete?.name ?? ''} will be removed from your saved projects. Files in ${pendingDelete?.location ?? ''} aren't touched.`}
+                confirmLabel="Delete"
+                busyLabel="Deleting…"
+                confirmIcon={<DeleteRegular />}
+                busy={deleting}
+                onConfirm={() => void confirmDelete()}
+                onCancel={() => setPendingDelete(null)}
+            />
         </>
     );
 }

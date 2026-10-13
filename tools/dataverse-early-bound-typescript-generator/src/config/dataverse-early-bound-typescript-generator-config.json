@@ -1,5 +1,11 @@
 {
     "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
     "deleteOrphanedFiles": false,
+    "projectDefaults": {
+        "outputRoot": "./src/dataverse-gen",
+        "generateEntityTypes": true,
+        "generateFormContext": false,
+        "generateIndex": true
+    },
     "projects": []
 }

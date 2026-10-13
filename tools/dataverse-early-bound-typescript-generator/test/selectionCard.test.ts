@@ -7,13 +7,14 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SelectionCard, type SelectionKind } from '../src/components/cards/SelectionCard';
+import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import type { EntitySummary, OperationSummary } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const ENTITIES: EntitySummary[] = [
-    { logicalName: 'account', schemaName: 'Account', displayName: 'Account', metadataId: 'a', isCustom: false, isManaged: true },
-    { logicalName: 'contoso_project', schemaName: 'contoso_Project', displayName: 'Project', metadataId: 'b', isCustom: true, isManaged: false },
+    { logicalName: 'account', schemaName: 'Account', displayName: 'Account', description: 'Business that represents a customer or potential customer.', metadataId: 'a', isCustom: false, isManaged: true },
+    { logicalName: 'contoso_project', schemaName: 'contoso_Project', displayName: 'Project', description: '', metadataId: 'b', isCustom: true, isManaged: false },
 ];
 
 const OPERATIONS: OperationSummary[] = [
@@ -51,6 +52,7 @@ async function render(overrides: { selected?: Partial<Record<SelectionKind, stri
                 FluentProvider,
                 { theme: webLightTheme },
                 createElement(SelectionCard, {
+                    step: computeWorkflowSteps({ hasProject: true, selectedCount: 0, plan: null })[1],
                     entities: ENTITIES,
                     operations: OPERATIONS,
                     solutions: [],
@@ -82,7 +84,11 @@ const click = (element: HTMLElement) => act(async () => element.click());
 describe('selection tables', () => {
     it('lists tables with their names and type', async () => {
         await render({ selected: { entities: ['account'] } });
-        expect(headers()).toEqual(['Display Name', 'Logical Name', 'Schema Name', 'Type']);
+        expect(headers()).toEqual(['Display Name', 'Logical Name', 'Schema Name', 'Description', 'Type']);
+        const accountCells = Array.from(rowFor('account').querySelectorAll('td')).map((td) => td.textContent);
+        expect(accountCells[4]).toBe('Business that represents a customer or potential customer.');
+        expect(rowFor('account').querySelector('[title]')).toBeNull();
+        expect(Array.from(rowFor('contoso_project').querySelectorAll('td'))[4].textContent).toBe('—');
         expect(rows()).toHaveLength(2);
         expect(rowFor('contoso_project').textContent).toContain('contoso_Project');
         expect(rowFor('contoso_project').textContent).toContain('Custom');
@@ -127,5 +133,18 @@ describe('selection tables', () => {
         expect(builtIn.textContent).toContain('Built-in');
         // Custom APIs are listed first.
         expect(rows()[0]).toBe(custom);
+    });
+
+    it('links the description cell to a Fluent tooltip with the full text', async () => {
+        await render();
+        const descriptionCell = Array.from(rowFor('account').querySelectorAll('td'))[4];
+        // A description tooltip stays in the DOM (hidden until hover) and is referenced by aria-describedby.
+        const trigger = descriptionCell.querySelector('[aria-describedby]') as HTMLElement;
+        expect(trigger.textContent).toBe('Business that represents a customer or potential customer.');
+        const tooltip = document.getElementById(trigger.getAttribute('aria-describedby') as string);
+        expect(tooltip?.getAttribute('role')).toBe('tooltip');
+        expect(tooltip?.textContent).toBe('Business that represents a customer or potential customer.');
+        // Rows without a description get no tooltip.
+        expect(Array.from(rowFor('contoso_project').querySelectorAll('td'))[4].querySelector('[aria-describedby]')).toBeNull();
     });
 });

@@ -25,7 +25,6 @@ marketplace, as the implementation guide asks.
 - Preview that diffs the generated files against the output folder (new / changed / unchanged / orphaned) with a
   file viewer.
 - Generate writes only new and changed files, then saves `.dataverse-gen.json`.
-- One-click **Regenerate** in the header (preview + generate).
 
 ## Commands (run from `tools/dataverse-type-gen/`)
 

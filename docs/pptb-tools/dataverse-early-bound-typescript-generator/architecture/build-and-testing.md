@@ -32,11 +32,15 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | File | Covers |
 | --- | --- |
 | `generator.test.ts` | CSDL parsing, selection expansion, and generated output compared file by file with the real dataverse-gen CLI's output |
+| `confirmationDialog.test.ts` | The reusable confirmation dialog: alert role, Confirm and Cancel, Escape, and the busy state |
 | `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions |
 | `metadataFallback.test.ts` | The `$metadata`-too-large fallback: navigation rebuilt from relationships matches the CSDL's, table files match the reference output, and the provider switches only on PPTB's size-limit errors |
 | `settings.test.ts` | Tool config: defaults from the config JSON, saved values and projects merged over them, the Settings panel's Save/Cancel, and the New Project dialog's validation and saving |
+| `previewCard.test.ts` | The Preview card: the summary sentence, tiles as filters, changes-only default and search (`visibleFiles`), Generate label, stale and success messages, the file table (columns, `fileType`, sorting, header tooltips, selecting with click and arrow keys), the resizable divider, and the FileViewer (header, copy, Changes tab, orphan notice) |
+| `lineDiff.test.ts` | The line diff: 500 random cases that must rebuild both texts, line numbering, context and collapsing, line endings, and the size limit |
 | `projectVersion.test.ts` | Project version bumps and Modified On after a Generate run, saved file lists, and matching the open folder to a saved project |
 | `selectionCard.test.ts` | The Select card's tables: columns per tab, toggling from the row, checkbox or keyboard, and the disabled state |
+| `workflow.test.ts` | Step states, relative times, shortened paths, recent projects, the Project card's empty and open states, and the progress bar |
 | `services.test.ts` | Path helpers, config round-trip, and write planning (statuses, casing reuse, first-time folder creation) |
 
 Test data:

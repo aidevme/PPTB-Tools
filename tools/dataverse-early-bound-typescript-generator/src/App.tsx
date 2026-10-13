@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, type NewProject, type SelectionKind } from './components';
+import { Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from './components';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
-import { DEFAULT_PROJECT_VERSION, recordGeneration, toolConfig, type ProjectEntry, type ToolConfig } from './config';
+import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectEntry, type ToolConfig } from './config';
 import { useConnection } from './hooks';
 import {
     PptbFileSink,
@@ -95,6 +95,10 @@ export default function App() {
     const [loadingOperations, setLoadingOperations] = useState(false);
     const [loadingSolution, setLoadingSolution] = useState(false);
     const [plan, setPlan] = useState<WritePlan | null>(null);
+    /** When the current plan was computed (ISO), for the Preview card's "Previewed … ago". */
+    const [previewedAt, setPreviewedAt] = useState<string | null>(null);
+    /** Summary of the last Generate run, shown in the Preview card until the next preview. */
+    const [lastResult, setLastResult] = useState<string | null>(null);
     const [planStale, setPlanStale] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -114,6 +118,8 @@ export default function App() {
     const openProjectFolder = useCallback(
         async (folder: string) => {
             const state = await loadProjectConfig(sink, folder);
+            // A folder without .dataverse-gen.json starts from the Settings panel's project defaults.
+            if (!state.exists) state.config = applyProjectDefaults(state.config, toolSettings.projectDefaults);
             if (!projectRoot) {
                 // Keep anything selected before the folder was picked.
                 const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
@@ -130,7 +136,7 @@ export default function App() {
             setPlanStale(false);
             await rememberProjectFolder(connKey, folder);
         },
-        [sink, connKey, projectRoot, config],
+        [sink, connKey, projectRoot, config, toolSettings.projectDefaults],
     );
 
     const loadProject = useCallback(
@@ -157,7 +163,7 @@ export default function App() {
      * picker opens there for the user to confirm instead. Resolves to `false` when that picker is cancelled.
      */
     const openSavedProject = useCallback(
-        async (project: ProjectEntry) => {
+        async (project: ProjectOpenTarget) => {
             if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
             setError(null);
             setNotice(null);
@@ -204,7 +210,9 @@ export default function App() {
     }, [metadataFallback]);
 
     /** Saves the Settings-panel values; the panel stays open and shows the error if saving fails. */
-    const saveToolSettings = useCallback(async (next: ToolConfig) => {
+    const saveToolSettings = useCallback(async (draft: ToolConfig) => {
+        // Same normalization as on load, so e.g. a blank output folder saves as the default, not as "".
+        const next = mergeToolConfig(draft);
         await saveToolConfig(next);
         setToolSettings(next);
     }, []);
@@ -393,6 +401,8 @@ export default function App() {
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
             const nextPlan = await createWritePlan(sink, projectRoot, resolved, files);
             setPlan(nextPlan);
+            setPreviewedAt(new Date().toISOString());
+            setLastResult(null);
             setPlanStale(false);
             return nextPlan;
         } catch (e) {
@@ -451,7 +461,9 @@ export default function App() {
                     counts: { new: 0, changed: 0, unchanged: planToApply.counts.unchanged + result.written, orphaned: planToApply.counts.orphaned },
                 });
                 const summary = `${result.written} file(s) written, ${planToApply.counts.unchanged} unchanged, ${planToApply.counts.orphaned} orphaned. Config saved to .dataverse-gen.json.`;
-                setNotice(summary);
+                setLastResult(
+                    `${result.written} ${result.written === 1 ? 'file' : 'files'} written · ${planToApply.counts.unchanged} unchanged · ${planToApply.counts.orphaned} orphaned · .dataverse-gen.json saved`,
+                );
                 await window.toolboxAPI?.utils.showNotification({ title: 'Dataverse Early-Bound TypeScript Generator', body: summary, type: 'success' });
             } catch (e) {
                 setError(`Generation failed: ${errorMessage(e)}`);
@@ -461,11 +473,6 @@ export default function App() {
         },
         [projectRoot, config, sink, recordProjectGeneration],
     );
-
-    const regenerate = useCallback(async () => {
-        const nextPlan = await runPreview();
-        if (nextPlan) await runGenerate(nextPlan);
-    }, [runPreview, runGenerate]);
 
     // ----- derived --------------------------------------------------------------------------------
 
@@ -488,10 +495,20 @@ export default function App() {
     /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
     const canSelect = inPptb && !!connection;
     const ready = canSelect && !!projectRoot;
+    const steps = computeWorkflowSteps({
+        hasProject: !!projectRoot,
+        selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
+        plan: plan ? { pending: plan.counts.new + plan.counts.changed, stale: planStale } : null,
+    });
+
+    /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
+    const openRecent = (target: ProjectOpenTarget) => {
+        openSavedProject(target).catch((e: unknown) => setError(`Could not open ${target.name}: ${errorMessage(e)}`));
+    };
 
     return (
         <div className={styles.page}>
-            <Header connection={connection} canRegenerate={ready && hasSelection} busy={busy} onRegenerate={regenerate} onOpenSettings={() => setSettingsOpen(true)} />
+            <Header connection={connection} onOpenSettings={() => setSettingsOpen(true)} />
             <SettingsPanel
                 open={settingsOpen}
                 onOpenChange={setSettingsOpen}
@@ -556,9 +573,17 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb}
+                <WorkflowProgress steps={steps} />
+                <ProjectCard
+                    step={steps[0]}
+                    projectRoot={projectRoot}
+                    rememberedFolder={rememberedFolder}
+                    configState={projectRoot ? configState : null}
+                    projects={toolSettings.projects}
+                    busy={busy || !inPptb}
                     onNewProject={() => setNewProjectOpen(true)}
                     onLoadExistingProject={() => setLoadProjectOpen(true)}
+                    onOpenRecent={openRecent}
                     onReload={() => projectRoot && loadProject(projectRoot)}
                     outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
                     hasSelection={hasSelection}
@@ -566,6 +591,7 @@ export default function App() {
                     onClearSelection={clearAll}
                 />
                 <SelectionCard
+                    step={steps[1]}
                     entities={entities}
                     operations={operations}
                     solutions={solutions}
@@ -583,8 +609,20 @@ export default function App() {
                     onSolutionChange={changeSolution}
                     onEnsureOperations={ensureOperations}
                 />
-                <OptionsCard config={config} disabled={!canSelect || busy} onChange={updateConfig} />
-                <PreviewCard plan={plan} stale={planStale} canPreview={ready && hasSelection} needsProject={canSelect && !projectRoot} busy={busy} onPreview={() => void runPreview()} onGenerate={() => plan && void runGenerate(plan)} />
+                <OptionsCard step={steps[2]} config={config} disabled={!canSelect || busy} onChange={updateConfig} />
+                <PreviewCard
+                    step={steps[3]}
+                    plan={plan}
+                    stale={planStale}
+                    canPreview={ready && hasSelection}
+                    needsProject={canSelect && !projectRoot}
+                    busy={busy}
+                    previewedAt={plan ? previewedAt : null}
+                    lastResult={plan ? lastResult : null}
+                    onPreview={() => void runPreview()}
+                    onGenerate={() => plan && void runGenerate(plan)}
+                    onCopyText={(text, label) => void copyPath(text, label)}
+                />
             </main>
             <Footer />
         </div>

@@ -12,7 +12,9 @@
 | `entities`, `operations`, `solutions` | Lists loaded from the environment. `operations` stays `null` until the `$metadata` document is loaded. |
 | `selectedSolutionId`, `solutionEntityIds`, `solutionComponentIds` | The solution filter and the ids in that solution. Results are cached per solution in refs. |
 | `plan`, `planStale` | The last preview, and whether the selection or options changed since. |
+| `previewedAt`, `lastResult` | When the plan was computed, and the summary of the last Generate run, for the Preview card. Set by `runPreview` and `runGenerate`. |
 | `progress`, `error`, `notice` | The progress bar and the error and success message bars. |
+| `steps` (derived, not state) | `computeWorkflowSteps` from the open project, the selection count and the plan; passed to `WorkflowProgress` and each card. |
 | `settingsOpen` | Whether the [SettingsPanel](../components/settings-panel.md) drawer is open. |
 | `toolSettings` | Tool config: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves on load. `saveToolSettings` and `addProject` save and update it. |
 | `newProjectOpen` | Whether the [NewProjectDialog](../components/new-project-dialog.md) is open. |
@@ -27,14 +29,14 @@ the connection changes, and a single `PptbFileSink`.
 | Callback | What it does |
 | --- | --- |
 | `loadProject`, `openProjectFolder` | Load a folder's `.dataverse-gen.json` (or defaults for a new project). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
-| `openSavedProject` | Opens a saved project's location directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. |
+| `openSavedProject` | Opens a project (`{ name, location }`) directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. |
+| `openRecent` | Opens a project from the Project card's recent list with `openSavedProject`, showing errors in the page. |
 | `updateConfig` | Merges a change into the config and marks the plan stale. `toggle`, `clear` and `clearAll` build on it. |
 | `ensureOperations` | Loads actions and functions the first time the Actions or Functions tab opens. |
 | `changeSolution` | Loads the chosen solution's components for the filter. |
 | `runPreview` | Builds the write plan. See the data flow on the [Architecture](./index.md#data-flow) page. |
 | `runGenerate` | Writes new and changed files, saves the config, marks written files unchanged, then calls `recordProjectGeneration`. |
 | `recordProjectGeneration` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified On when the run added or dropped files. |
-| `regenerate` | `runPreview`, then `runGenerate`. |
 
 ## Hooks
 

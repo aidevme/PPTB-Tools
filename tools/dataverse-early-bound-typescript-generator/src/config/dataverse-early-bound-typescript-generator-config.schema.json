@@ -14,11 +14,16 @@
             "type": "boolean",
             "default": false
         },
+        "projectDefaults": {
+            "$ref": "#/definitions/projectDefaults"
+        },
         "projects": {
             "description": "Projects created with the New Project dialog.",
             "type": "array",
             "default": [],
-            "items": { "$ref": "#/definitions/project" }
+            "items": {
+                "$ref": "#/definitions/project"
+            }
         }
     },
     "additionalProperties": false,
@@ -27,6 +32,34 @@
             "description": "ISO 8601 timestamp in UTC, as written by Date.toISOString().",
             "type": "string",
             "format": "date-time"
+        },
+        "projectDefaults": {
+            "description": "Options a new project starts with: applied when a project folder without .dataverse-gen.json is opened. Projects that already have one keep their own values. Missing or mistyped keys fall back to dataverse-gen's defaults.",
+            "type": "object",
+            "properties": {
+                "outputRoot": {
+                    "description": "Output folder, relative to the project folder. Written to a new project's output.outputRoot. A blank value falls back to the default.",
+                    "type": "string",
+                    "minLength": 1,
+                    "default": "./src/dataverse-gen"
+                },
+                "generateEntityTypes": {
+                    "description": "Generate an early-bound interface per table for dataverse-ify. Written to a new project's generateEntityTypes.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "generateFormContext": {
+                    "description": "Generate a typed <Table>FormContext interface per table for form scripts. Written to a new project's generateFormContext.",
+                    "type": "boolean",
+                    "default": false
+                },
+                "generateIndex": {
+                    "description": "Generate an index.ts that re-exports every generated file. Written to a new project's generateIndex.",
+                    "type": "boolean",
+                    "default": true
+                }
+            },
+            "additionalProperties": false
         },
         "project": {
             "description": "A saved project. The tool skips entries missing id, name, location or createdOn, and fills in description, version and modifiedOn when absent.",
@@ -69,11 +102,19 @@
                 "lastGeneratedFiles": {
                     "description": "Output files the last Generate run produced, relative to the output folder with forward slashes. Absent until the project is first generated.",
                     "type": "array",
-                    "items": { "type": "string", "minLength": 1 },
+                    "items": {
+                        "type": "string",
+                        "minLength": 1
+                    },
                     "uniqueItems": true
                 }
             },
-            "required": ["id", "name", "location", "createdOn"],
+            "required": [
+                "id",
+                "name",
+                "location",
+                "createdOn"
+            ],
             "additionalProperties": false
         }
     }

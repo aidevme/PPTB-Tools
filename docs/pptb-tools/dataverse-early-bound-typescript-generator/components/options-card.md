@@ -10,6 +10,7 @@ Source: [`src/components/cards/OptionsCard.tsx`](https://github.com/aidevme/PPTB
 
 | Prop | Type | Description |
 | --- | --- | --- |
+| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
 | `config` | `DataverseGenConfig` | The current project config. |
 | `disabled` | `boolean` | Disables every input. |
 | `onChange` | `(update: Partial<DataverseGenConfig>) => void` | Merges a change into the config. |

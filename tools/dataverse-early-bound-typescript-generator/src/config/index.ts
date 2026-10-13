@@ -1,4 +1,5 @@
 import defaults from './dataverse-early-bound-typescript-generator-config.json';
+import type { DataverseGenConfig } from '../core';
 
 /** A project created with the New Project dialog. */
 export interface ProjectEntry {
@@ -23,11 +24,45 @@ export interface ProjectEntry {
 /** Version given to new projects, and to projects saved before versions were recorded. */
 export const DEFAULT_PROJECT_VERSION = '1.0.0';
 
+/**
+ * Options a new project starts with: applied when a project folder without `.dataverse-gen.json` is opened.
+ * Projects that already have the file keep their own values. Same meaning as the matching
+ * `.dataverse-gen.json` keys.
+ */
+export interface ProjectDefaults {
+    /** `output.outputRoot`: output folder, relative to the project folder. */
+    outputRoot: string;
+    generateEntityTypes: boolean;
+    generateFormContext: boolean;
+    generateIndex: boolean;
+}
+
 /** Tool settings and projects, saved in PPTB's per-tool settings. */
 export interface ToolConfig {
     /** Delete files in the output folders that the current selection no longer generates. */
     deleteOrphanedFiles: boolean;
+    projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
+}
+
+/** dataverse-gen's own defaults, used when the bundled JSON doesn't set a value. */
+const BUILT_IN_PROJECT_DEFAULTS: ProjectDefaults = {
+    outputRoot: './src/dataverse-gen',
+    generateEntityTypes: true,
+    generateFormContext: false,
+    generateIndex: true,
+};
+
+/** Each value from `value` when it has the right type (and, for `outputRoot`, isn't blank), else from `fallback`. */
+function normalizeProjectDefaults(value: unknown, fallback: ProjectDefaults): ProjectDefaults {
+    const v = (value && typeof value === 'object' ? value : {}) as Partial<Record<keyof ProjectDefaults, unknown>>;
+    const flag = (key: 'generateEntityTypes' | 'generateFormContext' | 'generateIndex') => (typeof v[key] === 'boolean' ? (v[key] as boolean) : fallback[key]);
+    return {
+        outputRoot: typeof v.outputRoot === 'string' && v.outputRoot.trim() ? v.outputRoot.trim() : fallback.outputRoot,
+        generateEntityTypes: flag('generateEntityTypes'),
+        generateFormContext: flag('generateFormContext'),
+        generateIndex: flag('generateIndex'),
+    };
 }
 
 /**
@@ -61,6 +96,7 @@ function normalizeProjects(values: unknown[]): ProjectEntry[] {
  */
 export const toolConfig: ToolConfig = {
     deleteOrphanedFiles: defaults.deleteOrphanedFiles === true,
+    projectDefaults: normalizeProjectDefaults(defaults.projectDefaults, BUILT_IN_PROJECT_DEFAULTS),
     projects: normalizeProjects(defaults.projects as unknown[]),
 };
 
@@ -69,7 +105,22 @@ export function mergeToolConfig(saved: unknown): ToolConfig {
     const values = (saved && typeof saved === 'object' ? saved : {}) as Partial<Record<keyof ToolConfig, unknown>>;
     return {
         deleteOrphanedFiles: typeof values.deleteOrphanedFiles === 'boolean' ? values.deleteOrphanedFiles : toolConfig.deleteOrphanedFiles,
+        projectDefaults: normalizeProjectDefaults(values.projectDefaults, toolConfig.projectDefaults),
         projects: Array.isArray(values.projects) ? normalizeProjects(values.projects) : toolConfig.projects,
+    };
+}
+
+/**
+ * A new project's `.dataverse-gen.json` with the project defaults applied. Everything else in `config`
+ * (selection, other output options) is kept.
+ */
+export function applyProjectDefaults(config: DataverseGenConfig, projectDefaults: ProjectDefaults): DataverseGenConfig {
+    return {
+        ...config,
+        generateEntityTypes: projectDefaults.generateEntityTypes,
+        generateFormContext: projectDefaults.generateFormContext,
+        generateIndex: projectDefaults.generateIndex,
+        output: { ...(config.output ?? {}), outputRoot: projectDefaults.outputRoot },
     };
 }
 

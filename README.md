@@ -29,7 +29,7 @@ This tool generates early-bound TypeScript types and metadata for Dataverse tabl
 - Pick a project folder and load or create `.dataverse-gen.json`.
 - Select tables (with search and a solution filter), actions and functions.
 - Preview generated files as new, changed, unchanged or orphaned against the output folder.
-- Write only what changed, save the config, or regenerate in one click.
+- Write only what changed and save the config.
 
 **Status:** initial implementation; output verified against dataverse-gen test fixtures, not yet validated against a live environment.
 

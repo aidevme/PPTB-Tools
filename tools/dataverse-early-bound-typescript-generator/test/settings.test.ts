@@ -6,7 +6,8 @@ import { act, createElement, useState } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { mergeToolConfig, toolConfig, toolConfigEquals, type ProjectEntry, type ToolConfig } from '../src/config';
+import { applyProjectDefaults, mergeToolConfig, toolConfig, toolConfigEquals, type ProjectEntry, type ToolConfig } from '../src/config';
+import { createDefaultConfig } from '../src/core';
 import { loadToolConfig, saveToolConfig } from '../src/services/settings';
 import { SettingsPanel } from '../src/components/panels/SettingsPanel';
 import { NewProjectDialog } from '../src/components/dialogs/NewProjectDialog';
@@ -42,7 +43,11 @@ afterEach(() => {
 
 describe('tool config', () => {
     it('defaults come from the bundled JSON', () => {
-        expect(toolConfig).toEqual({ deleteOrphanedFiles: false, projects: [] });
+        expect(toolConfig).toEqual({
+            deleteOrphanedFiles: false,
+            projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
+            projects: [],
+        });
     });
 
     it('applies saved values over the defaults and ignores unknown or mistyped ones', () => {
@@ -51,6 +56,25 @@ describe('tool config', () => {
         expect(mergeToolConfig(undefined)).toEqual(toolConfig);
         expect(mergeToolConfig({ projects: [PROJECT, { name: 'no id' }, 'x'] })).toEqual(settingsWith({ projects: [PROJECT] }));
         expect(mergeToolConfig({ projects: 'nope' })).toEqual(toolConfig);
+    });
+
+    it('merges project defaults key by key, ignoring mistyped values and a blank output folder', () => {
+        const merged = mergeToolConfig({ projectDefaults: { outputRoot: '  ./types  ', generateFormContext: true, generateIndex: 'no' } });
+        expect(merged.projectDefaults).toEqual({ ...toolConfig.projectDefaults, outputRoot: './types', generateFormContext: true });
+        expect(mergeToolConfig({ projectDefaults: { outputRoot: '   ' } }).projectDefaults.outputRoot).toBe('./src/dataverse-gen');
+        expect(mergeToolConfig({ projectDefaults: 'x' }).projectDefaults).toEqual(toolConfig.projectDefaults);
+    });
+
+    it('applies project defaults to a new project config, keeping everything else', () => {
+        const base = { ...createDefaultConfig(), entities: ['account'], output: { outputRoot: './src/dataverse-gen', fileSuffix: '.d.ts' } };
+        const applied = applyProjectDefaults(base, { outputRoot: './types', generateEntityTypes: false, generateFormContext: true, generateIndex: false });
+        expect(applied).toEqual({
+            ...base,
+            generateEntityTypes: false,
+            generateFormContext: true,
+            generateIndex: false,
+            output: { outputRoot: './types', fileSuffix: '.d.ts' },
+        });
     });
 
     it('fills in fields that projects saved before versions were recorded lack', () => {
@@ -70,8 +94,8 @@ describe('tool config', () => {
         const store = installSettingsStub();
         expect(await loadToolConfig()).toEqual(toolConfig);
         await saveToolConfig(settingsWith({ deleteOrphanedFiles: true, projects: [PROJECT] }));
-        expect(store.toolConfig).toEqual({ deleteOrphanedFiles: true, projects: [PROJECT] });
-        expect(await loadToolConfig()).toEqual({ deleteOrphanedFiles: true, projects: [PROJECT] });
+        expect(store.toolConfig).toEqual(settingsWith({ deleteOrphanedFiles: true, projects: [PROJECT] }));
+        expect(await loadToolConfig()).toEqual(settingsWith({ deleteOrphanedFiles: true, projects: [PROJECT] }));
     });
 
     it('uses the defaults outside PPTB, where saving fails', async () => {
@@ -123,6 +147,26 @@ describe('settings panel', () => {
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ deleteOrphanedFiles: true }));
         expect(onOpenChange).toHaveBeenCalledWith(false);
+    });
+
+    it('edits the project defaults on the Options tab', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await click(Array.from(document.querySelectorAll('[role="tab"]')).find((t) => t.textContent?.includes('Options')) as HTMLElement);
+        const input = document.querySelector('input:not([type])') as HTMLInputElement ?? (document.querySelector('input[type="text"]') as HTMLInputElement);
+        expect(input.value).toBe('./src/dataverse-gen');
+        await act(async () => {
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, './types');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        const switches = Array.from(document.querySelectorAll('input[role="switch"]')) as HTMLInputElement[];
+        expect(switches.map((s) => s.checked)).toEqual([true, false, true]);
+        await click(switches[1]);
+        expect(button('Save').disabled).toBe(false);
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(
+            settingsWith({ projectDefaults: { outputRoot: './types', generateEntityTypes: true, generateFormContext: true, generateIndex: true } }),
+        );
     });
 
     it('Cancel closes without saving', async () => {

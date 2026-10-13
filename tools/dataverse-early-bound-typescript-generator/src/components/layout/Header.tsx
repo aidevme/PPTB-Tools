@@ -1,59 +1,63 @@
-import { Badge, Button, Text, Tooltip, makeStyles, tokens } from '@fluentui/react-components';
-import { ArrowSyncRegular, SettingsRegular } from '@fluentui/react-icons';
-
-const useStyles = makeStyles({
-    header: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: tokens.spacingHorizontalM,
-        padding: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalL}`,
-        borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-        flexWrap: 'wrap',
-    },
-    titleBlock: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXXS },
-    right: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
-});
+import { Badge, Button, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
+import { CodeRegular, PlugConnectedRegular, PlugDisconnectedRegular, SettingsRegular } from '@fluentui/react-icons';
+import { version } from '../../../package.json';
+import { useHeaderStyles } from '../../styles';
 
 export interface HeaderProps {
     connection: ToolBoxAPI.Connection | null;
-    /** Whether a `.dataverse-gen.json` with a selection is loaded, enabling one-click regeneration. */
-    canRegenerate: boolean;
-    busy: boolean;
-    onRegenerate: () => void;
     onOpenSettings: () => void;
 }
 
-/** Tool title, active connection badge, the one-click Regenerate action and the Settings button. */
-export function Header({ connection, canRegenerate, busy, onRegenerate, onOpenSettings }: HeaderProps) {
-    const styles = useStyles();
+/**
+ * The bar across the top: app icon, title, version and subtitle on the left; the active connection and the
+ * Settings button on the right.
+ */
+export function Header({ connection, onOpenSettings }: HeaderProps) {
+    const styles = useHeaderStyles();
     return (
         <header className={styles.header}>
-            <div className={styles.titleBlock}>
-                <Text size={600} weight="semibold">
-                    Dataverse Early-Bound TypeScript Generator
-                </Text>
-                <Text size={200}>Early-bound TypeScript types and metadata for dataverse-ify, from a .dataverse-gen.json project.</Text>
+            <div className={styles.identity}>
+                <span className={styles.appIcon} aria-hidden="true">
+                    <CodeRegular />
+                </span>
+                <div className={styles.titleBlock}>
+                    <div className={styles.titleRow}>
+                        <Text as="h1" className={styles.title}>
+                            Dataverse Early-Bound TypeScript Generator
+                        </Text>
+                        <Badge appearance="tint" color="brand" size="small">
+                            v{version}
+                        </Badge>
+                    </div>
+                    <Text size={200} className={styles.subtitle}>
+                        Early-bound TypeScript types and metadata for dataverse-ify, from a .dataverse-gen.json project.
+                    </Text>
+                </div>
             </div>
             <div className={styles.right}>
                 {connection ? (
-                    <Tooltip content={connection.url} relationship="description">
-                        <Badge appearance="tint" color="brand">
-                            {connection.name}
-                        </Badge>
+                    <Tooltip content={connection.url} relationship="description" withArrow>
+                        <div className={styles.connection} role="status" aria-label={`Connected to ${connection.name}`}>
+                            <span className={mergeClasses(styles.statusDot, styles.statusDotConnected)} aria-hidden="true" />
+                            <PlugConnectedRegular className={styles.connectionIcon} aria-hidden="true" />
+                            <span className={styles.connectionText}>
+                                <span className={styles.connectionLabel}>Connected</span>
+                                <span className={styles.connectionName}>{connection.name}</span>
+                            </span>
+                        </div>
                     </Tooltip>
                 ) : (
-                    <Badge appearance="tint" color="warning">
-                        No connection
-                    </Badge>
+                    <div className={mergeClasses(styles.connection, styles.connectionDisconnected)} role="status">
+                        <span className={mergeClasses(styles.statusDot, styles.statusDotDisconnected)} aria-hidden="true" />
+                        <PlugDisconnectedRegular className={styles.connectionIcon} aria-hidden="true" />
+                        <span className={styles.connectionText}>
+                            <span className={styles.connectionLabel}>Connection</span>
+                            <span className={styles.connectionName}>Not connected</span>
+                        </span>
+                    </div>
                 )}
-                <Tooltip content="Load metadata, generate and write all files for the current .dataverse-gen.json in one step" relationship="description" withArrow>
-                    <Button appearance="primary" icon={<ArrowSyncRegular />} disabled={!canRegenerate || busy} onClick={onRegenerate}>
-                        Regenerate
-                    </Button>
-                </Tooltip>
                 <Tooltip content="Settings" relationship="label" withArrow>
-                    <Button appearance="subtle" icon={<SettingsRegular />} onClick={onOpenSettings} />
+                    <Button appearance="subtle" size="large" icon={<SettingsRegular />} onClick={onOpenSettings} />
                 </Tooltip>
             </div>
         </header>

@@ -67,6 +67,12 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 {
     "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
     "deleteOrphanedFiles": false,
+    "projectDefaults": {
+        "outputRoot": "./src/dataverse-gen",
+        "generateEntityTypes": true,
+        "generateFormContext": false,
+        "generateIndex": true
+    },
     "projects": []
 }
 ```
@@ -75,6 +81,10 @@ remember the last project folder per connection. They aren't part of `ToolConfig
   carried into `toolConfig`.
 - **`deleteOrphanedFiles`:** `false`. Shown as a checkbox on the Settings panel's Schema Generation tab. Not
   acted on yet; see [Known limitations](#known-limitations).
+- **`projectDefaults`:** the options a new project starts with, edited on the Settings panel's Options tab.
+  When a project folder without `.dataverse-gen.json` is opened, `applyProjectDefaults` writes these into its
+  config. Projects that already have the file keep their own values. The bundled values equal dataverse-gen's
+  `.dataverse-gen.template.json`; a missing or mistyped key falls back to them (`BUILT_IN_PROJECT_DEFAULTS`).
 - **`projects`:** `[]`. Projects listed here would be offered on every install, before anything is saved.
   They go through the same normalization as saved projects.
 
@@ -106,7 +116,14 @@ workspace settings.
 root (object, additionalProperties: false)
 ├── $schema              string
 ├── deleteOrphanedFiles  boolean, default false
+├── projectDefaults      #/definitions/projectDefaults
 └── projects             array of #/definitions/project, default []
+
+#/definitions/projectDefaults (object, additionalProperties: false, all optional)
+├── outputRoot           string, minLength 1, default "./src/dataverse-gen"
+├── generateEntityTypes  boolean, default true
+├── generateFormContext  boolean, default false
+└── generateIndex        boolean, default true
 
 #/definitions/project (object, additionalProperties: false)
 ├── id                   string, UUID pattern            required
@@ -141,6 +158,7 @@ deliberately more tolerant about what it **reads**, so a stored value that fails
 | `lastGeneratedFiles` | Unique non-empty strings | Non-string items dropped; duplicates kept |
 | Unknown keys | Rejected | Ignored, and not written back |
 | Wrong top-level types | Rejected | The default is used for that key |
+| `projectDefaults` values | Typed; `outputRoot` non-empty | Per key: wrong type or blank `outputRoot` (after trimming) uses the default |
 
 Values the loader tolerates are handled where they're used:
 
@@ -181,8 +199,16 @@ interface ProjectEntry {
     lastGeneratedFiles?: string[];  // absent until first generated
 }
 
+interface ProjectDefaults {
+    outputRoot: string;             // trimmed, never blank
+    generateEntityTypes: boolean;
+    generateFormContext: boolean;
+    generateIndex: boolean;
+}
+
 interface ToolConfig {
     deleteOrphanedFiles: boolean;
+    projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
 
@@ -209,6 +235,8 @@ Builds a complete `ToolConfig` from stored data, falling back to `toolConfig` ke
 - `saved` that isn't an object (including `undefined`, which PPTB returns for a missing key) is treated as
   `{}`, so the result equals the defaults.
 - `deleteOrphanedFiles` is taken only if it's a boolean.
+- `projectDefaults` is merged key by key over `toolConfig.projectDefaults`: booleans only if boolean,
+  `outputRoot` only if a non-blank string (stored trimmed).
 - `projects` is taken only if it's an array, then normalized. The result is a new array; a stored array is never
   merged with the default projects.
 - Every other key is dropped.
@@ -228,6 +256,13 @@ The returned object always has its keys in the same order. That matters for `too
 | `lastGeneratedFiles` | Array (non-strings removed) | Key omitted |
 
 `normalizeProjects` maps and filters out the `undefined` results, keeping the original order.
+
+### `applyProjectDefaults(config, projectDefaults): DataverseGenConfig`
+
+Returns `config` with `generateEntityTypes`, `generateFormContext`, `generateIndex` and `output.outputRoot`
+taken from `projectDefaults`. Everything else is kept: the selection, other `output` keys such as
+`fileSuffix`, and `referencedTypes`. `App.tsx` calls it in `openProjectFolder` only when the folder has no
+`.dataverse-gen.json` (`state.exists === false`).
 
 ### `toolConfigEquals(a, b): boolean`
 
@@ -257,10 +292,11 @@ All writes go through `saveToolConfig(next)`, which replaces the whole stored `t
 | Event | Where | Change |
 | --- | --- | --- |
 | Tool loads | `App.tsx` effect → `loadToolConfig()` | `toolSettings` starts as `toolConfig`, then becomes `mergeToolConfig(stored)` |
-| Settings → Save | `SettingsPanel` → `saveToolSettings` | The whole draft, including the `projects` it was opened with |
+| Settings → Save | `SettingsPanel` → `saveToolSettings` | The whole draft, normalized with `mergeToolConfig` (so a blank output folder saves as the default), including the `projects` it was opened with |
+| Open a folder without `.dataverse-gen.json` | `openProjectFolder` | Nothing saved; the new project's config gets `projectDefaults` |
 | New Project → Save | `NewProjectDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
 | Load Existing Project → Delete | `LoadProjectDialog` → `deleteProject` | Removes the project by `id` |
-| Generate / Regenerate | `runGenerate` → `recordProjectGeneration` | The project whose `location` matches the open folder, if `recordGeneration` returns a change |
+| Generate | `runGenerate` → `recordProjectGeneration` | The project whose `location` matches the open folder, if `recordGeneration` returns a change |
 
 Error handling differs by operation:
 

@@ -28,7 +28,8 @@ Source: [`src/components/dialogs/LoadProjectDialog.tsx`](https://github.com/aide
   **Load**.
 - **Load** opens the selected project and is enabled once a row is selected.
 - **Delete:** each row ends with a subtle Fluent UI `Button` with a trash icon (`DeleteRegular`) and a
-  "Delete project" `Tooltip`. Clicking it doesn't select the row; it opens a confirmation dialog. **Delete**
+  "Delete project" `Tooltip`. Clicking it doesn't select the row; it opens a
+  [ConfirmationDialog](./confirmation-dialog.md). **Delete**
   there removes the project from the saved projects (`App.tsx`'s `deleteProject` saves the updated list);
   the files in its folder aren't touched. **Cancel** keeps it. Errors are shown in the dialog. **Cancel**, the Escape key, or a click outside closes the
   dialog. Nothing is selected when it opens.

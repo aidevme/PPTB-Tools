@@ -9,6 +9,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 
 | Prop | Type | Description |
 | --- | --- | --- |
+| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
 | `entities` | `EntitySummary[]` | Tables in the connected environment. |
 | `operations` | `OperationSummary[] \| null` | Actions and functions; `null` until the `$metadata` document has been loaded. |
 | `solutions` | `SolutionSummary[]` | Solutions offered in the solution filter. |
@@ -39,7 +40,9 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 - **Tables:** each tab lists its items in a Fluent UI `Table` with a checkbox column. Clicking a row, its
   checkbox, or pressing Space or Enter on it toggles the selection; selected rows are highlighted. Column
   headers are semibold and stay visible while the list scrolls.
-  - **Tables tab:** Display Name, Logical Name, Schema Name, and Type (**Custom** badge, or Standard).
+  - **Tables tab:** Display Name, Logical Name, Schema Name, Description, and Type (**Custom** badge, or
+    Standard). Long descriptions are cut to one line, with the full text in a Fluent UI `Tooltip` on
+    hover; tables without one show a dash.
   - **Actions and Functions tabs:** Name (display name above the unique name when they differ), Binding
     (Bound to a table, or Unbound), Parameters, and Type (**Custom API**, **Private custom API** or **Custom
     action** badges, or Built-in). Custom APIs missing from `$metadata` show **From definition** under

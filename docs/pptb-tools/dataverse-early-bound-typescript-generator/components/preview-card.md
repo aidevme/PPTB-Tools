@@ -1,6 +1,8 @@
 # PreviewCard
 
-Steps 4 and 5 of the workflow: compare the generated files with the output folder, then write them.
+Steps 4 and 5 of the workflow: preview what Generate would do, then write the files. Status tiles summarize
+and filter the files, and the table lists them beside a [FileViewer](./file-viewer.md) that shows each
+file's content or changes.
 
 Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx)
 
@@ -8,21 +10,73 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 
 | Prop | Type | Description |
 | --- | --- | --- |
+| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
 | `plan` | `WritePlan \| null` | The last preview: every file with its status and content. `null` before the first preview. |
 | `stale` | `boolean` | The selection or options changed since the plan was computed. |
-| `canPreview` | `boolean` | Enables the Preview button. |
+| `canPreview` | `boolean` | Enables the Preview buttons. |
 | `needsProject` | `boolean` | Everything is ready except the project folder; shows a hint. |
-| `busy` | `boolean` | Disables both buttons while another operation runs. |
+| `busy` | `boolean` | Disables the buttons while another operation runs, and shows a loading placeholder before the first preview. |
+| `previewedAt` | `string \| null` | When the plan was computed (ISO), shown as "Previewed *2 minutes ago*". |
+| `lastResult` | `string \| null` | Summary of the last Generate run, shown as a success message until the next preview. |
 | `onPreview` | `() => void` | Loads metadata, generates the files and compares them with disk. |
 | `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`. |
+| `onCopyText` | `(text: string, label: string) => void` | Copies a file's content or the output folder path. |
+| `now` | `number` (optional) | Current time for "Previewed … ago". Defaults to `Date.now()`; tests pass a fixed value. |
 
-## Behavior
+## Messages
 
-- **Generate** is disabled until there's an up-to-date preview with at least one new or changed file.
-- **File statuses:** each file is `new`, `changed`, `unchanged` or `orphaned`. The status badges in the
-  toolbar show counts and filter the list.
-- **Unchanged files** aren't rewritten. **Orphaned files** (in the output folder but no longer generated)
-  are reported, never deleted.
-- **File list and viewer:** the list is on the left; selecting a file shows its generated content on the
-  right in a [CodeViewer](./code-viewer.md). An orphaned file has no generated content, so the viewer
-  explains that it can be deleted manually.
+- **Out of date:** when the selection or options changed since the preview, a warning bar says so and has a
+  **Preview again** button.
+- **After Generate:** a success bar shows the result, for example "1 file written · 279 unchanged · 9
+  orphaned · .dataverse-gen.json saved". It stays until the next preview. PPTB also shows a notification.
+
+## Action bar
+
+- **Preview** (secondary) and **Generate** (primary). The Generate button names the count: **Generate 2
+  files**, or **Nothing to write** when every file is up to date. It's disabled without an up-to-date
+  preview or with nothing to write, and its tooltip says why.
+- "Previewed *2 minutes ago*" after a preview.
+- Without a project folder, a hint says to open a project first.
+
+## Summary and status tiles
+
+- **Summary:** one sentence saying what Generate would do, for example "1 new file will be created and 1 file
+  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan`).
+- **Tiles:** **New**, **Changed**, **Unchanged** and **Orphaned**, each with an icon, a large count and a
+  colored left edge. A tooltip explains what Generate does with that status.
+- **Tiles as filters:** clicking a tile shows only that status, and the tile is highlighted (`aria-pressed`).
+  Clicking it again goes back to the default view.
+- **Output folder:** shown as a chip, shortened in the middle, with the full path in a tooltip and a copy
+  button.
+
+## File table
+
+- **Default view: changes only.** New, changed and orphaned files are listed; unchanged files appear when
+  **Show unchanged** is on, or when the Unchanged tile is selected (`visibleFiles`). With nothing to show, the
+  table suggests turning on **Show unchanged**.
+- **Search:** filters by path, ignoring case. "Showing *n* of *total* files" updates as you filter, and is
+  announced to screen readers.
+- **Columns:**
+  - **Name:** a type icon (table, list, lightning bolt, ƒx, database or document), the file name without its
+    folder, and "(generated as …)" when an existing file's casing was reused. The full path is in a tooltip.
+  - **Type:** `entities`, `enums`, `actions`, `functions`, `metadata`, or `other` for `complextypes/` and
+    `index.ts` (`fileType`).
+  - **Status:** a colored dot and the status.
+- **Sorting:** clicking a header sorts by that column, ascending; clicking it again flips to descending. Until
+  then the table keeps the plan's order, grouped by folder. Names sort naturally ignoring case, types
+  alphabetically, and statuses as new, changed, unchanged, orphaned. Ties fall back to name order
+  (`sortFiles`).
+- **Header tooltips** explain each column, every type and every status. They open on hover and on keyboard
+  focus.
+- **Selecting:** click a row, or press Space or Enter, to show it in the viewer. **↑** and **↓** move to the
+  previous or next file and focus it.
+- **Before the first preview:** a hint to click Preview. While a first preview runs, a skeleton placeholder.
+
+## Layout
+
+The table and the [FileViewer](./file-viewer.md) sit side by side in matching rounded panels. The divider
+between them can be dragged to resize the table, or focused and moved with **←** and **→** (32 px a step).
+The table is at least 280 px wide and the viewer at least 320 px. It's a `separator` with its current width
+in `aria-valuenow`.
+
+Collapsible grouping by type isn't implemented, since it conflicts with sorting by column.

@@ -1,22 +1,33 @@
 # Header
 
-The bar across the top of the tool: title and subtitle, the active connection, the **Regenerate** button and
-the **Settings** button.
+The bar across the top of the tool: the app icon, title, version and subtitle on the left, and the active
+connection and the **Settings** button on the right.
 
-Source: [`src/components/Header.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/Header.tsx)
+Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Header.tsx)
 
 ## Props (`HeaderProps`)
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `connection` | `ToolBoxAPI.Connection \| null` | Active PPTB connection. Shown as a badge with the environment URL in a tooltip; `null` shows "No connection". |
-| `canRegenerate` | `boolean` | Whether a project with a selection is loaded, so one-click regeneration can run. |
-| `busy` | `boolean` | Disables Regenerate while another operation runs. |
-| `onRegenerate` | `() => void` | Loads metadata, generates and writes all files for the current `.dataverse-gen.json` in one step. |
+| `connection` | `ToolBoxAPI.Connection \| null` | Active PPTB connection, or `null` when there's none. |
 | `onOpenSettings` | `() => void` | Opens the [SettingsPanel](./settings-panel.md). |
 
 ## Behavior
 
-- Regenerate is disabled unless `canRegenerate` is true and the tool isn't busy.
-- The Settings button is always enabled, even without a connection.
-- Both buttons have tooltips with an arrow.
+- **Background:** a soft gradient from the brand color into the page background, with a light shadow
+  underneath.
+- **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient.
+- **Version:** a small badge after the title with the tool's version, read from `package.json` at build
+  time. Only the version number ends up in the bundle.
+- **Connection pill:**
+  - **Connected:** a green status dot, "CONNECTED" and the connection name. Hovering shows the environment
+    URL in a tooltip.
+  - **Not connected:** an amber pill with "Not connected".
+  - It has `role="status"`, so screen readers announce changes.
+- **Settings** is an icon button with a tooltip. It's always enabled, even without a connection.
+
+There's no Regenerate button any more. Use **Preview** and then **Generate** on the
+[PreviewCard](./preview-card.md).
+
+Styles are in `src/styles/Header.styles.ts`. All colors come from Fluent theme tokens, so the header follows
+PPTB's light and dark themes.

@@ -1,45 +1,22 @@
-import { Card, CardHeader, Field, InfoLabel, Input, Switch, Text, makeStyles, tokens, type InfoLabelProps } from '@fluentui/react-components';
+import { Field, Input, Switch, Text } from '@fluentui/react-components';
 import { DEFAULT_OUTPUT_ROOT, type DataverseGenConfig } from '../../core';
-
-const useStyles = makeStyles({
-    body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },
-    switches: { display: 'flex', gap: tokens.spacingHorizontalL, flexWrap: 'wrap' },
-    outputRoot: { maxWidth: '420px' },
-});
+import { infoLabel } from '../shared/infoLabel';
+import { useOptionsCardStyles } from '../../styles';
+import { StepCard } from '../shared/StepCard';
+import type { StepState } from '../shared/workflowSteps';
 
 export interface OptionsCardProps {
+    step: StepState;
     config: DataverseGenConfig;
     disabled: boolean;
     onChange: (update: Partial<DataverseGenConfig>) => void;
 }
 
-/**
- * A label slot that renders an {@link InfoLabel}: the text plus an info button with an explanation. Used for
- * `Field` and `Switch` labels so the label stays associated with its control.
- */
-function infoLabel(text: string, info: InfoLabelProps['info']) {
-    return {
-        children: (_: unknown, props: InfoLabelProps) => (
-            <InfoLabel {...props} info={info}>
-                {text}
-            </InfoLabel>
-        ),
-    };
-}
-
 /** Step 3: output folder and which artefacts to emit (mirrors the dataverse-gen init prompts). */
-export function OptionsCard({ config, disabled, onChange }: OptionsCardProps) {
-    const styles = useStyles();
+export function OptionsCard({ step, config, disabled, onChange }: OptionsCardProps) {
+    const styles = useOptionsCardStyles();
     return (
-        <Card>
-            <CardHeader
-                header={
-                    <Text weight="semibold" size={400}>
-                        3. Options
-                    </Text>
-                }
-                description={<Text size={200}>Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.</Text>}
-            />
+        <StepCard step={step} description="Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
             <div className={styles.body}>
                 <Field
                     label={infoLabel(
@@ -103,6 +80,6 @@ export function OptionsCard({ config, disabled, onChange }: OptionsCardProps) {
                     tables.
                 </Text>
             </div>
-        </Card>
+        </StepCard>
     );
 }

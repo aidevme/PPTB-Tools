@@ -1,9 +1,9 @@
 # CodeViewer
 
-A read-only, syntax-highlighted view of a generated file, with line numbers. Used on the right side of the
-[PreviewCard](./preview-card.md).
+A read-only, syntax-highlighted view of a generated file, with line numbers. Used by the
+[FileViewer](./file-viewer.md) in the [PreviewCard](./preview-card.md) for a file's generated content.
 
-Source: [`src/components/CodeViewer.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/CodeViewer.tsx)
+Source: [`src/components/viewers/CodeViewer.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx)
 
 ## Props (`ICodeViewerProps`)
 

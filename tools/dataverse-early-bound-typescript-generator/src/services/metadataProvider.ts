@@ -60,13 +60,14 @@ export class PptbMetadataProvider {
     listEntities(): Promise<EntitySummary[]> {
         if (!this.entityList) {
             this.entityList = api()
-                .getAllEntitiesMetadata(['LogicalName', 'SchemaName', 'DisplayName', 'EntitySetName', 'MetadataId', 'IsCustomEntity', 'IsManaged'])
+                .getAllEntitiesMetadata(['LogicalName', 'SchemaName', 'DisplayName', 'Description', 'EntitySetName', 'MetadataId', 'IsCustomEntity', 'IsManaged'])
                 .then((result) =>
                     result.value
                         .map((e) => ({
                             logicalName: e.LogicalName,
                             schemaName: (e.SchemaName as string) ?? e.LogicalName,
                             displayName: label(e.DisplayName) || e.LogicalName,
+                            description: label(e.Description),
                             entitySetName: (e.EntitySetName as string | null) ?? undefined,
                             metadataId: e.MetadataId,
                             isCustom: e.IsCustomEntity === true,

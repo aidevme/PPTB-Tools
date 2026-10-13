@@ -41,8 +41,6 @@ inside `services/` import each other directly to avoid import cycles.
 **Generate** (`runGenerate`): `applyWritePlan` writes only new and changed files, then `saveProjectConfig`
 saves `.dataverse-gen.json`.
 
-**Regenerate** (the header button) runs Preview and then Generate in one step.
-
 ## Further reading
 
 - [Core](./core.md), [Services](./services.md), [App state and hooks](./app-state.md),

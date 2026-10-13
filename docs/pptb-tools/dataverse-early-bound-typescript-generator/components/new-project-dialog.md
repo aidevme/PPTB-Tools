@@ -21,7 +21,7 @@ Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidev
 
 ## Version and Modified On
 
-After each successful Generate (or Regenerate) of a saved project's folder, the tool compares the files the
+After each successful Generate of a saved project's folder, the tool compares the files the
 run produced with the ones the project's previous run produced (`lastGeneratedFiles`). If any file was
 added, or a previously generated file is no longer produced (an orphan), the version gets a patch bump
 (`1.0.0` → `1.0.1`) and **Modified On** is set to now. Changes to the content of the same files don't count.
