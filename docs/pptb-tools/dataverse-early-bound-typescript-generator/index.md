@@ -61,7 +61,8 @@ const account = await client.retrieve<Account>(accountMetadata.logicalName, id, 
   APIs still work, but built-in actions and functions (such as `WinOpportunity`) and custom process actions
   aren't available, and output can differ slightly from `dataverse-gen`'s.
 - Custom ejected EJS templates are not supported. The `dataverse-gen` CLI still honours them.
-- Orphaned files are reported but not deleted. Remove them yourself if you no longer need them.
+- Orphaned files are only reported unless you turn on **Delete orphaned files** and confirm. Deletion is
+  permanent (no Recycle Bin or Trash).
 - A few type mappings differ from `dataverse-gen` where its output would not compile. See the tool's
   [README](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-type-gen#deliberate-deviations-from-dataverse-gen-output).
 

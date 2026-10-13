@@ -24,7 +24,7 @@ Review against this repo's actual conventions, not generic style preferences:
 - **Domain invariants:** check Dataverse-related code against the facts documented in the tool's README
   (e.g. for the Early-Bound Generator: generated output must stay byte-identical to dataverse-gen's except
   for the listed deliberate deviations; private custom APIs missing from `$metadata` are built from
-  `customapi` + `customapirequestparameters`; orphaned files are reported, never deleted). A query against
+  `customapi` + `customapirequestparameters`; orphaned files are reported, and deleted only when the user opts in and confirms, via the guarded `deleteOrphanedFiles`). A query against
   the wrong entity set or filter attribute is a correctness bug, not a nitpick.
 - **Scope discipline:** this repo deliberately narrows port scope (see the Early-Bound Generator README's
   "Not implemented" section)

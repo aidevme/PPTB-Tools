@@ -47,5 +47,17 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 - **Unchanged files aren't rewritten.** Line endings are ignored when comparing, so a CRLF checkout doesn't
   show every file as changed. Generated files use LF.
 
-Files in the output folders that this run wouldn't produce are marked `orphaned`. They're reported but never
-deleted, because PPTB's file API has no delete.
+Files in the output folders that this run wouldn't produce are marked `orphaned`. They're reported by default.
+With **Delete orphaned files** on (`deleteOrphanedFiles`) and the user's confirmation, Generate deletes them
+after writing, through `FileSink.deleteFiles`.
+
+- **Mechanism:** PPTB's file API has no delete, so `PptbFileSink.deleteFiles` opens a hidden PPTB terminal
+  (PowerShell for Windows paths per `isWindowsPath`, `/bin/sh` otherwise) and runs the commands from
+  `buildDeleteCommands`: `Remove-Item -LiteralPath … -Force` or `rm -f -- …`, every path single-quoted, 20 per
+  command. It then checks with `fileSystem.exists` which files remain; that check, not terminal output,
+  decides success.
+- **Guard:** `deleteOrphanedFiles(sink, plan)` passes the sink only files with status `orphaned`, no `..`
+  segment in `relativePath`, and an `absolutePath` equal to `joinPath(plan.outputRoot, relativePath)`. It
+  returns `{ deleted, failed }` (`DeleteResult`).
+- **Failures:** leftover files are reported as "Some orphaned files were not deleted"; a terminal that fails
+  entirely as "Could not delete the orphaned files". The writes still count as done.

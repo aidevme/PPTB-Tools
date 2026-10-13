@@ -1,6 +1,6 @@
 {
     "name": "dataverse-early-bound-typescript-generator",
-    "version": "0.9.0",
+    "version": "1.0.0",
     "displayName": "Dataverse Early-Bound TypeScript Generator",
     "description": "Generate early-bound TypeScript types and metadata for Dataverse, compatible with dataverse-ify and the .dataverse-gen.json config used by dataverse-gen.",
     "main": "index.html",
@@ -18,7 +18,7 @@
         "fluentui"
     ],
     "license": "GPL-2.0",
-    "icon": "icon/dataverse-type-gen-icon.svg",
+    "icon": "icon/dataverse-early-bound-typescript-generator-icon.svg",
     "contributors": [
         {
             "name": "Zsolt Zombik"
@@ -30,8 +30,8 @@
         "readmeUrl": "https://raw.githubusercontent.com/aidevme/PPTB-Tools/main/tools/dataverse-early-bound-typescript-generator/README.md"
     },
     "features": {
-        "multiConnection": "none",
-        "minAPI": "1.2.2",
+        "connections": 1,
+        "minAPI": "1.2.7",
         "enabledForPowerPlatformAPI": false
     },
     "repository": {
@@ -61,7 +61,7 @@
         "react-dom": "^18.3.1"
     },
     "devDependencies": {
-        "@pptb/types": "^1.2.4",
+        "@pptb/types": "^1.2.7",
         "@types/node": "^24.19.2",
         "@types/react": "^18.3.12",
         "@types/react-dom": "^18.3.1",

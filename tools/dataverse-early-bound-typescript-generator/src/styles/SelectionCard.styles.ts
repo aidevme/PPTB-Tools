@@ -16,6 +16,8 @@ export const useSelectionCardStyles = makeStyles({
     // Keeps the column headers visible while the list scrolls.
     headerRow: { position: 'sticky', top: 0, zIndex: 1, backgroundColor: tokens.colorNeutralBackground1 },
     headerCell: { fontWeight: tokens.fontWeightSemibold },
+    // Wider than Fluent's default tooltip, for the per-value explanations.
+    headerTooltip: { maxWidth: '360px', '& ul': { margin: `${tokens.spacingVerticalXS} 0`, paddingLeft: tokens.spacingHorizontalL } },
     stacked: { display: 'flex', flexDirection: 'column', minWidth: 0 },
     mono: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
     secondary: { color: tokens.colorNeutralForeground3, fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },

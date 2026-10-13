@@ -18,8 +18,10 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 | `busy` | `boolean` | Disables the buttons while another operation runs, and shows a loading placeholder before the first preview. |
 | `previewedAt` | `string \| null` | When the plan was computed (ISO), shown as "Previewed *2 minutes ago*". |
 | `lastResult` | `string \| null` | Summary of the last Generate run, shown as a success message until the next preview. |
+| `deleteOrphans` | `boolean` | Whether the **Delete orphaned files** switch is on (the tool setting `deleteOrphanedFiles`). |
+| `onDeleteOrphansChange` | `(checked: boolean) => void` | Called when the switch is toggled; the app saves the setting. |
 | `onPreview` | `() => void` | Loads metadata, generates the files and compares them with disk. |
-| `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`. |
+| `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`; with `deleteOrphans` on and orphans present, the app asks for confirmation first, then also deletes them. |
 | `onCopyText` | `(text: string, label: string) => void` | Copies a file's content or the output folder path. |
 | `now` | `number` (optional) | Current time for "Previewed … ago". Defaults to `Date.now()`; tests pass a fixed value. |
 
@@ -28,7 +30,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Out of date:** when the selection or options changed since the preview, a warning bar says so and has a
   **Preview again** button.
 - **After Generate:** a success bar shows the result, for example "1 file written · 279 unchanged · 9
-  orphaned · .dataverse-gen.json saved". It stays until the next preview. PPTB also shows the same line in a
+  orphaned · .dataverse-gen.json saved" (with "· 2 deleted" when orphans were deleted). It stays until the next preview. PPTB also shows the same line in a
   "Generation complete" success notification for 3 seconds (`summarizeGeneration` builds both).
 
 ## Action bar
@@ -36,13 +38,29 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Preview** (secondary) and **Generate** (primary). The Generate button names the count: **Generate 2
   files**, or **Nothing to write** when every file is up to date. It's disabled without an up-to-date
   preview or with nothing to write, and its tooltip says why.
+- **Delete orphaned files** (`Switch`), right after Generate, with a tooltip explaining it. It reads and saves
+  the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](./settings-panel.md) checkbox, so they stay
+  in sync. It's disabled until a preview exists, since only a preview tells which files are orphaned; its
+  tooltip then adds "Available after Preview". When on:
+  - The summary says "…and N orphaned files will be deleted." instead of "left untouched", and the card
+    description changes.
+  - Generate is enabled even when only deletions are pending, and reads **Delete N orphaned files** in that
+    case. The workflow step counts orphans as pending.
+  - Clicking Generate with orphans present opens a [ConfirmationDialog](./confirmation-dialog.md), "Delete
+    orphaned files?". It lists up to 10 orphan paths (then "…and N more") and the output folder, and warns
+    that deletion is permanent, not to the Recycle Bin or Trash. Its confirm button reads **Generate and
+    delete N** or **Delete N files**.
+  - On confirm, Generate writes new and changed files, saves `.dataverse-gen.json`, records the project
+    generation, then deletes the orphans. If some remain, an error "Some orphaned files were not deleted"
+    lists them (notification and page error bar); if the terminal fails entirely, "Could not delete the
+    orphaned files". The writes still count as done, and the Orphaned tile shows what's left.
 - "Previewed *2 minutes ago*" after a preview.
 - Without a project folder, a hint says to open a project first.
 
 ## Summary and status tiles
 
 - **Summary:** one sentence saying what Generate would do, for example "1 new file will be created and 1 file
-  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan` in `services/plan.ts`). The same
+  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan(counts, deleteOrphans)` in `services/plan.ts`; with the switch on, "will be deleted"). The same
   sentence appears in a PPTB info notification, "Preview ready", for 5 seconds after each successful preview.
 - **Tiles:** **New**, **Changed**, **Unchanged** and **Orphaned**, each with an icon, a large count and a
   colored left edge. A tooltip explains what Generate does with that status.

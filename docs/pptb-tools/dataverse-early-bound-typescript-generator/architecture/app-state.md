@@ -28,7 +28,7 @@ the connection changes, and a single `PptbFileSink`.
 
 | Callback | What it does |
 | --- | --- |
-| `loadProject`, `openProjectFolder` | Load a folder's `.dataverse-gen.json` (or defaults for a new project). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
+| `loadProject`, `openProjectFolder` | Load a folder's `.dataverse-gen.json` (or defaults for a new project), then apply the Settings panel's Options (`applyProjectDefaults`). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
 | `openSavedProject` | Opens a project (`{ name, location }`) directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. Once loaded, `notifyProjectLoaded` shows an info notification. |
 | `openRecent` | Opens a project from the Project card's recent list with `openSavedProject`, showing errors in the page. |
 | `updateConfig` | Merges a change into the config and marks the plan stale. `toggle`, `clear` and `clearAll` build on it. |

@@ -20,6 +20,7 @@ import {
     Text,
     Tooltip,
     type SelectTabData,
+    type SortDirection,
     type SelectTabEvent,
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
@@ -32,14 +33,118 @@ export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 const MAX_ROWS = 500;
 
-const ENTITY_COLUMNS = ['Display Name', 'Logical Name', 'Schema Name', 'Description', 'Type'];
-const OPERATION_COLUMNS = ['Name', 'Binding', 'Parameters', 'Type'];
+/** A column header: its label and the explanation shown in its tooltip. */
+interface SelectionColumn {
+    label: string;
+    help: ReactNode;
+}
 
-/** One table row: the selection key, a name for the checkbox's accessible label, and the cells after it. */
+const ENTITY_COLUMNS: SelectionColumn[] = [
+    {
+        label: 'Display Name',
+        help: <><strong>Display Name:</strong> the table's name as shown in Power Apps, in the user's language. Click to sort by display name.</>,
+    },
+    {
+        label: 'Logical Name',
+        help: <><strong>Logical Name:</strong> the lowercase name used in the Web API and stored in .dataverse-gen.json. Generated file names are based on it. Click to sort by logical name.</>,
+    },
+    {
+        label: 'Schema Name',
+        help: <><strong>Schema Name:</strong> the PascalCase name the generated interface and metadata constants are named after. Click to sort by schema name.</>,
+    },
+    {
+        label: 'Description',
+        help: <><strong>Description:</strong> the table's description from its metadata; hover over a description to read all of it. Tables without one are listed last. Click to sort by description.</>,
+    },
+    {
+        label: 'Type',
+        help: (
+            <>
+                <strong>Type:</strong> who defined the table.
+                <ul>
+                    <li><strong>Standard</strong>: part of Dataverse or a Microsoft app</li>
+                    <li><strong>Custom</strong>: created by a publisher, including Microsoft solutions that add their own tables</li>
+                </ul>
+                Click to sort by type.
+            </>
+        ),
+    },
+];
+
+const OPERATION_COLUMNS: SelectionColumn[] = [
+    {
+        label: 'Name',
+        help: <><strong>Name:</strong> the message's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
+    },
+    {
+        label: 'Binding',
+        help: (
+            <>
+                <strong>Binding:</strong> how the message is called.
+                <ul>
+                    <li><strong>Bound to &lt;table&gt;</strong>: called on a record of that table, which is generated automatically</li>
+                    <li><strong>Unbound</strong>: called on its own</li>
+                </ul>
+                Click to sort by binding.
+            </>
+        ),
+    },
+    {
+        label: 'Parameters',
+        help: <><strong>Parameters:</strong> the number of request parameters in $metadata. "From definition" means the message isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
+    },
+    {
+        label: 'Type',
+        help: (
+            <>
+                <strong>Type:</strong> where the message comes from.
+                <ul>
+                    <li><strong>Custom API</strong> / <strong>Private custom API</strong>: a customapi record</li>
+                    <li><strong>Custom action</strong>: a custom process action</li>
+                    <li><strong>Built-in</strong>: a standard Dataverse message</li>
+                </ul>
+                Click to sort by type.
+            </>
+        ),
+    },
+];
+
+/** A value to sort a column by; `undefined` (no value) is always listed last. */
+type SortValue = string | number | undefined;
+
+interface SortState {
+    /** Index into the tab's columns. */
+    column: number;
+    direction: SortDirection;
+}
+
+/**
+ * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort
+ * value per cell.
+ */
 interface SelectionRow {
     key: string;
     label: string;
     cells: ReactNode[];
+    sortValues: SortValue[];
+}
+
+function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
+    if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
+    const result = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
+    return direction === 'ascending' ? result : -result;
+}
+
+/**
+ * Rows in the order to list them: their given order until a column is sorted, then by that column, with ties in
+ * their given order. Rows without a value for the column come last in either direction.
+ */
+export function sortSelectionRows<T extends { sortValues: SortValue[] }>(rows: T[], sort: SortState | null): T[] {
+    if (!sort) return rows;
+    return rows
+        .map((row, index) => ({ row, index }))
+        .sort((a, b) => compareSortValues(a.row.sortValues[sort.column], b.row.sortValues[sort.column], sort.direction) || a.index - b.index)
+        .map(({ row }) => row);
 }
 
 function operationType(o: OperationSummary): string {
@@ -64,6 +169,11 @@ export interface SelectionCardProps {
     /** Names in the config that the connected environment does not have. */
     missing: Record<SelectionKind, string[]>;
     disabled: boolean;
+    /**
+     * No project open yet: the lists stay empty and the tabs, search, solution filter, switches and Clear are
+     * disabled until one is created or opened.
+     */
+    needsProject?: boolean;
     onToggle: (kind: SelectionKind, name: string, checked: boolean) => void;
     onClear: (kind: SelectionKind) => void;
     onSolutionChange: (solutionId: string | null) => void;
@@ -75,10 +185,15 @@ export interface SelectionCardProps {
 export function SelectionCard(props: SelectionCardProps) {
     const { step } = props;
     const styles = useSelectionCardStyles();
+    /** Nothing to browse until a project is open, so every control is disabled. */
+    const noProject = !!props.needsProject;
     const [tab, setTab] = useState<SelectionKind>('entities');
     const [search, setSearch] = useState('');
     const [selectedOnly, setSelectedOnly] = useState(false);
     const [customApisOnly, setCustomApisOnly] = useState(false);
+    // Each tab keeps its own sort, since their columns differ.
+    const [sorts, setSorts] = useState<Record<SelectionKind, SortState | null>>({ entities: null, actions: null, functions: null });
+    const sort = sorts[tab];
 
     const selectedSet = useMemo(() => new Set(props.selected[tab]), [props.selected, tab]);
     const term = search.trim().toLowerCase();
@@ -113,6 +228,7 @@ export function SelectionCard(props: SelectionCardProps) {
                                 'Standard'
                             ),
                         ],
+                        sortValues: [e.displayName, e.logicalName, e.schemaName, e.description || undefined, e.isCustom ? 'Custom' : 'Standard'],
                     }),
                 );
         }
@@ -156,6 +272,12 @@ export function SelectionCard(props: SelectionCardProps) {
                             operationType(o)
                         ),
                     ],
+                    sortValues: [
+                        hasDisplayName ? o.displayName : o.name,
+                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
+                        o.inMetadata ? o.parameterCount : undefined,
+                        operationType(o),
+                    ],
                 };
             });
     }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles]);
@@ -168,7 +290,17 @@ export function SelectionCard(props: SelectionCardProps) {
 
     const loading = tab === 'entities' ? props.loadingEntities : props.loadingOperations;
     const missing = props.missing[tab];
-    const shown = rows.slice(0, MAX_ROWS);
+    // Sorted before the row limit, so the first rows shown are the first of all matches.
+    const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
+    const shown = sorted.slice(0, MAX_ROWS);
+    const columns = tab === 'entities' ? ENTITY_COLUMNS : OPERATION_COLUMNS;
+
+    const toggleSort = (column: number) =>
+        setSorts((current) => {
+            const active = current[tab];
+            const direction: SortDirection = active?.column === column && active.direction === 'ascending' ? 'descending' : 'ascending';
+            return { ...current, [tab]: { column, direction } };
+        });
 
     return (
         <StepCard step={step} description={
@@ -180,7 +312,7 @@ export function SelectionCard(props: SelectionCardProps) {
                 </div>
             }>
             <div className={styles.body}>
-                <TabList selectedValue={tab} onTabSelect={onTabSelect}>
+                <TabList selectedValue={tab} onTabSelect={onTabSelect} disabled={noProject}>
                     <Tooltip content="Dataverse tables to generate early-bound interfaces, metadata and choice enums for" relationship="description" withArrow>
                         <Tab value="entities" icon={<TableRegular />}>
                             Tables
@@ -202,6 +334,7 @@ export function SelectionCard(props: SelectionCardProps) {
                         className={styles.search}
                         placeholder={tab === 'entities' ? 'Search by display or logical name' : 'Search by name or display name'}
                         value={search}
+                        disabled={noProject}
                         onChange={(_, data) => setSearch(data.value)}
                     />
                     <Dropdown
@@ -210,7 +343,7 @@ export function SelectionCard(props: SelectionCardProps) {
                         selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}
                         value={props.solutions.find((s) => s.id === props.selectedSolutionId)?.friendlyName ?? ''}
                         onOptionSelect={(_, data) => props.onSolutionChange(data.optionValue ?? null)}
-                        disabled={props.solutions.length === 0}
+                        disabled={noProject || props.solutions.length === 0}
                     >
                         {props.solutions.map((s) => (
                             <Option key={s.id} value={s.id} text={s.friendlyName}>
@@ -220,10 +353,10 @@ export function SelectionCard(props: SelectionCardProps) {
                     </Dropdown>
                     {props.loadingSolution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
                     {tab !== 'entities' && (
-                        <Switch label="Custom only" checked={customApisOnly} onChange={(_, data) => setCustomApisOnly(data.checked)} />
+                        <Switch label="Custom only" checked={customApisOnly} disabled={noProject} onChange={(_, data) => setCustomApisOnly(data.checked)} />
                     )}
-                    <Switch label="Selected only" checked={selectedOnly} onChange={(_, data) => setSelectedOnly(data.checked)} />
-                    <Button appearance="subtle" size="small" disabled={props.disabled || props.selected[tab].length === 0} onClick={() => props.onClear(tab)}>
+                    <Switch label="Selected only" checked={selectedOnly} disabled={noProject} onChange={(_, data) => setSelectedOnly(data.checked)} />
+                    <Button appearance="subtle" size="small" disabled={noProject || props.disabled || props.selected[tab].length === 0} onClick={() => props.onClear(tab)}>
                         Clear {tab}
                     </Button>
                 </div>
@@ -233,21 +366,36 @@ export function SelectionCard(props: SelectionCardProps) {
                     </Text>
                 )}
                 <div className={styles.list}>
-                    {loading ? (
+                    {props.needsProject ? (
+                        <div className={styles.empty}>Create a new project or open an existing one (step 1) to list tables, actions and functions.</div>
+                    ) : loading ? (
                         <div className={styles.empty}>
                             <Spinner label={tab === 'entities' ? 'Loading tables…' : 'Loading the $metadata document…'} />
                         </div>
                     ) : shown.length === 0 ? (
                         <div className={styles.empty}>{props.disabled ? 'Connect to an environment to list items.' : 'Nothing matches.'}</div>
                     ) : (
-                        <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small">
+                        <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small" sortable>
                             <TableHeader>
                                 <TableRow className={styles.headerRow}>
                                     <TableSelectionCell type="checkbox" invisible />
-                                    {(tab === 'entities' ? ENTITY_COLUMNS : OPERATION_COLUMNS).map((column) => (
-                                        <TableHeaderCell key={column} className={styles.headerCell}>
-                                            {column}
-                                        </TableHeaderCell>
+                                    {columns.map((column, index) => (
+                                        // Wrapping the cell means the tooltip opens on hover and when its sort button gets focus.
+                                        <Tooltip
+                                            key={column.label}
+                                            content={{ children: column.help, className: styles.headerTooltip }}
+                                            relationship="description"
+                                            positioning="above"
+                                            withArrow
+                                        >
+                                            <TableHeaderCell
+                                                className={styles.headerCell}
+                                                sortDirection={sort?.column === index ? sort.direction : undefined}
+                                                onClick={() => toggleSort(index)}
+                                            >
+                                                {column.label}
+                                            </TableHeaderCell>
+                                        </Tooltip>
                                     ))}
                                 </TableRow>
                             </TableHeader>
@@ -289,9 +437,11 @@ export function SelectionCard(props: SelectionCardProps) {
                         </Table>
                     )}
                 </div>
-                <Text size={200}>
-                    {rows.length > MAX_ROWS ? `Showing the first ${MAX_ROWS} of ${rows.length} matches, refine the search to see more.` : `${rows.length} shown.`}
-                </Text>
+                {!props.needsProject && (
+                    <Text size={200}>
+                        {rows.length > MAX_ROWS ? `Showing the first ${MAX_ROWS} of ${rows.length} matches, refine the search to see more.` : `${rows.length} shown.`}
+                    </Text>
+                )}
             </div>
         </StepCard>
     );

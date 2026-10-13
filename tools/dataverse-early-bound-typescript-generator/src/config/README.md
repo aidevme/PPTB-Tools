@@ -79,11 +79,14 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 
 - **`$schema`** links the file to the schema for editor validation. `index.ts` never reads it, and it isn't
   carried into `toolConfig`.
-- **`deleteOrphanedFiles`:** `false`. Shown as a checkbox on the Settings panel's Schema Generation tab. Not
-  acted on yet; see [Known limitations](#known-limitations).
-- **`projectDefaults`:** the options a new project starts with, edited on the Settings panel's Options tab.
-  When a project folder without `.dataverse-gen.json` is opened, `applyProjectDefaults` writes these into its
-  config. Projects that already have the file keep their own values. The bundled values equal dataverse-gen's
+- **`deleteOrphanedFiles`:** `false`. Shown as a checkbox on the Settings panel's Schema Generation tab and
+  as the **Delete orphaned files** switch in Preview and generate; both save the same setting. When on,
+  Generate deletes orphaned files after the user confirms the list.
+- **`projectDefaults`:** the options every project starts with, edited on the Settings panel's Options tab.
+  Whenever a project is opened, `applyProjectDefaults` writes these into its config, also over the values in an
+  existing `.dataverse-gen.json`; `App.tsx` also applies them to the open project when they change (after the
+  saved settings load, or when different ones are saved). The Options card can still change them for the
+  project, and Generate saves the result to `.dataverse-gen.json`. The bundled values equal dataverse-gen's
   `.dataverse-gen.template.json`; a missing or mistyped key falls back to them (`BUILT_IN_PROJECT_DEFAULTS`).
 - **`projects`:** `[]`. Projects listed here would be offered on every install, before anything is saved.
   They go through the same normalization as saved projects.
@@ -324,8 +327,9 @@ After a successful write, `App.tsx` calls `recordGeneration` with:
 | Present | Any file added or removed (set comparison) | Patch bump, `modifiedOn = now`, list recorded |
 | Present | Same set, any order | `undefined` (nothing to save) |
 
-The comparison is against the previous run's list, not the disk. Orphaned files are never deleted, so a
-disk-based comparison would count them as dropped on every run and bump the version each time. Content
+The comparison is against the previous run's list, not the disk. Orphaned files are deleted only when
+Delete orphaned files is on and confirmed, so they usually stay on disk and a disk-based comparison would
+count them as dropped on every run and bump the version each time. Content
 changes to the same set of files never bump the version. The recorded list is de-duplicated and sorted, so
 storage stays stable across runs.
 
@@ -360,8 +364,9 @@ To add a new setting:
 
 ## Known limitations
 
-- **`deleteOrphanedFiles` has no effect yet.** PPTB's file API has no delete, so orphans are only reported.
-  The setting is stored and shown so it can be wired up once PPTB supports deleting files.
+- **`deleteOrphanedFiles` deletes through a terminal.** PPTB's file API has no delete, so deletion runs
+  `Remove-Item` or `rm -f` in a hidden PPTB terminal and is verified afterwards with `fileSystem.exists`. Files
+  that remain are reported as an error. Deletion is permanent (no Recycle Bin or Trash).
 - **Last write wins.** `addProject`, `deleteProject` and `recordProjectGeneration` each build `next` from the
   `toolSettings` value they captured, then save the whole config. If two writes overlap, the later one replaces
   the earlier one's change. The UI makes this unlikely (dialogs are modal, and generation runs while the tool

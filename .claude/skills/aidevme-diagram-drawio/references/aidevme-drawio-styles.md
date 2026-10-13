@@ -1,24 +1,24 @@
-# HSO Draw.io Style Reference
+# AIDevMe Draw.io Style Reference
 
-Canonical HSO palette and copy-paste `style=` fragments for draw.io `mxCell` elements. All diagrams produced by `hso-diagram-drawio` MUST use these values and nothing else.
+Canonical AIDevMe palette and copy-paste `style=` fragments for draw.io `mxCell` elements. All diagrams produced by `aidevme-diagram-drawio` MUST use these values and nothing else.
 
-## Palette (source: HSO Brand Manual v3.0 — aligned with `hso-revealjs-presentation`)
+## Palette (source: AIDevMe Brand Manual v3.0 — aligned with `aidevme-revealjs-presentation`)
 
 | Name | Hex | Role |
 |---|---|---|
-| `hso-dark-blue` | `#00395F` | Primary. Headers, primary entities, title bars. |
-| `hso-bluegreen` | `#079FC3` | Default accent. Most decks/diagrams. |
-| `hso-green` | `#00B294` | Success / opportunity emphasis. |
-| `hso-salmon` | `#F1554B` | Warning / risk / attention. |
-| `hso-mimosa` | `#F2B949` | Caution / contrast. |
-| `hso-steel` | `#7F9CAF` | Secondary strokes, muted emphasis. |
-| `hso-tagline` | `#4A4A4A` | Muted dark text. |
-| `hso-text` | `#505050` | Body text. |
-| `hso-light-grey` | `#E3E3E3` | Dividers, subtle fills. |
-| `hso-web-grey` | `#ECEFF3` | Backdrop panels, swim lane bands. |
+| `aidevme-dark-blue` | `#00395F` | Primary. Headers, primary entities, title bars. |
+| `aidevme-bluegreen` | `#079FC3` | Default accent. Most decks/diagrams. |
+| `aidevme-green` | `#00B294` | Success / opportunity emphasis. |
+| `aidevme-salmon` | `#F1554B` | Warning / risk / attention. |
+| `aidevme-mimosa` | `#F2B949` | Caution / contrast. |
+| `aidevme-steel` | `#7F9CAF` | Secondary strokes, muted emphasis. |
+| `aidevme-tagline` | `#4A4A4A` | Muted dark text. |
+| `aidevme-text` | `#505050` | Body text. |
+| `aidevme-light-grey` | `#E3E3E3` | Dividers, subtle fills. |
+| `aidevme-web-grey` | `#ECEFF3` | Backdrop panels, swim lane bands. |
 | `white` | `#FFFFFF` | Entity body, text on dark fills. |
 
-Each diagram picks **ONE** dominant accent (default `hso-bluegreen`) and uses it consistently. Do NOT introduce colors outside this palette.
+Each diagram picks **ONE** dominant accent (default `aidevme-bluegreen`) and uses it consistently. Do NOT introduce colors outside this palette.
 
 ## Drawio style fragments
 

@@ -69,6 +69,8 @@ async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged
                     busy: false,
                     previewedAt: null,
                     lastResult: null,
+                    deleteOrphans: false,
+                    onDeleteOrphansChange: vi.fn(),
                     onPreview: vi.fn(),
                     onGenerate: vi.fn(),
                     onCopyText: vi.fn(),
@@ -78,7 +80,12 @@ async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged
         ),
     );
     // Most tests look at every file; unchanged files are hidden until this switch is on.
-    if (showUnchanged) await act(async () => (document.querySelector('input[role="switch"]') as HTMLInputElement)?.click());
+    if (showUnchanged) {
+        const input = Array.from(document.querySelectorAll('input[role="switch"]')).find((i) =>
+            document.querySelector(`label[for="${i.id}"]`)?.textContent?.includes('Show unchanged'),
+        ) as HTMLInputElement | undefined;
+        await act(async () => input?.click());
+    }
 }
 
 const rows = () => Array.from(document.querySelectorAll('table[aria-label="Generated files"] tbody tr')) as HTMLElement[];
@@ -160,6 +167,7 @@ describe('summary and filtering', () => {
             '1 new file will be created and 2 files will be updated, and 3 orphaned files will be left untouched.',
         );
         expect(summarizePlan({ new: 0, changed: 0, unchanged: 5, orphaned: 0 })).toBe('Everything is up to date; nothing will be written.');
+        expect(summarizePlan({ new: 0, changed: 1, unchanged: 5, orphaned: 1 }, true)).toBe('1 file will be updated, and 1 orphaned file will be deleted.');
     });
 
     it('hides unchanged files by default, and filters by status and search', () => {
@@ -264,5 +272,54 @@ describe('FileViewer in the Preview card', () => {
         await select('old.ts');
         expect(document.body.textContent).toContain('no longer generates it');
         expect(document.querySelector('[role="tab"]')).toBeNull();
+    });
+});
+
+describe('Delete orphaned files switch', () => {
+    const button = (text: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.includes(text)) as HTMLButtonElement;
+    const deleteSwitch = () =>
+        Array.from(document.querySelectorAll('input[role="switch"]')).find((input) =>
+            document.querySelector(`label[for="${input.id}"]`)?.textContent?.includes('Delete orphaned files'),
+        ) as HTMLInputElement;
+
+    it('reflects the setting, reports changes, and explains itself in a tooltip', async () => {
+        const onDeleteOrphansChange = vi.fn();
+        await render({ onDeleteOrphansChange });
+        const input = deleteSwitch();
+        expect(input.checked).toBe(false);
+        await act(async () => input.click());
+        expect(onDeleteOrphansChange).toHaveBeenCalledWith(true);
+        const tooltip = document.getElementById(input.closest('[aria-describedby]')?.getAttribute('aria-describedby') ?? input.getAttribute('aria-describedby') ?? '');
+        expect(tooltip?.textContent).toMatch(/permanently/);
+    });
+
+    it('says orphans will be deleted, and lets Generate run when only deletions are pending', async () => {
+        const orphansOnly = {
+            ...PLAN,
+            files: PLAN.files.filter((f) => f.status === 'orphaned' || f.status === 'unchanged'),
+            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1 },
+        };
+        await render({ plan: orphansOnly, deleteOrphans: true });
+        expect(document.body.textContent).toContain('1 orphaned file will be deleted.');
+        expect(deleteSwitch().checked).toBe(true);
+        expect(button('Delete 1 orphaned file').disabled).toBe(false);
+    });
+
+    it('is disabled until a preview exists', async () => {
+        await render({ plan: null }, { showUnchanged: false });
+        const input = deleteSwitch();
+        expect(input.disabled).toBe(true);
+        const tooltip = document.getElementById(input.closest('[aria-describedby]')?.getAttribute('aria-describedby') ?? input.getAttribute('aria-describedby') ?? '');
+        expect(tooltip?.textContent).toMatch(/Available after Preview/);
+    });
+
+    it('keeps Generate disabled with nothing to write while the switch is off', async () => {
+        const orphansOnly = {
+            ...PLAN,
+            files: PLAN.files.filter((f) => f.status === 'orphaned' || f.status === 'unchanged'),
+            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1 },
+        };
+        await render({ plan: orphansOnly });
+        expect(button('Nothing to write').disabled).toBe(true);
     });
 });

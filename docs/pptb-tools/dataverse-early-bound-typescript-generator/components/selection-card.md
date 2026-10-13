@@ -22,6 +22,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 | `selected` | `Record<SelectionKind, string[]>` | Selected names per tab. |
 | `missing` | `Record<SelectionKind, string[]>` | Names in the config that the connected environment doesn't have. |
 | `disabled` | `boolean` | Disables the checkboxes and Clear button. |
+| `needsProject` | `boolean` (optional) | No project open: instead of the tables it says to create or open a project (step 1), hides the row count, and disables the tabs, search box, solution filter, **Custom only** and **Selected only** switches, and **Clear**. `App.tsx` only lists tables, solutions and the `$metadata` operations once a project is open. |
 | `onToggle` | `(kind, name, checked) => void` | Selects or deselects one item. |
 | `onClear` | `(kind: SelectionKind) => void` | Clears the current tab's selection. |
 | `onSolutionChange` | `(solutionId: string \| null) => void` | Changes the solution filter. |

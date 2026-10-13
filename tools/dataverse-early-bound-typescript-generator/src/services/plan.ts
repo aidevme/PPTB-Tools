@@ -8,8 +8,9 @@
  * - Files that are unchanged are not rewritten (line endings are ignored when comparing, so a CRLF
  *   checkout does not churn).
  *
- * Orphans (files in the generated folders that this run would not produce) are reported but never
- * deleted: PPTB's file-system API has no delete, and the user may want to inspect them first.
+ * Orphans (files in the generated folders that this run would not produce) are only reported, unless the
+ * user turns on Delete orphaned files: then Generate deletes them after a confirmation. PPTB's file system API
+ * has no delete, so that goes through a PPTB terminal (see `PptbFileSink.deleteFiles`).
  */
 import { OUTPUT_FOLDERS, type GeneratedFile, type ResolvedConfig } from '../core';
 import type { DirectoryEntry, FileSink } from './fileSink';
@@ -27,19 +28,24 @@ function splitRelative(relativePath: string): { dir: string; name: string } {
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
-/** One sentence saying what Generate would do with a plan. */
-export function summarizePlan(counts: WritePlan['counts']): string {
+/** One sentence saying what Generate would do with a plan; `deleteOrphans` when Delete orphaned files is on. */
+export function summarizePlan(counts: WritePlan['counts'], deleteOrphans = false): string {
     const parts: string[] = [];
     if (counts.new) parts.push(`${plural(counts.new, 'new file', 'new files')} will be created`);
     if (counts.changed) parts.push(`${plural(counts.changed, 'file', 'files')} will be updated`);
     const writes = parts.length ? parts.join(' and ') : 'Everything is up to date; nothing will be written';
-    const orphans = counts.orphaned ? `, and ${plural(counts.orphaned, 'orphaned file', 'orphaned files')} will be left untouched` : '';
+    const orphans = counts.orphaned ? `, and ${plural(counts.orphaned, 'orphaned file', 'orphaned files')} will be ${deleteOrphans ? 'deleted' : 'left untouched'}` : '';
     return `${writes}${orphans}.`;
 }
 
-/** One line saying what a finished Generate run did, e.g. `2 files written · 279 unchanged · 9 orphaned · .dataverse-gen.json saved`. */
-export function summarizeGeneration(written: number, counts: WritePlan['counts']): string {
-    return `${plural(written, 'file', 'files')} written · ${counts.unchanged} unchanged · ${counts.orphaned} orphaned · .dataverse-gen.json saved`;
+/**
+ * One line saying what a finished Generate run did, e.g. `2 files written · 279 unchanged · 9 orphaned ·
+ * .dataverse-gen.json saved`. With `deleted` (the run deleted orphans), orphans read `9 deleted` and any left over
+ * `1 orphaned`.
+ */
+export function summarizeGeneration(written: number, counts: WritePlan['counts'], deleted?: number): string {
+    const orphans = deleted === undefined ? [`${counts.orphaned} orphaned`] : [`${deleted} deleted`, ...(counts.orphaned > deleted ? [`${counts.orphaned - deleted} orphaned`] : [])];
+    return [`${plural(written, 'file', 'files')} written`, `${counts.unchanged} unchanged`, ...orphans, '.dataverse-gen.json saved'].join(' · ');
 }
 
 /** Absolute output root for a project (`output.outputRoot` is relative to the project folder). */
@@ -152,4 +158,28 @@ export async function applyWritePlan(
         onProgress?.(completed, toWrite.length, file);
     }
     return { written: toWrite.length, skipped: plan.files.length - toWrite.length };
+}
+
+export interface DeleteResult {
+    /** Relative paths of the orphans that were deleted. */
+    deleted: string[];
+    /** Relative paths of the orphans that still exist afterwards. */
+    failed: string[];
+}
+
+/**
+ * Deletes a plan's orphaned files. As a guard, only files the plan lists as orphaned, whose absolute path is
+ * exactly their relative path inside the output root (no `..` segments), are passed to the sink; nothing else in
+ * the project can be deleted.
+ */
+export async function deleteOrphanedFiles(sink: FileSink, plan: WritePlan): Promise<DeleteResult> {
+    const orphans = plan.files.filter(
+        (f) => f.status === 'orphaned' && !f.relativePath.split('/').includes('..') && f.absolutePath === joinPath(plan.outputRoot, f.relativePath),
+    );
+    if (orphans.length === 0) return { deleted: [], failed: [] };
+    const remaining = new Set(await sink.deleteFiles(orphans.map((f) => f.absolutePath)));
+    return {
+        deleted: orphans.filter((f) => !remaining.has(f.absolutePath)).map((f) => f.relativePath),
+        failed: orphans.filter((f) => remaining.has(f.absolutePath)).map((f) => f.relativePath),
+    };
 }

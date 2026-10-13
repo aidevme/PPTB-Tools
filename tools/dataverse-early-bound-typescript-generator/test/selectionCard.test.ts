@@ -6,7 +6,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { SelectionCard, type SelectionKind } from '../src/components/cards/SelectionCard';
+import { SelectionCard, sortSelectionRows, type SelectionKind } from '../src/components/cards/SelectionCard';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import type { EntitySummary, OperationSummary } from '../src/types';
 
@@ -42,7 +42,7 @@ afterEach(() => {
     root = undefined;
 });
 
-async function render(overrides: { selected?: Partial<Record<SelectionKind, string[]>>; disabled?: boolean } = {}) {
+async function render(overrides: { selected?: Partial<Record<SelectionKind, string[]>>; disabled?: boolean; needsProject?: boolean } = {}) {
     const onToggle = vi.fn();
     container = document.body.appendChild(document.createElement('div'));
     root = createRoot(container);
@@ -65,6 +65,7 @@ async function render(overrides: { selected?: Partial<Record<SelectionKind, stri
                     selected: { entities: [], actions: [], functions: [], ...overrides.selected },
                     missing: { entities: [], actions: [], functions: [] },
                     disabled: overrides.disabled ?? false,
+                    needsProject: overrides.needsProject ?? false,
                     onToggle,
                     onClear: vi.fn(),
                     onSolutionChange: vi.fn(),
@@ -109,6 +110,28 @@ describe('selection tables', () => {
         expect(onToggle).toHaveBeenCalledTimes(3);
     });
 
+    it('lists nothing until a project is created or opened', async () => {
+        await render({ disabled: true, needsProject: true });
+        expect(document.querySelector('table')).toBeNull();
+        expect(document.body.textContent).toContain('Create a new project or open an existing one (step 1)');
+        expect(document.body.textContent).not.toContain('shown.');
+        // Tabs, search, solution filter, switches and Clear are all disabled.
+        for (const t of Array.from(document.querySelectorAll('[role="tab"]'))) expect((t as HTMLButtonElement).disabled).toBe(true);
+        expect((document.querySelector('input[type="search"]') as HTMLInputElement).disabled).toBe(true);
+        for (const input of Array.from(document.querySelectorAll('input[role="switch"]'))) expect((input as HTMLInputElement).disabled).toBe(true);
+        const dropdown = document.querySelector('[role="combobox"]') as HTMLElement;
+        expect(dropdown.hasAttribute('disabled') || dropdown.getAttribute('aria-disabled') === 'true').toBe(true);
+        const clear = Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.startsWith('Clear')) as HTMLButtonElement;
+        expect(clear.disabled).toBe(true);
+    });
+
+    it('enables the controls once a project is open', async () => {
+        await render();
+        for (const t of Array.from(document.querySelectorAll('[role="tab"]'))) expect((t as HTMLButtonElement).disabled).toBe(false);
+        expect((document.querySelector('input[type="search"]') as HTMLInputElement).disabled).toBe(false);
+        for (const input of Array.from(document.querySelectorAll('input[role="switch"]'))) expect((input as HTMLInputElement).disabled).toBe(false);
+    });
+
     it('does nothing while disabled', async () => {
         const onToggle = await render({ disabled: true });
         await click(rowFor('account'));
@@ -135,6 +158,40 @@ describe('selection tables', () => {
         expect(rows()[0]).toBe(custom);
     });
 
+    it('sorts by a column when its header is clicked, toggling the direction', async () => {
+        await render();
+        const header = (label: string) => Array.from(document.querySelectorAll('th')).find((th) => th.textContent === label) as HTMLElement;
+        const sortButton = (label: string) => (header(label).querySelector('button') ?? header(label)) as HTMLElement;
+        const firstRowKey = () => rows()[0].querySelectorAll('td')[2].textContent;
+
+        expect(header('Logical Name').getAttribute('aria-sort')).toBe('none');
+        await click(sortButton('Logical Name'));
+        expect(header('Logical Name').getAttribute('aria-sort')).toBe('ascending');
+        expect(rows().map((r) => r.querySelectorAll('td')[2].textContent)).toEqual(['account', 'contoso_project']);
+
+        await click(sortButton('Logical Name'));
+        expect(header('Logical Name').getAttribute('aria-sort')).toBe('descending');
+        expect(firstRowKey()).toBe('contoso_project');
+
+        // Tables without a description are listed last in either direction.
+        await click(sortButton('Description'));
+        expect(firstRowKey()).toBe('account');
+        await click(sortButton('Description'));
+        expect(firstRowKey()).toBe('account');
+        expect(header('Logical Name').getAttribute('aria-sort')).toBe('none');
+    });
+
+    it('explains each column in a Fluent tooltip on its header cell', async () => {
+        await render();
+        for (const th of Array.from(document.querySelectorAll('th')).filter((cell) => cell.textContent)) {
+            const describedBy = th.getAttribute('aria-describedby');
+            expect(describedBy, th.textContent ?? '').toBeTruthy();
+            const tooltip = document.getElementById(describedBy as string);
+            expect(tooltip?.getAttribute('role')).toBe('tooltip');
+            expect(tooltip?.textContent).toContain(`${th.textContent}:`);
+        }
+    });
+
     it('links the description cell to a Fluent tooltip with the full text', async () => {
         await render();
         const descriptionCell = Array.from(rowFor('account').querySelectorAll('td'))[4];
@@ -146,5 +203,27 @@ describe('selection tables', () => {
         expect(tooltip?.textContent).toBe('Business that represents a customer or potential customer.');
         // Rows without a description get no tooltip.
         expect(Array.from(rowFor('contoso_project').querySelectorAll('td'))[4].querySelector('[aria-describedby]')).toBeNull();
+    });
+});
+
+describe('sortSelectionRows', () => {
+    const row = (key: string, ...sortValues: Array<string | number | undefined>) => ({ key, sortValues });
+    const keys = (list: Array<{ key: string }>) => list.map((r) => r.key);
+
+    it('keeps the given order until a column is sorted', () => {
+        const list = [row('b', 'b'), row('a', 'a')];
+        expect(sortSelectionRows(list, null)).toBe(list);
+    });
+
+    it('sorts text case-insensitively and numbers numerically, keeping ties in order', () => {
+        const list = [row('x', 'beta', 10), row('y', 'Alpha', 2), row('z', 'alpha', 2)];
+        expect(keys(sortSelectionRows(list, { column: 0, direction: 'ascending' }))).toEqual(['y', 'z', 'x']);
+        expect(keys(sortSelectionRows(list, { column: 1, direction: 'descending' }))).toEqual(['x', 'y', 'z']);
+    });
+
+    it('lists rows without a value last in both directions', () => {
+        const list = [row('none', undefined), row('one', 1), row('two', 2)];
+        expect(keys(sortSelectionRows(list, { column: 0, direction: 'ascending' }))).toEqual(['one', 'two', 'none']);
+        expect(keys(sortSelectionRows(list, { column: 0, direction: 'descending' }))).toEqual(['two', 'one', 'none']);
     });
 });

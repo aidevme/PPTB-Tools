@@ -21,7 +21,7 @@ What you can actually verify here:
    re-render), or a parser that assumes a metadata shape Dataverse doesn't guarantee.
 3. **Domain invariant checks**: cross-reference the change against documented invariants in the tool's
    README (e.g. for the Early-Bound Generator: output stays byte-identical to dataverse-gen's apart from the
-   listed deliberate deviations; generated files use LF; orphaned files are reported, never deleted). Flag
+   listed deliberate deviations; generated files use LF; orphaned files are reported, and deleted only when the user opts in and confirms, via the guarded `deleteOrphanedFiles`). Flag
    anything that looks inconsistent with these.
 
 What you cannot verify here, and must say so instead of guessing: anything requiring a live Dataverse

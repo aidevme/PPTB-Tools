@@ -81,8 +81,8 @@ export function FileViewer({ file, onCopyText }: IFileViewerProps) {
                 {content === undefined ? (
                     <MessageBar intent="warning" className={styles.notice}>
                         <MessageBarBody>
-                            This file is in the output folder but the current selection no longer generates it. It's never deleted
-                            automatically; remove it yourself if you no longer need it.
+                            This file is in the output folder but the current selection no longer generates it. It's only deleted when
+                            Delete orphaned files is on and you confirm; otherwise remove it yourself if you no longer need it.
                         </MessageBarBody>
                     </MessageBar>
                 ) : canDiff && tab === 'changes' ? (

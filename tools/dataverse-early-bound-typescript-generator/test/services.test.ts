@@ -1,8 +1,8 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { resolveConfig, parseConfig, serializeConfig, createDefaultConfig } from '../src/core';
-import { InMemoryFileSink } from '../src/services/fileSink';
+import { InMemoryFileSink, buildDeleteCommands } from '../src/services/fileSink';
 import { basename, dirname, joinPath, separatorOf, toPosix } from '../src/services/paths';
-import { applyWritePlan, createWritePlan } from '../src/services/plan';
+import { applyWritePlan, createWritePlan, deleteOrphanedFiles, summarizeGeneration } from '../src/services/plan';
 import { loadProjectConfig, saveProjectConfig } from '../src/services/projectConfig';
 
 describe('paths', () => {
@@ -120,5 +120,75 @@ describe('write plan', () => {
         await applyWritePlan(sink, plan);
         expect(sink.directories.has('/p/src/dataverse-gen/entities')).toBe(true);
         expect(sink.files.size).toBe(4);
+    });
+});
+
+describe('deleting orphaned files', () => {
+    const config = resolveConfig(createDefaultConfig());
+
+    it('deletes only the plan’s orphans', async () => {
+        const sink = new InMemoryFileSink({
+            'C:\\proj\\src\\dataverse-gen\\entities\\Account.ts': 'A\n',
+            'C:\\proj\\src\\dataverse-gen\\enums\\stale_enum.ts': 'x',
+            'C:\\proj\\src\\dataverse-gen\\notes.ts': 'user file, not ours',
+        });
+        const plan = await createWritePlan(sink, 'C:\\proj', config, [{ path: 'entities/Account.ts', content: 'A\n' }]);
+        const result = await deleteOrphanedFiles(sink, plan);
+        expect(result).toEqual({ deleted: ['enums/stale_enum.ts'], failed: [] });
+        expect(sink.files.has('C:\\proj\\src\\dataverse-gen\\enums\\stale_enum.ts')).toBe(false);
+        expect(sink.files.has('C:\\proj\\src\\dataverse-gen\\entities\\Account.ts')).toBe(true);
+        expect(sink.files.has('C:\\proj\\src\\dataverse-gen\\notes.ts')).toBe(true);
+    });
+
+    it('never passes a path outside the output folder to the sink', async () => {
+        const sink = new InMemoryFileSink({ '/p/secret.ts': 's', '/p/src/dataverse-gen/enums/old.ts': 'o' });
+        const deleteFiles = vi.spyOn(sink, 'deleteFiles');
+        const plan = {
+            projectRoot: '/p',
+            outputRoot: '/p/src/dataverse-gen',
+            files: [
+                { relativePath: '../../secret.ts', absolutePath: '/p/secret.ts', status: 'orphaned' as const },
+                { relativePath: 'enums/x.ts', absolutePath: '/p/secret.ts', status: 'orphaned' as const },
+                { relativePath: 'enums/old.ts', absolutePath: '/p/src/dataverse-gen/enums/old.ts', status: 'orphaned' as const },
+                { relativePath: 'enums/new.ts', absolutePath: '/p/src/dataverse-gen/enums/new.ts', status: 'new' as const, content: 'n' },
+            ],
+            counts: { new: 1, changed: 0, unchanged: 0, orphaned: 3 },
+        };
+        await deleteOrphanedFiles(sink, plan);
+        expect(deleteFiles).toHaveBeenCalledWith(['/p/src/dataverse-gen/enums/old.ts']);
+        expect(sink.files.has('/p/secret.ts')).toBe(true);
+    });
+
+    it('reports files that are still there afterwards', async () => {
+        const sink = new InMemoryFileSink({ '/p/src/dataverse-gen/enums/a.ts': 'a', '/p/src/dataverse-gen/enums/b.ts': 'b' });
+        vi.spyOn(sink, 'deleteFiles').mockResolvedValue(['/p/src/dataverse-gen/enums/b.ts']);
+        const plan = await createWritePlan(sink, '/p', config, []);
+        expect(await deleteOrphanedFiles(sink, plan)).toEqual({ deleted: ['enums/a.ts'], failed: ['enums/b.ts'] });
+    });
+
+    it('summarizes a run that deleted orphans', () => {
+        const counts = { new: 0, changed: 1, unchanged: 3, orphaned: 2 };
+        expect(summarizeGeneration(1, counts, 2)).toBe('1 file written · 3 unchanged · 2 deleted · .dataverse-gen.json saved');
+        expect(summarizeGeneration(1, counts, 1)).toBe('1 file written · 3 unchanged · 1 deleted · 1 orphaned · .dataverse-gen.json saved');
+        expect(summarizeGeneration(1, counts)).toBe('1 file written · 3 unchanged · 2 orphaned · .dataverse-gen.json saved');
+    });
+});
+
+describe('delete commands', () => {
+    it('uses PowerShell Remove-Item -LiteralPath for Windows paths, quoting each path', () => {
+        expect(buildDeleteCommands(["C:\\proj\\it's $here\\a.ts", 'C:\\proj\\b.ts'])).toEqual([
+            "Remove-Item -LiteralPath 'C:\\proj\\it''s $here\\a.ts','C:\\proj\\b.ts' -Force -ErrorAction SilentlyContinue",
+        ]);
+    });
+
+    it('uses rm -f -- for POSIX paths, quoting each path', () => {
+        expect(buildDeleteCommands(["/home/me/it's/a.ts", '/home/me/-b.ts'])).toEqual(["rm -f -- '/home/me/it'\\''s/a.ts' '/home/me/-b.ts'"]);
+    });
+
+    it('splits long lists into batches of 20', () => {
+        const paths = Array.from({ length: 45 }, (_, i) => `/p/f${i}.ts`);
+        const commands = buildDeleteCommands(paths);
+        expect(commands).toHaveLength(3);
+        expect(commands[2]).toBe(`rm -f -- ${paths.slice(40).map((p) => `'${p}'`).join(' ')}`);
     });
 });
