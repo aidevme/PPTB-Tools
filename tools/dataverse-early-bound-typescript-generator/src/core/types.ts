@@ -81,6 +81,13 @@ export interface EdmxOperation {
 
 /** Parsed `$metadata` document, limited to what the generator needs. */
 export interface EdmxSchema {
+    /**
+     * Where the schema came from. `'metadata'` means it was rebuilt from table and relationship metadata
+     * because the CSDL could not be loaded (see `createMetadataSchema`): entity types then carry no
+     * navigation properties, and each entity's navigation comes from its relationship metadata instead.
+     * Omitted for a parsed CSDL document.
+     */
+    source?: 'csdl' | 'metadata';
     entityTypes: EdmxEntityType[];
     complexTypes: EdmxComplexType[];
     enumTypes: EdmxEnumType[];
@@ -138,6 +145,26 @@ export interface AttributeMetadataInput {
     OptionSet?: OptionSetInput | null;
 }
 
+/** A `ManyToOneRelationships` / `OneToManyRelationships` entry of `EntityDefinitions`. */
+export interface OneToManyRelationshipInput {
+    SchemaName?: string;
+    ReferencedEntity: string;
+    ReferencingEntity: string;
+    /** Collection-valued navigation property on the referenced (one) side. */
+    ReferencedEntityNavigationPropertyName?: string | null;
+    /** Single-valued navigation property on the referencing (many) side. */
+    ReferencingEntityNavigationPropertyName?: string | null;
+}
+
+/** A `ManyToManyRelationships` entry of `EntityDefinitions`. */
+export interface ManyToManyRelationshipInput {
+    SchemaName?: string;
+    Entity1LogicalName: string;
+    Entity2LogicalName: string;
+    Entity1NavigationPropertyName?: string | null;
+    Entity2NavigationPropertyName?: string | null;
+}
+
 /** Entity metadata needed by the generator, independent of how it was fetched. */
 export interface EntityMetadataInput {
     LogicalName: string;
@@ -145,6 +172,13 @@ export interface EntityMetadataInput {
     EntitySetName: string;
     PrimaryIdAttribute?: string;
     Attributes: AttributeMetadataInput[];
+    /**
+     * Relationships, only needed when the schema was rebuilt from metadata (`EdmxSchema.source ===
+     * 'metadata'`); a CSDL-based schema already has the navigation properties.
+     */
+    ManyToOneRelationships?: OneToManyRelationshipInput[];
+    OneToManyRelationships?: OneToManyRelationshipInput[];
+    ManyToManyRelationships?: ManyToManyRelationshipInput[];
 }
 
 // ---------------------------------------------------------------------------------------------------

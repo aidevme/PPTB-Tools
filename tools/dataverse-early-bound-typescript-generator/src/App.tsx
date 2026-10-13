@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Footer, Header, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, type SelectionKind } from './components';
+import { Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from './components';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
+import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectEntry, type ToolConfig } from './config';
 import { useConnection } from './hooks';
 import {
     PptbFileSink,
@@ -12,11 +13,20 @@ import {
     getRememberedProjectFolder,
     getSolutionEntityIds,
     getSolutionMemberIds,
+    isSamePath,
     listSolutions,
     loadProjectConfig,
+    loadToolConfig,
+    notifyGenerationComplete,
+    notifyPreviewReady,
+    notifyProjectLoaded,
     rememberProjectFolder,
+    reportError,
     resolveOutputRoot,
     saveProjectConfig,
+    saveToolConfig,
+    summarizeGeneration,
+    technicalMessage,
     type ProjectConfigState,
 } from './services';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
@@ -37,17 +47,10 @@ const useStyles = makeStyles({
     progress: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS },
 });
 
-const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions: [], functions: [] };
+/** How long the "$metadata is too large" warning stays visible. */
+const METADATA_FALLBACK_WARNING_MS = 5000;
 
-function errorMessage(error: unknown): string {
-    if (error instanceof Error) return error.message;
-    if (typeof error === 'string') return error;
-    try {
-        return JSON.stringify(error);
-    } catch {
-        return String(error);
-    }
-}
+const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions: [], functions: [] };
 
 /**
  * Top-level state and orchestration. Holds the project folder and its `.dataverse-gen.json`, the
@@ -64,6 +67,14 @@ export default function App() {
     const provider = useMemo(() => new PptbMetadataProvider(), [connKey]); // eslint-disable-line react-hooks/exhaustive-deps
     const sink = useMemo(() => new PptbFileSink(), []);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [newProjectOpen, setNewProjectOpen] = useState(false);
+    const [loadProjectOpen, setLoadProjectOpen] = useState(false);
+    /** Settings-panel values: the bundled defaults until the saved values have loaded. */
+    const [toolSettings, setToolSettings] = useState<ToolConfig>(toolConfig);
+    /** The $metadata document is too large for PPTB, so the schema was rebuilt from table metadata. */
+    const [metadataFallback, setMetadataFallback] = useState(false);
+    /** The fallback warning is shown for a few seconds when the fallback starts, then hides itself. */
+    const [showMetadataFallbackWarning, setShowMetadataFallbackWarning] = useState(false);
 
     const [projectRoot, setProjectRoot] = useState<string | null>(null);
     /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
@@ -80,6 +91,10 @@ export default function App() {
     const [loadingOperations, setLoadingOperations] = useState(false);
     const [loadingSolution, setLoadingSolution] = useState(false);
     const [plan, setPlan] = useState<WritePlan | null>(null);
+    /** When the current plan was computed (ISO), for the Preview card's "Previewed … ago". */
+    const [previewedAt, setPreviewedAt] = useState<string | null>(null);
+    /** Summary of the last Generate run, shown in the Preview card until the next preview. */
+    const [lastResult, setLastResult] = useState<string | null>(null);
     const [planStale, setPlanStale] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -95,62 +110,145 @@ export default function App() {
 
     // ----- project folder -------------------------------------------------------------------------
 
+    /** Opens `folder` as the project and reads its `.dataverse-gen.json`; throws when it can't be read. Returns what was loaded. */
+    const openProjectFolder = useCallback(
+        async (folder: string) => {
+            const state = await loadProjectConfig(sink, folder);
+            // A folder without .dataverse-gen.json starts from the Settings panel's project defaults.
+            if (!state.exists) state.config = applyProjectDefaults(state.config, toolSettings.projectDefaults);
+            if (!projectRoot) {
+                // Keep anything selected before the folder was picked.
+                const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
+                state.config = {
+                    ...state.config,
+                    entities: merge(state.config.entities, config.entities),
+                    actions: merge(state.config.actions, config.actions),
+                    functions: merge(state.config.functions, config.functions),
+                };
+            }
+            setProjectRoot(folder);
+            setConfigState(state);
+            setPlan(null);
+            setPlanStale(false);
+            await rememberProjectFolder(connKey, folder);
+            return state;
+        },
+        [sink, connKey, projectRoot, config, toolSettings.projectDefaults],
+    );
+
     const loadProject = useCallback(
         async (folder: string) => {
             setError(null);
             setNotice(null);
             try {
-                const state = await loadProjectConfig(sink, folder);
-                if (!projectRoot) {
-                    // Keep anything selected before the folder was picked.
-                    const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
-                    state.config = {
-                        ...state.config,
-                        entities: merge(state.config.entities, config.entities),
-                        actions: merge(state.config.actions, config.actions),
-                        functions: merge(state.config.functions, config.functions),
-                    };
-                }
-                setProjectRoot(folder);
-                setConfigState(state);
-                setPlan(null);
-                setPlanStale(false);
-                await rememberProjectFolder(connKey, folder);
+                await openProjectFolder(folder);
             } catch (e) {
-                const message = errorMessage(e);
-                setError(
-                    /access denied|permission/i.test(message)
-                        ? `PPTB has not granted this tool access to ${folder}. Click Browse… and select the folder again to grant access.`
-                        : `Could not load ${folder}: ${message}`,
-                );
+                setError(reportError(`Could not load ${folder}`, e, { folder }));
             }
         },
-        [sink, connKey, projectRoot, config],
+        [openProjectFolder],
     );
 
-    const browse = useCallback(async () => {
-        if (!window.toolboxAPI) return;
-        try {
-            // selectPath is also what grants this tool file-system access to the chosen folder.
+    /**
+     * Opens a project saved with the New Project dialog: its location becomes the project folder and its
+     * `.dataverse-gen.json` is read. If PPTB hasn't granted access to that folder in this session, the folder
+     * picker opens there for the user to confirm instead. Resolves to `false` when that picker is cancelled.
+     */
+    const openSavedProject = useCallback(
+        async (project: ProjectOpenTarget) => {
+            if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
+            setError(null);
+            setNotice(null);
+            try {
+                // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
+                // otherwise just look like a new project.
+                await window.toolboxAPI.fileSystem.readDirectory(project.location);
+                void notifyProjectLoaded(project.name, await openProjectFolder(project.location));
+                return true;
+            } catch (e) {
+                if (!/access denied|permission|not allowed|not permitted/i.test(technicalMessage(e))) throw e;
+            }
             const folder = await window.toolboxAPI.fileSystem.selectPath({
                 type: 'folder',
-                title: 'Select the project folder',
-                message: 'Pick the folder that contains (or should contain) .dataverse-gen.json',
-                defaultPath: projectRoot ?? rememberedFolder ?? undefined,
+                title: `Open ${project.name}`,
+                message: 'Confirm the project folder so Power Platform ToolBox lets the tool read it',
+                defaultPath: project.location,
             });
-            if (folder) await loadProject(folder);
-        } catch (e) {
-            setError(`Could not open the folder picker: ${errorMessage(e)}`);
-        }
-    }, [loadProject, projectRoot, rememberedFolder]);
+            if (!folder) return false;
+            void notifyProjectLoaded(project.name, await openProjectFolder(folder));
+            return true;
+        },
+        [openProjectFolder],
+    );
 
     // ----- environment lists ----------------------------------------------------------------------
+
+    useEffect(() => {
+        let cancelled = false;
+        void loadToolConfig().then((loaded) => !cancelled && setToolSettings(loaded));
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!metadataFallback) {
+            setShowMetadataFallbackWarning(false);
+            return;
+        }
+        setShowMetadataFallbackWarning(true);
+        const timer = window.setTimeout(() => setShowMetadataFallbackWarning(false), METADATA_FALLBACK_WARNING_MS);
+        return () => window.clearTimeout(timer);
+    }, [metadataFallback]);
+
+    /** Saves the Settings-panel values; the panel stays open and shows the error if saving fails. */
+    const saveToolSettings = useCallback(async (draft: ToolConfig) => {
+        // Same normalization as on load, so e.g. a blank output folder saves as the default, not as "".
+        const next = mergeToolConfig(draft);
+        await saveToolConfig(next);
+        setToolSettings(next);
+    }, []);
+
+    /** Adds a project from the New Project dialog to `projects` and saves the config. */
+    const addProject = useCallback(
+        async (project: NewProject) => {
+            const now = new Date().toISOString();
+            const next: ToolConfig = {
+                ...toolSettings,
+                projects: [...toolSettings.projects, { ...project, id: crypto.randomUUID(), version: DEFAULT_PROJECT_VERSION, createdOn: now, modifiedOn: now }],
+            };
+            await saveToolConfig(next);
+            setToolSettings(next);
+        },
+        [toolSettings],
+    );
+
+    /** Removes a saved project from `projects` and saves the config; files in its folder are left alone. */
+    const deleteProject = useCallback(
+        async (project: ProjectEntry) => {
+            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.filter((p) => p.id !== project.id) };
+            await saveToolConfig(next);
+            setToolSettings(next);
+        },
+        [toolSettings],
+    );
+
+    /** Folder picker for the New Project dialog's Location; `null` when cancelled or outside PPTB. */
+    const pickProjectLocation = useCallback(async (current: string) => {
+        if (!window.toolboxAPI) return null;
+        return window.toolboxAPI.fileSystem.selectPath({
+            type: 'folder',
+            title: 'Select the project location',
+            defaultPath: current || undefined,
+        });
+    }, []);
 
     useEffect(() => {
         if (!inPptb || !connection) return;
         let cancelled = false;
         setEntities([]);
         setOperations(null);
+        setMetadataFallback(false);
         setSolutions([]);
         setSelectedSolutionId(null);
         setSolutionEntityIds(null);
@@ -162,7 +260,7 @@ export default function App() {
         provider
             .listEntities()
             .then((list) => !cancelled && setEntities(list))
-            .catch((e) => !cancelled && setError(`Could not list tables: ${errorMessage(e)}`))
+            .catch((e) => !cancelled && setError(reportError(`Could not list tables`, e)))
             .finally(() => !cancelled && setLoadingEntities(false));
         listSolutions()
             .then((list) => !cancelled && setSolutions(list))
@@ -183,8 +281,11 @@ export default function App() {
         setLoadingOperations(true);
         provider
             .listOperations()
-            .then(setOperations)
-            .catch((e) => setError(`Could not load the $metadata document: ${errorMessage(e)}`))
+            .then((list) => {
+                setOperations(list);
+                setMetadataFallback(provider.usesMetadataFallback);
+            })
+            .catch((e) => setError(reportError(`Could not load the $metadata document`, e)))
             .finally(() => setLoadingOperations(false));
     }, [operations, loadingOperations, inPptb, provider]);
 
@@ -205,7 +306,7 @@ export default function App() {
             solutionCache.current.set(solutionId, ids);
             setSolutionEntityIds(ids);
         } catch (e) {
-            setError(`Could not load the solution's tables: ${errorMessage(e)}`);
+            setError(reportError(`Could not load the solution's tables`, e));
             setSelectedSolutionId(null);
         } finally {
             setLoadingSolution(false);
@@ -232,7 +333,7 @@ export default function App() {
                 solutionOperationCache.current.set(solutionId, members);
                 if (!cancelled) setSolutionComponentIds(members);
             })
-            .catch((e) => !cancelled && setError(`Could not load the solution's actions and functions: ${errorMessage(e)}`))
+            .catch((e) => !cancelled && setError(reportError(`Could not load the solution's actions and functions`, e)))
             .finally(() => !cancelled && setLoadingSolutionOperations(false));
         return () => {
             cancelled = true;
@@ -264,7 +365,7 @@ export default function App() {
             await window.toolboxAPI.utils.copyToClipboard(path);
             await window.toolboxAPI.utils.showNotification({ title: 'Copied', body: `${label} copied to the clipboard.`, type: 'info', duration: 2500 });
         } catch (e) {
-            setError(`Could not copy to the clipboard: ${errorMessage(e)}`);
+            setError(reportError(`Could not copy to the clipboard`, e));
         }
     }, []);
 
@@ -278,6 +379,7 @@ export default function App() {
             const resolved = resolveConfig(config);
             setProgress({ message: 'Loading the $metadata document…', completed: 0, total: 1 });
             const schema = await provider.getSchemaForSelection(resolved.actions, resolved.functions);
+            setMetadataFallback(provider.usesMetadataFallback);
             const selection = resolveSelection(schema, resolved);
             const names = selection.entities.map((e) => e.Name);
             setProgress({ message: `Loading metadata for ${names.length} table(s)…`, completed: 0, total: names.length });
@@ -291,15 +393,47 @@ export default function App() {
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
             const nextPlan = await createWritePlan(sink, projectRoot, resolved, files);
             setPlan(nextPlan);
+            setPreviewedAt(new Date().toISOString());
+            setLastResult(null);
             setPlanStale(false);
+            void notifyPreviewReady(nextPlan);
             return nextPlan;
         } catch (e) {
-            setError(errorMessage(e));
+            setError(reportError('Preview failed', e, { projectRoot }));
             return null;
         } finally {
             setProgress(null);
         }
     }, [projectRoot, config, provider, sink]);
+
+    /**
+     * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
+     * Modified On when the run added files or stopped producing ones the previous run did. Folders that
+     * aren't saved projects are left alone; a failure to save is logged, since the files were written.
+     */
+    const recordProjectGeneration = useCallback(
+        async (root: string, applied: WritePlan) => {
+            const index = toolSettings.projects.findIndex((p) => isSamePath(p.location, root));
+            if (index === -1) return;
+            const updated = recordGeneration(
+                toolSettings.projects[index],
+                {
+                    files: applied.files.filter((f) => f.status !== 'orphaned').map((f) => f.relativePath),
+                    newFiles: applied.files.filter((f) => f.status === 'new').map((f) => f.relativePath),
+                },
+                new Date().toISOString(),
+            );
+            if (!updated) return;
+            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.map((p, i) => (i === index ? updated : p)) };
+            try {
+                await saveToolConfig(next);
+                setToolSettings(next);
+            } catch (e) {
+                console.warn('Could not update the project after generating', e);
+            }
+        },
+        [toolSettings],
+    );
 
     const runGenerate = useCallback(
         async (planToApply: WritePlan) => {
@@ -312,28 +446,24 @@ export default function App() {
                 );
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
                 setConfigState((state) => ({ ...state, exists: true, path: configPath }));
+                await recordProjectGeneration(projectRoot, planToApply);
                 // Everything written is now unchanged.
                 setPlan({
                     ...planToApply,
                     files: planToApply.files.map((f) => (f.status === 'new' || f.status === 'changed' ? { ...f, status: 'unchanged', existingContent: f.content } : f)),
                     counts: { new: 0, changed: 0, unchanged: planToApply.counts.unchanged + result.written, orphaned: planToApply.counts.orphaned },
                 });
-                const summary = `${result.written} file(s) written, ${planToApply.counts.unchanged} unchanged, ${planToApply.counts.orphaned} orphaned. Config saved to .dataverse-gen.json.`;
-                setNotice(summary);
-                await window.toolboxAPI?.utils.showNotification({ title: 'Dataverse Early-Bound TypeScript Generator', body: summary, type: 'success' });
+                setLastResult(summarizeGeneration(result.written, planToApply.counts));
+                // Not awaited, and it never throws: a failed notification mustn't report a successful write as "Generation failed".
+                void notifyGenerationComplete(result.written, planToApply.counts);
             } catch (e) {
-                setError(`Generation failed: ${errorMessage(e)}`);
+                setError(reportError(`Generation failed`, e));
             } finally {
                 setProgress(null);
             }
         },
-        [projectRoot, config, sink],
+        [projectRoot, config, sink, recordProjectGeneration],
     );
-
-    const regenerate = useCallback(async () => {
-        const nextPlan = await runPreview();
-        if (nextPlan) await runGenerate(nextPlan);
-    }, [runPreview, runGenerate]);
 
     // ----- derived --------------------------------------------------------------------------------
 
@@ -356,11 +486,40 @@ export default function App() {
     /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
     const canSelect = inPptb && !!connection;
     const ready = canSelect && !!projectRoot;
+    const steps = computeWorkflowSteps({
+        hasProject: !!projectRoot,
+        selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
+        plan: plan ? { pending: plan.counts.new + plan.counts.changed, stale: planStale } : null,
+    });
+
+    /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
+    const openRecent = (target: ProjectOpenTarget) => {
+        openSavedProject(target).catch((e: unknown) => setError(reportError(`Could not open ${target.name}`, e, { location: target.location })));
+    };
 
     return (
         <div className={styles.page}>
-            <Header connection={connection} canRegenerate={ready && hasSelection} busy={busy} onRegenerate={regenerate} onOpenSettings={() => setSettingsOpen(true)} />
-            <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
+            <Header connection={connection} onOpenSettings={() => setSettingsOpen(true)} />
+            <SettingsPanel
+                open={settingsOpen}
+                onOpenChange={setSettingsOpen}
+                settings={toolSettings}
+                onSave={saveToolSettings}
+            />
+            <NewProjectDialog
+                open={newProjectOpen}
+                onOpenChange={setNewProjectOpen}
+                existingNames={toolSettings.projects.map((p) => p.name)}
+                onBrowseLocation={pickProjectLocation}
+                onSave={addProject}
+            />
+            <LoadProjectDialog
+                open={loadProjectOpen}
+                onOpenChange={setLoadProjectOpen}
+                projects={toolSettings.projects}
+                onLoad={openSavedProject}
+                onDelete={deleteProject}
+            />
             <main className={styles.main}>
                 {!inPptb && (
                     <MessageBar intent="warning">
@@ -374,6 +533,16 @@ export default function App() {
                 {inPptb && !connectionLoading && !connection && (
                     <MessageBar intent="info">
                         <MessageBarBody>Connect to a Dataverse environment in PPTB to list tables, actions and functions.</MessageBarBody>
+                    </MessageBar>
+                )}
+                {showMetadataFallbackWarning && (
+                    <MessageBar intent="warning">
+                        <MessageBarBody>
+                            <MessageBarTitle>$metadata is too large for Power Platform ToolBox</MessageBarTitle>
+                            This environment's $metadata document is over the 16 MB PPTB allows, so types are built from table and
+                            relationship metadata instead. Tables and custom APIs work; built-in actions and functions and custom process
+                            actions are not available. Output can differ slightly from dataverse-gen's.
+                        </MessageBarBody>
                     </MessageBar>
                 )}
                 {error && (
@@ -395,7 +564,17 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb} onBrowse={browse}
+                <WorkflowProgress steps={steps} />
+                <ProjectCard
+                    step={steps[0]}
+                    projectRoot={projectRoot}
+                    rememberedFolder={rememberedFolder}
+                    configState={projectRoot ? configState : null}
+                    projects={toolSettings.projects}
+                    busy={busy || !inPptb}
+                    onNewProject={() => setNewProjectOpen(true)}
+                    onLoadExistingProject={() => setLoadProjectOpen(true)}
+                    onOpenRecent={openRecent}
                     onReload={() => projectRoot && loadProject(projectRoot)}
                     outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
                     hasSelection={hasSelection}
@@ -403,6 +582,7 @@ export default function App() {
                     onClearSelection={clearAll}
                 />
                 <SelectionCard
+                    step={steps[1]}
                     entities={entities}
                     operations={operations}
                     solutions={solutions}
@@ -420,8 +600,20 @@ export default function App() {
                     onSolutionChange={changeSolution}
                     onEnsureOperations={ensureOperations}
                 />
-                <OptionsCard config={config} disabled={!canSelect || busy} onChange={updateConfig} />
-                <PreviewCard plan={plan} stale={planStale} canPreview={ready && hasSelection} needsProject={canSelect && !projectRoot} busy={busy} onPreview={() => void runPreview()} onGenerate={() => plan && void runGenerate(plan)} />
+                <OptionsCard step={steps[2]} config={config} disabled={!canSelect || busy} onChange={updateConfig} />
+                <PreviewCard
+                    step={steps[3]}
+                    plan={plan}
+                    stale={planStale}
+                    canPreview={ready && hasSelection}
+                    needsProject={canSelect && !projectRoot}
+                    busy={busy}
+                    previewedAt={plan ? previewedAt : null}
+                    lastResult={plan ? lastResult : null}
+                    onPreview={() => void runPreview()}
+                    onGenerate={() => plan && void runGenerate(plan)}
+                    onCopyText={(text, label) => void copyPath(text, label)}
+                />
             </main>
             <Footer />
         </div>

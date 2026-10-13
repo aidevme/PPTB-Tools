@@ -29,6 +29,7 @@ import type {
     SchemaModel,
     TsType,
 } from './types';
+import { navigationFromRelationships } from './metadataSchema';
 
 /** The subset of the CSDL that the configured selection pulls in. */
 export interface Selection {
@@ -476,7 +477,9 @@ export function buildSchemaModel(edmx: EdmxSchema, config: ResolvedConfig, getEn
         if (!metadata) {
             throw new Error(`${entityType.Name} is not a Dataverse entity (no metadata available), remove it from the ${'.dataverse-gen.json'}`);
         }
-        const navigation: NavigationModel[] = entityType.NavigationProperties.map((n) => ({
+        // A schema rebuilt from metadata has no navigation on its entity types; derive it from relationships.
+        const sourceNavigation = edmx.source === 'metadata' ? navigationFromRelationships(metadata) : entityType.NavigationProperties;
+        const navigation: NavigationModel[] = sourceNavigation.map((n) => ({
             Name: n.Name,
             Type: n.Type,
             IsCollection: n.IsCollection,

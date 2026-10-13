@@ -1,0 +1,42 @@
+{
+    "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
+    "deleteOrphanedFiles": false,
+    "projectDefaults": {
+        "outputRoot": "./src/generated/dataverse",
+        "generateEntityTypes": true,
+        "generateFormContext": true,
+        "generateIndex": true
+    },
+    "projects": [
+        {
+            "id": "3f2c8a1e-5b7d-4c9a-8e21-6d4f0b9a7c13",
+            "name": "Contoso Sales Web Resources",
+            "description": "Early-bound types for the account and opportunity form scripts.",
+            "location": "C:\\repos\\contoso-sales\\webresources",
+            "version": "1.0.2",
+            "createdOn": "2026-09-28T08:15:00.000Z",
+            "modifiedOn": "2026-10-11T14:42:10.000Z",
+            "lastGeneratedFiles": [
+                "actions/WinOpportunity.ts",
+                "complextypes/WhoAmIResponse.ts",
+                "entities/Account.ts",
+                "entities/Opportunity.ts",
+                "entities/OpportunityClose.ts",
+                "enums/account_accountcategorycode.ts",
+                "enums/opportunity_statuscode.ts",
+                "functions/WhoAmI.ts",
+                "index.ts",
+                "metadata.ts"
+            ]
+        },
+        {
+            "id": "9b1d4e77-0a3c-4f6e-b5d2-21c8e6f0a945",
+            "name": "Fabrikam Field Service PCF",
+            "description": "",
+            "location": "C:\\repos\\fabrikam-fs\\pcf\\WorkOrderTimeline",
+            "version": "1.0.0",
+            "createdOn": "2026-10-12T09:05:30.000Z",
+            "modifiedOn": "2026-10-12T09:05:30.000Z"
+        }
+    ]
+}

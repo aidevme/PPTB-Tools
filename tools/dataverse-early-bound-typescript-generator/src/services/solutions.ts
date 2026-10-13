@@ -2,12 +2,13 @@
  * Solution list and solution → table membership, for the Select step's solution filter.
  */
 import type { SolutionSummary } from '../types';
+import { withRetries } from './errors';
 
 const ENTITY_COMPONENT_TYPE = 1;
 
 function api(): typeof window.dataverseAPI {
     if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
-    return window.dataverseAPI;
+    return withRetries(window.dataverseAPI);
 }
 
 /** Visible unmanaged solutions, sorted by friendly name. */

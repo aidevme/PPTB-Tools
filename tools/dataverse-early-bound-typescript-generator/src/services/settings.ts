@@ -1,10 +1,12 @@
 /**
  * Per-tool settings stored by PPTB (`toolboxAPI.settings`): the project folder last used with each
- * connection, so reopening the tool lands on the same project.
+ * connection, so reopening the tool lands on the same project, and the values saved in the Settings panel.
  */
+import { mergeToolConfig, toolConfig, type ToolConfig } from '../config';
 
 const PROJECT_FOLDERS_KEY = 'projectFolders';
 const LAST_PROJECT_FOLDER_KEY = 'lastProjectFolder';
+const TOOL_CONFIG_KEY = 'toolConfig';
 
 type ProjectFolders = Record<string, string>;
 
@@ -46,4 +48,23 @@ export async function rememberProjectFolder(key: string | undefined, folder: str
     } catch (error) {
         console.warn('Could not remember project folder', error);
     }
+}
+
+/** Settings-panel values: the bundled defaults with any saved values applied. Defaults outside PPTB. */
+export async function loadToolConfig(): Promise<ToolConfig> {
+    const api = settings();
+    if (!api) return { ...toolConfig };
+    try {
+        return mergeToolConfig(await api.get(TOOL_CONFIG_KEY));
+    } catch (error) {
+        console.warn('Could not read saved settings', error);
+        return { ...toolConfig };
+    }
+}
+
+/** Saves the Settings-panel values; throws when PPTB is unavailable or the save fails. */
+export async function saveToolConfig(config: ToolConfig): Promise<void> {
+    const api = settings();
+    if (!api) throw new Error('Settings can only be saved inside Power Platform ToolBox.');
+    await api.set(TOOL_CONFIG_KEY, { ...config });
 }

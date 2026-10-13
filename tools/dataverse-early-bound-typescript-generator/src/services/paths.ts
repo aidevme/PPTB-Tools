@@ -59,3 +59,15 @@ export function basename(absolutePath: string): string {
 export function toPosix(relativePath: string): string {
     return relativePath.replace(/\\/g, '/').replace(/^\.\//, '');
 }
+
+/**
+ * Whether two absolute paths name the same folder, ignoring separators and trailing separators, and casing
+ * for Windows paths (drive letter or UNC).
+ */
+export function isSamePath(a: string, b: string): boolean {
+    const normalize = (p: string) => {
+        const slashed = p.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+        return separatorOf(p) === '\\' ? slashed.toLowerCase() : slashed;
+    };
+    return normalize(a) === normalize(b);
+}

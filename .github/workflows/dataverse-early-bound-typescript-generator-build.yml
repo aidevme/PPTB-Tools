@@ -25,8 +25,33 @@ defaults:
     working-directory: tools/dataverse-early-bound-typescript-generator
 
 jobs:
-  test-and-build:
-    name: Test and build
+  # Checks package.json against PPTB's tool requirements (required fields, icon path, reachable repository and
+  # readme URLs). It doesn't need the build output, so it runs first and stops the workflow early on a bad manifest.
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: tools/dataverse-early-bound-typescript-generator/package-lock.json
+
+      # pptb-validate comes from the @pptb/types dev dependency.
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate
+        run: npm run validate
+
+  test:
+    name: Test
+    needs: validate
     runs-on: ubuntu-latest
 
     steps:
@@ -45,6 +70,26 @@ jobs:
 
       - name: Test
         run: npm test
+
+  build:
+    name: Build
+    # Only build (and publish dist/) once the tests have passed.
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: tools/dataverse-early-bound-typescript-generator/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
 
       # `npm run build` runs `tsc` (typecheck) before `vite build`.
       - name: Build

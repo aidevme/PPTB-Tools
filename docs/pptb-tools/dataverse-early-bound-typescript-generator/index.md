@@ -28,8 +28,11 @@ Tables used by a selected action or function are included automatically.
 
 ## How to use it
 
-1. **Project.** Click **Browse…** and pick the folder that holds, or should hold, `.dataverse-gen.json`. The
-   tool remembers this folder for the current connection.
+New to the tool? [Getting started](./getting-started/) walks through every step in detail.
+
+1. **Project.** Click **New Project**, give the project a name and pick its location: the folder that holds,
+   or should hold, `.dataverse-gen.json`. Then click **Load Existing Project**, choose the project and click
+   **Load**. The tool remembers the folder for the current connection.
 2. **Select.** Tick tables, actions and functions. Use the search box, the solution filter and the
    **Selected only** switch to narrow the list. Names in the config that this environment lacks are listed and
    skipped.
@@ -38,8 +41,6 @@ Tables used by a selected action or function are included automatically.
 4. **Preview.** Loads metadata and compares the result with the output folder. Each file is marked new, changed,
    unchanged or orphaned. Click a file to view its content.
 5. **Generate.** Writes the new and changed files and saves `.dataverse-gen.json`.
-
-Once a project has a config, **Regenerate** in the header runs preview and generate in one step.
 
 ## Using the output
 
@@ -55,6 +56,10 @@ const account = await client.retrieve<Account>(accountMetadata.logicalName, id, 
 ## Known limitations
 
 - Not yet tested against a live environment inside PPTB.
+- In very large environments, the `$metadata` document can be over the 16 MB Power Platform ToolBox allows. The
+  tool then builds types from table and relationship metadata instead and shows a warning for a few seconds. Tables and custom
+  APIs still work, but built-in actions and functions (such as `WinOpportunity`) and custom process actions
+  aren't available, and output can differ slightly from `dataverse-gen`'s.
 - Custom ejected EJS templates are not supported. The `dataverse-gen` CLI still honours them.
 - Orphaned files are reported but not deleted. Remove them yourself if you no longer need them.
 - A few type mappings differ from `dataverse-gen` where its output would not compile. See the tool's

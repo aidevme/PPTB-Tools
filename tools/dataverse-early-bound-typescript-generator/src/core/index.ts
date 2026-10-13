@@ -9,4 +9,6 @@ export type { XmlParser } from './csdl';
 export { buildSchemaModel, resolveSelection, makeCodeSafe } from './model';
 export type { Selection, EntityMetadataLookup } from './model';
 export { generate, OUTPUT_FOLDERS } from './generator';
+export { createMetadataSchema, navigationFromRelationships } from './metadataSchema';
+export type { EntityTypeSource } from './metadataSchema';
 export * from './templates';
