@@ -2,7 +2,7 @@
 
 Steps 4 and 5 of the workflow: compare the generated files with the output folder, then write them.
 
-Source: [`src/components/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/PreviewCard.tsx)
+Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx)
 
 ## Props (`PreviewCardProps`)
 

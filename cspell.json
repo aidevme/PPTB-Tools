@@ -2,6 +2,7 @@
   "version": "0.2",
   "language": "en",
   "words": [
+    "accountcategorycode",
     "accountid",
     "accountsync",
     "accounttier",
@@ -59,6 +60,7 @@
     "colourful",
     "colours",
     "commondataserviceforapps",
+    "complextypes",
     "configurator",
     "connectionprovider",
     "connectionreference",
@@ -126,6 +128,7 @@
     "exfiltration",
     "exitcode",
     "externalid",
+    "Fabrikam",
     "factoryai",
     "fastmcp",
     "favoriting",

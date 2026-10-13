@@ -1,0 +1,5 @@
+{
+    "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
+    "deleteOrphanedFiles": false,
+    "projects": []
+}

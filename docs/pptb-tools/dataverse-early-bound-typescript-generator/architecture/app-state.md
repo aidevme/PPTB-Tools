@@ -14,6 +14,10 @@
 | `plan`, `planStale` | The last preview, and whether the selection or options changed since. |
 | `progress`, `error`, `notice` | The progress bar and the error and success message bars. |
 | `settingsOpen` | Whether the [SettingsPanel](../components/settings-panel.md) drawer is open. |
+| `toolSettings` | Tool config: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves on load. `saveToolSettings` and `addProject` save and update it. |
+| `newProjectOpen` | Whether the [NewProjectDialog](../components/new-project-dialog.md) is open. |
+| `loadProjectOpen` | Whether the [LoadProjectDialog](../components/load-project-dialog.md) is open. |
+| `metadataFallback`, `showMetadataFallbackWarning` | The provider is using the metadata fallback because `$metadata` is too large. When it starts, a warning shows for 5 seconds (`METADATA_FALLBACK_WARNING_MS`) and then hides itself. |
 
 Two service objects are held with `useMemo`: a `PptbMetadataProvider`, recreated with an empty cache whenever
 the connection changes, and a single `PptbFileSink`.
@@ -22,12 +26,14 @@ the connection changes, and a single `PptbFileSink`.
 
 | Callback | What it does |
 | --- | --- |
-| `browse`, `loadProject` | Pick a folder, then load its `.dataverse-gen.json` (or defaults for a new project). |
+| `loadProject`, `openProjectFolder` | Load a folder's `.dataverse-gen.json` (or defaults for a new project). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
+| `openSavedProject` | Opens a saved project's location directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. |
 | `updateConfig` | Merges a change into the config and marks the plan stale. `toggle`, `clear` and `clearAll` build on it. |
 | `ensureOperations` | Loads actions and functions the first time the Actions or Functions tab opens. |
 | `changeSolution` | Loads the chosen solution's components for the filter. |
 | `runPreview` | Builds the write plan. See the data flow on the [Architecture](./index.md#data-flow) page. |
-| `runGenerate` | Writes new and changed files, saves the config, and marks written files unchanged. |
+| `runGenerate` | Writes new and changed files, saves the config, marks written files unchanged, then calls `recordProjectGeneration`. |
+| `recordProjectGeneration` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified On when the run added or dropped files. |
 | `regenerate` | `runPreview`, then `runGenerate`. |
 
 ## Hooks

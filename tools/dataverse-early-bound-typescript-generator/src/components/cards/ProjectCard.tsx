@@ -14,8 +14,11 @@ import {
     makeStyles,
     tokens,
 } from '@fluentui/react-components';
-import { ArrowClockwiseRegular, CopyRegular, DismissCircleRegular, DocumentRegular, FolderOpenRegular, FolderRegular } from '@fluentui/react-icons';
-import type { ProjectConfigState } from '../services';
+import { AddRegular, ArrowClockwiseRegular, CopyRegular, FolderListRegular, DismissCircleRegular, DocumentRegular, FolderRegular } from '@fluentui/react-icons';
+import type { ProjectConfigState } from '../../services';
+
+/** Temporarily hidden; set to `true` to show the History menu (copy paths, clear selection) again. */
+const SHOW_HISTORY_MENU = false;
 
 const useStyles = makeStyles({
     body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },
@@ -33,11 +36,14 @@ const useStyles = makeStyles({
 
 export interface ProjectCardProps {
     projectRoot: string | null;
-    /** Folder used last time; PPTB needs it re-selected through Browse before it can be read. */
+    /** Folder used last time with this connection, shown as a hint while no project is open. */
     rememberedFolder: string | null;
     configState: ProjectConfigState | null;
     busy: boolean;
-    onBrowse: () => void;
+    /** Opens the New Project dialog. */
+    onNewProject: () => void;
+    /** Opens the Load Existing Project dialog. */
+    onLoadExistingProject: () => void;
     onReload: () => void;
     /** Absolute output folder (`output.outputRoot` resolved against the project), when a project is open. */
     outputFolder: string | null;
@@ -53,7 +59,8 @@ export function ProjectCard({
     rememberedFolder,
     configState,
     busy,
-    onBrowse,
+    onNewProject,
+    onLoadExistingProject,
     onReload,
     outputFolder,
     hasSelection,
@@ -77,12 +84,16 @@ export function ProjectCard({
             />
             <div className={styles.body}>
                 <div className={styles.row}>
-                    <Button icon={<FolderOpenRegular />} onClick={onBrowse} disabled={busy}>
-                        Browse…
+                    <Button icon={<AddRegular />} onClick={onNewProject} disabled={busy}>
+                        New Project
+                    </Button>
+                    <Button icon={<FolderListRegular />} onClick={onLoadExistingProject} disabled={busy}>
+                        Load Existing Project
                     </Button>
                     <Button icon={<ArrowClockwiseRegular />} appearance="subtle" onClick={onReload} disabled={busy || !projectRoot}>
                         Reload config
                     </Button>
+                    {SHOW_HISTORY_MENU && (
                     <Menu>
                         <MenuTrigger disableButtonEnhancement>
                             <MenuButton appearance="subtle" disabled={busy}>
@@ -111,12 +122,12 @@ export function ProjectCard({
                             </MenuList>
                         </MenuPopover>
                     </Menu>
+                    )}
                     {projectRoot ? <span className={styles.path}>{projectRoot}</span> : <Text italic>No project folder selected</Text>}
                 </div>
                 {!projectRoot && rememberedFolder && (
                     <Text size={200}>
-                        Last used: <span className={styles.path}>{rememberedFolder}</span> Click Browse… to reopen it (the folder picker opens
-                        there, and PPTB needs you to confirm it before the tool can read it).
+                        Last used: <span className={styles.path}>{rememberedFolder}</span> Open a saved project with Load Existing Project.
                     </Text>
                 )}
                 {configState && (

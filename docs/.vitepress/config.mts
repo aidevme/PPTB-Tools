@@ -24,6 +24,8 @@ export default defineConfig({
                                     { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/header" },
                                     { text: "SettingsPanel", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/settings-panel" },
                                     { text: "ProjectCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/project-card" },
+                                    { text: "NewProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/new-project-dialog" },
+                                    { text: "LoadProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/load-project-dialog" },
                                     { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/selection-card" },
                                     { text: "OptionsCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/options-card" },
                                     { text: "PreviewCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/preview-card" },

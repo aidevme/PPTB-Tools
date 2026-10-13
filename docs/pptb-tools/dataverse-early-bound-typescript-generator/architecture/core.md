@@ -17,6 +17,7 @@ side by side.
 | `model.ts` | `SchemaModel.ts` | `resolveSelection` expands the selection; `buildSchemaModel` combines the CSDL with attribute metadata and maps everything to TypeScript types. |
 | `templates.ts` | `_templates/*.ejs` | One render function per file kind: entity, enum, action/function, complex type, `metadata.ts` and `index.ts`. |
 | `generator.ts` | `TypescriptGenerator.ts` | `generate` turns a `SchemaModel` into `GeneratedFile[]`. |
+| `metadataSchema.ts` | — | Fallback when the CSDL can't be loaded: `createMetadataSchema` builds the schema from the table list, and `navigationFromRelationships` rebuilds an entity's navigation properties from its relationship metadata. |
 | `types.ts` | — | Input types (`Edmx*`, `*Input`) and model types (`*Model`) shared by the modules above. |
 
 ## Why the templates are code
@@ -35,6 +36,19 @@ purpose. That way, regenerating with `npx dataverse-gen` or with this tool produ
 
 That's what makes it possible to test the output against the CLI's reference files (see
 [Build and testing](./build-and-testing.md)).
+
+## Schema without `$metadata`
+
+When PPTB can't return the `$metadata` document (it's over PPTB's 16 MiB limit), the schema is rebuilt from
+metadata and marked `source: 'metadata'`. For tables the generator only needs names, keys, entity sets and
+navigation properties from the CSDL; properties already come from attribute metadata. So `buildSchemaModel`
+takes each entity's navigation from `navigationFromRelationships` instead of the entity type:
+
+- many-to-one → single-valued, named `ReferencingEntityNavigationPropertyName` (`owner` maps to `principal`)
+- one-to-many → collection, named `ReferencedEntityNavigationPropertyName`
+- many-to-many → collection on each side, named `Entity1/2NavigationPropertyName`
+
+The fallback schema has no actions, functions, complex types or enums of its own.
 
 ## Deliberate deviations
 

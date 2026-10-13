@@ -14,6 +14,8 @@ callbacks down as props. Everything is exported from the folder's `index.ts` bar
 | — | [Header](./header.md) | Title, connection badge, Regenerate and Settings buttons |
 | — | [SettingsPanel](./settings-panel.md) | Drawer opened from the header's Settings button |
 | 1 | [ProjectCard](./project-card.md) | Pick the project folder and load `.dataverse-gen.json` |
+| — | [NewProjectDialog](./new-project-dialog.md) | Dialog opened from ProjectCard's New Project button |
+| — | [LoadProjectDialog](./load-project-dialog.md) | Dialog opened from ProjectCard's Load Existing Project button |
 | 2 | [SelectionCard](./selection-card.md) | Choose tables, actions and functions |
 | 3 | [OptionsCard](./options-card.md) | Output folder and which files to generate |
 | 4 | [PreviewCard](./preview-card.md) | Compare generated files with disk, then write them |

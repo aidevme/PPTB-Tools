@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import {
     Badge,
     Button,
     Card,
     CardHeader,
-    Checkbox,
     Dropdown,
     Option,
     SearchBox,
@@ -12,6 +11,14 @@ import {
     Switch,
     Tab,
     TabList,
+    Table,
+    TableBody,
+    TableCell,
+    TableCellLayout,
+    TableHeader,
+    TableHeaderCell,
+    TableRow,
+    TableSelectionCell,
     Text,
     Tooltip,
     makeStyles,
@@ -20,11 +27,26 @@ import {
     type SelectTabEvent,
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
-import type { EntitySummary, OperationSummary, SolutionSummary } from '../types';
+import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 const MAX_ROWS = 500;
+
+const ENTITY_COLUMNS = ['Display Name', 'Logical Name', 'Schema Name', 'Type'];
+const OPERATION_COLUMNS = ['Name', 'Binding', 'Parameters', 'Type'];
+
+/** One table row: the selection key, a name for the checkbox's accessible label, and the cells after it. */
+interface SelectionRow {
+    key: string;
+    label: string;
+    cells: ReactNode[];
+}
+
+function operationType(o: OperationSummary): string {
+    if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
+    return o.isProcessAction ? 'Custom action' : 'Built-in';
+}
 
 const useStyles = makeStyles({
     body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },
@@ -36,15 +58,13 @@ const useStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: tokens.borderRadiusMedium,
     },
-    row: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacingHorizontalS,
-        padding: `0 ${tokens.spacingHorizontalS}`,
-        borderBottom: `1px solid ${tokens.colorNeutralStroke3}`,
-        ':hover': { backgroundColor: tokens.colorNeutralBackground1Hover },
-    },
-    rowLabel: { display: 'flex', flexDirection: 'column', flexGrow: 1, minWidth: 0, padding: `${tokens.spacingVerticalXS} 0` },
+    row: { cursor: 'pointer' },
+    rowDisabled: { cursor: 'default' },
+    // Keeps the column headers visible while the list scrolls.
+    headerRow: { position: 'sticky', top: 0, zIndex: 1, backgroundColor: tokens.colorNeutralBackground1 },
+    headerCell: { fontWeight: tokens.fontWeightSemibold },
+    stacked: { display: 'flex', flexDirection: 'column', minWidth: 0 },
+    mono: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
     secondary: { color: tokens.colorNeutralForeground3, fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
     empty: { padding: tokens.spacingVerticalL, textAlign: 'center', color: tokens.colorNeutralForeground3 },
     summary: { display: 'flex', gap: tokens.spacingHorizontalS, alignItems: 'center', flexWrap: 'wrap' },
@@ -91,12 +111,24 @@ export function SelectionCard(props: SelectionCardProps) {
                 .filter((e) => !props.solutionEntityIds || props.solutionEntityIds.has(e.metadataId.toLowerCase()))
                 .filter((e) => !selectedOnly || selectedSet.has(e.logicalName))
                 .filter((e) => matches(e.logicalName, e.displayName, e.schemaName))
-                .map((e) => ({
-                    key: e.logicalName,
-                    primary: e.displayName,
-                    secondary: e.logicalName,
-                    tag: e.isCustom ? 'custom' : undefined,
-                }));
+                .map(
+                    (e): SelectionRow => ({
+                        key: e.logicalName,
+                        label: e.displayName,
+                        cells: [
+                            e.displayName,
+                            <span className={styles.mono}>{e.logicalName}</span>,
+                            <span className={styles.mono}>{e.schemaName}</span>,
+                            e.isCustom ? (
+                                <Badge appearance="outline" size="small">
+                                    Custom
+                                </Badge>
+                            ) : (
+                                'Standard'
+                            ),
+                        ],
+                    }),
+                );
         }
         const kind = tab === 'actions' ? 'action' : 'function';
         return (props.operations ?? [])
@@ -108,18 +140,39 @@ export function SelectionCard(props: SelectionCardProps) {
             // Custom APIs first, then case-insensitive by name (a plain sort puts lowercase publisher
             // prefixes after hundreds of built-in PascalCase messages, past the row limit).
             .sort((a, b) => Number(b.isCustomApi || b.isProcessAction) - Number(a.isCustomApi || a.isProcessAction) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
-            .map((o) => {
-                const binding = o.isBound ? `bound to ${o.boundTo ?? '?'}` : 'unbound';
+            .map((o): SelectionRow => {
+                const hasDisplayName = !!o.displayName && o.displayName !== o.name;
                 return {
                     key: o.name,
-                    primary: o.displayName && o.displayName !== o.name ? `${o.displayName} (${o.name})` : o.name,
-                    secondary: o.inMetadata
-                        ? `${binding} · ${o.parameterCount} parameters`
-                        : `${binding} · not in $metadata, types are built from the custom API definition`,
-                    tag: o.isCustomApi ? (o.isPrivate ? 'private custom API' : 'custom API') : o.isProcessAction ? 'custom action' : o.isBound ? 'bound' : undefined,
+                    label: o.name,
+                    cells: [
+                        hasDisplayName ? (
+                            <span className={styles.stacked}>
+                                <span>{o.displayName}</span>
+                                <span className={styles.secondary}>{o.name}</span>
+                            </span>
+                        ) : (
+                            o.name
+                        ),
+                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
+                        o.inMetadata ? (
+                            String(o.parameterCount)
+                        ) : (
+                            <Tooltip content="Not in $metadata; types are built from the custom API definition" relationship="description" withArrow>
+                                <span className={styles.secondary}>From definition</span>
+                            </Tooltip>
+                        ),
+                        o.isCustomApi || o.isProcessAction ? (
+                            <Badge appearance="outline" size="small">
+                                {operationType(o)}
+                            </Badge>
+                        ) : (
+                            operationType(o)
+                        ),
+                    ],
                 };
             });
-    }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId]);
+    }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles]);
 
     const onTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
         const next = data.value as SelectionKind;
@@ -209,24 +262,53 @@ export function SelectionCard(props: SelectionCardProps) {
                     ) : shown.length === 0 ? (
                         <div className={styles.empty}>{props.disabled ? 'Connect to an environment to list items.' : 'Nothing matches.'}</div>
                     ) : (
-                        shown.map((row) => (
-                            <label key={row.key} className={styles.row}>
-                                <Checkbox
-                                    checked={selectedSet.has(row.key)}
-                                    disabled={props.disabled}
-                                    onChange={(_, data) => props.onToggle(tab, row.key, data.checked === true)}
-                                />
-                                <span className={styles.rowLabel}>
-                                    <Text>{row.primary}</Text>
-                                    <span className={styles.secondary}>{row.secondary}</span>
-                                </span>
-                                {row.tag && (
-                                    <Badge appearance="outline" size="small">
-                                        {row.tag}
-                                    </Badge>
-                                )}
-                            </label>
-                        ))
+                        <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small">
+                            <TableHeader>
+                                <TableRow className={styles.headerRow}>
+                                    <TableSelectionCell type="checkbox" invisible />
+                                    {(tab === 'entities' ? ENTITY_COLUMNS : OPERATION_COLUMNS).map((column) => (
+                                        <TableHeaderCell key={column} className={styles.headerCell}>
+                                            {column}
+                                        </TableHeaderCell>
+                                    ))}
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {shown.map((row) => {
+                                    const checked = selectedSet.has(row.key);
+                                    const toggleRow = () => {
+                                        if (!props.disabled) props.onToggle(tab, row.key, !checked);
+                                    };
+                                    return (
+                                        <TableRow
+                                            key={row.key}
+                                            className={props.disabled ? styles.rowDisabled : styles.row}
+                                            aria-selected={checked}
+                                            appearance={checked ? 'brand' : 'none'}
+                                            tabIndex={0}
+                                            onClick={toggleRow}
+                                            onKeyDown={(e) => {
+                                                if (e.key === ' ' || e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    toggleRow();
+                                                }
+                                            }}
+                                        >
+                                            <TableSelectionCell
+                                                type="checkbox"
+                                                checked={checked}
+                                                checkboxIndicator={{ 'aria-label': `Select ${row.label}`, disabled: props.disabled }}
+                                            />
+                                            {row.cells.map((cell, index) => (
+                                                <TableCell key={index}>
+                                                    <TableCellLayout truncate>{cell}</TableCellLayout>
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    );
+                                })}
+                            </TableBody>
+                        </Table>
                     )}
                 </div>
                 <Text size={200}>

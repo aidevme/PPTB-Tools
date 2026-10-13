@@ -3,7 +3,7 @@
 Step 2 of the workflow: choose the tables, actions and functions to generate. The selection is stored
 directly in the config, so it's saved to `.dataverse-gen.json`.
 
-Source: [`src/components/SelectionCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/SelectionCard.tsx)
+Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx)
 
 ## Props (`SelectionCardProps`)
 
@@ -36,7 +36,13 @@ Source: [`src/components/SelectionCard.tsx`](https://github.com/aidevme/PPTB-Too
 - **Sorting:** actions and functions list custom APIs first, then sort by name ignoring case.
 - **Row limit:** the list shows at most 500 rows; the footer asks you to refine the search when there are
   more matches.
-- **Tags:** rows are tagged `custom`, `custom API`, `private custom API`, `custom action` or `bound`.
-  Private custom APIs that aren't in `$metadata` say their types are built from the custom API definition.
+- **Tables:** each tab lists its items in a Fluent UI `Table` with a checkbox column. Clicking a row, its
+  checkbox, or pressing Space or Enter on it toggles the selection; selected rows are highlighted. Column
+  headers are semibold and stay visible while the list scrolls.
+  - **Tables tab:** Display Name, Logical Name, Schema Name, and Type (**Custom** badge, or Standard).
+  - **Actions and Functions tabs:** Name (display name above the unique name when they differ), Binding
+    (Bound to a table, or Unbound), Parameters, and Type (**Custom API**, **Private custom API** or **Custom
+    action** badges, or Built-in). Custom APIs missing from `$metadata` show **From definition** under
+    Parameters: their types are built from the custom API definition.
 - **Missing items:** names that are in the config but not in the environment are listed above the list.
   They stay in the config and are skipped when generating.

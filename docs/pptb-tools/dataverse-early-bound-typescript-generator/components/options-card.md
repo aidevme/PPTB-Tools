@@ -4,7 +4,7 @@ Step 3 of the workflow: the output folder and which files to generate. The optio
 dataverse-gen `init` prompts and are saved to `.dataverse-gen.json`, so the dataverse-gen CLI uses the same
 settings.
 
-Source: [`src/components/OptionsCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/OptionsCard.tsx)
+Source: [`src/components/cards/OptionsCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/OptionsCard.tsx)
 
 ## Props (`OptionsCardProps`)
 
@@ -25,3 +25,10 @@ Source: [`src/components/OptionsCard.tsx`](https://github.com/aidevme/PPTB-Tools
 
 Attribute constants, choice enums and the metadata cache (`metadata.ts`) are always generated for the
 selected tables.
+
+## Info labels
+
+Each control's label is a Fluent UI `InfoLabel`: an info button next to the text opens a short explanation of
+what the option produces and which `.dataverse-gen.json` key it's saved as. The `InfoLabel` renders in the
+control's label slot, so the label stays associated with its input, and clicking the text still toggles the
+switch.

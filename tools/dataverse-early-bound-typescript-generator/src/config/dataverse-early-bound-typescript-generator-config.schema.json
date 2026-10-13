@@ -1,0 +1,80 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "https://github.com/aidevme/PPTB-Tools/tools/dataverse-early-bound-typescript-generator/src/config/dataverse-early-bound-typescript-generator-config.schema.json",
+    "title": "Dataverse Early-Bound TypeScript Generator config",
+    "description": "Tool settings and saved projects for the Dataverse Early-Bound TypeScript Generator. dataverse-early-bound-typescript-generator-config.json holds the defaults bundled at build time; values saved in the tool are kept in PPTB's per-tool settings in the same shape.",
+    "type": "object",
+    "properties": {
+        "$schema": {
+            "description": "Path or URL of this schema, for editor validation. Ignored by the tool.",
+            "type": "string"
+        },
+        "deleteOrphanedFiles": {
+            "description": "Delete files in the output folders that the current selection no longer generates. Not applied yet: PPTB's file API can't delete files, so orphaned files are only reported.",
+            "type": "boolean",
+            "default": false
+        },
+        "projects": {
+            "description": "Projects created with the New Project dialog.",
+            "type": "array",
+            "default": [],
+            "items": { "$ref": "#/definitions/project" }
+        }
+    },
+    "additionalProperties": false,
+    "definitions": {
+        "isoDateTime": {
+            "description": "ISO 8601 timestamp in UTC, as written by Date.toISOString().",
+            "type": "string",
+            "format": "date-time"
+        },
+        "project": {
+            "description": "A saved project. The tool skips entries missing id, name, location or createdOn, and fills in description, version and modifiedOn when absent.",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "description": "Unique id, generated with crypto.randomUUID().",
+                    "type": "string",
+                    "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+                },
+                "name": {
+                    "description": "Project name. Unique among saved projects, ignoring case.",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "description": {
+                    "description": "Optional description.",
+                    "type": "string",
+                    "default": ""
+                },
+                "location": {
+                    "description": "Absolute path of the project folder, usually the one with package.json and .dataverse-gen.json.",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "version": {
+                    "description": "Project version. Starts at 1.0.0 and gets a patch bump when a Generate run adds files or stops producing ones the previous run did.",
+                    "type": "string",
+                    "pattern": "^\\d+\\.\\d+\\.\\d+$",
+                    "default": "1.0.0"
+                },
+                "createdOn": {
+                    "$ref": "#/definitions/isoDateTime",
+                    "description": "When the project was created."
+                },
+                "modifiedOn": {
+                    "$ref": "#/definitions/isoDateTime",
+                    "description": "When a Generate run last added or dropped files. Defaults to createdOn."
+                },
+                "lastGeneratedFiles": {
+                    "description": "Output files the last Generate run produced, relative to the output folder with forward slashes. Absent until the project is first generated.",
+                    "type": "array",
+                    "items": { "type": "string", "minLength": 1 },
+                    "uniqueItems": true
+                }
+            },
+            "required": ["id", "name", "location", "createdOn"],
+            "additionalProperties": false
+        }
+    }
+}

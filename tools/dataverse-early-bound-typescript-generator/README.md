@@ -1,4 +1,4 @@
-# Dataverse Early-Bound TypeScript Generator (`tools/dataverse-type-gen`)
+# Dataverse Early-Bound TypeScript Generator (`tools/dataverse-early-bound-typescript-generator`)
 
 A Power Platform ToolBox (PPTB) tool that generates early-bound TypeScript types and metadata for
 Dataverse tables, actions and functions. The output is compatible with Scott Durow's
@@ -53,6 +53,7 @@ src/
 │   ├── csdl.ts             # $metadata (EDMX) parser
 │   ├── model.ts            # selection + type mapping (port of SchemaModel.ts)
 │   ├── templates.ts        # the 7 EJS templates as plain functions
+│   ├── metadataSchema.ts   # fallback schema from table + relationship metadata (CSDL too large)
 │   └── generator.ts        # SchemaModel -> GeneratedFile[] (deterministic)
 ├── services/               # PPTB adapters and file planning
 │   ├── metadataProvider.ts # dataverseAPI: tables, CSDL, attributes, option sets (cached, throttled)
@@ -87,6 +88,14 @@ into its own package when the CLI is built.
 - **Custom APIs missing from `$metadata`.** Private custom APIs, and ones the environment's metadata cache does not
   include yet, are still listed and selectable. Their definitions are built from the `customapi` record and its
   `customapirequestparameters`, mapped to the EDM types `$metadata` would publish.
+- **`$metadata` too large for PPTB.** PPTB's `getCSDLDocument` rejects documents over 16 MiB, compressed or
+  decompressed. On that error the provider rebuilds the schema from the table list (`createMetadataSchema`), and
+  each selected table's navigation properties from its `ManyToOne`/`OneToMany`/`ManyToManyRelationships`
+  (`navigationFromRelationships`); properties already come from attribute metadata. Custom APIs are still built
+  from their records. Built-in actions and functions, custom process actions and CSDL complex types and enums have
+  no metadata source, so they're unavailable, and the UI shows a warning. With the fixture CSDL's relationships,
+  the fallback produces the same table files as the CSDL path (`test/metadataFallback.test.ts`), but it hasn't
+  been checked against a live environment that hits the limit.
 - **Concurrency.** Entity metadata is fetched four entities at a time, with progress shown.
 - **File-name casing.** An existing file whose name differs only in casing is reused, and the module specifiers
   in `index.ts` and `metadata.ts` are rewritten to match.
@@ -114,5 +123,7 @@ These only affect cases where dataverse-gen emits code that does not compile:
 
 - Not yet validated against a live Dataverse environment inside PPTB. The full flow was exercised in a browser
   with mocked PPTB APIs fed by dataverse-gen's test fixtures.
-- The CSDL is 1 to 5 MB and is fetched once per connection when Actions/Functions are opened or on first preview.
+- The CSDL is usually 1 to 5 MB and is fetched once per connection when Actions/Functions are opened or on first
+  preview. Environments whose CSDL is over PPTB's 16 MiB limit use the metadata fallback above, without built-in
+  actions/functions or custom process actions.
 - The tool name has not been checked against the PPTB marketplace or npm.

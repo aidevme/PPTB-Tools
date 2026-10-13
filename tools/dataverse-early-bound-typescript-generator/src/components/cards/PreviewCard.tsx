@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
 import { Badge, Button, Card, CardHeader, Text, Tooltip, makeStyles, tokens } from '@fluentui/react-components';
 import { DocumentSearchRegular, SaveRegular } from '@fluentui/react-icons';
-import type { FileStatus, PlannedFile, WritePlan } from '../types';
-import { CodeViewer } from './CodeViewer';
+import type { FileStatus, PlannedFile, WritePlan } from '../../types';
+import { CodeViewer } from '../CodeViewer';
 
 const useStyles = makeStyles({
     body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },

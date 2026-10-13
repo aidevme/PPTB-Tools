@@ -5,7 +5,7 @@
  * Everything is cached per instance; the app creates a new instance whenever the active connection
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
-import { parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type OptionSetInput } from '../core';
+import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary } from '../types';
 import { mapWithConcurrency } from './concurrency';
 
@@ -31,10 +31,26 @@ function api(): typeof window.dataverseAPI {
     return window.dataverseAPI;
 }
 
+/**
+ * PPTB's `getCSDLDocument` caps the `$metadata` response at 16 MiB (its batch response limit), and large
+ * environments exceed that, either compressed ("exceeds the maximum size") or once decompressed ("Cannot
+ * create a Buffer larger than … bytes"). Those environments fall back to {@link createMetadataSchema}.
+ */
+function isCsdlSizeLimitError(error: unknown): boolean {
+    const message = error instanceof Error ? error.message : String(error);
+    return /larger than \d+ bytes|exceeds the maximum size/i.test(message);
+}
+
+/** Only the navigation property columns are needed from the relationship metadata. */
+const ONE_TO_MANY_COLUMNS = ['SchemaName', 'ReferencedEntity', 'ReferencingEntity', 'ReferencedEntityNavigationPropertyName', 'ReferencingEntityNavigationPropertyName'];
+const MANY_TO_MANY_COLUMNS = ['SchemaName', 'Entity1LogicalName', 'Entity2LogicalName', 'Entity1NavigationPropertyName', 'Entity2NavigationPropertyName'];
+
 export class PptbMetadataProvider {
     private entityList?: Promise<EntitySummary[]>;
     private csdl?: Promise<string>;
     private schema?: Promise<EdmxSchema>;
+    /** Set once the CSDL turned out to be too large and the schema was rebuilt from metadata. */
+    private metadataFallback = false;
     private readonly entityCache = new Map<string, Promise<EntityMetadataInput>>();
     private customApis?: Promise<CustomApiRecord[]>;
     /** Whether the bulk `queryData` option-set query works on this host; `undefined` until tried. */
@@ -79,17 +95,35 @@ export class PptbMetadataProvider {
         return this.csdl;
     }
 
-    /** Parsed CSDL, parsed once per connection. */
+    /**
+     * Parsed CSDL, parsed once per connection. When the CSDL is too large for PPTB, a schema rebuilt from
+     * the table list instead (see {@link usesMetadataFallback}).
+     */
     getSchema(): Promise<EdmxSchema> {
         if (!this.schema) {
             this.schema = this.getCsdl()
                 .then((xml) => parseCsdl(xml))
+                .catch(async (error: unknown) => {
+                    if (!isCsdlSizeLimitError(error)) throw error;
+                    console.warn('The $metadata document is too large for PPTB; rebuilding the schema from table metadata.', error);
+                    const entities = await this.listEntities();
+                    this.metadataFallback = true;
+                    return createMetadataSchema(entities.map((e) => ({ logicalName: e.logicalName, entitySetName: e.entitySetName })));
+                })
                 .catch((error: unknown) => {
                     this.schema = undefined;
                     throw error;
                 });
         }
         return this.schema;
+    }
+
+    /**
+     * Whether the schema was rebuilt from table and relationship metadata because the `$metadata` document
+     * is too large for PPTB. Built-in actions/functions and custom process actions are unavailable then.
+     */
+    get usesMetadataFallback(): boolean {
+        return this.metadataFallback;
     }
 
     /** Actions and functions from the CSDL, for the Select step. */
@@ -199,6 +233,7 @@ export class PptbMetadataProvider {
     reset(): void {
         this.entityList = undefined;
         this.csdl = undefined;
+        this.metadataFallback = false;
         this.schema = undefined;
         this.entityCache.clear();
         this.customApis = undefined;
@@ -207,11 +242,13 @@ export class PptbMetadataProvider {
 
     private async fetchEntity(logicalName: string): Promise<EntityMetadataInput> {
         const dataverse = api();
-        const [entity, attributes] = await Promise.all([
+        const [entity, attributes, relationships] = await Promise.all([
             dataverse.getEntityMetadata(logicalName, true, ['LogicalName', 'SchemaName', 'EntitySetName', 'PrimaryIdAttribute']),
             // No $select: Targets, Format and DateTimeBehavior live on derived attribute types and cannot be
             // selected on the base Attributes collection, so take everything.
             dataverse.getEntityRelatedMetadata(logicalName, 'Attributes'),
+            // Navigation properties normally come from the CSDL; only the fallback schema needs these.
+            this.metadataFallback ? this.fetchRelationships(logicalName) : Promise.resolve(undefined),
         ]);
         const attributeList = attributes.value as unknown as AttributeMetadataInput[];
         await this.attachOptionSets(logicalName, attributeList);
@@ -221,6 +258,23 @@ export class PptbMetadataProvider {
             EntitySetName: entity.EntitySetName as string,
             PrimaryIdAttribute: (entity.PrimaryIdAttribute as string | undefined) ?? undefined,
             Attributes: attributeList,
+            ...relationships,
+        };
+    }
+
+    private async fetchRelationships(
+        logicalName: string,
+    ): Promise<Pick<EntityMetadataInput, 'ManyToOneRelationships' | 'OneToManyRelationships' | 'ManyToManyRelationships'>> {
+        const dataverse = api();
+        const [manyToOne, oneToMany, manyToMany] = await Promise.all([
+            dataverse.getEntityRelatedMetadata(logicalName, 'ManyToOneRelationships', ONE_TO_MANY_COLUMNS),
+            dataverse.getEntityRelatedMetadata(logicalName, 'OneToManyRelationships', ONE_TO_MANY_COLUMNS),
+            dataverse.getEntityRelatedMetadata(logicalName, 'ManyToManyRelationships', MANY_TO_MANY_COLUMNS),
+        ]);
+        return {
+            ManyToOneRelationships: manyToOne.value as unknown as OneToManyRelationshipInput[],
+            OneToManyRelationships: oneToMany.value as unknown as OneToManyRelationshipInput[],
+            ManyToManyRelationships: manyToMany.value as unknown as ManyToManyRelationshipInput[],
         };
     }
 

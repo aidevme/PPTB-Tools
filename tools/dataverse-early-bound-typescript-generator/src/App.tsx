@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Footer, Header, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, type SelectionKind } from './components';
+import { Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, type NewProject, type SelectionKind } from './components';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
+import { DEFAULT_PROJECT_VERSION, recordGeneration, toolConfig, type ProjectEntry, type ToolConfig } from './config';
 import { useConnection } from './hooks';
 import {
     PptbFileSink,
@@ -12,11 +13,14 @@ import {
     getRememberedProjectFolder,
     getSolutionEntityIds,
     getSolutionMemberIds,
+    isSamePath,
     listSolutions,
     loadProjectConfig,
+    loadToolConfig,
     rememberProjectFolder,
     resolveOutputRoot,
     saveProjectConfig,
+    saveToolConfig,
     type ProjectConfigState,
 } from './services';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
@@ -36,6 +40,9 @@ const useStyles = makeStyles({
     },
     progress: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS },
 });
+
+/** How long the "$metadata is too large" warning stays visible. */
+const METADATA_FALLBACK_WARNING_MS = 5000;
 
 const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions: [], functions: [] };
 
@@ -64,6 +71,14 @@ export default function App() {
     const provider = useMemo(() => new PptbMetadataProvider(), [connKey]); // eslint-disable-line react-hooks/exhaustive-deps
     const sink = useMemo(() => new PptbFileSink(), []);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    const [newProjectOpen, setNewProjectOpen] = useState(false);
+    const [loadProjectOpen, setLoadProjectOpen] = useState(false);
+    /** Settings-panel values: the bundled defaults until the saved values have loaded. */
+    const [toolSettings, setToolSettings] = useState<ToolConfig>(toolConfig);
+    /** The $metadata document is too large for PPTB, so the schema was rebuilt from table metadata. */
+    const [metadataFallback, setMetadataFallback] = useState(false);
+    /** The fallback warning is shown for a few seconds when the fallback starts, then hides itself. */
+    const [showMetadataFallbackWarning, setShowMetadataFallbackWarning] = useState(false);
 
     const [projectRoot, setProjectRoot] = useState<string | null>(null);
     /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
@@ -95,62 +110,145 @@ export default function App() {
 
     // ----- project folder -------------------------------------------------------------------------
 
+    /** Opens `folder` as the project and reads its `.dataverse-gen.json`; throws when it can't be read. */
+    const openProjectFolder = useCallback(
+        async (folder: string) => {
+            const state = await loadProjectConfig(sink, folder);
+            if (!projectRoot) {
+                // Keep anything selected before the folder was picked.
+                const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
+                state.config = {
+                    ...state.config,
+                    entities: merge(state.config.entities, config.entities),
+                    actions: merge(state.config.actions, config.actions),
+                    functions: merge(state.config.functions, config.functions),
+                };
+            }
+            setProjectRoot(folder);
+            setConfigState(state);
+            setPlan(null);
+            setPlanStale(false);
+            await rememberProjectFolder(connKey, folder);
+        },
+        [sink, connKey, projectRoot, config],
+    );
+
     const loadProject = useCallback(
         async (folder: string) => {
             setError(null);
             setNotice(null);
             try {
-                const state = await loadProjectConfig(sink, folder);
-                if (!projectRoot) {
-                    // Keep anything selected before the folder was picked.
-                    const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
-                    state.config = {
-                        ...state.config,
-                        entities: merge(state.config.entities, config.entities),
-                        actions: merge(state.config.actions, config.actions),
-                        functions: merge(state.config.functions, config.functions),
-                    };
-                }
-                setProjectRoot(folder);
-                setConfigState(state);
-                setPlan(null);
-                setPlanStale(false);
-                await rememberProjectFolder(connKey, folder);
+                await openProjectFolder(folder);
             } catch (e) {
                 const message = errorMessage(e);
                 setError(
                     /access denied|permission/i.test(message)
-                        ? `PPTB has not granted this tool access to ${folder}. Click Browse… and select the folder again to grant access.`
+                        ? `PPTB has not granted this tool access to ${folder}. Open it again with Load Existing Project to grant access.`
                         : `Could not load ${folder}: ${message}`,
                 );
             }
         },
-        [sink, connKey, projectRoot, config],
+        [openProjectFolder],
     );
 
-    const browse = useCallback(async () => {
-        if (!window.toolboxAPI) return;
-        try {
-            // selectPath is also what grants this tool file-system access to the chosen folder.
+    /**
+     * Opens a project saved with the New Project dialog: its location becomes the project folder and its
+     * `.dataverse-gen.json` is read. If PPTB hasn't granted access to that folder in this session, the folder
+     * picker opens there for the user to confirm instead. Resolves to `false` when that picker is cancelled.
+     */
+    const openSavedProject = useCallback(
+        async (project: ProjectEntry) => {
+            if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
+            setError(null);
+            setNotice(null);
+            try {
+                // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
+                // otherwise just look like a new project.
+                await window.toolboxAPI.fileSystem.readDirectory(project.location);
+                await openProjectFolder(project.location);
+                return true;
+            } catch (e) {
+                if (!/access denied|permission|not allowed|not permitted/i.test(errorMessage(e))) throw e;
+            }
             const folder = await window.toolboxAPI.fileSystem.selectPath({
                 type: 'folder',
-                title: 'Select the project folder',
-                message: 'Pick the folder that contains (or should contain) .dataverse-gen.json',
-                defaultPath: projectRoot ?? rememberedFolder ?? undefined,
+                title: `Open ${project.name}`,
+                message: 'Confirm the project folder so Power Platform ToolBox lets the tool read it',
+                defaultPath: project.location,
             });
-            if (folder) await loadProject(folder);
-        } catch (e) {
-            setError(`Could not open the folder picker: ${errorMessage(e)}`);
-        }
-    }, [loadProject, projectRoot, rememberedFolder]);
+            if (!folder) return false;
+            await openProjectFolder(folder);
+            return true;
+        },
+        [openProjectFolder],
+    );
 
     // ----- environment lists ----------------------------------------------------------------------
+
+    useEffect(() => {
+        let cancelled = false;
+        void loadToolConfig().then((loaded) => !cancelled && setToolSettings(loaded));
+        return () => {
+            cancelled = true;
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!metadataFallback) {
+            setShowMetadataFallbackWarning(false);
+            return;
+        }
+        setShowMetadataFallbackWarning(true);
+        const timer = window.setTimeout(() => setShowMetadataFallbackWarning(false), METADATA_FALLBACK_WARNING_MS);
+        return () => window.clearTimeout(timer);
+    }, [metadataFallback]);
+
+    /** Saves the Settings-panel values; the panel stays open and shows the error if saving fails. */
+    const saveToolSettings = useCallback(async (next: ToolConfig) => {
+        await saveToolConfig(next);
+        setToolSettings(next);
+    }, []);
+
+    /** Adds a project from the New Project dialog to `projects` and saves the config. */
+    const addProject = useCallback(
+        async (project: NewProject) => {
+            const now = new Date().toISOString();
+            const next: ToolConfig = {
+                ...toolSettings,
+                projects: [...toolSettings.projects, { ...project, id: crypto.randomUUID(), version: DEFAULT_PROJECT_VERSION, createdOn: now, modifiedOn: now }],
+            };
+            await saveToolConfig(next);
+            setToolSettings(next);
+        },
+        [toolSettings],
+    );
+
+    /** Removes a saved project from `projects` and saves the config; files in its folder are left alone. */
+    const deleteProject = useCallback(
+        async (project: ProjectEntry) => {
+            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.filter((p) => p.id !== project.id) };
+            await saveToolConfig(next);
+            setToolSettings(next);
+        },
+        [toolSettings],
+    );
+
+    /** Folder picker for the New Project dialog's Location; `null` when cancelled or outside PPTB. */
+    const pickProjectLocation = useCallback(async (current: string) => {
+        if (!window.toolboxAPI) return null;
+        return window.toolboxAPI.fileSystem.selectPath({
+            type: 'folder',
+            title: 'Select the project location',
+            defaultPath: current || undefined,
+        });
+    }, []);
 
     useEffect(() => {
         if (!inPptb || !connection) return;
         let cancelled = false;
         setEntities([]);
         setOperations(null);
+        setMetadataFallback(false);
         setSolutions([]);
         setSelectedSolutionId(null);
         setSolutionEntityIds(null);
@@ -183,7 +281,10 @@ export default function App() {
         setLoadingOperations(true);
         provider
             .listOperations()
-            .then(setOperations)
+            .then((list) => {
+                setOperations(list);
+                setMetadataFallback(provider.usesMetadataFallback);
+            })
             .catch((e) => setError(`Could not load the $metadata document: ${errorMessage(e)}`))
             .finally(() => setLoadingOperations(false));
     }, [operations, loadingOperations, inPptb, provider]);
@@ -278,6 +379,7 @@ export default function App() {
             const resolved = resolveConfig(config);
             setProgress({ message: 'Loading the $metadata document…', completed: 0, total: 1 });
             const schema = await provider.getSchemaForSelection(resolved.actions, resolved.functions);
+            setMetadataFallback(provider.usesMetadataFallback);
             const selection = resolveSelection(schema, resolved);
             const names = selection.entities.map((e) => e.Name);
             setProgress({ message: `Loading metadata for ${names.length} table(s)…`, completed: 0, total: names.length });
@@ -301,6 +403,35 @@ export default function App() {
         }
     }, [projectRoot, config, provider, sink]);
 
+    /**
+     * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
+     * Modified On when the run added files or stopped producing ones the previous run did. Folders that
+     * aren't saved projects are left alone; a failure to save is logged, since the files were written.
+     */
+    const recordProjectGeneration = useCallback(
+        async (root: string, applied: WritePlan) => {
+            const index = toolSettings.projects.findIndex((p) => isSamePath(p.location, root));
+            if (index === -1) return;
+            const updated = recordGeneration(
+                toolSettings.projects[index],
+                {
+                    files: applied.files.filter((f) => f.status !== 'orphaned').map((f) => f.relativePath),
+                    newFiles: applied.files.filter((f) => f.status === 'new').map((f) => f.relativePath),
+                },
+                new Date().toISOString(),
+            );
+            if (!updated) return;
+            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.map((p, i) => (i === index ? updated : p)) };
+            try {
+                await saveToolConfig(next);
+                setToolSettings(next);
+            } catch (e) {
+                console.warn('Could not update the project after generating', e);
+            }
+        },
+        [toolSettings],
+    );
+
     const runGenerate = useCallback(
         async (planToApply: WritePlan) => {
             if (!projectRoot) return;
@@ -312,6 +443,7 @@ export default function App() {
                 );
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
                 setConfigState((state) => ({ ...state, exists: true, path: configPath }));
+                await recordProjectGeneration(projectRoot, planToApply);
                 // Everything written is now unchanged.
                 setPlan({
                     ...planToApply,
@@ -327,7 +459,7 @@ export default function App() {
                 setProgress(null);
             }
         },
-        [projectRoot, config, sink],
+        [projectRoot, config, sink, recordProjectGeneration],
     );
 
     const regenerate = useCallback(async () => {
@@ -360,7 +492,26 @@ export default function App() {
     return (
         <div className={styles.page}>
             <Header connection={connection} canRegenerate={ready && hasSelection} busy={busy} onRegenerate={regenerate} onOpenSettings={() => setSettingsOpen(true)} />
-            <SettingsPanel open={settingsOpen} onOpenChange={setSettingsOpen} />
+            <SettingsPanel
+                open={settingsOpen}
+                onOpenChange={setSettingsOpen}
+                settings={toolSettings}
+                onSave={saveToolSettings}
+            />
+            <NewProjectDialog
+                open={newProjectOpen}
+                onOpenChange={setNewProjectOpen}
+                existingNames={toolSettings.projects.map((p) => p.name)}
+                onBrowseLocation={pickProjectLocation}
+                onSave={addProject}
+            />
+            <LoadProjectDialog
+                open={loadProjectOpen}
+                onOpenChange={setLoadProjectOpen}
+                projects={toolSettings.projects}
+                onLoad={openSavedProject}
+                onDelete={deleteProject}
+            />
             <main className={styles.main}>
                 {!inPptb && (
                     <MessageBar intent="warning">
@@ -374,6 +525,16 @@ export default function App() {
                 {inPptb && !connectionLoading && !connection && (
                     <MessageBar intent="info">
                         <MessageBarBody>Connect to a Dataverse environment in PPTB to list tables, actions and functions.</MessageBarBody>
+                    </MessageBar>
+                )}
+                {showMetadataFallbackWarning && (
+                    <MessageBar intent="warning">
+                        <MessageBarBody>
+                            <MessageBarTitle>$metadata is too large for Power Platform ToolBox</MessageBarTitle>
+                            This environment's $metadata document is over the 16 MB PPTB allows, so types are built from table and
+                            relationship metadata instead. Tables and custom APIs work; built-in actions and functions and custom process
+                            actions are not available. Output can differ slightly from dataverse-gen's.
+                        </MessageBarBody>
                     </MessageBar>
                 )}
                 {error && (
@@ -395,7 +556,9 @@ export default function App() {
                         <ProgressBar value={progress.total > 0 ? progress.completed / progress.total : undefined} />
                     </div>
                 )}
-                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb} onBrowse={browse}
+                <ProjectCard projectRoot={projectRoot} rememberedFolder={rememberedFolder} configState={projectRoot ? configState : null} busy={busy || !inPptb}
+                    onNewProject={() => setNewProjectOpen(true)}
+                    onLoadExistingProject={() => setLoadProjectOpen(true)}
                     onReload={() => projectRoot && loadProject(projectRoot)}
                     outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
                     hasSelection={hasSelection}

@@ -33,6 +33,10 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | --- | --- |
 | `generator.test.ts` | CSDL parsing, selection expansion, and generated output compared file by file with the real dataverse-gen CLI's output |
 | `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions |
+| `metadataFallback.test.ts` | The `$metadata`-too-large fallback: navigation rebuilt from relationships matches the CSDL's, table files match the reference output, and the provider switches only on PPTB's size-limit errors |
+| `settings.test.ts` | Tool config: defaults from the config JSON, saved values and projects merged over them, the Settings panel's Save/Cancel, and the New Project dialog's validation and saving |
+| `projectVersion.test.ts` | Project version bumps and Modified On after a Generate run, saved file lists, and matching the open folder to a saved project |
+| `selectionCard.test.ts` | The Select card's tables: columns per tab, toggling from the row, checkbox or keyboard, and the disabled state |
 | `services.test.ts` | Path helpers, config round-trip, and write planning (statuses, casing reuse, first-time folder creation) |
 
 Test data:
