@@ -14,29 +14,30 @@ This guide ensures only @aidevme can approve PRs, merge code, and deploy to npm.
 
 2. Click **"Add branch protection rule"** (or edit existing rule for `main`)
 
-3. **Branch name pattern**: `main-protection`
+3. **Branch name pattern**: `main`
 
 4. **Enable these settings:**
 
    ✅ **Require a pull request before merging**
-   - ✅ Require approvals: **1**
+   - ✅ Require approvals: **1** (you can't approve your own PR; as the only collaborator you merge your own PRs
+     by bypassing as admin, so keep "Do not allow bypassing" off)
    - ✅ Dismiss stale pull request approvals when new commits are pushed
    - ✅ Require review from Code Owners
 
    ✅ **Require status checks to pass before merging**
    - ✅ Require branches to be up to date before merging
+   - Required check: **Analyze (javascript-typescript)** (CodeQL, runs on every PR). Don't require "Build Tool"
+     (it runs after CodeQL via `workflow_run`, not on the PR) or the tool's "Test and build" (it only runs when
+     that tool's files change), or unrelated PRs wait forever.
 
    ✅ **Require conversation resolution before merging**
 
-   ✅ **Do not allow bypassing the above settings**
-   - This ensures even admins (you) follow the rules
+   ❌ **Do not allow bypassing the above settings**: off
+   - With it on, a single-maintainer repo can never merge, since nobody else can approve. Turn it on once a
+     second maintainer can review.
 
-   ✅ **Restrict who can push to matching branches**
-   - Add: **@aidevme** (only you can push)
-   - Or leave empty to allow only via PR
-
-   ✅ **Restrict who can dismiss pull request reviews**
-   - Add: **@aidevme** (only you can dismiss reviews)
+   ℹ️ **Restrict who can push** and **Restrict who can dismiss pull request reviews** are only available for
+   organization-owned repositories. This is a personal repository, and only @aidevme has write access anyway.
 
    ✅ **Allow force pushes**: ❌ Disabled
 
