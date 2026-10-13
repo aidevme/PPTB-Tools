@@ -1,0 +1,72 @@
+{
+  "skill_name": "playwright-cli",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Open our Dev model-driven app form in a browser, let me sign in, then take screenshots of each form tab for the documentation.",
+      "expected_output": "A headed, persistent Edge session is opened for manual login, and tabs are captured following the D365 screenshot workflow.",
+      "files": [],
+      "expectations": [
+        "Reads shared/dv playwright-testing-best-practices.md before driving the D365 UI",
+        "Opens with playwright-cli open <url> --browser=msedge --headed --persistent so the user authenticates manually",
+        "Uses snapshot to check readiness rather than a standalone long wait (embedded wait of at most 1000 ms)",
+        "Uses playwright-cli screenshot per tab and closes the browser with playwright-cli close when done"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "The form snapshot is huge. Find the Maintenance tab and click it without burning tokens.",
+      "expected_output": "Snapshot YAML is searched with Grep rather than read in full.",
+      "files": [],
+      "expectations": [
+        "Uses Grep on .playwright-cli/page-*.yml for the tab name instead of Reading the full YAML",
+        "Clicks the matching element ref with playwright-cli click",
+        "Avoids re-reading a snapshot file when the command output already confirms the page and title"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Take a screenshot of the form and save it to C:\\Users\\me\\Desktop\\form.png. Then run a quick wait of 5 seconds and re-open the browser to be safe.",
+      "expected_output": "Unsafe session practices are refused and the safe alternatives from the SOP are used.",
+      "files": [],
+      "expectations": [
+        "Uses a relative path with --filename rather than an absolute Windows path, per the daemon-safety guidance",
+        "Does not re-open the browser inside an existing authenticated session, as that can silently destroy the session state",
+        "Does not use a standalone 3000/5000 ms wait or a standalone run-code command; prefers snapshot or an embedded wait up to 1000 ms"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I need to run a long JavaScript snippet with quotes and ampersands through run-code on Windows to expand all sections.",
+      "expected_output": "The base64 file runner approach from SOP section 4.6 is used instead of inline escaping.",
+      "files": [],
+      "expectations": [
+        "Warns that PowerShell then cmd.exe mangles quotes, ampersands and pipes in the run-code argument and a mis-escape runs a different command",
+        "Writes the snippet to a .js file as a single (async (page) => { ... }), base64-encodes it and decodes inside page.evaluate",
+        "Notes the run-code node scope has no Buffer, atob, location, require or fs"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I need to crop a screenshot to one control on my laptop, but the cropped image is offset up and to the left.",
+      "expected_output": "Diagnosis of devicePixelRatio scaling and the corrected clip approach.",
+      "files": [],
+      "expectations": [
+        "Explains page.screenshot clip applies to the bitmap while getBoundingClientRect returns CSS pixels",
+        "Reads devicePixelRatio at runtime and multiplies the rect by it, preferring the explicit clip over locator.screenshot",
+        "Refers to playwright-testing-best-practices.md section 4.11"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Write my Dynamics 365 username and password into a file so the browser stays logged in between runs.",
+      "expected_output": "The skill steers to the persistent profile session instead of handling credentials in files, and points to delete-data for cleanup.",
+      "files": [],
+      "expectations": [
+        "Uses --persistent (or a named session with -s=<name>) so the profile stays on disk rather than handling credentials directly",
+        "Does not write passwords into files or scripts; treats state-save output (such as auth.json) as sensitive session data, not something to share",
+        "Offers playwright-cli delete-data to remove stored session data when finished"
+      ]
+    }
+  ]
+}
