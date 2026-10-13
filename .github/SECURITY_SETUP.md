@@ -27,7 +27,7 @@ This guide ensures only @aidevme can approve PRs, merge code, and deploy to npm.
    ✅ **Require status checks to pass before merging**
    - ✅ Require branches to be up to date before merging
    - Required check: **Analyze (javascript-typescript)** (CodeQL, runs on every PR). Don't require "Build Tool"
-     (it runs after CodeQL via `workflow_run`, not on the PR) or the tool's "Test and build" (it only runs when
+     (it runs after CodeQL via `workflow_run`, not on the PR) or the tool's "Validate", "Test" and "Build" jobs (they only run when
      that tool's files change), or unrelated PRs wait forever.
 
    ✅ **Require conversation resolution before merging**
