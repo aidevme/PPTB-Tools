@@ -78,7 +78,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 ## File table
 
 - **Default view: changes only.** New, changed and orphaned files are listed; unchanged files appear when
-  **Show unchanged** is on, or when the Unchanged tile is selected (`visibleFiles`). With nothing to show, the
+  **Show unchanged** is on, or when the Unchanged tile is selected (`visibleFiles` in `components/shared/previewFiles.tsx`). With nothing to show, the
   table suggests turning on **Show unchanged**.
 - **Search:** filters by path, ignoring case. "Showing *n* of *total* files" updates as you filter, and is
   announced to screen readers.
@@ -91,7 +91,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Sorting:** clicking a header sorts by that column, ascending; clicking it again flips to descending. Until
   then the table keeps the plan's order, grouped by folder. Names sort naturally ignoring case, types
   alphabetically, and statuses as new, changed, unchanged, orphaned. Ties fall back to name order
-  (`sortFiles`).
+  (`sortFiles` in `components/shared/previewFiles.tsx`).
 - **Header tooltips** explain each column, every type and every status. They open on hover and on keyboard
   focus.
 - **Selecting:** click a row, or press Space or Enter, to show it in the viewer. **↑** and **↓** move to the
@@ -106,3 +106,9 @@ The table is at least 280 px wide and the viewer at least 320 px. It's a `separa
 in `aria-valuenow`.
 
 Collapsible grouping by type isn't implemented, since it conflicts with sorting by column.
+
+## Where the code lives
+
+- `components/cards/PreviewCard.tsx`: the card.
+- `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the
+  header tooltips (`HEADER_HELP`), and the list and viewer widths with `clampListWidth`.

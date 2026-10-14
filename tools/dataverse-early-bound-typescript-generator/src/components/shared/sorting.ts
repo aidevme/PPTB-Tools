@@ -1,0 +1,33 @@
+/**
+ * Sorting helpers for the tool's sortable tables. Started with the Select card's rows; the Preview card and the Load
+ * Existing Project dialog are to move here too (refactoring plan, row 9).
+ */
+import type { SortDirection } from '@fluentui/react-components';
+
+/** A value to sort a column by; `undefined` (no value) is always listed last. */
+export type SortValue = string | number | undefined;
+
+export interface SortState {
+    /** Index into the tab's columns. */
+    column: number;
+    direction: SortDirection;
+}
+
+/** Compares two sort values in `direction`; `undefined` (no value) sorts last in both directions. */
+export function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
+    if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
+    const result = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
+    return direction === 'ascending' ? result : -result;
+}
+
+/**
+ * Rows in the order to list them: their given order until a column is sorted, then by that column, with ties in
+ * their given order. Rows without a value for the column come last in either direction.
+ */
+export function sortSelectionRows<T extends { sortValues: SortValue[] }>(rows: T[], sort: SortState | null): T[] {
+    if (!sort) return rows;
+    return rows
+        .map((row, index) => ({ row, index }))
+        .sort((a, b) => compareSortValues(a.row.sortValues[sort.column], b.row.sortValues[sort.column], sort.direction) || a.index - b.index)
+        .map(({ row }) => row);
+}

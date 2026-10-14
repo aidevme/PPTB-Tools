@@ -19,147 +19,22 @@ import {
     TableSelectionCell,
     Text,
     Tooltip,
-    type BadgeProps,
     type SelectTabData,
     type SortDirection,
     type SelectTabEvent,
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
-import type { EntitySummary, OperationSummary, SolutionSummary, TableType } from '../../types';
+import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
 import { useSelectionCardStyles } from '../../styles';
+import { sortSelectionRows, type SortState, type SortValue } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
+import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from './selectionColumns';
 import type { StepState } from '../shared/workflowSteps';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
-
-/** A column header: its label and the explanation shown in its tooltip. */
-interface SelectionColumn {
-    label: string;
-    help: ReactNode;
-}
-
-const ENTITY_COLUMNS: SelectionColumn[] = [
-    {
-        label: 'Display Name',
-        help: <><strong>Display Name:</strong> the table's name as shown in Power Apps, in the user's language. Click to sort by display name.</>,
-    },
-    {
-        label: 'Logical Name',
-        help: <><strong>Logical Name:</strong> the lowercase name used in the Web API and stored in .dataverse-gen.json. Generated file names are based on it. Click to sort by logical name.</>,
-    },
-    {
-        label: 'Schema Name',
-        help: <><strong>Schema Name:</strong> the PascalCase name the generated interface and metadata constants are named after. Click to sort by schema name.</>,
-    },
-    {
-        label: 'Description',
-        help: <><strong>Description:</strong> the table's description from its metadata; hover over a description to read all of it. Tables without one are listed last. Click to sort by description.</>,
-    },
-    {
-        label: 'Type',
-        help: (
-            <>
-                <strong>Type:</strong> the kind of table, as Power Apps shows it.
-                <ul>
-                    <li><strong>Standard</strong>: an ordinary table stored in Dataverse</li>
-                    <li><strong>Activity</strong>: an activity such as a task, email or appointment, with a subject and dates</li>
-                    <li><strong>Virtual</strong>: data from an external source, shown in Dataverse but not stored in it</li>
-                    <li><strong>Elastic</strong>: built for very large data volumes (tens of millions of rows)</li>
-                </ul>
-                Click to sort by type.
-            </>
-        ),
-    },
-];
-
-/** Columns of the Actions tab: custom APIs, custom process actions and built-in actions. */
-const CUSTOMAPI_COLUMNS: SelectionColumn[] = [
-    {
-        label: 'Name',
-        help: <><strong>Name:</strong> the action's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
-    },
-    {
-        label: 'Binding',
-        help: (
-            <>
-                <strong>Binding:</strong> how the action is called.
-                <ul>
-                    <li><strong>Bound to &lt;table&gt;</strong>: called on a record of that table, which is generated automatically</li>
-                    <li><strong>Unbound</strong>: called on its own</li>
-                </ul>
-                Click to sort by binding.
-            </>
-        ),
-    },
-    {
-        label: 'Parameters',
-        help: <><strong>Parameters:</strong> the number of request parameters in $metadata. "From definition" means the action isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
-    },
-    {
-        label: 'Type',
-        help: (
-            <>
-                <strong>Type:</strong> where the action comes from.
-                <ul>
-                    <li><strong>Custom API</strong> / <strong>Private custom API</strong>: a customapi record</li>
-                    <li><strong>Custom action</strong>: a custom process action</li>
-                    <li><strong>Built-in</strong>: a standard Dataverse action</li>
-                </ul>
-                Click to sort by type.
-            </>
-        ),
-    },
-];
-
-/** Columns of the Functions tab: custom API functions and built-in functions (process actions are never functions). */
-const FUNCTION_COLUMNS: SelectionColumn[] = [
-    {
-        label: 'Name',
-        help: <><strong>Name:</strong> the function's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
-    },
-    {
-        label: 'Binding',
-        help: (
-            <>
-                <strong>Binding:</strong> how the function is called.
-                <ul>
-                    <li><strong>Bound to &lt;table&gt;</strong>: called on a record or collection of that table, which is generated automatically</li>
-                    <li><strong>Unbound</strong>: called on its own</li>
-                </ul>
-                Click to sort by binding.
-            </>
-        ),
-    },
-    {
-        label: 'Parameters',
-        help: <><strong>Parameters:</strong> the number of parameters in $metadata. "From definition" means the function isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
-    },
-    {
-        label: 'Type',
-        help: (
-            <>
-                <strong>Type:</strong> where the function comes from.
-                <ul>
-                    <li><strong>Custom API</strong> / <strong>Private custom API</strong>: a customapi record marked as a function</li>
-                    <li><strong>Built-in</strong>: a standard Dataverse function</li>
-                </ul>
-                Click to sort by type.
-            </>
-        ),
-    },
-];
-
-/** A value to sort a column by; `undefined` (no value) is always listed last. */
-type SortValue = string | number | undefined;
-
-interface SortState {
-    /** Index into the tab's columns. */
-    column: number;
-    direction: SortDirection;
-}
 
 /**
  * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort
@@ -171,35 +46,6 @@ interface SelectionRow {
     cells: ReactNode[];
     sortValues: SortValue[];
 }
-
-function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
-    if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
-    const result = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
-    return direction === 'ascending' ? result : -result;
-}
-
-/**
- * Rows in the order to list them: their given order until a column is sorted, then by that column, with ties in
- * their given order. Rows without a value for the column come last in either direction.
- */
-export function sortSelectionRows<T extends { sortValues: SortValue[] }>(rows: T[], sort: SortState | null): T[] {
-    if (!sort) return rows;
-    return rows
-        .map((row, index) => ({ row, index }))
-        .sort((a, b) => compareSortValues(a.row.sortValues[sort.column], b.row.sortValues[sort.column], sort.direction) || a.index - b.index)
-        .map(({ row }) => row);
-}
-
-/**
- * Badge colour per table type, from Fluent UI's semantic palette so it adapts to light and dark themes. Red
- * (danger/severe) is avoided, since nothing here is an error.
- */
-const TABLE_TYPE_COLORS: Record<TableType, BadgeProps['color']> = {
-    Standard: 'informative',
-    Activity: 'brand',
-    Virtual: 'warning',
-    Elastic: 'success',
-};
 
 function operationType(o: OperationSummary): string {
     if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
@@ -346,7 +192,7 @@ export function SelectionCard(props: SelectionCardProps) {
     const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
     const rowLimit = props.rowLimit ?? MAX_ROWS;
     const shown = sorted.slice(0, rowLimit);
-    const columns = tab === 'entities' ? ENTITY_COLUMNS : tab === 'actions' ? CUSTOMAPI_COLUMNS : FUNCTION_COLUMNS;
+    const columns = tab === 'entities' ? ENTITY_COLUMNS : tab === 'actions' ? ACTION_COLUMNS : FUNCTION_COLUMNS;
 
     const toggleSort = (column: number) =>
         setSorts((current) => {
