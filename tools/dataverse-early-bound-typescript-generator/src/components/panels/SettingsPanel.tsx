@@ -1,29 +1,118 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
 import {
+    Body1,
     Button,
-    Field,
-    Input,
+    Caption1,
     DrawerBody,
     DrawerFooter,
     DrawerHeader,
     DrawerHeaderTitle,
+    Input,
     MessageBar,
     MessageBarBody,
     OverlayDrawer,
+    SearchBox,
+    SpinButton,
     Switch,
     Tab,
     TabList,
     Text,
+    Title3,
+    mergeClasses,
     type SelectTabData,
     type SelectTabEvent,
 } from '@fluentui/react-components';
-import { CodeRegular, DismissRegular, OptionsRegular, WrenchRegular } from '@fluentui/react-icons';
-import { toolConfigEquals, type ProjectDefaults, type ToolConfig } from '../../config';
-import { infoLabel } from '../shared/infoLabel';
+import {
+    AlertRegular,
+    ArrowResetRegular,
+    CodeRegular,
+    DeleteRegular,
+    DismissRegular,
+    DocumentCheckmarkRegular,
+    FolderRegular,
+    ListRegular,
+    OptionsRegular,
+    SettingsRegular,
+    WrenchRegular,
+} from '@fluentui/react-icons';
+import {
+    RECENT_PROJECT_COUNT_RANGE,
+    SELECTION_ROW_LIMIT_RANGE,
+    toolConfig,
+    toolConfigEquals,
+    type GeneralSettings,
+    type ProjectDefaults,
+    type ToolConfig,
+} from '../../config';
 import { useSettingsPanelStyles } from '../../styles';
 import { reportError } from '../../services';
+import { OutputPreview, SettingRow, SettingsSection, type SectionBadge } from './SettingsParts';
 
-type SettingsTab = 'general' | 'options' | 'schemaGeneration';
+type SettingsTab = 'general' | 'options' | 'files';
+
+const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; icon: ReactElement }> = [
+    { value: 'general', label: 'General', subtitle: 'Notifications and lists', icon: <OptionsRegular /> },
+    { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: <WrenchRegular /> },
+    { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: <CodeRegular /> },
+];
+
+/** One-line explanation at the top of each tab. */
+const TAB_INTROS: Record<SettingsTab, string> = {
+    general: 'How the tool itself behaves.',
+    options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
+    files: 'How Generate treats files in the output folders, for every project.',
+};
+
+const SCOPE_INSTALLATION: SectionBadge = { label: 'This PPTB installation' };
+const SCOPE_PROJECTS: SectionBadge = { label: 'Default for every project', color: 'brand' };
+const SCOPE_CONFIG_FILE: SectionBadge = { label: '.dataverse-gen.json' };
+const SCOPE_ALL_PROJECTS: SectionBadge = { label: 'All projects' };
+
+type ControlIds = { labelledBy: string; describedBy: string };
+
+/** A setting as listed in a section; also what search matches against. */
+interface SettingDefinition {
+    id: string;
+    title: string;
+    description: string;
+    info?: ReactNode;
+    /** Extra words search should match, beyond the title and description. */
+    keywords?: string;
+    changed: boolean;
+    layout?: 'inline' | 'stacked';
+    control: (ids: ControlIds) => ReactNode;
+    /** Shown under the row, e.g. a warning while the setting is on. */
+    note?: ReactNode;
+}
+
+interface SectionDefinition {
+    id: string;
+    tab: SettingsTab;
+    title: string;
+    icon: ReactElement;
+    badges: SectionBadge[];
+    danger?: boolean;
+    settings: SettingDefinition[];
+    extra?: ReactNode;
+}
+
+/** The settings with every value Reset puts back to the bundled default; saved projects are kept. */
+function withDefaults(config: ToolConfig): ToolConfig {
+    return {
+        ...config,
+        general: { ...toolConfig.general },
+        deleteOrphanedFiles: toolConfig.deleteOrphanedFiles,
+        confirmBeforeGenerate: toolConfig.confirmBeforeGenerate,
+        projectDefaults: { ...toolConfig.projectDefaults },
+    };
+}
+
+/** Whether a setting matches every word of the search, case-insensitively. */
+function matchesSearch(setting: SettingDefinition, section: SectionDefinition, query: string): boolean {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const haystack = [setting.title, setting.description, setting.keywords, section.title].join(' ').toLowerCase();
+    return words.every((w) => haystack.includes(w));
+}
 
 export interface SettingsPanelProps {
     open: boolean;
@@ -35,12 +124,16 @@ export interface SettingsPanelProps {
 }
 
 /**
- * Tool settings, shown in an overlay drawer that slides in from the right edge, with vertical tabs. Changes
- * are made on a draft: Save (enabled once something changed) persists them, Cancel discards them.
+ * Tool settings, in an overlay drawer that slides in from the right. A navigation column (search, then vertical
+ * tabs with subtitles) sits beside section cards; each setting is a row with its title and description on the left
+ * and its control on the right. Changes are made on a draft: a dot marks each changed value, the footer says when
+ * there are unsaved changes, Save (enabled once something changed) persists them, Cancel discards them, and Reset
+ * to defaults restores the bundled defaults (saved projects are kept).
  */
 export function SettingsPanel({ open, onOpenChange, settings, onSave }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();
     const [tab, setTab] = useState<SettingsTab>('general');
+    const [query, setQuery] = useState('');
     const [draft, setDraft] = useState<ToolConfig>(settings);
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
@@ -50,13 +143,25 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
         if (open) {
             setDraft(settings);
             setSaveError(null);
+            setQuery('');
         }
     }, [open, settings]);
 
     const dirty = !toolConfigEquals(draft, settings);
+    const atDefaults = toolConfigEquals(withDefaults(draft), draft);
     const update = (change: Partial<ToolConfig>) => setDraft((current) => ({ ...current, ...change }));
     const updateProjectDefaults = (change: Partial<ProjectDefaults>) =>
         setDraft((current) => ({ ...current, projectDefaults: { ...current.projectDefaults, ...change } }));
+    const updateGeneral = (change: Partial<GeneralSettings>) => setDraft((current) => ({ ...current, general: { ...current.general, ...change } }));
+    /**
+     * A SpinButton's new value: the stepped value, or the typed text when the user typed one. Out-of-range or
+     * fractional values are clamped and rounded when the settings are saved (`mergeToolConfig`).
+     */
+    const spinValue = (data: { value?: number | null; displayValue?: string }, current: number) => {
+        if (typeof data.value === 'number') return data.value;
+        const typed = Number(data.displayValue);
+        return data.displayValue !== undefined && data.displayValue.trim() !== '' && Number.isFinite(typed) ? typed : current;
+    };
 
     const save = async () => {
         setSaving(true);
@@ -71,116 +176,367 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
         }
     };
 
+    const general = draft.general;
+    const savedGeneral = settings.general;
+    const notificationSwitch =
+        (key: 'showProjectLoadedNotification' | 'showPreviewReadyNotification' | 'showGenerationCompleteNotification') =>
+        ({ labelledBy, describedBy }: ControlIds) => (
+            <Switch
+                checked={general[key]}
+                aria-labelledby={labelledBy}
+                aria-describedby={describedBy}
+                onChange={(_, data) => updateGeneral({ [key]: data.checked })}
+            />
+        );
+
+    const sections: SectionDefinition[] = [
+        {
+            id: 'notifications',
+            tab: 'general',
+            title: 'Notifications',
+            icon: <AlertRegular />,
+            badges: [SCOPE_INSTALLATION],
+            settings: [
+                {
+                    id: 'projectLoaded',
+                    title: 'Project loaded',
+                    description: 'When a project opens.',
+                    info: (
+                        <>
+                            Says whether the project's .dataverse-gen.json was found. Saved as{' '}
+                            <code>general.showProjectLoadedNotification</code>.
+                        </>
+                    ),
+                    keywords: 'notification toast open',
+                    changed: general.showProjectLoadedNotification !== savedGeneral.showProjectLoadedNotification,
+                    control: notificationSwitch('showProjectLoadedNotification'),
+                },
+                {
+                    id: 'previewReady',
+                    title: 'Preview ready',
+                    description: 'When a preview finishes.',
+                    info: (
+                        <>
+                            Summarizes what Generate would do. Saved as <code>general.showPreviewReadyNotification</code>.
+                        </>
+                    ),
+                    keywords: 'notification toast',
+                    changed: general.showPreviewReadyNotification !== savedGeneral.showPreviewReadyNotification,
+                    control: notificationSwitch('showPreviewReadyNotification'),
+                },
+                {
+                    id: 'generationComplete',
+                    title: 'Generation complete',
+                    description: 'When Generate finishes.',
+                    info: (
+                        <>
+                            Lists the files written. The result also shows on the Preview card either way, and error notifications are
+                            always shown. Saved as <code>general.showGenerationCompleteNotification</code>.
+                        </>
+                    ),
+                    keywords: 'notification toast generate',
+                    changed: general.showGenerationCompleteNotification !== savedGeneral.showGenerationCompleteNotification,
+                    control: notificationSwitch('showGenerationCompleteNotification'),
+                },
+            ],
+        },
+        {
+            id: 'lists',
+            tab: 'general',
+            title: 'Lists & startup',
+            icon: <ListRegular />,
+            badges: [SCOPE_INSTALLATION],
+            settings: [
+                {
+                    id: 'recentProjects',
+                    title: 'Recent projects',
+                    description: 'Offered on the Project card; 0 hides the list.',
+                    info: (
+                        <>
+                            From {RECENT_PROJECT_COUNT_RANGE.min} to {RECENT_PROJECT_COUNT_RANGE.max}. Saved as{' '}
+                            <code>general.recentProjectCount</code>.
+                        </>
+                    ),
+                    keywords: 'recent projects shown',
+                    changed: general.recentProjectCount !== savedGeneral.recentProjectCount,
+                    control: ({ labelledBy, describedBy }) => (
+                        <>
+                            <SpinButton
+                                className={styles.number}
+                                min={RECENT_PROJECT_COUNT_RANGE.min}
+                                max={RECENT_PROJECT_COUNT_RANGE.max}
+                                value={general.recentProjectCount}
+                                aria-labelledby={labelledBy}
+                                aria-describedby={describedBy}
+                                onChange={(_, data) => updateGeneral({ recentProjectCount: spinValue(data, general.recentProjectCount) })}
+                            />
+                            <Caption1 className={styles.unit}>{general.recentProjectCount === 1 ? 'project' : 'projects'}</Caption1>
+                        </>
+                    ),
+                },
+                {
+                    id: 'rowLimit',
+                    title: 'Rows in the Select tables',
+                    description: 'The most each table lists; search to find others.',
+                    info: (
+                        <>
+                            From {SELECTION_ROW_LIMIT_RANGE.min} to {SELECTION_ROW_LIMIT_RANGE.max}, for tables, actions and functions.
+                            Higher values can make large environments slower. Saved as <code>general.selectionRowLimit</code>.
+                        </>
+                    ),
+                    keywords: 'rows shown limit select tables',
+                    changed: general.selectionRowLimit !== savedGeneral.selectionRowLimit,
+                    control: ({ labelledBy, describedBy }) => (
+                        <>
+                            <SpinButton
+                                className={styles.number}
+                                min={SELECTION_ROW_LIMIT_RANGE.min}
+                                max={SELECTION_ROW_LIMIT_RANGE.max}
+                                step={100}
+                                value={general.selectionRowLimit}
+                                aria-labelledby={labelledBy}
+                                aria-describedby={describedBy}
+                                onChange={(_, data) => updateGeneral({ selectionRowLimit: spinValue(data, general.selectionRowLimit) })}
+                            />
+                            <Caption1 className={styles.unit}>rows</Caption1>
+                        </>
+                    ),
+                },
+            ],
+        },
+        {
+            id: 'output',
+            tab: 'options',
+            title: 'Output',
+            icon: <FolderRegular />,
+            badges: [SCOPE_PROJECTS, SCOPE_CONFIG_FILE],
+            settings: [
+                {
+                    id: 'outputRoot',
+                    title: 'Output folder',
+                    description: 'Where generated files go, relative to the project folder.',
+                    info: (
+                        <>
+                            Sets the project's <code>output.outputRoot</code>. A blank value keeps the previous default.
+                        </>
+                    ),
+                    keywords: 'output root path directory',
+                    changed: draft.projectDefaults.outputRoot !== settings.projectDefaults.outputRoot,
+                    layout: 'stacked',
+                    control: ({ labelledBy, describedBy }) => (
+                        <Input
+                            className={styles.search}
+                            value={draft.projectDefaults.outputRoot}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => updateProjectDefaults({ outputRoot: data.value })}
+                        />
+                    ),
+                },
+            ],
+        },
+        {
+            id: 'generatedFiles',
+            tab: 'options',
+            title: 'Generated files',
+            icon: <DocumentCheckmarkRegular />,
+            badges: [SCOPE_PROJECTS, SCOPE_CONFIG_FILE],
+            extra: <OutputPreview defaults={draft.projectDefaults} />,
+            settings: (
+                [
+                    ['generateEntityTypes', 'Early-bound entity interfaces', 'A typed interface per table, for dataverse-ify.', 'dataverse-ify entity types'],
+                    ['generateFormContext', 'Form context helpers', 'A typed FormContext per table, for form scripts.', 'xrm formcontext form scripts'],
+                    ['generateIndex', 'index.ts barrel file', 'An index.ts that re-exports every generated file.', 'barrel index exports'],
+                ] as const
+            ).map(
+                ([key, title, description, keywords]): SettingDefinition => ({
+                    id: key,
+                    title,
+                    description,
+                    info: (
+                        <>
+                            Sets the project's <code>{key}</code>.
+                        </>
+                    ),
+                    keywords,
+                    changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
+                    control: ({ labelledBy, describedBy }) => (
+                        <Switch
+                            checked={draft.projectDefaults[key]}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => updateProjectDefaults({ [key]: data.checked })}
+                        />
+                    ),
+                }),
+            ),
+        },
+        {
+            id: 'beforeGenerating',
+            tab: 'files',
+            title: 'Before generating',
+            icon: <DocumentCheckmarkRegular />,
+            badges: [SCOPE_ALL_PROJECTS],
+            settings: [
+                {
+                    id: 'confirmBeforeGenerate',
+                    title: 'Ask before generating',
+                    description: 'Confirm before new and changed files are written.',
+                    info: (
+                        <>
+                            The confirmation names the output folder and how many files will be created and overwritten. Overwrites
+                            can't be undone, so use source control. When orphaned files are deleted too, their confirmation covers both.
+                            Saved as <code>confirmBeforeGenerate</code>.
+                        </>
+                    ),
+                    keywords: 'confirm confirmation overwrite',
+                    changed: draft.confirmBeforeGenerate !== settings.confirmBeforeGenerate,
+                    control: ({ labelledBy, describedBy }) => (
+                        <Switch
+                            checked={draft.confirmBeforeGenerate}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => update({ confirmBeforeGenerate: data.checked })}
+                        />
+                    ),
+                },
+            ],
+        },
+        {
+            id: 'orphans',
+            tab: 'files',
+            title: 'Orphaned files',
+            icon: <DeleteRegular />,
+            badges: [SCOPE_ALL_PROJECTS, { label: 'Permanent', color: 'danger' }],
+            danger: true,
+            settings: [
+                {
+                    id: 'deleteOrphanedFiles',
+                    title: 'Delete Orphaned Files',
+                    description: 'Delete generated files the selection no longer produces.',
+                    info: (
+                        <>
+                            Orphaned files are files in the output folders that the current selection no longer generates. When on,
+                            Generate deletes them permanently after you confirm the list; when off, they're only reported. Also
+                            available as a switch in Preview and generate. Saved as <code>deleteOrphanedFiles</code>.
+                        </>
+                    ),
+                    keywords: 'orphan orphaned delete remove cleanup',
+                    changed: draft.deleteOrphanedFiles !== settings.deleteOrphanedFiles,
+                    control: ({ labelledBy, describedBy }) => (
+                        <Switch
+                            checked={draft.deleteOrphanedFiles}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => update({ deleteOrphanedFiles: data.checked })}
+                        />
+                    ),
+                    note: draft.deleteOrphanedFiles ? (
+                        <MessageBar intent="warning" className={styles.warning}>
+                            <MessageBarBody>Files are deleted permanently, not moved to the Recycle Bin or Trash.</MessageBarBody>
+                        </MessageBar>
+                    ) : undefined,
+                },
+            ],
+        },
+    ];
+
+    const searching = query.trim().length > 0;
+    const visibleSections = searching
+        ? sections
+              .map((section) => ({ ...section, settings: section.settings.filter((s) => matchesSearch(s, section, query)) }))
+              .filter((section) => section.settings.length > 0)
+        : sections.filter((section) => section.tab === tab);
+    const tabLabel = (value: SettingsTab) => TABS.find((t) => t.value === value)?.label ?? value;
+
+    const renderSection = (section: SectionDefinition) => (
+        <SettingsSection
+            key={section.id}
+            title={searching ? `${section.title} · ${tabLabel(section.tab)}` : section.title}
+            icon={section.icon}
+            badges={section.badges}
+            danger={section.danger}
+            extra={searching ? undefined : section.extra}
+        >
+            {section.settings.map((setting) => (
+                <div key={setting.id}>
+                    <SettingRow
+                        title={setting.title}
+                        description={setting.description}
+                        info={setting.info}
+                        changed={setting.changed}
+                        layout={setting.layout}
+                        control={setting.control}
+                    />
+                    {setting.note && <div className={styles.sectionExtra}>{setting.note}</div>}
+                </div>
+            ))}
+        </SettingsSection>
+    );
+
     return (
-        <OverlayDrawer position="end" size="large" open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
+        <OverlayDrawer className={styles.drawer} position="end" open={open} onOpenChange={(_, data) => onOpenChange(data.open)}>
             <DrawerHeader>
                 <DrawerHeaderTitle
                     action={<Button appearance="subtle" aria-label="Close" icon={<DismissRegular />} onClick={() => onOpenChange(false)} />}
                 >
-                    Settings
+                    <span className={styles.headerTitle}>
+                        <span className={styles.headerIcon} aria-hidden="true">
+                            <SettingsRegular />
+                        </span>
+                        <span className={styles.headerText}>
+                            <Title3>Settings</Title3>
+                            <Caption1 className={styles.headerSubtitle}>Dataverse Early-Bound TypeScript Generator</Caption1>
+                        </span>
+                    </span>
                 </DrawerHeaderTitle>
             </DrawerHeader>
             <DrawerBody>
                 <div className={styles.body}>
-                    <TabList
-                        vertical
-                        className={styles.tabs}
-                        selectedValue={tab}
-                        onTabSelect={(_: SelectTabEvent, data: SelectTabData) => setTab(data.value as SettingsTab)}
+                    <nav className={styles.nav} aria-label="Settings sections">
+                        <SearchBox
+                            className={styles.search}
+                            placeholder="Search settings"
+                            aria-label="Search settings"
+                            value={query}
+                            onChange={(_, data) => setQuery(data.value)}
+                        />
+                        <TabList
+                            vertical
+                            selectedValue={searching ? null : tab}
+                            onTabSelect={(_: SelectTabEvent, data: SelectTabData) => {
+                                setTab(data.value as SettingsTab);
+                                setQuery('');
+                            }}
+                        >
+                            {TABS.map((t) => (
+                                <Tab key={t.value} value={t.value} icon={t.icon}>
+                                    <span className={styles.tabLabel}>
+                                        <span>{t.label}</span>
+                                        <Caption1 className={styles.tabSubtitle}>{t.subtitle}</Caption1>
+                                    </span>
+                                </Tab>
+                            ))}
+                        </TabList>
+                    </nav>
+                    {/* Re-keyed on every tab or search change so the fade-in plays. */}
+                    <div
+                        key={searching ? 'search' : tab}
+                        className={styles.content}
+                        role="tabpanel"
+                        aria-label={searching ? 'Search results' : tabLabel(tab)}
                     >
-                        <Tab value="general" icon={<OptionsRegular />}>
-                            General
-                        </Tab>
-                        <Tab value="options" icon={<WrenchRegular />}>
-                            Options
-                        </Tab>
-                        <Tab value="schemaGeneration" icon={<CodeRegular />}>
-                            Schema Generation
-                        </Tab>
-                    </TabList>
-                    <div className={styles.content} role="tabpanel">
-                        {tab === 'general' && (
+                        {searching ? (
+                            visibleSections.length > 0 && <Body1 className={styles.resultsHeading}>Settings matching "{query.trim()}"</Body1>
+                        ) : (
                             <Text size={200} className={styles.intro}>
-                                Settings for the tool as a whole, rather than for generated files or projects. They're saved in the
-                                tool settings for this Power Platform ToolBox installation. There are no general settings yet.
+                                {TAB_INTROS[tab]}
                             </Text>
                         )}
-                        {tab === 'options' && (
-                            <>
-                                <Text size={200} className={styles.intro}>
-                                    The Options every project starts with: applied whenever a project is opened, also over the values in
-                                    its .dataverse-gen.json, and to the open project when you save different ones here. You can still
-                                    change them for a project on the Options card; Generate saves them to its .dataverse-gen.json.
-                                </Text>
-                                <Field
-                                    label={infoLabel(
-                                        'Output folder',
-                                        <>
-                                            Where generated files go, relative to the project folder. Sets the project's{' '}
-                                            <code>output.outputRoot</code>. A blank value keeps the previous default.
-                                        </>,
-                                    )}
-                                >
-                                    <Input
-                                        value={draft.projectDefaults.outputRoot}
-                                        onChange={(_, data) => updateProjectDefaults({ outputRoot: data.value })}
-                                    />
-                                </Field>
-                                <Switch
-                                    label={infoLabel(
-                                        'Early-bound entity interfaces (dataverse-ify)',
-                                        <>
-                                            An interface per table with a typed property per column, for dataverse-ify. Sets the project's
-                                            <code>generateEntityTypes</code>.
-                                        </>,
-                                    )}
-                                    checked={draft.projectDefaults.generateEntityTypes}
-                                    onChange={(_, data) => updateProjectDefaults({ generateEntityTypes: data.checked })}
-                                />
-                                <Switch
-                                    label={infoLabel(
-                                        'Form context helpers (Xrm.FormContext)',
-                                        <>
-                                            A typed <code>&lt;Table&gt;FormContext</code> interface per table for form scripts. Sets the
-                                            project's <code>generateFormContext</code>.
-                                        </>,
-                                    )}
-                                    checked={draft.projectDefaults.generateFormContext}
-                                    onChange={(_, data) => updateProjectDefaults({ generateFormContext: data.checked })}
-                                />
-                                <Switch
-                                    label={infoLabel(
-                                        'index.ts barrel file',
-                                        <>
-                                            An <code>index.ts</code> that re-exports every generated file. Sets the project's{' '}
-                                            <code>generateIndex</code>.
-                                        </>,
-                                    )}
-                                    checked={draft.projectDefaults.generateIndex}
-                                    onChange={(_, data) => updateProjectDefaults({ generateIndex: data.checked })}
-                                />
-                            </>
-                        )}
-                        {tab === 'schemaGeneration' && (
-                            <>
-                                <Text size={200} className={styles.intro}>
-                                    How Generate treats files already in the output folders. These settings apply to every project and
-                                    are saved in the tool settings, not in .dataverse-gen.json.
-                                </Text>
-                                <Switch
-                                    label={infoLabel(
-                                        'Delete Orphaned Files',
-                                        <>
-                                            Orphaned files are files in the output folders that the current selection no longer
-                                            generates. When on, Generate deletes them permanently after you confirm the list; when off,
-                                            they're only reported. Also available as a switch in Preview and generate. Saved as{' '}
-                                            <code>deleteOrphanedFiles</code>.
-                                        </>,
-                                    )}
-                                    checked={draft.deleteOrphanedFiles}
-                                    onChange={(_, data) => update({ deleteOrphanedFiles: data.checked })}
-                                />
-                            </>
+                        {visibleSections.length > 0 ? (
+                            visibleSections.map(renderSection)
+                        ) : (
+                            <Body1 className={styles.empty}>No settings match "{query.trim()}".</Body1>
                         )}
                         {saveError && (
                             <MessageBar intent="error">
@@ -191,12 +547,20 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                 </div>
             </DrawerBody>
             <DrawerFooter className={styles.footer}>
-                <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>
-                    {saving ? 'Saving…' : 'Save'}
-                </Button>
-                <Button disabled={saving} onClick={() => onOpenChange(false)}>
-                    Cancel
-                </Button>
+                <span className={mergeClasses(styles.footerStatus, dirty && styles.footerStatusDirty)} aria-live="polite">
+                    {dirty ? '● Unsaved changes' : 'No unsaved changes'}
+                </span>
+                <span className={styles.footerActions}>
+                    <Button appearance="subtle" icon={<ArrowResetRegular />} disabled={atDefaults || saving} onClick={() => setDraft(withDefaults)}>
+                        Reset to defaults
+                    </Button>
+                    <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>
+                        {saving ? 'Saving…' : 'Save'}
+                    </Button>
+                    <Button disabled={saving} onClick={() => onOpenChange(false)}>
+                        Cancel
+                    </Button>
+                </span>
             </DrawerFooter>
         </OverlayDrawer>
     );

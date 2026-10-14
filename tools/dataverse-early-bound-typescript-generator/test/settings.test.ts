@@ -44,7 +44,15 @@ afterEach(() => {
 describe('tool config', () => {
     it('defaults come from the bundled JSON', () => {
         expect(toolConfig).toEqual({
+            general: {
+                showProjectLoadedNotification: true,
+                showPreviewReadyNotification: true,
+                showGenerationCompleteNotification: true,
+                recentProjectCount: 3,
+                selectionRowLimit: 500,
+            },
             deleteOrphanedFiles: false,
+            confirmBeforeGenerate: false,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
             projects: [],
         });
@@ -56,6 +64,21 @@ describe('tool config', () => {
         expect(mergeToolConfig(undefined)).toEqual(toolConfig);
         expect(mergeToolConfig({ projects: [PROJECT, { name: 'no id' }, 'x'] })).toEqual(settingsWith({ projects: [PROJECT] }));
         expect(mergeToolConfig({ projects: 'nope' })).toEqual(toolConfig);
+    });
+
+    it('merges the General settings key by key, clamping and rounding numbers to their range', () => {
+        const merged = mergeToolConfig({ general: { showPreviewReadyNotification: false, recentProjectCount: 7.6, selectionRowLimit: 99999, other: true } });
+        expect(merged.general).toEqual({ ...toolConfig.general, showPreviewReadyNotification: false, recentProjectCount: 8, selectionRowLimit: 2000 });
+        expect(mergeToolConfig({ general: { recentProjectCount: -3, selectionRowLimit: 5 } }).general).toMatchObject({ recentProjectCount: 0, selectionRowLimit: 100 });
+        expect(mergeToolConfig({ general: { recentProjectCount: '5', showProjectLoadedNotification: 'no' } }).general).toEqual(toolConfig.general);
+        expect(mergeToolConfig({ general: 'x' }).general).toEqual(toolConfig.general);
+        // Settings saved before these keys existed load with the defaults.
+        expect(mergeToolConfig({ deleteOrphanedFiles: true })).toEqual(settingsWith({ deleteOrphanedFiles: true }));
+    });
+
+    it('reads confirmBeforeGenerate only when it is a boolean', () => {
+        expect(mergeToolConfig({ confirmBeforeGenerate: true }).confirmBeforeGenerate).toBe(true);
+        expect(mergeToolConfig({ confirmBeforeGenerate: 'yes' }).confirmBeforeGenerate).toBe(false);
     });
 
     it('merges project defaults key by key, ignoring mistyped values and a blank output folder', () => {
@@ -127,53 +150,142 @@ describe('settings panel', () => {
 
     const button = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement;
     const click = (element: HTMLElement) => act(async () => element.click());
-    const openSchemaTab = () => click(Array.from(document.querySelectorAll('[role="tab"]')).find((t) => t.textContent?.includes('Schema Generation')) as HTMLElement);
-    const checkbox = () => document.querySelector('input[type="checkbox"]') as HTMLInputElement;
+    const openTab = (name: string) =>
+        click(Array.from(document.querySelectorAll('[role="tab"]')).find((t) => t.textContent?.startsWith(name)) as HTMLElement);
+    /** The control of the setting row titled `title` (found through its aria-labelledby). */
+    const control = (title: string) =>
+        Array.from(document.querySelectorAll('input')).find((input) => {
+            const id = input.getAttribute('aria-labelledby');
+            return !!id && document.getElementById(id)?.textContent?.trim().startsWith(title);
+        }) as HTMLInputElement;
+    const typeInto = (input: HTMLInputElement, value: string) =>
+        act(async () => {
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, value);
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+        });
 
     it('enables Save once a value changes, then saves the draft and closes', async () => {
         const onSave = vi.fn(async () => {});
         const onOpenChange = await render(toolConfig, onSave);
         expect(button('Save').disabled).toBe(true);
+        expect(document.body.textContent).toContain('No unsaved changes');
 
-        await openSchemaTab();
-        await click(checkbox());
+        await openTab('Generate & files');
+        await click(control('Delete Orphaned Files'));
         expect(button('Save').disabled).toBe(false);
+        expect(document.body.textContent).toContain('Unsaved changes');
 
         // Changing it back means nothing to save.
-        await click(checkbox());
+        await click(control('Delete Orphaned Files'));
         expect(button('Save').disabled).toBe(true);
 
-        await click(checkbox());
+        await click(control('Delete Orphaned Files'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ deleteOrphanedFiles: true }));
         expect(onOpenChange).toHaveBeenCalledWith(false);
     });
 
-    it('edits the project defaults on the Options tab', async () => {
+    it('edits the project defaults on the Options tab, with a live preview of the output', async () => {
         const onSave = vi.fn(async () => {});
         await render(toolConfig, onSave);
-        await click(Array.from(document.querySelectorAll('[role="tab"]')).find((t) => t.textContent?.includes('Options')) as HTMLElement);
-        const input = document.querySelector('input:not([type])') as HTMLInputElement ?? (document.querySelector('input[type="text"]') as HTMLInputElement);
+        await openTab('Options');
+        const input = control('Output folder');
         expect(input.value).toBe('./src/dataverse-gen');
-        await act(async () => {
-            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, './types');
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-        });
-        const switches = Array.from(document.querySelectorAll('input[role="switch"]')) as HTMLInputElement[];
-        expect(switches.map((s) => s.checked)).toEqual([true, false, true]);
-        await click(switches[1]);
-        expect(button('Save').disabled).toBe(false);
+        await typeInto(input, './types');
+        expect(control('Early-bound entity interfaces').checked).toBe(true);
+        expect(control('Form context helpers').checked).toBe(false);
+        expect(control('index.ts barrel file').checked).toBe(true);
+
+        const preview = () => document.querySelector('pre[aria-label="Preview of the generated folder structure"]')?.textContent ?? '';
+        expect(preview()).toContain('./types/');
+        expect(preview()).not.toContain('FormContext');
+        await click(control('Form context helpers'));
+        expect(preview()).toContain('FormContext');
+        await click(control('index.ts barrel file'));
+        expect(preview()).toContain('index.ts       (off)');
+        await click(control('index.ts barrel file'));
+
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(
             settingsWith({ projectDefaults: { outputRoot: './types', generateEntityTypes: true, generateFormContext: true, generateIndex: true } }),
         );
     });
 
+    it('edits the General settings: notification switches and the two limits', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        // General is the first tab.
+        expect(['Project loaded', 'Preview ready', 'Generation complete'].map((t) => control(t).checked)).toEqual([true, true, true]);
+        await click(control('Preview ready'));
+        expect(control('Recent projects').value).toBe('3');
+        expect(control('Rows in the Select tables').value).toBe('500');
+        // Increment the recent projects count with the arrow key.
+        await act(async () => control('Recent projects').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true })));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(
+            settingsWith({ general: { ...toolConfig.general, showPreviewReadyNotification: false, recentProjectCount: 4 } }),
+        );
+    });
+
+    it('groups settings into sections with scope badges, and marks changed values', async () => {
+        await render(toolConfig, vi.fn(async () => {}));
+        const sections = () => Array.from(document.querySelectorAll('[role="group"]')).map((g) => g.querySelector('h2, h3, [id]')?.textContent);
+        expect(sections()).toEqual(['Notifications', 'Lists & startup']);
+        expect(document.body.textContent).toContain('This PPTB installation');
+        expect(document.querySelectorAll('[aria-label="Changed, not saved yet"]')).toHaveLength(0);
+        await click(control('Project loaded'));
+        expect(document.querySelectorAll('[aria-label="Changed, not saved yet"]')).toHaveLength(1);
+    });
+
+    it('offers Ask before generating, and warns while orphaned files are deleted', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        expect(document.body.textContent).toContain('Permanent');
+        const warning = 'Files are deleted permanently';
+        expect(document.body.textContent).not.toContain(warning);
+        await click(control('Delete Orphaned Files'));
+        expect(document.body.textContent).toContain(warning);
+        await click(control('Delete Orphaned Files'));
+
+        await click(control('Ask before generating'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ confirmBeforeGenerate: true }));
+    });
+
+    it('searches across all tabs', async () => {
+        await render(toolConfig, vi.fn(async () => {}));
+        const search = document.querySelector('input[aria-label="Search settings"]') as HTMLInputElement;
+        await typeInto(search, 'orphan');
+        // The setting from the third tab shows while General is still the selected tab.
+        expect(control('Delete Orphaned Files')).toBeTruthy();
+        expect(control('Project loaded')).toBeUndefined();
+        expect(document.body.textContent).toContain('Orphaned files · Generate & files');
+
+        await typeInto(search, 'nothing like this');
+        expect(document.body.textContent).toContain('No settings match');
+    });
+
+    it('resets to the defaults but keeps saved projects', async () => {
+        const onSave = vi.fn(async () => {});
+        const custom = settingsWith({
+            deleteOrphanedFiles: true,
+            general: { ...toolConfig.general, recentProjectCount: 7 },
+            projects: [PROJECT],
+        });
+        await render(custom, onSave);
+        expect(button('Reset to defaults').disabled).toBe(false);
+        await click(button('Reset to defaults'));
+        expect(button('Reset to defaults').disabled).toBe(true);
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ projects: [PROJECT] }));
+    });
+
     it('Cancel closes without saving', async () => {
         const onSave = vi.fn(async () => {});
         const onOpenChange = await render(toolConfig, onSave);
-        await openSchemaTab();
-        await click(checkbox());
+        await openTab('Generate & files');
+        await click(control('Delete Orphaned Files'));
         await click(button('Cancel'));
         expect(onSave).not.toHaveBeenCalled();
         expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -184,8 +296,8 @@ describe('settings panel', () => {
             throw new Error('disk full');
         });
         const onOpenChange = await render(toolConfig, onSave);
-        await openSchemaTab();
-        await click(checkbox());
+        await openTab('Generate & files');
+        await click(control('Delete Orphaned Files'));
         await click(button('Save'));
         expect(onOpenChange).not.toHaveBeenCalledWith(false);
         expect(document.body.textContent).toContain('Could not save the settings: disk full');

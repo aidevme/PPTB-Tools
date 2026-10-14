@@ -1,6 +1,6 @@
 # App state and hooks
 
-`src/App.tsx` owns all of the tool's state and orchestration; there's no state management library. The
+`src/components/apps/App.tsx` owns all of the tool's state and orchestration; there's no state management library. The
 [components](../components/) are presentational and receive everything as props.
 
 ## State in `App.tsx`

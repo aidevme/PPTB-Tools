@@ -60,11 +60,12 @@ project file. Docs: `docs/pptb-tools/dataverse-early-bound-typescript-generator/
 
 ```
 src/
-├── main.tsx / App.tsx  # theme + all top-level state and orchestration (no state management library)
+├── main.tsx           # theme; renders components/apps/App.tsx
 ├── core/               # pure TS: no PPTB, no I/O, no DOM-UI (DOMParser only for the CSDL)
 ├── services/           # PPTB adapters: dataverseAPI metadata, toolboxAPI file system, write planning
 ├── hooks/              # useConnection: polls window.toolboxAPI for the active connection
-├── components/         # presentational; receive data/callbacks from App.tsx as props
+├── components/         # apps/App.tsx: all top-level state and orchestration (no state management library);
+│                       # the other folders are presentational and receive data/callbacks from App as props
 └── types/
 test/                   # vitest: dataverse-gen fixtures + the real CLI's reference output
 ```

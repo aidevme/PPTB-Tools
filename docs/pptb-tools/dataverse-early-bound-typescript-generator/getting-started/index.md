@@ -51,6 +51,10 @@ A notification confirms the project loaded. The Project card then shows its name
 `.dataverse-gen.json` was found. Next time, the projects you used most recently appear as tiles on the Project
 card; click one to reopen it.
 
+Under **Settings** → **General** you can turn the "project loaded", "preview ready" and "generation complete"
+notifications on or off (errors are always shown), choose how many recent projects are shown (0 to 10), and
+how many rows the Select card lists at once (100 to 2000).
+
 ## 3. Choose what to generate (step 2)
 
 The **Select** card lists tables, actions and functions once a project is open; until then it asks you to
@@ -97,6 +101,10 @@ Trash.
 
 Click **Generate *n* files**. The tool writes only the new and changed files, then saves `.dataverse-gen.json`
 with your selection and options. A notification and a message on the card confirm what was written.
+
+To be asked first, turn on **Ask before generating** in **Settings** → **Generate & files**. The confirmation
+names the output folder and how many files will be created and overwritten. Overwrites can't be undone, so use
+source control to get old versions back.
 
 Commit the generated files, and `.dataverse-gen.json`, with the rest of your project.
 

@@ -54,6 +54,12 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
     generation, then deletes the orphans. If some remain, an error "Some orphaned files were not deleted"
     lists them (notification and page error bar); if the terminal fails entirely, "Could not delete the
     orphaned files". The writes still count as done, and the Orphaned tile shows what's left.
+  - Without orphans to delete, when the **Ask before generating** setting (`confirmBeforeGenerate`) is on and
+    at least one file is new or changed, Generate opens a [ConfirmationDialog](./confirmation-dialog.md),
+    "Generate files?". It shows the output folder, how many files will be created and overwritten, and that
+    source control is the way to undo. Its confirm button reads **Generate N files**. The delete confirmation
+    above covers the writes too, so only one dialog appears.
+- The "Preview ready" and "Generation complete" notifications can be turned off in the Settings panel's General tab.
 - "Previewed *2 minutes ago*" after a preview.
 - Without a project folder, a hint says to open a project first.
 

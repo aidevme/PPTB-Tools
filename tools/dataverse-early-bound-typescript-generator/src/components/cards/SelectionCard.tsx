@@ -32,6 +32,7 @@ import type { StepState } from '../shared/workflowSteps';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
+/** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
 
 /** A column header: its label and the explanation shown in its tooltip. */
@@ -232,6 +233,8 @@ export interface SelectionCardProps {
     onSolutionChange: (solutionId: string | null) => void;
     /** Called when the actions/functions tabs are opened, so the CSDL is only fetched when needed. */
     onEnsureOperations: () => void;
+    /** The most rows each table lists (the General setting); defaults to 500. */
+    rowLimit?: number;
 }
 
 /** Step 2: pick tables, actions and functions. Selection is stored directly in the config. */
@@ -341,7 +344,8 @@ export function SelectionCard(props: SelectionCardProps) {
     const missing = props.missing[tab];
     // Sorted before the row limit, so the first rows shown are the first of all matches.
     const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
-    const shown = sorted.slice(0, MAX_ROWS);
+    const rowLimit = props.rowLimit ?? MAX_ROWS;
+    const shown = sorted.slice(0, rowLimit);
     const columns = tab === 'entities' ? ENTITY_COLUMNS : tab === 'actions' ? CUSTOMAPI_COLUMNS : FUNCTION_COLUMNS;
 
     const toggleSort = (column: number) =>
@@ -488,7 +492,7 @@ export function SelectionCard(props: SelectionCardProps) {
                 </div>
                 {!props.needsProject && (
                     <Text size={200}>
-                        {rows.length > MAX_ROWS ? `Showing the first ${MAX_ROWS} of ${rows.length} matches, refine the search to see more.` : `${rows.length} shown.`}
+                        {rows.length > rowLimit ? `Showing the first ${rowLimit} of ${rows.length} matches, refine the search to see more.` : `${rows.length} shown.`}
                     </Text>
                 )}
             </div>

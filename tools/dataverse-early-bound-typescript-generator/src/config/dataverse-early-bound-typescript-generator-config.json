@@ -1,6 +1,14 @@
 {
     "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
+    "general": {
+        "showProjectLoadedNotification": true,
+        "showPreviewReadyNotification": true,
+        "showGenerationCompleteNotification": true,
+        "recentProjectCount": 3,
+        "selectionRowLimit": 500
+    },
     "deleteOrphanedFiles": false,
+    "confirmBeforeGenerate": false,
     "projectDefaults": {
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,

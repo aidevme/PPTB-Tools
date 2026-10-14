@@ -9,6 +9,41 @@ project can be regenerated from either.
 Implementation guide: [docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md).
 User docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
+## Why this tool exists
+
+The dataverse-gen CLI signs in to Dataverse with its companion
+[dataverse-auth](https://github.com/scottdurow/dataverse-auth) package. In some tenants that sign-in fails:
+[dataverse-auth issue #48](https://github.com/scottdurow/dataverse-auth/issues/48) reports
+`Authentication failed: InteractionRequiredAuthError: invalid_grant: AADSTS50076` ("you must use multi-factor
+authentication"), without an MFA prompt ever appearing. The same account signs in with MFA everywhere else, other
+tenants work with dataverse-auth, and device-code sign-in is blocked in those tenants too. The issue is still
+open.
+
+This tool generates the same output without signing in by itself: it uses the Dataverse connection you've
+already opened in Power Platform ToolBox, so dataverse-auth isn't involved. If you can connect to an environment
+in PPTB, with MFA or any other sign-in method PPTB supports, you can generate types for it. Because the tool
+reads and writes the same `.dataverse-gen.json`, a project can keep using the dataverse-gen CLI where its sign-in
+works.
+
+## How it differs from the Early Bound Generator
+
+The PPTB marketplace also has the
+[Early Bound Generator](https://github.com/mbwilding/PPTB-Tools/tree/main/tools/early-bound-generator)
+(`@mbwilding/tool-early-bound-generator`), which generates **C#** early-bound classes for .NET code such as
+plug-ins and console apps. This tool generates **TypeScript** instead, for code that runs in the browser or in
+Node:
+
+| | This tool | Early Bound Generator |
+| --- | --- | --- |
+| Language | TypeScript | C# |
+| Typical use | Form scripts and web resources, PCF controls, React and code apps, Node scripts | Plug-ins, custom workflow activities, .NET apps |
+| Runtime the code is for | [dataverse-ify](https://github.com/scottdurow/dataverse-ify) over the Dataverse Web API | The Dataverse SDK for .NET |
+| Output | Table interfaces and attribute constants, `const enum`s for choices, a metadata cache for dataverse-ify, optional typed `Xrm.FormContext` helpers, request types for actions and functions (including private custom APIs) | C# classes for tables, option sets and messages |
+| Project file | `.dataverse-gen.json`, shared with the [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI | — |
+
+Use this tool for client-side TypeScript, and the Early Bound Generator for server-side .NET code; a solution
+with both can use both.
+
 ## Attribution
 
 The generator logic and templates are a TypeScript port of `dataverse-gen` 2.0.17 (MIT, © Scott Durow).
@@ -46,7 +81,7 @@ code-splitting or ESM output.
 
 ```
 src/
-├── main.tsx / App.tsx      # theme + top-level state and orchestration
+├── main.tsx                # theme; renders components/apps/App.tsx (top-level state and orchestration)
 ├── core/                   # pure TS, no DOM-UI, no PPTB, no I/O (DOMParser only for the CSDL)
 │   ├── config.ts           # .dataverse-gen.json schema, defaults, parse/serialize
 │   ├── csdl.ts             # $metadata (EDMX) parser
@@ -62,7 +97,7 @@ src/
 │   ├── solutions.ts        # solution list + solution table membership
 │   ├── settings.ts         # remembered project folder per connection
 │   └── paths.ts            # absolute host path helpers
-├── components/             # presentational cards
+├── components/             # apps/App.tsx (state and orchestration), plus presentational cards, dialogs, panels
 └── types/
 test/
 ├── fixtures/               # trimmed dataverse-gen test data (EDMX + entity metadata)
@@ -106,6 +141,10 @@ into its own package when the CLI is built.
   `fileSystem.exists` which files remain, not by terminal output. `deleteOrphanedFiles` in `services/plan.ts` only
   passes files with status `orphaned`, no `..` segment, and a path equal to the output root joined with the
   relative path. Leftover files are reported as an error; the writes still count as done.
+- **Tool settings.** Besides `deleteOrphanedFiles`, the Settings panel saves `general` (three notification
+  switches, `recentProjectCount` 0 to 10, `selectionRowLimit` 100 to 2000) and `confirmBeforeGenerate`. With the
+  latter on, Generate asks first, naming the output folder and the created and overwritten counts; when orphans
+  are deleted, that confirmation covers the writes. See [`src/config/README.md`](./src/config/README.md).
 - **Line endings.** Generated files use LF. Comparison ignores CRLF vs LF, so a CRLF checkout shows as unchanged.
 
 ### Deliberate deviations from dataverse-gen output
@@ -131,4 +170,5 @@ These only affect cases where dataverse-gen emits code that does not compile:
 - The CSDL is usually 1 to 5 MB and is fetched once per connection when Actions/Functions are opened or on first
   preview. Environments whose CSDL is over PPTB's 16 MiB limit use the metadata fallback above, without built-in
   actions/functions or custom process actions.
-- The tool name has not been checked against the PPTB marketplace or npm.
+- The name is unique on npm. The closest marketplace tool is the C# Early Bound Generator; see
+  [How it differs from the Early Bound Generator](#how-it-differs-from-the-early-bound-generator).
