@@ -99,7 +99,7 @@ into its own package when the CLI is built.
 - **File-name casing.** An existing file whose name differs only in casing is reused, and the module specifiers
   in `index.ts` and `metadata.ts` are rewritten to match.
 - **Orphans are deleted only on opt-in.** By default they're only reported. With **Delete orphaned files** on
-  (`deleteOrphanedFiles`, a switch in Preview and generate synced with the Settings checkbox), Generate asks for
+  (`deleteOrphanedFiles`, a switch in Preview and generate synced with the Settings switch), Generate asks for
   confirmation, writes the files and `.dataverse-gen.json`, then deletes the orphans. PPTB's file API has no
   delete, so `PptbFileSink.deleteFiles` runs `Remove-Item` (Windows paths) or `rm -f` (otherwise) in a hidden PPTB
   terminal, 20 paths per command, with every path single-quoted. Success is decided by checking with
