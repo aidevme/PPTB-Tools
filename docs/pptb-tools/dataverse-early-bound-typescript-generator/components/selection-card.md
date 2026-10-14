@@ -23,6 +23,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 | `missing` | `Record<SelectionKind, string[]>` | Names in the config that the connected environment doesn't have. |
 | `disabled` | `boolean` | Disables the checkboxes and Clear button. |
 | `needsProject` | `boolean` (optional) | No project open: instead of the tables it says to create or open a project (step 1), hides the row count, and disables the tabs, search box, solution filter, **Custom only** and **Selected only** switches, and **Clear**. `App.tsx` only lists tables, solutions and the `$metadata` operations once a project is open. |
+| `rowLimit` | `number` (optional) | Most rows listed at once. Defaults to 500. `App.tsx` passes the `general.selectionRowLimit` setting. |
 | `onToggle` | `(kind, name, checked) => void` | Selects or deselects one item. |
 | `onClear` | `(kind: SelectionKind) => void` | Clears the current tab's selection. |
 | `onSolutionChange` | `(solutionId: string \| null) => void` | Changes the solution filter. |
@@ -36,8 +37,8 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 - **Filters:** a search box, a solution dropdown, **Selected only**, and on the Actions and Functions tabs
   **Custom only** (custom APIs and custom process actions).
 - **Sorting:** actions and functions list custom APIs first, then sort by name ignoring case.
-- **Row limit:** the list shows at most 500 rows; the footer asks you to refine the search when there are
-  more matches.
+- **Row limit:** the list shows at most `rowLimit` rows (500 by default); the footer says "Showing the first
+  *N* of *M* matches" and asks you to refine the search when there are more.
 - **Tables:** each tab lists its items in a Fluent UI `Table` with a checkbox column. Clicking a row, its
   checkbox, or pressing Space or Enter on it toggles the selection; selected rows are highlighted. Column
   headers are semibold and stay visible while the list scrolls.

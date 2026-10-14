@@ -1,4 +1,7 @@
-/** Presentational components; all data and callbacks come from `App.tsx` as props. */
+/**
+ * Presentational components; all data and callbacks come from `apps/App.tsx` as props. `App` itself isn't exported
+ * here: it imports this barrel, and `main.tsx` imports it directly.
+ */
 export { CodeViewer } from './viewers/CodeViewer';
 export type { ICodeViewerProps } from './viewers/CodeViewer';
 export { Footer } from './layout/Footer';

@@ -209,3 +209,10 @@ describe('WorkflowProgress', () => {
         target.remove();
     });
 });
+
+describe('recent project count', () => {
+    it('honours the General setting, and 0 offers none', () => {
+        expect(recentProjects([ADVENTURE, FABRIKAM, CONTOSO, NORTHWIND], null, null, NOW, 2)).toHaveLength(2);
+        expect(recentProjects([ADVENTURE, FABRIKAM, CONTOSO, NORTHWIND], null, 'D:\\scratch\\demo-app', NOW, 0)).toEqual([]);
+    });
+});

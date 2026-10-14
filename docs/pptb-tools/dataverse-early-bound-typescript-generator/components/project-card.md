@@ -23,6 +23,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 | `hasSelection` | `boolean` | Whether anything is selected, enabling "Clear selection". |
 | `onCopyPath` | `(path: string, label: string) => void` | Copies a path to the clipboard; `label` names it in the confirmation toast. |
 | `onClearSelection` | `() => void` | Clears every selected table, action and function. |
+| `recentProjectCount` | `number` (optional) | How many recent projects to show; 0 hides the list. Defaults to 3. `App.tsx` passes the `general.recentProjectCount` setting. |
 | `now` | `number` (optional) | Current time for relative dates. Defaults to `Date.now()`; tests pass a fixed value. |
 
 ## No project open
@@ -30,7 +31,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 - **Empty state:** a large folder icon, "Open a project to get started", one line of explanation, and two
   actions. **Load Existing Project** is the primary button and **New Project** the secondary one. There's no
   Reload button until a project is open.
-- **Recent projects:** up to three, as clickable tiles with an icon, the name and a second line. The full
+- **Recent projects:** up to three by default (`recentProjectCount`), as clickable tiles with an icon, the name and a second line. The full
   path shows in a tooltip, and clicking a tile opens that project directly.
 
 ## Project open
@@ -49,7 +50,8 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 
 ## Which projects are recent
 
-`recentProjects(projects, projectRoot, rememberedFolder, now)` returns up to three entries:
+`recentProjects(projects, projectRoot, rememberedFolder, now, max)` returns up to `max` entries (default 3, the
+`recentProjectCount` setting; 0 returns none):
 
 1. The folder last used with this connection, labelled "Last used". It shows under its saved project name
    when it's a saved project, and under its folder name otherwise.

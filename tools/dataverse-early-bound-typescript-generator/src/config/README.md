@@ -66,7 +66,15 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 ```json
 {
     "$schema": "./dataverse-early-bound-typescript-generator-config.schema.json",
+    "general": {
+        "showProjectLoadedNotification": true,
+        "showPreviewReadyNotification": true,
+        "showGenerationCompleteNotification": true,
+        "recentProjectCount": 3,
+        "selectionRowLimit": 500
+    },
     "deleteOrphanedFiles": false,
+    "confirmBeforeGenerate": false,
     "projectDefaults": {
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,
@@ -79,7 +87,16 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 
 - **`$schema`** links the file to the schema for editor validation. `index.ts` never reads it, and it isn't
   carried into `toolConfig`.
-- **`deleteOrphanedFiles`:** `false`. Shown as a switch on the Settings panel's Schema Generation tab and
+- **`general`:** settings for the tool itself, edited on the Settings panel's General tab. The three
+  `show…Notification` flags (all `true`) switch the success notifications "Project loaded", "Preview ready" and
+  "Generation complete" on or off; error notifications are always shown. `recentProjectCount` (`3`, range 0 to
+  10) is how many recent projects the Project card offers, and 0 hides the list. `selectionRowLimit` (`500`,
+  range 100 to 2000) is the most rows each Select table lists. Saved settings from before this section existed
+  load with these defaults.
+- **`confirmBeforeGenerate`:** `false`. Shown as the **Ask before generating** switch on the Generate & files
+  tab. When on, Generate asks for confirmation before writing, naming the output folder and how many files will
+  be created and overwritten. When orphans are deleted too, the delete confirmation covers the writes as well.
+- **`deleteOrphanedFiles`:** `false`. Shown as a switch on the Settings panel's Generate & files tab and
   as the **Delete orphaned files** switch in Preview and generate; both save the same setting. When on,
   Generate deletes orphaned files after the user confirms the list.
 - **`projectDefaults`:** the options every project starts with, edited on the Settings panel's Options tab.
@@ -96,7 +113,10 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 
 ## Sample file
 
-The sample shows every field with realistic values and isn't imported anywhere. It has two projects:
+The sample shows every field with realistic values and isn't imported anywhere. Its `general` values differ from
+the defaults (`showPreviewReadyNotification: false`, `recentProjectCount: 5`, `selectionRowLimit: 1000`) and
+`confirmBeforeGenerate` is `true`, so a loader that ignored them would show up in the round trip. It has two
+projects:
 
 - **Contoso Sales Web Resources** has been generated: version `1.0.2`, `modifiedOn` later than `createdOn`,
   and a `lastGeneratedFiles` list covering each output folder (`entities/`, `enums/`, `actions/`, `functions/`,
@@ -118,9 +138,18 @@ workspace settings.
 ```text
 root (object, additionalProperties: false)
 ├── $schema              string
+├── general              #/definitions/general
 ├── deleteOrphanedFiles  boolean, default false
+├── confirmBeforeGenerate  boolean, default false
 ├── projectDefaults      #/definitions/projectDefaults
 └── projects             array of #/definitions/project, default []
+
+#/definitions/general (object, additionalProperties: false, all optional)
+├── showProjectLoadedNotification       boolean, default true
+├── showPreviewReadyNotification        boolean, default true
+├── showGenerationCompleteNotification  boolean, default true
+├── recentProjectCount                  integer, 0 to 10, default 3
+└── selectionRowLimit                   integer, 100 to 2000, default 500
 
 #/definitions/projectDefaults (object, additionalProperties: false, all optional)
 ├── outputRoot           string, minLength 1, default "./src/dataverse-gen"
@@ -161,6 +190,8 @@ deliberately more tolerant about what it **reads**, so a stored value that fails
 | `lastGeneratedFiles` | Unique non-empty strings | Non-string items dropped; duplicates kept |
 | Unknown keys | Rejected | Ignored, and not written back |
 | Wrong top-level types | Rejected | The default is used for that key |
+| `general` booleans | Typed | Per key: a non-boolean uses the default |
+| `general` numbers | `integer` within `minimum`/`maximum` (rejects 2.5 or 5000) | Per key: must be a finite number, then rounded and clamped to the range; a string or `NaN` uses the default |
 | `projectDefaults` values | Typed; `outputRoot` non-empty | Per key: wrong type or blank `outputRoot` (after trimming) uses the default |
 
 Values the loader tolerates are handled where they're used:
@@ -209,8 +240,18 @@ interface ProjectDefaults {
     generateIndex: boolean;
 }
 
+interface GeneralSettings {
+    showProjectLoadedNotification: boolean;
+    showPreviewReadyNotification: boolean;
+    showGenerationCompleteNotification: boolean;
+    recentProjectCount: number;     // integer, RECENT_PROJECT_COUNT_RANGE
+    selectionRowLimit: number;      // integer, SELECTION_ROW_LIMIT_RANGE
+}
+
 interface ToolConfig {
+    general: GeneralSettings;
     deleteOrphanedFiles: boolean;
+    confirmBeforeGenerate: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -229,6 +270,8 @@ which `recordGeneration` treats differently from "generated, but produced nothin
 | Export | Value | Use |
 | --- | --- | --- |
 | `DEFAULT_PROJECT_VERSION` | `'1.0.0'` | New projects, and projects saved without a version |
+| `RECENT_PROJECT_COUNT_RANGE` | `{ min: 0, max: 10 }` | Range of `general.recentProjectCount`; the Settings panel's spin button and the loader's clamp use it |
+| `SELECTION_ROW_LIMIT_RANGE` | `{ min: 100, max: 2000 }` | Range of `general.selectionRowLimit`, used the same way |
 | `toolConfig` | `ToolConfig` built from the default JSON | Initial `toolSettings` in `App.tsx`, and the fallback in `loadToolConfig` |
 
 ### `mergeToolConfig(saved: unknown): ToolConfig`
@@ -237,7 +280,11 @@ Builds a complete `ToolConfig` from stored data, falling back to `toolConfig` ke
 
 - `saved` that isn't an object (including `undefined`, which PPTB returns for a missing key) is treated as
   `{}`, so the result equals the defaults.
-- `deleteOrphanedFiles` is taken only if it's a boolean.
+- `general` is merged key by key over `toolConfig.general` (`normalizeGeneralSettings`): booleans only if
+  boolean; numbers only if finite numbers, then rounded and clamped to their range (`clampInteger`); anything
+  else, including strings, falls back to the default. A `general` that isn't an object gives the defaults, so
+  settings saved before it existed load unchanged.
+- `deleteOrphanedFiles` and `confirmBeforeGenerate` are taken only if they're booleans.
 - `projectDefaults` is merged key by key over `toolConfig.projectDefaults`: booleans only if boolean,
   `outputRoot` only if a non-blank string (stored trimmed).
 - `projects` is taken only if it's an array, then normalized. The result is a new array; a stored array is never
@@ -359,7 +406,7 @@ To add a new setting:
 
 | File | Covers |
 | --- | --- |
-| `test/settings.test.ts` | Defaults from the JSON; `mergeToolConfig` with unknown, mistyped and partial values, including the defaults for old projects; `toolConfigEquals`; `loadToolConfig` / `saveToolConfig` against a stubbed `toolboxAPI.settings` and outside PPTB; Settings panel Save/Cancel; New Project and Load Existing Project dialogs |
+| `test/settings.test.ts` | Defaults from the JSON; `mergeToolConfig` with unknown, mistyped and partial values, including the defaults for old projects, `general` merging, rounding and clamping, and boolean-only `confirmBeforeGenerate`; `toolConfigEquals`; `loadToolConfig` / `saveToolConfig` against a stubbed `toolboxAPI.settings` and outside PPTB; Settings panel General tab switches and spin buttons, the Generate & files "Ask before generating" switch, and Save/Cancel; New Project and Load Existing Project dialogs |
 | `test/projectVersion.test.ts` | `bumpPatchVersion`; every `recordGeneration` branch; `lastGeneratedFiles` round-trip; `isSamePath` |
 
 ## Known limitations

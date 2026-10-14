@@ -37,12 +37,63 @@ export interface ProjectDefaults {
     generateIndex: boolean;
 }
 
+/** Settings on the General tab: how the tool itself behaves. */
+export interface GeneralSettings {
+    /** Show the "Project loaded" notification after a project opens. */
+    showProjectLoadedNotification: boolean;
+    /** Show the "Preview ready" notification after a preview. */
+    showPreviewReadyNotification: boolean;
+    /** Show the "Generation complete" notification after Generate. */
+    showGenerationCompleteNotification: boolean;
+    /** Recent projects offered on the Project card; 0 hides the list. See {@link RECENT_PROJECT_COUNT_RANGE}. */
+    recentProjectCount: number;
+    /** Rows shown at most in each Select table. See {@link SELECTION_ROW_LIMIT_RANGE}. */
+    selectionRowLimit: number;
+}
+
+/** Allowed range for {@link GeneralSettings.recentProjectCount}. */
+export const RECENT_PROJECT_COUNT_RANGE = { min: 0, max: 10 } as const;
+/** Allowed range for {@link GeneralSettings.selectionRowLimit}. */
+export const SELECTION_ROW_LIMIT_RANGE = { min: 100, max: 2000 } as const;
+
 /** Tool settings and projects, saved in PPTB's per-tool settings. */
 export interface ToolConfig {
+    general: GeneralSettings;
     /** Delete files in the output folders that the current selection no longer generates. */
     deleteOrphanedFiles: boolean;
+    /** Ask for confirmation before Generate writes new and changed files. */
+    confirmBeforeGenerate: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
+}
+
+/** The tool's own General defaults, used when the bundled JSON doesn't set a value. */
+const BUILT_IN_GENERAL_SETTINGS: GeneralSettings = {
+    showProjectLoadedNotification: true,
+    showPreviewReadyNotification: true,
+    showGenerationCompleteNotification: true,
+    recentProjectCount: 3,
+    selectionRowLimit: 500,
+};
+
+/** A whole number within `range`, or `fallback` when `value` isn't a finite number. */
+function clampInteger(value: unknown, range: { min: number; max: number }, fallback: number): number {
+    if (typeof value !== 'number' || !Number.isFinite(value)) return fallback;
+    return Math.min(range.max, Math.max(range.min, Math.round(value)));
+}
+
+/** Each value from `value` when it has the right type (numbers clamped to their range), else from `fallback`. */
+function normalizeGeneralSettings(value: unknown, fallback: GeneralSettings): GeneralSettings {
+    const v = (value && typeof value === 'object' ? value : {}) as Partial<Record<keyof GeneralSettings, unknown>>;
+    const flag = (key: 'showProjectLoadedNotification' | 'showPreviewReadyNotification' | 'showGenerationCompleteNotification') =>
+        typeof v[key] === 'boolean' ? (v[key] as boolean) : fallback[key];
+    return {
+        showProjectLoadedNotification: flag('showProjectLoadedNotification'),
+        showPreviewReadyNotification: flag('showPreviewReadyNotification'),
+        showGenerationCompleteNotification: flag('showGenerationCompleteNotification'),
+        recentProjectCount: clampInteger(v.recentProjectCount, RECENT_PROJECT_COUNT_RANGE, fallback.recentProjectCount),
+        selectionRowLimit: clampInteger(v.selectionRowLimit, SELECTION_ROW_LIMIT_RANGE, fallback.selectionRowLimit),
+    };
 }
 
 /** dataverse-gen's own defaults, used when the bundled JSON doesn't set a value. */
@@ -95,7 +146,9 @@ function normalizeProjects(values: unknown[]): ProjectEntry[] {
  * applied on top.
  */
 export const toolConfig: ToolConfig = {
+    general: normalizeGeneralSettings(defaults.general, BUILT_IN_GENERAL_SETTINGS),
     deleteOrphanedFiles: defaults.deleteOrphanedFiles === true,
+    confirmBeforeGenerate: defaults.confirmBeforeGenerate === true,
     projectDefaults: normalizeProjectDefaults(defaults.projectDefaults, BUILT_IN_PROJECT_DEFAULTS),
     projects: normalizeProjects(defaults.projects as unknown[]),
 };
@@ -104,7 +157,10 @@ export const toolConfig: ToolConfig = {
 export function mergeToolConfig(saved: unknown): ToolConfig {
     const values = (saved && typeof saved === 'object' ? saved : {}) as Partial<Record<keyof ToolConfig, unknown>>;
     return {
+        general: normalizeGeneralSettings(values.general, toolConfig.general),
         deleteOrphanedFiles: typeof values.deleteOrphanedFiles === 'boolean' ? values.deleteOrphanedFiles : toolConfig.deleteOrphanedFiles,
+        confirmBeforeGenerate:
+            typeof values.confirmBeforeGenerate === 'boolean' ? values.confirmBeforeGenerate : toolConfig.confirmBeforeGenerate,
         projectDefaults: normalizeProjectDefaults(values.projectDefaults, toolConfig.projectDefaults),
         projects: Array.isArray(values.projects) ? normalizeProjects(values.projects) : toolConfig.projects,
     };

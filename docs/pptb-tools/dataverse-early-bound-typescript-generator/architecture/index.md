@@ -12,7 +12,7 @@ The code is split so that the generator itself has no dependency on PPTB, React 
 | Layer | Folder | Depends on | Page |
 | --- | --- | --- | --- |
 | UI | `src/components/` | React, Fluent UI | [Components](../components/) |
-| App state | `src/App.tsx`, `src/hooks/` | UI, services, core | [App state and hooks](./app-state.md) |
+| App state | `src/components/apps/App.tsx`, `src/hooks/` | UI, services, core | [App state and hooks](./app-state.md) |
 | Services | `src/services/` | `window.dataverseAPI`, `window.toolboxAPI`, core | [Services](./services.md) |
 | Core | `src/core/` | Nothing (only `DOMParser`) | [Core](./core.md) |
 | Shared types | `src/types/` | — | — |

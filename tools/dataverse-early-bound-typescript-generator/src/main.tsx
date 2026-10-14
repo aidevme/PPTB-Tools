@@ -1,7 +1,7 @@
 import { StrictMode, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { FluentProvider, webDarkTheme, webLightTheme } from '@fluentui/react-components';
-import App from './App';
+import App from './components/apps/App';
 import './index.css';
 
 type ThemeMode = 'light' | 'dark';

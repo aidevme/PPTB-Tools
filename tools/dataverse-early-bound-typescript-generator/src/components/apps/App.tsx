@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { DeleteRegular } from '@fluentui/react-icons';
-import { ConfirmationDialog, Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from './components';
-import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
-import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from './config';
-import { useConnection } from './hooks';
+import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
+import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
+import { ConfirmationDialog, Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
+import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../../core';
+import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from '../../config';
+import { useConnection } from '../../hooks';
 import {
     PptbFileSink,
     PptbMetadataProvider,
@@ -30,24 +30,9 @@ import {
     summarizeGeneration,
     technicalMessage,
     type ProjectConfigState,
-} from './services';
-import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from './types';
-
-const useStyles = makeStyles({
-    page: { display: 'flex', flexDirection: 'column', minHeight: '100vh' },
-    main: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: tokens.spacingVerticalM,
-        padding: tokens.spacingHorizontalL,
-        flexGrow: 1,
-        maxWidth: '1400px',
-        width: '100%',
-        boxSizing: 'border-box',
-        alignSelf: 'center',
-    },
-    progress: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalXS },
-});
+} from '../../services';
+import { useAppStyles } from '../../styles';
+import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from '../../types';
 
 /** How long the "$metadata is too large" warning stays visible. */
 const METADATA_FALLBACK_WARNING_MS = 5000;
@@ -60,7 +45,7 @@ const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions
  * presentational and receive everything as props.
  */
 export default function App() {
-    const styles = useStyles();
+    const styles = useAppStyles();
     const { connection, isLoading: connectionLoading } = useConnection();
     const inPptb = typeof window !== 'undefined' && !!window.toolboxAPI && !!window.dataverseAPI;
     const connKey = connectionKey(connection);
@@ -71,6 +56,8 @@ export default function App() {
     const [settingsOpen, setSettingsOpen] = useState(false);
     /** Whether the dialog confirming that Generate will delete orphaned files is open. */
     const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+    /** Whether the dialog confirming Generate (the "Ask before generating" setting) is open. */
+    const [confirmGenerateOpen, setConfirmGenerateOpen] = useState(false);
     const [newProjectOpen, setNewProjectOpen] = useState(false);
     const [loadProjectOpen, setLoadProjectOpen] = useState(false);
     /** Settings-panel values: the bundled defaults until the saved values have loaded. */
@@ -159,6 +146,7 @@ export default function App() {
      * `.dataverse-gen.json` is read. If PPTB hasn't granted access to that folder in this session, the folder
      * picker opens there for the user to confirm instead. Resolves to `false` when that picker is cancelled.
      */
+    const showProjectLoaded = toolSettings.general.showProjectLoadedNotification;
     const openSavedProject = useCallback(
         async (project: ProjectOpenTarget) => {
             if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
@@ -168,7 +156,8 @@ export default function App() {
                 // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
                 // otherwise just look like a new project.
                 await window.toolboxAPI.fileSystem.readDirectory(project.location);
-                void notifyProjectLoaded(project.name, await openProjectFolder(project.location));
+                const state = await openProjectFolder(project.location);
+                if (showProjectLoaded) void notifyProjectLoaded(project.name, state);
                 return true;
             } catch (e) {
                 if (!/access denied|permission|not allowed|not permitted/i.test(technicalMessage(e))) throw e;
@@ -180,10 +169,11 @@ export default function App() {
                 defaultPath: project.location,
             });
             if (!folder) return false;
-            void notifyProjectLoaded(project.name, await openProjectFolder(folder));
+            const state = await openProjectFolder(folder);
+            if (showProjectLoaded) void notifyProjectLoaded(project.name, state);
             return true;
         },
-        [openProjectFolder],
+        [openProjectFolder, showProjectLoaded],
     );
 
     // ----- environment lists ----------------------------------------------------------------------
@@ -433,7 +423,7 @@ export default function App() {
             setPreviewedAt(new Date().toISOString());
             setLastResult(null);
             setPlanStale(false);
-            void notifyPreviewReady(nextPlan, toolSettings.deleteOrphanedFiles);
+            if (toolSettings.general.showPreviewReadyNotification) void notifyPreviewReady(nextPlan, toolSettings.deleteOrphanedFiles);
             return nextPlan;
         } catch (e) {
             setError(reportError('Preview failed', e, { projectRoot }));
@@ -441,7 +431,7 @@ export default function App() {
         } finally {
             setProgress(null);
         }
-    }, [projectRoot, config, provider, sink, toolSettings.deleteOrphanedFiles]);
+    }, [projectRoot, config, provider, sink, toolSettings.deleteOrphanedFiles, toolSettings.general.showPreviewReadyNotification]);
 
     /**
      * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
@@ -524,20 +514,24 @@ export default function App() {
                 });
                 setLastResult(summarizeGeneration(result.written, planToApply.counts, deleted?.size));
                 // Not awaited, and it never throws: a failed notification mustn't report a successful write as "Generation failed".
-                void notifyGenerationComplete(result.written, planToApply.counts, deleted?.size);
+                if (toolSettings.general.showGenerationCompleteNotification) void notifyGenerationComplete(result.written, planToApply.counts, deleted?.size);
             } catch (e) {
                 setError(reportError(`Generation failed`, e));
             } finally {
                 setProgress(null);
             }
         },
-        [projectRoot, config, sink, recordProjectGeneration],
+        [projectRoot, config, sink, recordProjectGeneration, toolSettings.general.showGenerationCompleteNotification],
     );
 
-    /** Generate: deleting orphans needs a confirmation first; otherwise it writes straight away. */
+    /**
+     * Generate: deleting orphans always needs a confirmation, which also covers the writes; otherwise "Ask before
+     * generating" asks first, or it writes straight away.
+     */
     const startGenerate = () => {
         if (!plan) return;
         if (toolSettings.deleteOrphanedFiles && plan.counts.orphaned > 0) setConfirmDeleteOpen(true);
+        else if (toolSettings.confirmBeforeGenerate && plan.counts.new + plan.counts.changed > 0) setConfirmGenerateOpen(true);
         else void runGenerate(plan, false);
     };
 
@@ -657,6 +651,7 @@ export default function App() {
                     rememberedFolder={rememberedFolder}
                     configState={projectRoot ? configState : null}
                     projects={toolSettings.projects}
+                    recentProjectCount={toolSettings.general.recentProjectCount}
                     busy={busy || !inPptb}
                     onNewProject={() => setNewProjectOpen(true)}
                     onLoadExistingProject={() => setLoadProjectOpen(true)}
@@ -686,6 +681,7 @@ export default function App() {
                     onClear={clear}
                     onSolutionChange={changeSolution}
                     onEnsureOperations={ensureOperations}
+                    rowLimit={toolSettings.general.selectionRowLimit}
                 />
                 <OptionsCard step={steps[2]} config={config} disabled={!canSelect || busy} onChange={updateConfig} />
                 <PreviewCard
@@ -720,6 +716,18 @@ export default function App() {
                 }}
                 onCancel={() => setConfirmDeleteOpen(false)}
             />
+            <ConfirmationDialog
+                open={confirmGenerateOpen && !!plan}
+                title="Generate files?"
+                message={plan && <GenerateSummary plan={plan} />}
+                confirmLabel={`Generate ${plan ? plan.counts.new + plan.counts.changed : 0} ${plan && plan.counts.new + plan.counts.changed === 1 ? 'file' : 'files'}`}
+                confirmIcon={<SaveRegular />}
+                onConfirm={() => {
+                    setConfirmGenerateOpen(false);
+                    if (plan) void runGenerate(plan, false);
+                }}
+                onCancel={() => setConfirmGenerateOpen(false)}
+            />
             <Footer />
         </div>
     );
@@ -746,6 +754,24 @@ function OrphanList({ plan }: { plan: WritePlan }) {
                 ))}
                 {more > 0 && <li>…and {more} more</li>}
             </ul>
+        </>
+    );
+}
+
+/** The "Ask before generating" confirmation's message: where files go, what's created and overwritten, and that it can't be undone. */
+function GenerateSummary({ plan }: { plan: WritePlan }) {
+    const { new: created, changed } = plan.counts;
+    const files = (n: number) => `${n} ${n === 1 ? 'file' : 'files'}`;
+    return (
+        <>
+            <Text block>
+                Generate writes to <code>{plan.outputRoot}</code> and saves <code>.dataverse-gen.json</code>.
+            </Text>
+            <ul>
+                {created > 0 && <li>{files(created)} will be created</li>}
+                {changed > 0 && <li>{files(changed)} will be overwritten</li>}
+            </ul>
+            <Text block>Overwritten files can't be restored by the tool; use source control to undo changes.</Text>
         </>
     );
 }

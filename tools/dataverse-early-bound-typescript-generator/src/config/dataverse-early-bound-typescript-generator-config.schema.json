@@ -9,8 +9,16 @@
             "description": "Path or URL of this schema, for editor validation. Ignored by the tool.",
             "type": "string"
         },
+        "general": {
+            "$ref": "#/definitions/general"
+        },
         "deleteOrphanedFiles": {
-            "description": "Delete files in the output folders that the current selection no longer generates. Not applied yet: PPTB's file API can't delete files, so orphaned files are only reported.",
+            "description": "Delete files in the output folders that the current selection no longer generates. When true, Generate deletes them permanently after the user confirms the list; when false, they're only reported. Shown on the Settings panel's Generate & files tab and as a switch in Preview and generate.",
+            "type": "boolean",
+            "default": false
+        },
+        "confirmBeforeGenerate": {
+            "description": "Ask for confirmation before Generate writes files, naming the output folder and how many files will be created and overwritten. Overwrites can't be undone. Shown on the Settings panel's Generate & files tab.",
             "type": "boolean",
             "default": false
         },
@@ -32,6 +40,42 @@
             "description": "ISO 8601 timestamp in UTC, as written by Date.toISOString().",
             "type": "string",
             "format": "date-time"
+        },
+        "general": {
+            "description": "Settings on the General tab: how the tool itself behaves. Missing or mistyped keys fall back to the defaults; numbers are rounded and clamped to their range.",
+            "type": "object",
+            "properties": {
+                "showProjectLoadedNotification": {
+                    "description": "Show the \"Project loaded\" notification after a project opens.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "showPreviewReadyNotification": {
+                    "description": "Show the \"Preview ready\" notification after a preview.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "showGenerationCompleteNotification": {
+                    "description": "Show the \"Generation complete\" notification after Generate.",
+                    "type": "boolean",
+                    "default": true
+                },
+                "recentProjectCount": {
+                    "description": "Recent projects offered on the Project card. 0 hides the list.",
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 10,
+                    "default": 3
+                },
+                "selectionRowLimit": {
+                    "description": "Rows shown at most in each Select table (tables, actions, functions); refine the search to see others.",
+                    "type": "integer",
+                    "minimum": 100,
+                    "maximum": 2000,
+                    "default": 500
+                }
+            },
+            "additionalProperties": false
         },
         "projectDefaults": {
             "description": "Options a new project starts with: applied when a project folder without .dataverse-gen.json is opened. Projects that already have one keep their own values. Missing or mistyped keys fall back to dataverse-gen's defaults.",

@@ -93,6 +93,8 @@ export interface ProjectCardProps {
     configState: ProjectConfigState | null;
     /** Saved projects, for the open project's name and version and for the recent-projects list. */
     projects: ProjectEntry[];
+    /** How many recent projects to offer (the General setting); 0 hides the list. Defaults to 3. */
+    recentProjectCount?: number;
     busy: boolean;
     /** Opens the New Project dialog. */
     onNewProject: () => void;
@@ -119,7 +121,7 @@ export function ProjectCard(props: ProjectCardProps) {
     const { step, projectRoot, configState, projects, busy, onNewProject, onLoadExistingProject, onOpenRecent, onReload, onCopyPath } = props;
     const styles = useProjectCardStyles();
     const now = props.now ?? Date.now();
-    const recent = recentProjects(projects, projectRoot, props.rememberedFolder, now);
+    const recent = recentProjects(projects, projectRoot, props.rememberedFolder, now, props.recentProjectCount ?? MAX_RECENT);
 
     const recentList = recent.length > 0 && (
         <div className={styles.body}>

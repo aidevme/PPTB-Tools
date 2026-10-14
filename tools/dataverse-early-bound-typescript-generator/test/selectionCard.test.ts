@@ -241,3 +241,41 @@ describe('toTableType', () => {
         expect(toTableType({})).toBe('Standard');
     });
 });
+
+describe('row limit', () => {
+    it('lists at most rowLimit rows and says how many matched', async () => {
+        const many: EntitySummary[] = Array.from({ length: 5 }, (_, i) => ({ ...ENTITIES[0], logicalName: `t${i}`, schemaName: `T${i}`, displayName: `Table ${i}`, metadataId: `m${i}` }));
+        container = document.body.appendChild(document.createElement('div'));
+        root = createRoot(container);
+        await act(async () => {
+            root!.render(
+                createElement(
+                    FluentProvider,
+                    { theme: webLightTheme },
+                    createElement(SelectionCard, {
+                        step: computeWorkflowSteps({ hasProject: true, selectedCount: 0, plan: null })[1],
+                        entities: many,
+                        operations: [],
+                        solutions: [],
+                        solutionEntityIds: null,
+                        solutionComponentIds: null,
+                        selectedSolutionId: null,
+                        loadingEntities: false,
+                        loadingOperations: false,
+                        loadingSolution: false,
+                        selected: { entities: [], actions: [], functions: [] },
+                        missing: { entities: [], actions: [], functions: [] },
+                        disabled: false,
+                        onToggle: vi.fn(),
+                        onClear: vi.fn(),
+                        onSolutionChange: vi.fn(),
+                        onEnsureOperations: vi.fn(),
+                        rowLimit: 3,
+                    }),
+                ),
+            );
+        });
+        expect(rows()).toHaveLength(3);
+        expect(document.body.textContent).toContain('Showing the first 3 of 5 matches');
+    });
+});
