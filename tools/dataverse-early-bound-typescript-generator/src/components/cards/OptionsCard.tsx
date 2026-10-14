@@ -16,7 +16,7 @@ export interface OptionsCardProps {
 export function OptionsCard({ step, config, disabled, onChange }: OptionsCardProps) {
     const styles = useOptionsCardStyles();
     return (
-        <StepCard step={step} description="Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
+        <StepCard step={step} description="Start from the Options in Settings; change them here for this project. Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
             <div className={styles.body}>
                 <Field
                     label={infoLabel(

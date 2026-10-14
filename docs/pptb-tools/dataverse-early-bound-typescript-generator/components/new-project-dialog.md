@@ -13,7 +13,7 @@ Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidev
 | `onOpenChange` | `(open: boolean) => void` | Called when the dialog opens or closes. |
 | `existingNames` | `string[]` | Names of saved projects; a new project can't reuse one. |
 | `onBrowseLocation` | `(current: string) => Promise<string \| null>` | Opens PPTB's folder picker for Location. Resolves to the folder, or `null` when cancelled. |
-| `onSave` | `(project: NewProject) => Promise<void>` | Saves the project. The dialog closes when it resolves and shows the error when it rejects. |
+| `onSave` | `(project: NewProject) => Promise<void>` | Saves the project, then opens it. The dialog closes when it resolves and shows the error when it rejects. |
 
 `NewProject` is `{ name, description, location }`. `App.tsx` adds an `id`, a `version` (`1.0.0`) and
 `createdOn` and `modifiedOn` timestamps (both the creation time) before saving. Projects saved before
@@ -43,7 +43,9 @@ added, or a previously generated file is no longer produced (an orphan), the ver
 
 - The form is empty each time the dialog opens.
 - **Save** is enabled once Project Name and Location are filled in and the name isn't already used. It saves
-  and closes the dialog, or shows the error and stays open if saving fails.
+  and closes the dialog, or shows the error and stays open if saving fails. After saving, `App.tsx` also opens
+  the new project (as Load Existing Project would), which lists the tables on the Select card; if opening
+  fails, the error shows in the page, since the project was saved.
 - **Cancel**, the Escape key, or a click outside the dialog closes it without saving.
 - **Where projects are saved:** `App.tsx` appends the project to `projects` in the tool config and saves it in
   PPTB's per-tool settings (`toolboxAPI.settings`, key `toolConfig`), the same place as the

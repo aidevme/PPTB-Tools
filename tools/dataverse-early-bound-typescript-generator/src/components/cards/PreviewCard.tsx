@@ -122,12 +122,21 @@ const HEADER_HELP: Record<SortColumn, JSX.Element> = {
                 <li><strong>new</strong>: doesn't exist yet; Generate creates it</li>
                 <li><strong>changed</strong>: content differs; Generate overwrites it</li>
                 <li><strong>unchanged</strong>: identical; not rewritten</li>
-                <li><strong>orphaned</strong>: in the output folder but no longer generated; reported, never deleted</li>
+                <li><strong>orphaned</strong>: in the output folder but no longer generated; only reported, unless Delete orphaned files is on</li>
             </ul>
             Click to sort by status (new first).
         </>
     ),
 };
+
+/** Explanation shown in the Delete orphaned files switch's tooltip. */
+const DELETE_ORPHANS_HELP = (
+    <>
+        <strong>Delete orphaned files:</strong> when on, Generate also deletes orphaned files: files in the output folders that the
+        current selection no longer generates, such as a table you removed. You confirm the list first. Files are deleted permanently,
+        not moved to the Recycle Bin or Trash. When off, orphaned files are only reported. Saved in the tool settings.
+    </>
+);
 
 const TYPE_ICONS: Record<GeneratedFileType, JSX.Element> = {
     entities: <TableRegular />,
@@ -162,6 +171,9 @@ export interface PreviewCardProps {
     previewedAt: string | null;
     /** Summary of the last Generate run, shown as a success message until the next preview. */
     lastResult: string | null;
+    /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
+    deleteOrphans: boolean;
+    onDeleteOrphansChange: (checked: boolean) => void;
     onPreview: () => void;
     onGenerate: () => void;
     /** Copies text (a file's content or a path) to the clipboard; `label` names it in the confirmation. */
@@ -175,7 +187,7 @@ export interface PreviewCardProps {
  * the table lists them (changes only by default) beside a viewer showing each file's content or changes.
  */
 export function PreviewCard(props: PreviewCardProps) {
-    const { step, plan, stale, canPreview, needsProject, busy, previewedAt, lastResult, onPreview, onGenerate, onCopyText } = props;
+    const { step, plan, stale, canPreview, needsProject, busy, previewedAt, lastResult, deleteOrphans, onDeleteOrphansChange, onPreview, onGenerate, onCopyText } = props;
     const styles = usePreviewCardStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
@@ -232,12 +244,33 @@ export function PreviewCard(props: PreviewCardProps) {
         }
     };
 
-    const generateLabel = !plan ? 'Generate' : writable === 0 ? 'Nothing to write' : `Generate ${plural(writable, 'file', 'files')}`;
+    const deletable = plan && deleteOrphans ? plan.counts.orphaned : 0;
+    const generateLabel = !plan
+        ? 'Generate'
+        : writable > 0
+          ? `Generate ${plural(writable, 'file', 'files')}`
+          : deletable > 0
+            ? `Delete ${plural(deletable, 'orphaned file', 'orphaned files')}`
+            : 'Nothing to write';
+    const generateHelp = !plan
+        ? 'Run Preview first'
+        : writable === 0 && deletable === 0
+          ? 'Every generated file is already up to date'
+          : [
+                writable > 0 && 'Write the new and changed files and save .dataverse-gen.json',
+                deletable > 0 && `${writable > 0 ? 'then delete' : 'Delete'} the orphaned files (asks for confirmation first)`,
+            ]
+                .filter(Boolean)
+                .join(', ');
 
     return (
         <StepCard
             step={step}
-            description="Preview compares the generated files with the output folder; Generate writes only new and changed files and never deletes anything."
+            description={
+                deleteOrphans
+                    ? 'Preview compares the generated files with the output folder; Generate writes only new and changed files, then deletes orphaned files after you confirm.'
+                    : 'Preview compares the generated files with the output folder; Generate writes only new and changed files and never deletes anything.'
+            }
         >
             <div className={styles.body}>
                 {plan && stale && (
@@ -260,14 +293,26 @@ export function PreviewCard(props: PreviewCardProps) {
                     <Button icon={<DocumentSearchRegular />} disabled={!canPreview || busy} onClick={onPreview}>
                         Preview
                     </Button>
+                    <Tooltip content={generateHelp} relationship="description" withArrow>
+                        <Button appearance="primary" icon={<SaveRegular />} disabled={!plan || stale || busy || writable + deletable === 0} onClick={onGenerate}>
+                            {generateLabel}
+                        </Button>
+                    </Tooltip>
                     <Tooltip
-                        content={!plan ? 'Run Preview first' : writable === 0 ? 'Every generated file is already up to date' : 'Write the new and changed files and save .dataverse-gen.json'}
+                        content={{
+                            children: plan ? DELETE_ORPHANS_HELP : <>{DELETE_ORPHANS_HELP} Available after Preview, once the orphaned files are known.</>,
+                            className: styles.headerTooltip,
+                        }}
                         relationship="description"
                         withArrow
                     >
-                        <Button appearance="primary" icon={<SaveRegular />} disabled={!plan || stale || busy || writable === 0} onClick={onGenerate}>
-                            {generateLabel}
-                        </Button>
+                        {/* Only after a preview: until then nobody knows which files would be deleted. */}
+                        <Switch
+                            label="Delete orphaned files"
+                            checked={deleteOrphans}
+                            disabled={!plan || busy}
+                            onChange={(_, data) => onDeleteOrphansChange(data.checked)}
+                        />
                     </Tooltip>
                     {previewedAt && (
                         <Text size={200} className={styles.muted}>
@@ -284,7 +329,7 @@ export function PreviewCard(props: PreviewCardProps) {
 
                 {plan && (
                     <>
-                        <Text className={styles.summary}>{summarizePlan(plan.counts)}</Text>
+                        <Text className={styles.summary}>{summarizePlan(plan.counts, deleteOrphans)}</Text>
                         <div className={styles.tiles} role="group" aria-label="Filter by status">
                             {STATUS_ORDER.map((status) => {
                                 const accent = { new: styles.accentNew, changed: styles.accentChanged, unchanged: styles.accentUnchanged, orphaned: styles.accentOrphaned }[status];

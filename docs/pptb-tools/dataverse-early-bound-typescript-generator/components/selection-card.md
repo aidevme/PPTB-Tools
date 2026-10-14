@@ -22,6 +22,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 | `selected` | `Record<SelectionKind, string[]>` | Selected names per tab. |
 | `missing` | `Record<SelectionKind, string[]>` | Names in the config that the connected environment doesn't have. |
 | `disabled` | `boolean` | Disables the checkboxes and Clear button. |
+| `needsProject` | `boolean` (optional) | No project open: instead of the tables it says to create or open a project (step 1), hides the row count, and disables the tabs, search box, solution filter, **Custom only** and **Selected only** switches, and **Clear**. `App.tsx` only lists tables, solutions and the `$metadata` operations once a project is open. |
 | `onToggle` | `(kind, name, checked) => void` | Selects or deselects one item. |
 | `onClear` | `(kind: SelectionKind) => void` | Clears the current tab's selection. |
 | `onSolutionChange` | `(solutionId: string \| null) => void` | Changes the solution filter. |
@@ -40,8 +41,10 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 - **Tables:** each tab lists its items in a Fluent UI `Table` with a checkbox column. Clicking a row, its
   checkbox, or pressing Space or Enter on it toggles the selection; selected rows are highlighted. Column
   headers are semibold and stay visible while the list scrolls.
-  - **Tables tab:** Display Name, Logical Name, Schema Name, Description, and Type (**Custom** badge, or
-    Standard). Long descriptions are cut to one line, with the full text in a Fluent UI `Tooltip` on
+  - **Tables tab:** Display Name, Logical Name, Schema Name, Description, and Type: a **Standard**,
+    **Activity**, **Virtual** or **Elastic** badge. The type comes from the table metadata's `TableType`
+    (Standard, Virtual, Elastic) and `IsActivity`, since activity tables report `TableType: Standard`
+    (`toTableType` in `services/metadataProvider.ts`). Long descriptions are cut to one line, with the full text in a Fluent UI `Tooltip` on
     hover; tables without one show a dash.
   - **Actions and Functions tabs:** Name (display name above the unique name when they differ), Binding
     (Bound to a table, or Unbound), Parameters, and Type (**Custom API**, **Private custom API** or **Custom

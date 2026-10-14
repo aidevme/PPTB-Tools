@@ -80,4 +80,7 @@ Things that aren't obvious from a single file:
   avoid cycles.
 - **Private custom APIs aren't in `$metadata`.** They're still listed; their definitions are built from the
   `customapi` record and its `customapirequestparameters`.
-- **Orphaned files are reported, never deleted** — PPTB's file API has no delete.
+- **Orphaned files are deleted only on opt-in.** They're reported by default; they're removed only when the
+  user turns on *Delete orphaned files* and confirms the list. PPTB's file API has no delete, so deletion
+  runs through a hidden PPTB terminal (`PptbFileSink.deleteFiles`), and `deleteOrphanedFiles` in
+  `services/plan.ts` guards which paths reach it.

@@ -37,6 +37,8 @@ This tool generates early-bound TypeScript types and metadata for Dataverse tabl
 
 Contributions are welcome. Please open an issue to discuss a change before submitting a pull request, and keep new tools consistent with the structure of existing ones.
 
+For developer setup and tooling, including the PPTB AI agent skills for Claude Code and GitHub Copilot, see [DEVELOPER.md](DEVELOPER.md).
+
 Have a question, idea, or want to show what you built with a tool from this repo? Use [GitHub Discussions](https://github.com/aidevme/PPTB-Tools/discussions) instead of an issue — issues are for bugs and concrete, actionable feature requests.
 
 If you're using Claude Code, this repo defines custom subagents (architect, developer, tester, code-reviewer, documenter) scoped to the PPTB tool workflow — see [docs/agents/index.md](docs/agents/index.md).

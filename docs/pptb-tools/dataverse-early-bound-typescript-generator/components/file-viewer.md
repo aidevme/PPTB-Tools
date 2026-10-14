@@ -24,7 +24,8 @@ Sources:
   goes back to Changes.
 - **New and unchanged files** show the generated content in a [CodeViewer](./code-viewer.md).
 - **Orphaned files** have no generated content. A warning explains that the selection no longer generates
-  them and that they're never deleted automatically.
+  them and that they're only deleted when **Delete orphaned files** is on and you confirm; otherwise you
+  remove them yourself.
 
 ## Changes view (`DiffViewer`)
 

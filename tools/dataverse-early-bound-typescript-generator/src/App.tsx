@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, makeStyles, tokens } from '@fluentui/react-components';
-import { Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from './components';
+import { DeleteRegular } from '@fluentui/react-icons';
+import { ConfirmationDialog, Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from './components';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from './core';
-import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectEntry, type ToolConfig } from './config';
+import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from './config';
 import { useConnection } from './hooks';
 import {
     PptbFileSink,
@@ -10,6 +11,7 @@ import {
     applyWritePlan,
     connectionKey,
     createWritePlan,
+    deleteOrphanedFiles,
     getRememberedProjectFolder,
     getSolutionEntityIds,
     getSolutionMemberIds,
@@ -67,6 +69,8 @@ export default function App() {
     const provider = useMemo(() => new PptbMetadataProvider(), [connKey]); // eslint-disable-line react-hooks/exhaustive-deps
     const sink = useMemo(() => new PptbFileSink(), []);
     const [settingsOpen, setSettingsOpen] = useState(false);
+    /** Whether the dialog confirming that Generate will delete orphaned files is open. */
+    const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
     const [newProjectOpen, setNewProjectOpen] = useState(false);
     const [loadProjectOpen, setLoadProjectOpen] = useState(false);
     /** Settings-panel values: the bundled defaults until the saved values have loaded. */
@@ -114,8 +118,9 @@ export default function App() {
     const openProjectFolder = useCallback(
         async (folder: string) => {
             const state = await loadProjectConfig(sink, folder);
-            // A folder without .dataverse-gen.json starts from the Settings panel's project defaults.
-            if (!state.exists) state.config = applyProjectDefaults(state.config, toolSettings.projectDefaults);
+            // The Options (output folder, entity types, form context, index.ts) always start from Settings, also
+            // over the values in an existing .dataverse-gen.json; the Options card can change them afterwards.
+            state.config = applyProjectDefaults(state.config, toolSettings.projectDefaults);
             if (!projectRoot) {
                 // Keep anything selected before the folder was picked.
                 const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
@@ -209,7 +214,11 @@ export default function App() {
         setToolSettings(next);
     }, []);
 
-    /** Adds a project from the New Project dialog to `projects` and saves the config. */
+    /**
+     * Adds a project from the New Project dialog to `projects`, saves the config, and opens the project, which
+     * also lists the tables. A failure to save stays in the dialog; a failure to open shows in the page, since
+     * the project was saved.
+     */
     const addProject = useCallback(
         async (project: NewProject) => {
             const now = new Date().toISOString();
@@ -219,8 +228,9 @@ export default function App() {
             };
             await saveToolConfig(next);
             setToolSettings(next);
+            openSavedProject(project).catch((e: unknown) => setError(reportError(`Could not open ${project.name}`, e, { location: project.location })));
         },
-        [toolSettings],
+        [toolSettings, openSavedProject],
     );
 
     /** Removes a saved project from `projects` and saves the config; files in its folder are left alone. */
@@ -243,8 +253,11 @@ export default function App() {
         });
     }, []);
 
+    /** Tables, solutions and the selection are only listed once a project is open (created or loaded). */
+    const hasProject = !!projectRoot;
+
     useEffect(() => {
-        if (!inPptb || !connection) return;
+        if (!inPptb || !connection || !hasProject) return;
         let cancelled = false;
         setEntities([]);
         setOperations(null);
@@ -265,19 +278,27 @@ export default function App() {
         listSolutions()
             .then((list) => !cancelled && setSolutions(list))
             .catch((e) => console.warn('Could not list solutions', e));
-        // PPTB only grants file access to folders picked with selectPath in the current session, so the
-        // remembered folder cannot be read directly; it only pre-fills the folder picker.
+        return () => {
+            cancelled = true;
+        };
+        // Only re-run when the connection (and so the provider) changes, or the first project is opened.
+    }, [provider, inPptb, connection, hasProject]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // PPTB only grants file access to folders picked with selectPath in the current session, so the
+    // remembered folder cannot be read directly; it only pre-fills the folder picker.
+    useEffect(() => {
+        if (!inPptb || !connection) return;
+        let cancelled = false;
         getRememberedProjectFolder(connKey).then((folder) => {
             if (!cancelled) setRememberedFolder(folder ?? null);
         });
         return () => {
             cancelled = true;
         };
-        // Only re-run when the connection (and so the provider) changes.
-    }, [provider, inPptb, connection]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [inPptb, connection, connKey]);
 
     const ensureOperations = useCallback(() => {
-        if (operations !== null || loadingOperations || !inPptb) return;
+        if (operations !== null || loadingOperations || !inPptb || !hasProject) return;
         setLoadingOperations(true);
         provider
             .listOperations()
@@ -287,7 +308,7 @@ export default function App() {
             })
             .catch((e) => setError(reportError(`Could not load the $metadata document`, e)))
             .finally(() => setLoadingOperations(false));
-    }, [operations, loadingOperations, inPptb, provider]);
+    }, [operations, loadingOperations, inPptb, hasProject, provider]);
 
     const changeSolution = useCallback(async (solutionId: string | null) => {
         setSelectedSolutionId(solutionId);
@@ -348,6 +369,22 @@ export default function App() {
         setNotice(null);
     }, []);
 
+    /**
+     * Applies the Settings panel's Options to the current config when they change: once the saved settings load
+     * (which may finish after a remembered project opened), and when the user saves different ones. Edits made in
+     * the Options card are kept until then.
+     */
+    const configRef = useRef(config);
+    configRef.current = config;
+    const projectDefaultsKey = JSON.stringify(toolSettings.projectDefaults);
+    useEffect(() => {
+        const current = configRef.current;
+        const next = applyProjectDefaults(current, JSON.parse(projectDefaultsKey) as ProjectDefaults);
+        const options = (c: DataverseGenConfig) => [c.output?.outputRoot, c.generateEntityTypes, c.generateFormContext, c.generateIndex];
+        if (JSON.stringify(options(current)) === JSON.stringify(options(next))) return;
+        updateConfig({ output: next.output, generateEntityTypes: next.generateEntityTypes, generateFormContext: next.generateFormContext, generateIndex: next.generateIndex });
+    }, [projectDefaultsKey, updateConfig]);
+
     const toggle = useCallback(
         (kind: SelectionKind, name: string, checked: boolean) => {
             const current = config[kind] ?? [];
@@ -396,7 +433,7 @@ export default function App() {
             setPreviewedAt(new Date().toISOString());
             setLastResult(null);
             setPlanStale(false);
-            void notifyPreviewReady(nextPlan);
+            void notifyPreviewReady(nextPlan, toolSettings.deleteOrphanedFiles);
             return nextPlan;
         } catch (e) {
             setError(reportError('Preview failed', e, { projectRoot }));
@@ -404,7 +441,7 @@ export default function App() {
         } finally {
             setProgress(null);
         }
-    }, [projectRoot, config, provider, sink]);
+    }, [projectRoot, config, provider, sink, toolSettings.deleteOrphanedFiles]);
 
     /**
      * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
@@ -435,8 +472,12 @@ export default function App() {
         [toolSettings],
     );
 
+    /**
+     * Writes the plan's new and changed files and saves the project config; with `deleteOrphans`, then deletes the
+     * plan's orphaned files. A failed delete is reported on its own, since the files were already written.
+     */
     const runGenerate = useCallback(
-        async (planToApply: WritePlan) => {
+        async (planToApply: WritePlan, deleteOrphans: boolean) => {
             if (!projectRoot) return;
             setError(null);
             try {
@@ -447,15 +488,43 @@ export default function App() {
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
                 setConfigState((state) => ({ ...state, exists: true, path: configPath }));
                 await recordProjectGeneration(projectRoot, planToApply);
-                // Everything written is now unchanged.
+
+                let deleted: Set<string> | undefined;
+                if (deleteOrphans && planToApply.counts.orphaned > 0) {
+                    setProgress({ message: 'Deleting orphaned files…', completed: 0, total: planToApply.counts.orphaned });
+                    try {
+                        const outcome = await deleteOrphanedFiles(sink, planToApply);
+                        deleted = new Set(outcome.deleted);
+                        if (outcome.failed.length > 0) {
+                            setError(
+                                reportError('Some orphaned files were not deleted', new Error(`Still in the output folder: ${outcome.failed.join(', ')}`), {
+                                    outputRoot: planToApply.outputRoot,
+                                }),
+                            );
+                        }
+                    } catch (e) {
+                        deleted = new Set();
+                        setError(reportError('Could not delete the orphaned files', e, { outputRoot: planToApply.outputRoot }));
+                    }
+                }
+
+                // Everything written is now unchanged, and deleted orphans are gone.
+                const remainingFiles = planToApply.files
+                    .filter((f) => !(f.status === 'orphaned' && deleted?.has(f.relativePath)))
+                    .map((f) => (f.status === 'new' || f.status === 'changed' ? { ...f, status: 'unchanged' as const, existingContent: f.content } : f));
                 setPlan({
                     ...planToApply,
-                    files: planToApply.files.map((f) => (f.status === 'new' || f.status === 'changed' ? { ...f, status: 'unchanged', existingContent: f.content } : f)),
-                    counts: { new: 0, changed: 0, unchanged: planToApply.counts.unchanged + result.written, orphaned: planToApply.counts.orphaned },
+                    files: remainingFiles,
+                    counts: {
+                        new: 0,
+                        changed: 0,
+                        unchanged: planToApply.counts.unchanged + result.written,
+                        orphaned: planToApply.counts.orphaned - (deleted?.size ?? 0),
+                    },
                 });
-                setLastResult(summarizeGeneration(result.written, planToApply.counts));
+                setLastResult(summarizeGeneration(result.written, planToApply.counts, deleted?.size));
                 // Not awaited, and it never throws: a failed notification mustn't report a successful write as "Generation failed".
-                void notifyGenerationComplete(result.written, planToApply.counts);
+                void notifyGenerationComplete(result.written, planToApply.counts, deleted?.size);
             } catch (e) {
                 setError(reportError(`Generation failed`, e));
             } finally {
@@ -464,6 +533,22 @@ export default function App() {
         },
         [projectRoot, config, sink, recordProjectGeneration],
     );
+
+    /** Generate: deleting orphans needs a confirmation first; otherwise it writes straight away. */
+    const startGenerate = () => {
+        if (!plan) return;
+        if (toolSettings.deleteOrphanedFiles && plan.counts.orphaned > 0) setConfirmDeleteOpen(true);
+        else void runGenerate(plan, false);
+    };
+
+    /** The Delete orphaned files switch: saves `deleteOrphanedFiles` in the tool config, like the Settings panel. */
+    const changeDeleteOrphans = async (checked: boolean) => {
+        try {
+            await saveToolSettings({ ...toolSettings, deleteOrphanedFiles: checked });
+        } catch (e) {
+            setError(reportError('Could not save the setting', e));
+        }
+    };
 
     // ----- derived --------------------------------------------------------------------------------
 
@@ -484,12 +569,13 @@ export default function App() {
 
     const hasSelection = selected.entities.length + selected.actions.length + selected.functions.length > 0;
     /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
-    const canSelect = inPptb && !!connection;
-    const ready = canSelect && !!projectRoot;
+    const connected = inPptb && !!connection;
+    const canSelect = connected && hasProject;
+    const ready = canSelect;
     const steps = computeWorkflowSteps({
         hasProject: !!projectRoot,
         selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
-        plan: plan ? { pending: plan.counts.new + plan.counts.changed, stale: planStale } : null,
+        plan: plan ? { pending: plan.counts.new + plan.counts.changed + (toolSettings.deleteOrphanedFiles ? plan.counts.orphaned : 0), stale: planStale } : null,
     });
 
     /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
@@ -595,6 +681,7 @@ export default function App() {
                     selected={selected}
                     missing={missing}
                     disabled={!canSelect || busy}
+                    needsProject={!projectRoot}
                     onToggle={toggle}
                     onClear={clear}
                     onSolutionChange={changeSolution}
@@ -606,16 +693,59 @@ export default function App() {
                     plan={plan}
                     stale={planStale}
                     canPreview={ready && hasSelection}
-                    needsProject={canSelect && !projectRoot}
+                    needsProject={connected && !projectRoot}
                     busy={busy}
                     previewedAt={plan ? previewedAt : null}
                     lastResult={plan ? lastResult : null}
                     onPreview={() => void runPreview()}
-                    onGenerate={() => plan && void runGenerate(plan)}
+                    deleteOrphans={toolSettings.deleteOrphanedFiles}
+                    onDeleteOrphansChange={(checked) => void changeDeleteOrphans(checked)}
+                    onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
                 />
             </main>
+            <ConfirmationDialog
+                open={confirmDeleteOpen && !!plan}
+                title="Delete orphaned files?"
+                message={plan && <OrphanList plan={plan} />}
+                confirmLabel={
+                    plan && plan.counts.new + plan.counts.changed > 0
+                        ? `Generate and delete ${plan.counts.orphaned}`
+                        : `Delete ${plan?.counts.orphaned ?? 0} ${plan?.counts.orphaned === 1 ? 'file' : 'files'}`
+                }
+                confirmIcon={<DeleteRegular />}
+                onConfirm={() => {
+                    setConfirmDeleteOpen(false);
+                    if (plan) void runGenerate(plan, true);
+                }}
+                onCancel={() => setConfirmDeleteOpen(false)}
+            />
             <Footer />
         </div>
+    );
+}
+
+/** How many orphans the confirmation names before summarizing the rest. */
+const ORPHANS_LISTED = 10;
+
+/** The confirmation's message: what will be deleted, from which folder, and that it can't be undone. */
+function OrphanList({ plan }: { plan: WritePlan }) {
+    const orphans = plan.files.filter((f) => f.status === 'orphaned');
+    const more = orphans.length - ORPHANS_LISTED;
+    return (
+        <>
+            <Text block>
+                {orphans.length === 1 ? 'This file is' : `These ${orphans.length} files are`} in the output folder ({plan.outputRoot}) but no longer
+                generated. {orphans.length === 1 ? 'It' : 'They'} will be permanently deleted, not moved to the Recycle Bin or Trash.
+            </Text>
+            <ul>
+                {orphans.slice(0, ORPHANS_LISTED).map((f) => (
+                    <li key={f.relativePath}>
+                        <code>{f.relativePath}</code>
+                    </li>
+                ))}
+                {more > 0 && <li>…and {more} more</li>}
+            </ul>
+        </>
     );
 }

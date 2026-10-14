@@ -41,9 +41,9 @@ The first time, create a project:
 2. Enter a **Project Name** and an optional **Description**.
 3. For **Location**, click **Browse…** and pick your TypeScript project's folder: the one that has, or will
    have, `.dataverse-gen.json`.
-4. Click **Save**.
+4. Click **Save**. The new project opens straight away.
 
-Then open it: click **Load Existing Project**, select your project in the table, and click **Load**. (Clicking
+To open a saved project later, click **Load Existing Project**, select your project in the table, and click **Load**. (Clicking
 the project's name opens it straight away.) PPTB may ask you to confirm the folder first; that's how it grants
 the tool access to it.
 
@@ -53,7 +53,8 @@ card; click one to reopen it.
 
 ## 3. Choose what to generate (step 2)
 
-On the **Select** card, tick what you want types for:
+The **Select** card lists tables, actions and functions once a project is open; until then it asks you to
+create or open one. Tick what you want types for:
 
 - **Tables:** search by display, logical or schema name. Use the solution dropdown to show only one solution's
   tables, and **Selected only** to review your choices.
@@ -71,8 +72,8 @@ The **Options** card controls what's written, and is saved to `.dataverse-gen.js
 - **Form context helpers:** typed `Xrm.FormContext` interfaces for form scripts. Off by default.
 - **index.ts barrel file:** one file that re-exports everything. On by default.
 
-Each option's info button explains it. To change the defaults new projects start with, open **Settings**
-(the gear in the header) → **Options**.
+Each option's info button explains it. The options start from **Settings** (the gear in the header) →
+**Options** every time you open a project. Change them there for all projects, or here for this project only.
 
 ## 5. Preview (step 4)
 
@@ -87,7 +88,10 @@ with your output folder. Nothing is written yet.
   would change. Use **↑**/**↓** to move between files.
 
 **Orphaned** files are in your output folder but no longer generated, for example after you deselect a table.
-The tool never deletes them; remove them yourself if you don't need them.
+By default they're only reported. Turn on **Delete orphaned files** next to the Generate button (or in
+Settings) and Generate removes them after you confirm the list. The switch becomes available once you've run
+Preview. Deleted files don't go to the Recycle Bin or
+Trash.
 
 ## 6. Generate (step 5)
 

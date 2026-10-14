@@ -98,7 +98,14 @@ into its own package when the CLI is built.
 - **Concurrency.** Entity metadata is fetched four entities at a time, with progress shown.
 - **File-name casing.** An existing file whose name differs only in casing is reused, and the module specifiers
   in `index.ts` and `metadata.ts` are rewritten to match.
-- **Orphans are reported, never deleted.** PPTB's file API has no delete.
+- **Orphans are deleted only on opt-in.** By default they're only reported. With **Delete orphaned files** on
+  (`deleteOrphanedFiles`, a switch in Preview and generate synced with the Settings switch), Generate asks for
+  confirmation, writes the files and `.dataverse-gen.json`, then deletes the orphans. PPTB's file API has no
+  delete, so `PptbFileSink.deleteFiles` runs `Remove-Item` (Windows paths) or `rm -f` (otherwise) in a hidden PPTB
+  terminal, 20 paths per command, with every path single-quoted. Success is decided by checking with
+  `fileSystem.exists` which files remain, not by terminal output. `deleteOrphanedFiles` in `services/plan.ts` only
+  passes files with status `orphaned`, no `..` segment, and a path equal to the output root joined with the
+  relative path. Leftover files are reported as an error; the writes still count as done.
 - **Line endings.** Generated files use LF. Comparison ignores CRLF vs LF, so a CRLF checkout shows as unchanged.
 
 ### Deliberate deviations from dataverse-gen output
@@ -116,7 +123,6 @@ These only affect cases where dataverse-gen emits code that does not compile:
 
 - Custom (ejected) templates. The CLI can still use `_templates` EJS files; this tool ignores `templateRoot`.
 - The optional Node CLI and the MCP/headless "regenerate" mode from the guide's later build steps.
-- Deleting orphaned files.
 
 ## Known limitations
 

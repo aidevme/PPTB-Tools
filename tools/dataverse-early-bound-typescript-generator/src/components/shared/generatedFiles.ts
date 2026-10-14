@@ -24,7 +24,7 @@ export const STATUS_META: Record<FileStatus, { color: NonNullable<BadgeProps['co
     new: { color: 'success', label: 'New', meaning: "Doesn't exist yet; Generate creates it." },
     changed: { color: 'warning', label: 'Changed', meaning: 'Content differs; Generate overwrites it.' },
     unchanged: { color: 'informative', label: 'Unchanged', meaning: 'Identical; not rewritten.' },
-    orphaned: { color: 'danger', label: 'Orphaned', meaning: 'In the output folder but no longer generated; reported, never deleted.' },
+    orphaned: { color: 'danger', label: 'Orphaned', meaning: 'In the output folder but no longer generated; only reported, unless Delete orphaned files is on.' },
 };
 
 /** Status order used for sorting and the summary tiles. */

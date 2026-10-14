@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
     Button,
-    Checkbox,
     Field,
     Input,
     DrawerBody,
@@ -100,18 +99,24 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                         </Tab>
                     </TabList>
                     <div className={styles.content} role="tabpanel">
-                        {tab === 'general' && <Text size={200}>No general settings yet.</Text>}
+                        {tab === 'general' && (
+                            <Text size={200} className={styles.intro}>
+                                Settings for the tool as a whole, rather than for generated files or projects. They're saved in the
+                                tool settings for this Power Platform ToolBox installation. There are no general settings yet.
+                            </Text>
+                        )}
                         {tab === 'options' && (
                             <>
                                 <Text size={200} className={styles.intro}>
-                                    Defaults for new projects: used when a project folder without .dataverse-gen.json is opened. Projects
-                                    that already have one keep their own options, set on the Options card.
+                                    The Options every project starts with: applied whenever a project is opened, also over the values in
+                                    its .dataverse-gen.json, and to the open project when you save different ones here. You can still
+                                    change them for a project on the Options card; Generate saves them to its .dataverse-gen.json.
                                 </Text>
                                 <Field
                                     label={infoLabel(
                                         'Output folder',
                                         <>
-                                            Where generated files go, relative to the project folder. Saved to a new project's{' '}
+                                            Where generated files go, relative to the project folder. Sets the project's{' '}
                                             <code>output.outputRoot</code>. A blank value keeps the previous default.
                                         </>,
                                     )}
@@ -125,8 +130,8 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                                     label={infoLabel(
                                         'Early-bound entity interfaces (dataverse-ify)',
                                         <>
-                                            An interface per table with a typed property per column, for dataverse-ify. Saved to a new
-                                            project's <code>generateEntityTypes</code>.
+                                            An interface per table with a typed property per column, for dataverse-ify. Sets the project's
+                                            <code>generateEntityTypes</code>.
                                         </>,
                                     )}
                                     checked={draft.projectDefaults.generateEntityTypes}
@@ -136,8 +141,8 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                                     label={infoLabel(
                                         'Form context helpers (Xrm.FormContext)',
                                         <>
-                                            A typed <code>&lt;Table&gt;FormContext</code> interface per table for form scripts. Saved to a
-                                            new project's <code>generateFormContext</code>.
+                                            A typed <code>&lt;Table&gt;FormContext</code> interface per table for form scripts. Sets the
+                                            project's <code>generateFormContext</code>.
                                         </>,
                                     )}
                                     checked={draft.projectDefaults.generateFormContext}
@@ -147,7 +152,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                                     label={infoLabel(
                                         'index.ts barrel file',
                                         <>
-                                            An <code>index.ts</code> that re-exports every generated file. Saved to a new project's{' '}
+                                            An <code>index.ts</code> that re-exports every generated file. Sets the project's{' '}
                                             <code>generateIndex</code>.
                                         </>,
                                     )}
@@ -158,15 +163,23 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                         )}
                         {tab === 'schemaGeneration' && (
                             <>
-                                <Checkbox
-                                    label="Delete Orphaned Files"
-                                    checked={draft.deleteOrphanedFiles}
-                                    onChange={(_, data) => update({ deleteOrphanedFiles: data.checked === true })}
-                                />
-                                <Text size={200} className={styles.hint}>
-                                    Files in the output folders that the current selection no longer generates. Not applied yet: Power
-                                    Platform ToolBox can't delete files, so orphaned files are still only reported.
+                                <Text size={200} className={styles.intro}>
+                                    How Generate treats files already in the output folders. These settings apply to every project and
+                                    are saved in the tool settings, not in .dataverse-gen.json.
                                 </Text>
+                                <Switch
+                                    label={infoLabel(
+                                        'Delete Orphaned Files',
+                                        <>
+                                            Orphaned files are files in the output folders that the current selection no longer
+                                            generates. When on, Generate deletes them permanently after you confirm the list; when off,
+                                            they're only reported. Also available as a switch in Preview and generate. Saved as{' '}
+                                            <code>deleteOrphanedFiles</code>.
+                                        </>,
+                                    )}
+                                    checked={draft.deleteOrphanedFiles}
+                                    onChange={(_, data) => update({ deleteOrphanedFiles: data.checked })}
+                                />
                             </>
                         )}
                         {saveError && (
