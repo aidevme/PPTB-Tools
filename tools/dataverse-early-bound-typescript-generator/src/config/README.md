@@ -79,7 +79,7 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 
 - **`$schema`** links the file to the schema for editor validation. `index.ts` never reads it, and it isn't
   carried into `toolConfig`.
-- **`deleteOrphanedFiles`:** `false`. Shown as a checkbox on the Settings panel's Schema Generation tab and
+- **`deleteOrphanedFiles`:** `false`. Shown as a switch on the Settings panel's Schema Generation tab and
   as the **Delete orphaned files** switch in Preview and generate; both save the same setting. When on,
   Generate deletes orphaned files after the user confirms the list.
 - **`projectDefaults`:** the options every project starts with, edited on the Settings panel's Options tab.
