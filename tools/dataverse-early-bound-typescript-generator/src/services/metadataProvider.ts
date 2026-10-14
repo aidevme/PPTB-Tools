@@ -8,6 +8,7 @@
 import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
+import { queryAllPages } from './paging';
 import { withRetries } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
@@ -369,8 +370,13 @@ interface CustomApiRecord {
  */
 async function listCustomApis(): Promise<CustomApiRecord[]> {
     try {
-        const result = await api().queryData('customapis?$select=customapiid,uniquename,displayname,isfunction,isprivate,bindingtype,boundentitylogicalname');
-        return result.value.map((row) => ({
+        // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
+        const rows = await queryAllPages((query) => api().queryData(query), {
+            entitySet: 'customapis',
+            select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
+            idField: 'customapiid',
+        });
+        return rows.map((row) => ({
             id: row.customapiid as string,
             uniqueName: row.uniquename as string,
             displayName: (row.displayname as string | null) || undefined,
@@ -460,8 +466,14 @@ interface ProcessActionRecord {
  */
 async function listProcessActions(): Promise<ProcessActionRecord[]> {
     try {
-        const result = await api().queryData('workflows?$select=workflowid,uniquename,name&$filter=category eq 3 and type eq 1');
-        return result.value
+        // All of them, page by page, like the custom APIs.
+        const rows = await queryAllPages((query) => api().queryData(query), {
+            entitySet: 'workflows',
+            select: ['workflowid', 'uniquename', 'name'],
+            idField: 'workflowid',
+            filter: 'category eq 3 and type eq 1',
+        });
+        return rows
             .filter((row) => typeof row.uniquename === 'string' && row.uniquename)
             .map((row) => ({
                 id: row.workflowid as string,

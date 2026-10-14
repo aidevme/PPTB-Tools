@@ -1,34 +1,7 @@
 import { Highlight } from 'prism-react-renderer';
-import { makeStyles, tokens } from '@fluentui/react-components';
+import { useCodeViewerStyles } from '../../styles';
 
-const useStyles = makeStyles({
-    code: {
-        margin: 0,
-        fontFamily: tokens.fontFamilyMonospace,
-        fontSize: tokens.fontSizeBase200,
-        lineHeight: tokens.lineHeightBase200,
-        whiteSpace: 'pre',
-        color: tokens.colorNeutralForeground1,
-    },
-    line: { display: 'table-row' },
-    lineNumber: {
-        display: 'table-cell',
-        textAlign: 'right',
-        paddingRight: tokens.spacingHorizontalM,
-        color: tokens.colorNeutralForeground4,
-        userSelect: 'none',
-    },
-    lineContent: { display: 'table-cell' },
-    comment: { color: tokens.colorNeutralForeground3, fontStyle: 'italic' },
-    keyword: { color: tokens.colorPaletteBlueForeground2 },
-    string: { color: tokens.colorPaletteDarkOrangeForeground2 },
-    literal: { color: tokens.colorPaletteGreenForeground2 },
-    type: { color: tokens.colorPaletteTealForeground2 },
-    func: { color: tokens.colorPaletteMarigoldForeground2 },
-    punctuation: { color: tokens.colorNeutralForeground2 },
-});
-
-type TokenStyle = Exclude<keyof ReturnType<typeof useStyles>, 'code' | 'line' | 'lineNumber' | 'lineContent'>;
+type TokenStyle = Exclude<keyof ReturnType<typeof useCodeViewerStyles>, 'code' | 'line' | 'lineNumber' | 'lineContent'>;
 
 /** Prism token type -> style. Unlisted types (plain identifiers, properties) keep the default foreground. */
 const TOKEN_STYLE: Record<string, TokenStyle> = {
@@ -67,7 +40,7 @@ export interface ICodeViewerProps {
  * will be written; colors come from Fluent palette tokens so they follow the light/dark theme.
  */
 export function CodeViewer({ code, path }: ICodeViewerProps) {
-    const styles = useStyles();
+    const styles = useCodeViewerStyles();
     const language = languageFor(path);
     if (!language || code.length > MAX_HIGHLIGHT_LENGTH) return <pre className={styles.code}>{code}</pre>;
 

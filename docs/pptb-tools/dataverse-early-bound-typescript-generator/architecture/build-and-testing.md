@@ -43,6 +43,7 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | `projectVersion.test.ts` | Project version bumps and Modified On after a Generate run, saved file lists, and matching the open folder to a saved project |
 | `selectionCard.test.ts` | The Select card's tables: columns per tab, toggling from the row, checkbox or keyboard, the disabled state, and the row limit |
 | `workflow.test.ts` | Step states, relative times, shortened paths, recent projects (including the recent project count), the Project card's empty and open states, and the progress bar |
+| `paging.test.ts` | Keyset paging over `queryData`: the page query (key selected, ordered, `gt` the last key, caller filter kept), combining pages without gaps or duplicates, stopping on a short or empty page, and stopping with an error when the key doesn't advance or the page limit is reached |
 | `services.test.ts` | Path helpers, config round-trip, and write planning (statuses, casing reuse, first-time folder creation), deleting orphaned files (only plan orphans, the output-folder guard, failure reporting, summaries), and the delete commands (PowerShell and POSIX quoting, batching) |
 
 Test data:
