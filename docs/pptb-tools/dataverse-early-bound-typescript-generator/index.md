@@ -90,7 +90,10 @@ const account = await client.retrieve<Account>(accountMetadata.logicalName, id, 
 
 ## Known limitations
 
-- Not yet tested against a live environment inside PPTB.
+- Tested inside Power Platform ToolBox against a live environment (connecting, listing tables, projects,
+  selecting and previewing). Writing files with Generate, deleting orphaned files and the dark theme are still to
+  be tested live; see
+  [TESTING.md](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/TESTING.md).
 - In very large environments, the `$metadata` document can be over the 16 MB Power Platform ToolBox allows. The
   tool then builds types from table and relationship metadata instead and shows a warning for a few seconds. Tables and custom
   APIs still work, but built-in actions and functions (such as `WinOpportunity`) and custom process actions

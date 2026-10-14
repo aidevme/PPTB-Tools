@@ -165,8 +165,11 @@ These only affect cases where dataverse-gen emits code that does not compile:
 
 ## Known limitations
 
-- Not yet validated against a live Dataverse environment inside PPTB. The full flow was exercised in a browser
-  with mocked PPTB APIs fed by dataverse-gen's test fixtures.
+- **Live testing:** tested in PPTB Desktop 1.2.7 against a Dataverse environment with about 2,900 tables:
+  connecting, listing tables, creating and opening projects, selecting, the Settings panel, and previewing against
+  an existing output folder. **Not yet tested live:** writing files with Generate, deleting orphaned files, the
+  dark theme and error paths. See [TESTING.md](TESTING.md) for the results and the steps for the remaining
+  checks. The unit tests cover the same flows with mocked PPTB APIs and dataverse-gen's test fixtures.
 - The CSDL is usually 1 to 5 MB and is fetched once per connection when Actions/Functions are opened or on first
   preview. Environments whose CSDL is over PPTB's 16 MiB limit use the metadata fallback above, without built-in
   actions/functions or custom process actions.
