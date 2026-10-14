@@ -8,13 +8,14 @@ import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SelectionCard, sortSelectionRows, type SelectionKind } from '../src/components/cards/SelectionCard';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
+import { toTableType } from '../src/services/metadataProvider';
 import type { EntitySummary, OperationSummary } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const ENTITIES: EntitySummary[] = [
-    { logicalName: 'account', schemaName: 'Account', displayName: 'Account', description: 'Business that represents a customer or potential customer.', metadataId: 'a', isCustom: false, isManaged: true },
-    { logicalName: 'contoso_project', schemaName: 'contoso_Project', displayName: 'Project', description: '', metadataId: 'b', isCustom: true, isManaged: false },
+    { logicalName: 'account', schemaName: 'Account', displayName: 'Account', description: 'Business that represents a customer or potential customer.', metadataId: 'a', isCustom: false, isManaged: true, tableType: 'Standard' },
+    { logicalName: 'contoso_project', schemaName: 'contoso_Project', displayName: 'Project', description: '', metadataId: 'b', isCustom: true, isManaged: false, tableType: 'Activity' },
 ];
 
 const OPERATIONS: OperationSummary[] = [
@@ -92,7 +93,8 @@ describe('selection tables', () => {
         expect(Array.from(rowFor('contoso_project').querySelectorAll('td'))[4].textContent).toBe('—');
         expect(rows()).toHaveLength(2);
         expect(rowFor('contoso_project').textContent).toContain('contoso_Project');
-        expect(rowFor('contoso_project').textContent).toContain('Custom');
+        expect(Array.from(rowFor('contoso_project').querySelectorAll('td'))[5].textContent).toBe('Activity');
+        expect(Array.from(rowFor('account').querySelectorAll('td'))[5].textContent).toBe('Standard');
         expect(rowFor('account').getAttribute('aria-selected')).toBe('true');
         expect((rowFor('account').querySelector('input[type="checkbox"]') as HTMLInputElement).checked).toBe(true);
     });
@@ -225,5 +227,17 @@ describe('sortSelectionRows', () => {
         const list = [row('none', undefined), row('one', 1), row('two', 2)];
         expect(keys(sortSelectionRows(list, { column: 0, direction: 'ascending' }))).toEqual(['one', 'two', 'none']);
         expect(keys(sortSelectionRows(list, { column: 0, direction: 'descending' }))).toEqual(['two', 'one', 'none']);
+    });
+});
+
+describe('toTableType', () => {
+    it('maps Dataverse metadata to the table types Power Apps shows', () => {
+        expect(toTableType({ TableType: 'Elastic', IsActivity: false })).toBe('Elastic');
+        expect(toTableType({ TableType: 'Virtual', IsActivity: false })).toBe('Virtual');
+        // Activity tables report TableType "Standard"; IsActivity identifies them.
+        expect(toTableType({ TableType: 'Standard', IsActivity: true })).toBe('Activity');
+        expect(toTableType({ TableType: 'Standard', IsActivity: false })).toBe('Standard');
+        // Missing properties fall back to Standard.
+        expect(toTableType({})).toBe('Standard');
     });
 });

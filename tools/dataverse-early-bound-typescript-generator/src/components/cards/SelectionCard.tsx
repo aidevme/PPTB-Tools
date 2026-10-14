@@ -19,12 +19,13 @@ import {
     TableSelectionCell,
     Text,
     Tooltip,
+    type BadgeProps,
     type SelectTabData,
     type SortDirection,
     type SelectTabEvent,
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
-import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
+import type { EntitySummary, OperationSummary, SolutionSummary, TableType } from '../../types';
 import { useSelectionCardStyles } from '../../styles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
@@ -60,10 +61,12 @@ const ENTITY_COLUMNS: SelectionColumn[] = [
         label: 'Type',
         help: (
             <>
-                <strong>Type:</strong> who defined the table.
+                <strong>Type:</strong> the kind of table, as Power Apps shows it.
                 <ul>
-                    <li><strong>Standard</strong>: part of Dataverse or a Microsoft app</li>
-                    <li><strong>Custom</strong>: created by a publisher, including Microsoft solutions that add their own tables</li>
+                    <li><strong>Standard</strong>: an ordinary table stored in Dataverse</li>
+                    <li><strong>Activity</strong>: an activity such as a task, email or appointment, with a subject and dates</li>
+                    <li><strong>Virtual</strong>: data from an external source, shown in Dataverse but not stored in it</li>
+                    <li><strong>Elastic</strong>: built for very large data volumes (tens of millions of rows)</li>
                 </ul>
                 Click to sort by type.
             </>
@@ -71,16 +74,17 @@ const ENTITY_COLUMNS: SelectionColumn[] = [
     },
 ];
 
-const OPERATION_COLUMNS: SelectionColumn[] = [
+/** Columns of the Actions tab: custom APIs, custom process actions and built-in actions. */
+const CUSTOMAPI_COLUMNS: SelectionColumn[] = [
     {
         label: 'Name',
-        help: <><strong>Name:</strong> the message's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
+        help: <><strong>Name:</strong> the action's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
     },
     {
         label: 'Binding',
         help: (
             <>
-                <strong>Binding:</strong> how the message is called.
+                <strong>Binding:</strong> how the action is called.
                 <ul>
                     <li><strong>Bound to &lt;table&gt;</strong>: called on a record of that table, which is generated automatically</li>
                     <li><strong>Unbound</strong>: called on its own</li>
@@ -91,17 +95,55 @@ const OPERATION_COLUMNS: SelectionColumn[] = [
     },
     {
         label: 'Parameters',
-        help: <><strong>Parameters:</strong> the number of request parameters in $metadata. "From definition" means the message isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
+        help: <><strong>Parameters:</strong> the number of request parameters in $metadata. "From definition" means the action isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
     },
     {
         label: 'Type',
         help: (
             <>
-                <strong>Type:</strong> where the message comes from.
+                <strong>Type:</strong> where the action comes from.
                 <ul>
                     <li><strong>Custom API</strong> / <strong>Private custom API</strong>: a customapi record</li>
                     <li><strong>Custom action</strong>: a custom process action</li>
-                    <li><strong>Built-in</strong>: a standard Dataverse message</li>
+                    <li><strong>Built-in</strong>: a standard Dataverse action</li>
+                </ul>
+                Click to sort by type.
+            </>
+        ),
+    },
+];
+
+/** Columns of the Functions tab: custom API functions and built-in functions (process actions are never functions). */
+const FUNCTION_COLUMNS: SelectionColumn[] = [
+    {
+        label: 'Name',
+        help: <><strong>Name:</strong> the function's unique name, used in .dataverse-gen.json and for the generated request type, with its display name above it when it has a different one. Click to sort by name.</>,
+    },
+    {
+        label: 'Binding',
+        help: (
+            <>
+                <strong>Binding:</strong> how the function is called.
+                <ul>
+                    <li><strong>Bound to &lt;table&gt;</strong>: called on a record or collection of that table, which is generated automatically</li>
+                    <li><strong>Unbound</strong>: called on its own</li>
+                </ul>
+                Click to sort by binding.
+            </>
+        ),
+    },
+    {
+        label: 'Parameters',
+        help: <><strong>Parameters:</strong> the number of parameters in $metadata. "From definition" means the function isn't in $metadata (a private custom API), so its types are built from the custom API record; these are listed last. Click to sort by parameter count.</>,
+    },
+    {
+        label: 'Type',
+        help: (
+            <>
+                <strong>Type:</strong> where the function comes from.
+                <ul>
+                    <li><strong>Custom API</strong> / <strong>Private custom API</strong>: a customapi record marked as a function</li>
+                    <li><strong>Built-in</strong>: a standard Dataverse function</li>
                 </ul>
                 Click to sort by type.
             </>
@@ -146,6 +188,17 @@ export function sortSelectionRows<T extends { sortValues: SortValue[] }>(rows: T
         .sort((a, b) => compareSortValues(a.row.sortValues[sort.column], b.row.sortValues[sort.column], sort.direction) || a.index - b.index)
         .map(({ row }) => row);
 }
+
+/**
+ * Badge colour per table type, from Fluent UI's semantic palette so it adapts to light and dark themes. Red
+ * (danger/severe) is avoided, since nothing here is an error.
+ */
+const TABLE_TYPE_COLORS: Record<TableType, BadgeProps['color']> = {
+    Standard: 'informative',
+    Activity: 'brand',
+    Virtual: 'warning',
+    Elastic: 'success',
+};
 
 function operationType(o: OperationSummary): string {
     if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
@@ -220,15 +273,11 @@ export function SelectionCard(props: SelectionCardProps) {
                             ) : (
                                 <span className={styles.muted}>—</span>
                             ),
-                            e.isCustom ? (
-                                <Badge appearance="outline" size="small">
-                                    Custom
-                                </Badge>
-                            ) : (
-                                'Standard'
-                            ),
+                            <Badge appearance="outline" size="small" color={TABLE_TYPE_COLORS[e.tableType]}>
+                                {e.tableType}
+                            </Badge>,
                         ],
-                        sortValues: [e.displayName, e.logicalName, e.schemaName, e.description || undefined, e.isCustom ? 'Custom' : 'Standard'],
+                        sortValues: [e.displayName, e.logicalName, e.schemaName, e.description || undefined, e.tableType],
                     }),
                 );
         }
@@ -293,7 +342,7 @@ export function SelectionCard(props: SelectionCardProps) {
     // Sorted before the row limit, so the first rows shown are the first of all matches.
     const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
     const shown = sorted.slice(0, MAX_ROWS);
-    const columns = tab === 'entities' ? ENTITY_COLUMNS : OPERATION_COLUMNS;
+    const columns = tab === 'entities' ? ENTITY_COLUMNS : tab === 'actions' ? CUSTOMAPI_COLUMNS : FUNCTION_COLUMNS;
 
     const toggleSort = (column: number) =>
         setSorts((current) => {

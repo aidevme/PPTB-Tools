@@ -20,16 +20,20 @@ Source: [`src/components/panels/SettingsPanel.tsx`](https://github.com/aidevme/P
 - `App.tsx` holds the open state (`settingsOpen`).
 - Three vertical tabs on the left, **General**, **Options** and **Schema Generation**, switch the content on the right. The
   selected tab is view state inside the component and starts on General.
-- **General** has no settings yet and shows a placeholder.
+- **General** has no settings yet. It shows a short description, like the other tabs: settings for the tool as a
+  whole, saved in the tool settings for this PPTB installation, and that none exist yet.
 - **Options** holds the options every project starts with: **Output folder**, **Early-bound entity interfaces
   (dataverse-ify)**, **Form context helpers (Xrm.FormContext)** and **index.ts barrel file**, each with an info
   label. They're applied whenever a project is opened, also over the values in its `.dataverse-gen.json`, and
   to the open project when different ones are saved. The [OptionsCard](./options-card.md) can still change them
   for a project; Generate saves them to its `.dataverse-gen.json`. A blank output folder saves as the default
   (`./src/dataverse-gen`).
-- **Schema Generation** has a **Delete Orphaned Files** checkbox. Its hint reads "Files in the output folders that the
-  current selection no longer generates. When on, Generate deletes them permanently after you confirm the list;
-  when off, they're only reported. Also available as a switch in Preview and generate."
+- **Schema Generation** starts with a short description, like the Options tab: these settings control how
+  Generate treats files already in the output folders, apply to every project, and are saved in the tool settings
+  rather than `.dataverse-gen.json`. Below it is a **Delete Orphaned Files** switch (Fluent UI `Switch`) with an
+  info label. Its info button explains that orphaned files are files in the output folders that the current
+  selection no longer generates; when on, Generate deletes them permanently after you confirm the list, when off
+  they're only reported. It's also available as a switch in Preview and generate.
 - **Save and Cancel** sit at the bottom. Each time the panel opens it starts from the saved values. **Save** is
   enabled only when a value differs from the saved one; it saves and closes the panel, or shows the error and
   stays open if saving fails. **Cancel** (or closing the panel) discards the changes.

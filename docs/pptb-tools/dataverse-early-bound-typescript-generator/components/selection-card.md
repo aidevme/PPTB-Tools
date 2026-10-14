@@ -41,8 +41,10 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 - **Tables:** each tab lists its items in a Fluent UI `Table` with a checkbox column. Clicking a row, its
   checkbox, or pressing Space or Enter on it toggles the selection; selected rows are highlighted. Column
   headers are semibold and stay visible while the list scrolls.
-  - **Tables tab:** Display Name, Logical Name, Schema Name, Description, and Type (**Custom** badge, or
-    Standard). Long descriptions are cut to one line, with the full text in a Fluent UI `Tooltip` on
+  - **Tables tab:** Display Name, Logical Name, Schema Name, Description, and Type: a **Standard**,
+    **Activity**, **Virtual** or **Elastic** badge. The type comes from the table metadata's `TableType`
+    (Standard, Virtual, Elastic) and `IsActivity`, since activity tables report `TableType: Standard`
+    (`toTableType` in `services/metadataProvider.ts`). Long descriptions are cut to one line, with the full text in a Fluent UI `Tooltip` on
     hover; tables without one show a dash.
   - **Actions and Functions tabs:** Name (display name above the unique name when they differ), Binding
     (Bound to a table, or Unbound), Parameters, and Type (**Custom API**, **Private custom API** or **Custom

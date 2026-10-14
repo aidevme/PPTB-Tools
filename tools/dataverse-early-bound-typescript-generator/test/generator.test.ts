@@ -1,3 +1,5 @@
+/// <reference types="node" />
+// Node types for reading fixtures from disk; tsconfig keeps them out of src/, which runs in the PPTB tool frame.
 /**
  * Snapshot tests: the core must produce the same files as `npx dataverse-gen` for the same input.
  *

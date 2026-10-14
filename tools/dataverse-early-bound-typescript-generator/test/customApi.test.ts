@@ -1,3 +1,5 @@
+/// <reference types="node" />
+// Node types for reading fixtures from disk; tsconfig keeps them out of src/, which runs in the PPTB tool frame.
 /**
  * Custom APIs missing from `$metadata` (private ones) are built from their `customapi` record and request
  * parameters, then generated like any other action.

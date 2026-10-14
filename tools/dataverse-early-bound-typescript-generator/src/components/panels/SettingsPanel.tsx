@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
     Button,
-    Checkbox,
     Field,
     Input,
     DrawerBody,
@@ -100,7 +99,12 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                         </Tab>
                     </TabList>
                     <div className={styles.content} role="tabpanel">
-                        {tab === 'general' && <Text size={200}>No general settings yet.</Text>}
+                        {tab === 'general' && (
+                            <Text size={200} className={styles.intro}>
+                                Settings for the tool as a whole, rather than for generated files or projects. They're saved in the
+                                tool settings for this Power Platform ToolBox installation. There are no general settings yet.
+                            </Text>
+                        )}
                         {tab === 'options' && (
                             <>
                                 <Text size={200} className={styles.intro}>
@@ -159,16 +163,23 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                         )}
                         {tab === 'schemaGeneration' && (
                             <>
-                                <Checkbox
-                                    label="Delete Orphaned Files"
-                                    checked={draft.deleteOrphanedFiles}
-                                    onChange={(_, data) => update({ deleteOrphanedFiles: data.checked === true })}
-                                />
-                                <Text size={200} className={styles.hint}>
-                                    Files in the output folders that the current selection no longer generates. When on, Generate
-                                    deletes them permanently after you confirm the list; when off, they're only reported. Also
-                                    available as a switch in Preview and generate.
+                                <Text size={200} className={styles.intro}>
+                                    How Generate treats files already in the output folders. These settings apply to every project and
+                                    are saved in the tool settings, not in .dataverse-gen.json.
                                 </Text>
+                                <Switch
+                                    label={infoLabel(
+                                        'Delete Orphaned Files',
+                                        <>
+                                            Orphaned files are files in the output folders that the current selection no longer
+                                            generates. When on, Generate deletes them permanently after you confirm the list; when off,
+                                            they're only reported. Also available as a switch in Preview and generate. Saved as{' '}
+                                            <code>deleteOrphanedFiles</code>.
+                                        </>,
+                                    )}
+                                    checked={draft.deleteOrphanedFiles}
+                                    onChange={(_, data) => update({ deleteOrphanedFiles: data.checked })}
+                                />
                             </>
                         )}
                         {saveError && (

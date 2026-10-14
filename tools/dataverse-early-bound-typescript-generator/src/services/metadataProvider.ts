@@ -6,7 +6,7 @@
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
 import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
-import type { EntitySummary, OperationSummary } from '../types';
+import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
 import { withRetries } from './errors';
 
@@ -62,7 +62,18 @@ export class PptbMetadataProvider {
     listEntities(): Promise<EntitySummary[]> {
         if (!this.entityList) {
             this.entityList = api()
-                .getAllEntitiesMetadata(['LogicalName', 'SchemaName', 'DisplayName', 'Description', 'EntitySetName', 'MetadataId', 'IsCustomEntity', 'IsManaged'])
+                .getAllEntitiesMetadata([
+                    'LogicalName',
+                    'SchemaName',
+                    'DisplayName',
+                    'Description',
+                    'EntitySetName',
+                    'MetadataId',
+                    'IsCustomEntity',
+                    'IsManaged',
+                    'TableType',
+                    'IsActivity',
+                ])
                 .then((result) =>
                     result.value
                         .map((e) => ({
@@ -74,6 +85,7 @@ export class PptbMetadataProvider {
                             metadataId: e.MetadataId,
                             isCustom: e.IsCustomEntity === true,
                             isManaged: e.IsManaged === true,
+                            tableType: toTableType(e),
                         }))
                         .sort((a, b) => a.displayName.localeCompare(b.displayName) || a.logicalName.localeCompare(b.logicalName)),
                 )
@@ -469,4 +481,17 @@ function pickOptionSet(row: RawRecord): OptionSetInput | null {
     if (local?.Options?.length) return local;
     if (global?.Options) return { ...global, IsGlobal: true };
     return local ?? global ?? null;
+}
+
+/**
+ * A table's type from its metadata: Elastic or Virtual from `TableType`, Activity from `IsActivity` (activity
+ * tables report `TableType: 'Standard'`), and Standard otherwise, including when `TableType` is missing.
+ */
+export function toTableType(metadata: object): TableType {
+    // PPTB's EntityMetadata type doesn't declare these, though the Web API returns them when selected.
+    const { TableType: tableType, IsActivity: isActivity } = metadata as { TableType?: unknown; IsActivity?: unknown };
+    if (tableType === 'Elastic') return 'Elastic';
+    if (tableType === 'Virtual') return 'Virtual';
+    if (isActivity === true) return 'Activity';
+    return 'Standard';
 }

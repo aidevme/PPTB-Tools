@@ -39,7 +39,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
   files**, or **Nothing to write** when every file is up to date. It's disabled without an up-to-date
   preview or with nothing to write, and its tooltip says why.
 - **Delete orphaned files** (`Switch`), right after Generate, with a tooltip explaining it. It reads and saves
-  the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](./settings-panel.md) checkbox, so they stay
+  the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](./settings-panel.md) switch, so they stay
   in sync. It's disabled until a preview exists, since only a preview tells which files are orphaned; its
   tooltip then adds "Available after Preview". When on:
   - The summary says "…and N orphaned files will be deleted." instead of "left untouched", and the card

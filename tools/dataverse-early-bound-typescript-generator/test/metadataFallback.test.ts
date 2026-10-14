@@ -1,3 +1,5 @@
+/// <reference types="node" />
+// Node types for reading fixtures from disk; tsconfig keeps them out of src/, which runs in the PPTB tool frame.
 /**
  * Fallback for environments whose `$metadata` document is too large for PPTB's `getCSDLDocument`: the schema
  * is rebuilt from table and relationship metadata instead of the CSDL.
