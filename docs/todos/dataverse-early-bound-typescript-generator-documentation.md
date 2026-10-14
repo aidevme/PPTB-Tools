@@ -45,7 +45,7 @@ For `docs/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/
 
 | # | File | Section | What to show |
 | --- | --- | --- | --- |
-| 5 | `gs-load-tool.png` | 1. Load the tool | The tool in PPTB's tool list or marketplace, and its first screen with no project open (the Project card's empty state) |
+| 5 | `gs-load-tool.png` **Done** | 1. Load the tool | The tool in PPTB's tool list or marketplace, and its first screen with no project open (the Project card's empty state) |
 | 6 | `gs-new-project.png` | 2. Open a project | The New Project dialog filled in (name, description, location) |
 | 7 | `gs-load-project.png` | 2. Open a project | The Load Existing Project dialog with a few saved projects |
 | 8 | `gs-project-open.png` | 2. Open a project | The Project card with a project open: name, version, path, ".dataverse-gen.json found" |
