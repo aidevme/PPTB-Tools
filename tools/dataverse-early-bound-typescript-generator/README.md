@@ -44,6 +44,30 @@ Node:
 Use this tool for client-side TypeScript, and the Early Bound Generator for server-side .NET code; a solution
 with both can use both.
 
+## What this tool changes
+
+**In Dataverse: nothing.** The tool only reads table, choice, relationship and message metadata, solution
+membership and custom API definitions. It never creates, updates or deletes Dataverse data, metadata or
+customizations.
+
+**On your computer**, only when you click **Generate**, and only inside the project folder you opened:
+
+- **Generated files:** Generate creates new files and overwrites changed ones in the output folder (default
+  `./src/dataverse-gen`), creating the folder and the folders inside it if they don't exist. Unchanged files aren't
+  rewritten. **Preview** lists every file and its status first. There's no backup, so overwrites can't be undone
+  by the tool; use source control. Turn on **Settings → Generate & files → Ask before generating** to confirm
+  each run, with the output folder and the number of files to create and overwrite.
+- **`.dataverse-gen.json`:** saved in the project folder on every Generate, with the selection and options.
+- **Orphaned files (off by default):** with **Delete orphaned files** on, Generate also deletes generated files
+  the current selection no longer produces, after you confirm the list, which names the output folder. Deletion is
+  permanent (not the Recycle Bin or Trash). Only files the preview lists as orphaned can be deleted: generated
+  files in the output folder's `entities`, `enums`, `actions`, `functions` and `complextypes` folders, plus
+  `metadata.ts` and `index.ts`. Because PPTB's file API has no delete, deletion runs in a hidden PPTB terminal
+  (PowerShell on Windows, `/bin/sh` elsewhere), which is closed afterwards.
+
+**In Power Platform ToolBox:** the tool's settings, your saved projects and the last project folder used with
+each connection are stored in PPTB's per-tool settings for this tool.
+
 ## Credits
 
 - **Original tool:** [dataverse-gen](https://github.com/scottdurow/dataverse-gen) 2.0.17 by **Scott Durow**,
