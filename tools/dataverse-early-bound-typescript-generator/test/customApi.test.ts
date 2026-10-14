@@ -48,6 +48,15 @@ function installDataverseStub() {
                     ],
                 };
             }
+            if (query.startsWith('customapiresponseproperties?')) {
+                expect(query).toContain(`_customapiid_value eq ${CUSTOM_API_ID}`);
+                return {
+                    value: [
+                        { uniquename: 'Succeeded', type: 0 },
+                        { uniquename: 'EscalationId', type: 12 },
+                    ],
+                };
+            }
             if (query.startsWith('workflows?')) return { value: [] };
             throw new Error('unexpected query ' + query);
         },
@@ -86,6 +95,12 @@ describe('custom APIs missing from $metadata', () => {
         expect(action).toContain('  Assignee?: any;');
         expect(action).toContain('  Tags?: string[];');
         expect(files.get('metadata.ts')).toContain('contoso_EscalateQueueItem: contoso_EscalateQueueItemMetadata,');
+
+        // Response properties become the `<UniqueName>Response` complex type, as $metadata would publish it.
+        const response = files.get('complextypes/contoso_EscalateQueueItemResponse.ts') as string;
+        expect(response).toContain('export interface contoso_EscalateQueueItemResponse {');
+        expect(response).toContain('  EscalationId?: import("dataverse-ify").Guid;');
+        expect(response).toContain('  Succeeded?: boolean;');
     });
 
     it('leave the CSDL schema untouched when everything selected is in $metadata', async () => {
