@@ -33,6 +33,8 @@ The tool isn't in the PPTB tool gallery yet, so you load it from a local build:
 The header shows **Connected** with your environment's name; hover over it to see the URL. A progress bar
 across the top shows the four steps you're about to go through. Click a step to jump to it.
 
+![The tool's first screen in Power Platform ToolBox: the header with the tool name, version and a Connected badge; a four-step bar (Project, Select, Options, Preview and generate); the Project card with Load Existing Project and New Project buttons and a recent project; and the Select and Options cards waiting for a project](../../../../assets/dataverse-early-bound-typescript-generator/gs-load-tool.png)
+
 ## 2. Open a project (step 1)
 
 The first time, create a project:
