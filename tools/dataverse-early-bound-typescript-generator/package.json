@@ -73,6 +73,7 @@
     },
     "files": [
         "dist",
-        "npm-shrinkwrap.json"
+        "npm-shrinkwrap.json",
+        "THIRD_PARTY_NOTICES.md"
     ]
 }

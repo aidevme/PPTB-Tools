@@ -106,5 +106,8 @@ const account = await client.retrieve<Account>(accountMetadata.logicalName, id, 
 
 ## Credits
 
-Ported from `dataverse-gen` by Scott Durow (MIT). The generated code depends on `dataverse-ify`, also by Scott
-Durow (MIT).
+Ported from [dataverse-gen](https://github.com/scottdurow/dataverse-gen) 2.0.17 by Scott Durow (MIT): the
+generator logic and output templates are a TypeScript port of it. Its licence and copyright notice are in
+[THIRD_PARTY_NOTICES.md](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/THIRD_PARTY_NOTICES.md).
+The generated code depends on [dataverse-ify](https://github.com/scottdurow/dataverse-ify), also by Scott Durow
+(MIT), which projects install themselves.

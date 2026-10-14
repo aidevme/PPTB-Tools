@@ -44,12 +44,19 @@ Node:
 Use this tool for client-side TypeScript, and the Early Bound Generator for server-side .NET code; a solution
 with both can use both.
 
-## Attribution
+## Credits
 
-The generator logic and templates are a TypeScript port of `dataverse-gen` 2.0.17 (MIT, © Scott Durow).
-`dataverse-auth` is not ported because PPTB owns connections and tokens. Generated code depends on the
-unchanged `dataverse-ify` npm package. Contact the original author before publishing this tool to the PPTB
-marketplace, as the implementation guide asks.
+- **Original tool:** [dataverse-gen](https://github.com/scottdurow/dataverse-gen) 2.0.17 by **Scott Durow**,
+  licensed **MIT**. This tool's generator logic and output templates are a TypeScript port of dataverse-gen, and
+  its test fixtures come from dataverse-gen's test data. The MIT licence and copyright notice are reproduced in
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), which is also included in the published package.
+- **Runtime:** the generated code is for [dataverse-ify](https://github.com/scottdurow/dataverse-ify), also by
+  Scott Durow (MIT). It isn't included in this tool; projects install it themselves.
+- **Not ported:** [dataverse-auth](https://github.com/scottdurow/dataverse-auth), because Power Platform ToolBox
+  provides the Dataverse connection.
+
+This tool is licensed under the GPL-2.0, like the rest of this repository; MIT-licensed code can be included in
+GPL-licensed software as long as its notice is kept.
 
 ## Features
 
