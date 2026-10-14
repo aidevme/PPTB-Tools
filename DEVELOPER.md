@@ -1,5 +1,7 @@
 # DEVELOPER
 
+![A glowing open toolbox labelled "Shared instructions, better outcomes" releases three skill cards: teal "Build, fix, create" with a wrench and code brackets, amber "Review, assess, improve" with a magnifying glass over a document, and green "Verify, validate, trust" with a shield and checkmark. Each card is linked to an AI assistant orb above, with SKILL.md panels floating on a dark blue background](assets/pptb-tools-developer-preview.png)
+
 ## AI Agent Skills
 
 Power Platform ToolBox publishes [pptb-agent-skills](https://github.com/PowerPlatformToolBox/pptb-agent-skills), a
