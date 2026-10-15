@@ -1,4 +1,11 @@
 # Dataverse Type Forge: Implementation Guide
+<!-- cspell:ignore Optionset exchangerate queueid queueitemid queueitems scottdurow solutioncomponents systemuser transactioncurrency transactioncurrencyid workerid workeridmodifiedon -->
+
+::: info Design history
+This is the original planning document, kept for history. The working name "Dataverse Type Forge" and some details
+below are out of date. For current behavior, see the [user guide](../getting-started/) and the
+[contributor guide](./index.md).
+:::
 
 A Power Platform ToolBox (PPTB) tool that generates early-bound TypeScript types and metadata for Dataverse, compatible with Scott Durow's `dataverse-ify` runtime library.
 
@@ -207,7 +214,7 @@ npm run finalize-package
 npm publish --access public
 ```
 
-Then submit at https://www.powerplatformtoolbox.com/submit-tool (npm package name, display name, description, repo URL, tags).
+Then submit at <https://www.powerplatformtoolbox.com/submit-tool> (npm package name, display name, description, repo URL, tags).
 
 ## 9. Open questions
 
@@ -220,17 +227,17 @@ Then submit at https://www.powerplatformtoolbox.com/submit-tool (npm package nam
 
 ## 10. References
 
-- https://github.com/scottdurow/dataverse-auth
-- https://github.com/scottdurow/dataverse-gen
-- https://github.com/scottdurow/dataverse-ify
-- https://github.com/scottdurow/dataverse-ify/blob/master/docs/why-metadata.md
-- https://docs.powerplatformtoolbox.com/tool-development
-- https://docs.powerplatformtoolbox.com/tool-development/manifest
-- https://docs.powerplatformtoolbox.com/tool-development/api-reference/dataverse-api
-- https://docs.powerplatformtoolbox.com/tool-development/api-reference/filesystem-api
-- https://docs.powerplatformtoolbox.com/tool-development/csp-configuration
-- https://docs.powerplatformtoolbox.com/tool-development/validation
-- https://docs.powerplatformtoolbox.com/tool-development/publishing
-- https://docs.powerplatformtoolbox.com/tool-development/ai-agent-skills
-- https://github.com/PowerPlatformToolBox/sample-tools
-- https://github.com/PowerPlatformToolBox/desktop-app
+- <https://github.com/scottdurow/dataverse-auth>
+- <https://github.com/scottdurow/dataverse-gen>
+- <https://github.com/scottdurow/dataverse-ify>
+- <https://github.com/scottdurow/dataverse-ify/blob/master/docs/why-metadata.md>
+- <https://docs.powerplatformtoolbox.com/tool-development>
+- <https://docs.powerplatformtoolbox.com/tool-development/manifest>
+- <https://docs.powerplatformtoolbox.com/tool-development/api-reference/dataverse-api>
+- <https://docs.powerplatformtoolbox.com/tool-development/api-reference/filesystem-api>
+- <https://docs.powerplatformtoolbox.com/tool-development/csp-configuration>
+- <https://docs.powerplatformtoolbox.com/tool-development/validation>
+- <https://docs.powerplatformtoolbox.com/tool-development/publishing>
+- <https://docs.powerplatformtoolbox.com/tool-development/ai-agent-skills>
+- <https://github.com/PowerPlatformToolBox/sample-tools>
+- <https://github.com/PowerPlatformToolBox/desktop-app>

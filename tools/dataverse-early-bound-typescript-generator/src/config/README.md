@@ -311,8 +311,8 @@ The returned object always has its keys in the same order. That matters for `too
 
 Returns `config` with `generateEntityTypes`, `generateFormContext`, `generateIndex` and `output.outputRoot`
 taken from `projectDefaults`. Everything else is kept: the selection, other `output` keys such as
-`fileSuffix`, and `referencedTypes`. `App.tsx` calls it in `openProjectFolder` only when the folder has no
-`.dataverse-gen.json` (`state.exists === false`).
+`fileSuffix`, and `referencedTypes`. `App.tsx` calls it in `openProjectFolder` every time a folder is opened, also when
+the folder already has a `.dataverse-gen.json`.
 
 ### `toolConfigEquals(a, b): boolean`
 
@@ -343,7 +343,7 @@ All writes go through `saveToolConfig(next)`, which replaces the whole stored `t
 | --- | --- | --- |
 | Tool loads | `App.tsx` effect → `loadToolConfig()` | `toolSettings` starts as `toolConfig`, then becomes `mergeToolConfig(stored)` |
 | Settings → Save | `SettingsPanel` → `saveToolSettings` | The whole draft, normalized with `mergeToolConfig` (so a blank output folder saves as the default), including the `projects` it was opened with |
-| Open a folder without `.dataverse-gen.json` | `openProjectFolder` | Nothing saved; the new project's config gets `projectDefaults` |
+| Open a folder | `openProjectFolder` | Nothing saved; the open project's config gets `projectDefaults` |
 | New Project → Save | `NewProjectDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
 | Load Existing Project → Delete | `LoadProjectDialog` → `deleteProject` | Removes the project by `id` |
 | Generate | `runGenerate` → `recordProjectGeneration` | The project whose `location` matches the open folder, if `recordGeneration` returns a change |

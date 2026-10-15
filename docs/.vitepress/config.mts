@@ -10,31 +10,46 @@ export default defineConfig({
             { text: "Home", link: "/" },
             { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
         ],
-        sidebar: [
-            {
-                text: "PPTB Tools",
-                items: [
-                    {
-                        text: "Dataverse Early-Bound TypeScript Generator",
-                        link: "/pptb-tools/dataverse-early-bound-typescript-generator/",
-                        items: [
-                            { text: "Getting Started", link: "/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/" },
-                            {
-                                text: "Architecture",
-                                link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/",
-                                collapsed: true,
-                                items: [
+        sidebar: {
+            "/pptb-tools/dataverse-early-bound-typescript-generator/": [
+                {
+                    text: "Dataverse Early-Bound TypeScript Generator",
+                    link: "/pptb-tools/dataverse-early-bound-typescript-generator/",
+                },
+                {
+                    text: "User guide",
+                    items: [
+                        { text: "Getting started", link: "/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/" },
+                        { text: "Using the generated code", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/using-the-generated-code" },
+                        { text: "Why generate metadata?", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/why-generate-metadata" },
+                        { text: "What gets generated", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/what-gets-generated" },
+                        { text: "Project file reference", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/project-file" },
+                        { text: "Tool settings", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/tool-settings" },
+                        { text: "Moving from dataverse-gen", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/moving-from-dataverse-gen" },
+                        { text: "Safety: what the tool changes", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/safety" },
+                        { text: "Troubleshooting & limitations", link: "/pptb-tools/dataverse-early-bound-typescript-generator/guide/troubleshooting" },
+                    ],
+                },
+                {
+                    text: "Contributor guide",
+                    items: [
+                        { text: "Contributing", link: "/pptb-tools/dataverse-early-bound-typescript-generator/contributing/" },
+                        {
+                            text: "Architecture",
+                            link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/",
+                            collapsed: true,
+                            items: [
                                     { text: "Core", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/core" },
                                     { text: "Services", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/services" },
                                     { text: "App state and hooks", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/app-state" },
                                     { text: "Build and testing", link: "/pptb-tools/dataverse-early-bound-typescript-generator/architecture/build-and-testing" },
-                                ],
-                            },
-                            {
-                                text: "Components",
-                                link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/",
-                                collapsed: true,
-                                items: [
+                            ],
+                        },
+                        {
+                            text: "Components",
+                            link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/",
+                            collapsed: true,
+                            items: [
                                     { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/header" },
                                     { text: "WorkflowProgress", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/workflow-progress" },
                                     { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/step-card" },
@@ -49,13 +64,14 @@ export default defineConfig({
                                     { text: "FileViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/file-viewer" },
                                     { text: "CodeViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/code-viewer" },
                                     { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/footer" },
-                                ],
-                            },
-                        ],
-                    },
-                ],
-            },
-        ],
+                            ],
+                        },
+                        { text: "Testing", link: "/pptb-tools/dataverse-early-bound-typescript-generator/contributing/testing" },
+                        { text: "Design history", link: "/pptb-tools/dataverse-early-bound-typescript-generator/contributing/design-history" },
+                    ],
+                },
+            ],
+        },
         socialLinks: [{ icon: "github", link: "https://github.com/aidevme/PPTB-Tools" }],
         search: {
             provider: "local",

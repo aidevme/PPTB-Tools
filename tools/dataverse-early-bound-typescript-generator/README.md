@@ -6,8 +6,8 @@ Dataverse tables, actions and functions. The output is compatible with Scott Dur
 `.dataverse-gen.json` project file as his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, so a
 project can be regenerated from either.
 
-Implementation guide: [docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md).
-User docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
+Original design (kept for history): [docs/pptb-tools/dataverse-early-bound-typescript-generator/contributing/design-history.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/contributing/design-history.md).
+User and contributor docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
 ## Why this tool exists
 
@@ -46,27 +46,9 @@ with both can use both.
 
 ## What this tool changes
 
-**In Dataverse: nothing.** The tool only reads table, choice, relationship and message metadata, solution
-membership and custom API definitions. It never creates, updates or deletes Dataverse data, metadata or
-customizations.
-
-**On your computer**, only when you click **Generate**, and only inside the project folder you opened:
-
-- **Generated files:** Generate creates new files and overwrites changed ones in the output folder (default
-  `./src/dataverse-gen`), creating the folder and the folders inside it if they don't exist. Unchanged files aren't
-  rewritten. **Preview** lists every file and its status first. There's no backup, so overwrites can't be undone
-  by the tool; use source control. Turn on **Settings → Generate & files → Ask before generating** to confirm
-  each run, with the output folder and the number of files to create and overwrite.
-- **`.dataverse-gen.json`:** saved in the project folder on every Generate, with the selection and options.
-- **Orphaned files (off by default):** with **Delete orphaned files** on, Generate also deletes generated files
-  the current selection no longer produces, after you confirm the list, which names the output folder. Deletion is
-  permanent (not the Recycle Bin or Trash). Only files the preview lists as orphaned can be deleted: generated
-  files in the output folder's `entities`, `enums`, `actions`, `functions` and `complextypes` folders, plus
-  `metadata.ts` and `index.ts`. Because PPTB's file API has no delete, deletion runs in a hidden PPTB terminal
-  (PowerShell on Windows, `/bin/sh` elsewhere), which is closed afterwards.
-
-**In Power Platform ToolBox:** the tool's settings, your saved projects and the last project folder used with
-each connection are stored in PPTB's per-tool settings for this tool.
+In Dataverse: nothing, since the tool is read-only. On disk, it writes only on **Generate** and only inside the
+project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. See the
+[Safety guide](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/safety.md) for the details.
 
 ## Credits
 
@@ -92,7 +74,7 @@ GPL-licensed software as long as its notice is kept.
   file viewer.
 - Generate writes only new and changed files, then saves `.dataverse-gen.json`.
 
-## Commands (run from `tools/dataverse-type-gen/`)
+## Commands (run from `tools/dataverse-early-bound-typescript-generator/`)
 
 ```bash
 npm install
