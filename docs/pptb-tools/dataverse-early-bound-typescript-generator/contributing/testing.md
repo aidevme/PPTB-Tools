@@ -30,16 +30,19 @@ whose generated files you can't regenerate.
 | Select tables, actions and functions | Pass | 2026-10-13/14 | Desktop 1.2.7 | 1.0.0 | Search, solution filter, table types |
 | Preview against an existing output folder | Pass | 2026-10-13/14 | Desktop 1.2.7 | 1.0.0 | 1 changed, 279 unchanged, 9 orphaned; diff shown for the changed file |
 | Settings panel: change, save, reopen | Pass | 2026-10-13/14 | Desktop 1.2.7 | 1.0.0 | |
-| Generate: write new and changed files | **To do** | | | | See [Generate](#generate) |
-| Delete orphaned files | **To do** | | | | See [Delete orphaned files](#delete-orphaned-files) |
-| Dark theme, and switching theme while open | **To do** | | | | See [Themes](#themes) |
+| Generate: write new and changed files | Pass | 2026-10-15 | Desktop 1.2.7 | 1.0.0 | See [Generate](#generate) |
+| Delete orphaned files | Pass | 2026-10-15 | Desktop 1.2.7 | 1.0.0 | Windows (PowerShell). macOS and Linux not tested yet. See [Delete orphaned files](#delete-orphaned-files) |
+| Dark theme | Pass | 2026-10-15 | Desktop 1.2.7 | 1.0.0 | See [Themes](#themes), step 1 |
+| Switching theme while the tool is open | **To do** | | | | See [Themes](#themes), step 2 |
 | Error paths: no permission, expired connection | **To do** | | | | See [Error paths](#error-paths) |
 
-The passing rows come from the author's runs during development on 13 and 14 October 2026. When a check passes,
+The passing rows come from the author's runs on 13, 14 and 15 October 2026. When a check passes,
 fill in the date, the PPTB Desktop version and the tool version (shown next to the tool name in the header), and
 add anything notable.
 
-### Steps for the remaining checks
+### Steps for each check
+
+Use these to finish the open checks, and to repeat the passed ones before a release.
 
 #### Generate
 

@@ -36,8 +36,9 @@ dataverse-gen can't generate these.
 ## Known limitations
 
 - **Live testing:** the tool has been tested inside PPTB against a live environment for connecting, listing
-  tables, projects, selecting, the Settings panel and previewing. Writing files with Generate, deleting orphaned
-  files, the dark theme and error paths are still to be tested live; see [Testing](../contributing/testing.md).
+  tables, projects, selecting, the Settings panel, previewing, generating, deleting orphaned files (on Windows)
+  and the dark theme. Error paths, following a theme switch while the tool is open, and orphan deletion on macOS
+  and Linux are still to be tested live; see [Testing](../contributing/testing.md).
 - **Custom EJS templates aren't supported.** The dataverse-gen CLI still honors them.
 - **Orphaned files are only reported** unless you turn on **Delete orphaned files** and confirm. Deletion is
   permanent (no Recycle Bin or Trash).

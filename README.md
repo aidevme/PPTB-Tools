@@ -31,7 +31,7 @@ This tool generates early-bound TypeScript types and metadata for Dataverse tabl
 - Preview generated files as new, changed, unchanged or orphaned against the output folder.
 - Write only what changed and save the config.
 
-**Status:** version 1.0.0. Output verified against dataverse-gen's test fixtures; tested in Power Platform ToolBox against a live environment, with Generate, orphan deletion and the dark theme still to test live ([TESTING.md](tools/dataverse-early-bound-typescript-generator/TESTING.md)).
+**Status:** version 1.0.0. Output verified against dataverse-gen's test fixtures; tested in Power Platform ToolBox against a live environment, including Generate, orphan deletion (Windows) and the dark theme; error paths are still to test live ([TESTING.md](tools/dataverse-early-bound-typescript-generator/TESTING.md)).
 
 ## Contributing
 
