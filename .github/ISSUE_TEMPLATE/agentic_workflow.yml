@@ -1,0 +1,120 @@
+name: Agentic Workflow
+description: Propose a new GitHub Agentic Workflow, change an existing one, or report a problem with a run
+title: "[Agentic Workflow]: "
+labels: ["agentic-workflows"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Agentic workflows run an AI agent in GitHub Actions (gh-aw). Before filing, see the
+        [GitHub Agentic Workflows guide](https://aidevme.github.io/PPTB-Tools/repository/agentic-workflows) for how
+        they work in this repository, and the existing workflows in `.github/workflows/*.md`.
+
+        New workflows start **read-only** and report to an issue; anything that writes more needs a reason.
+
+  - type: dropdown
+    id: request-type
+    attributes:
+      label: Request type
+      options:
+        - New workflow
+        - Change an existing workflow
+        - Problem with a workflow run
+    validations:
+      required: true
+
+  - type: input
+    id: workflow
+    attributes:
+      label: Existing workflow
+      description: For a change or a problem, the workflow's file name. Leave empty for a new workflow.
+      placeholder: pptb-intake-review.md
+    validations:
+      required: false
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What should the agent do?
+      description: |
+        The task in plain language, as you'd brief a colleague. For a change, describe what should be different.
+        For a problem, describe what happened and what you expected.
+      placeholder: Review a PPTB tool against the live marketplace policies and report the findings as an issue.
+    validations:
+      required: true
+
+  - type: textarea
+    id: run-link
+    attributes:
+      label: Run link and errors
+      description: For a problem with a run, the Actions run URL and the error annotations or log lines.
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: When should it run?
+      description: Every run costs API credits, so prefer manual or infrequent triggers.
+      options:
+        - Manually (workflow_dispatch)
+        - On a schedule (daily or weekly)
+        - When an issue is opened or labelled
+        - When a pull request is opened or updated
+        - When another workflow completes (workflow_run)
+        - From a slash command in an issue or PR comment
+        - Not sure
+    validations:
+      required: false
+
+  - type: textarea
+    id: inputs
+    attributes:
+      label: Inputs
+      description: Values a person chooses when starting a manual run. Prefer fixed choices over free text.
+      placeholder: "tool: choice of folders under tools/"
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: outputs
+    attributes:
+      label: What may it write?
+      description: The safe outputs the agent may request. Leave all unchecked for a read-only change.
+      options:
+        - label: Create an issue
+        - label: Comment on an issue or pull request
+        - label: Add labels
+        - label: Open a pull request (never merged automatically)
+        - label: Create a discussion
+        - label: Upload an artifact
+
+  - type: textarea
+    id: network
+    attributes:
+      label: External access
+      description: |
+        Domains the agent must reach beyond GitHub and npm, and why. Each one is added to the firewall allowlist.
+      placeholder: "docs.powerplatformtoolbox.com: to fetch the current marketplace policies"
+    validations:
+      required: false
+
+  - type: textarea
+    id: success
+    attributes:
+      label: How do we know it works?
+      description: What a good result looks like, so the first runs can be checked against it.
+      placeholder: The issue has the review table and a verdict, and matches a local Claude Code review of the same commit.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I've checked that an existing workflow can't already do this.
+          required: false
+        - label: A person reviews everything the workflow produces before acting on it.
+          required: true

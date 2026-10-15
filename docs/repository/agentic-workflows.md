@@ -340,6 +340,11 @@ describes more workflows for Power Platform repositories. In this repository, th
 
 Start each one read-only and reporting to an issue. Allow pull requests only once its reports are reliable.
 
+To propose a workflow, change one, or report a problem with a run, open an issue with the
+[**Agentic Workflow**](https://github.com/aidevme/PPTB-Tools/issues/new?template=agentic_workflow.yml) template. It
+asks for the decisions a workflow file needs: the trigger, inputs, what it may write and which domains it must
+reach. It labels the issue `agentic-workflows`.
+
 ## References
 
 - [GitHub Agentic Workflows documentation](https://github.github.com/gh-aw/)
