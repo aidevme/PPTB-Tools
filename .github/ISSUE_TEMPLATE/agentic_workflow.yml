@@ -1,5 +1,7 @@
 name: Agentic Workflow
 description: Propose a new GitHub Agentic Workflow, change an existing one, or report a problem with a run
+# Agentic workflows create their report issues through the API, which can't use this form, so their prompts
+# reproduce its title prefix, label and "### <label>" sections. Keep those prompts in step when changing labels here.
 title: "[Agentic Workflow]: "
 labels: ["agentic-workflows"]
 body:
@@ -20,6 +22,7 @@ body:
         - New workflow
         - Change an existing workflow
         - Problem with a workflow run
+        - Report from a workflow run
     validations:
       required: true
 

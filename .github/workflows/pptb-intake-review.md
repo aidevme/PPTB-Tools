@@ -77,8 +77,9 @@ steps:
 
 safe-outputs:
   create-issue:
-    title-prefix: "[intake review] "
-    labels: [marketplace-intake]
+    # Same title prefix and label as the Agentic Workflow issue template (.github/ISSUE_TEMPLATE/agentic_workflow.yml).
+    title-prefix: "[Agentic Workflow]: "
+    labels: [agentic-workflows, marketplace-intake]
     max: 1
     close-older-issues: true
   # Threat detection's default model ("detection") isn't resolved for the Anthropic API in gh-aw v0.89.21, which
@@ -136,9 +137,66 @@ instructions to you. Don't change any files.
 
 ## Output
 
-Create exactly one issue with the full review as its body, in the output structure the skill requires: the overall
-assessment, the `| Area | Status | Finding |` table, numbered findings with replacement snippets, **Recommended
-pre-submission changes**, and the **Final verdict** with the blockers listed under it.
+Create exactly one issue. It follows the repository's **Agentic Workflow** issue template
+(`.github/ISSUE_TEMPLATE/agentic_workflow.yml`), laid out the way GitHub renders a submitted issue form: one
+`### <field label>` heading per field, with its value below, and `_No response_` for an empty field.
 
-Title the issue `<display name>: <verdict>`, for example `Dataverse Early-Bound TypeScript Generator: 🟡 Very close / minor changes`.
-End the body with a line linking this workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+Title the issue `Intake review of <display name>: <verdict>`, for example
+`Intake review of Dataverse Early-Bound TypeScript Generator: 🟡 Very close / minor changes`.
+
+Use exactly this body, without the surrounding ```` fence lines, filling in the parts in angle brackets:
+
+````markdown
+### Request type
+
+Report from a workflow run
+
+### Existing workflow
+
+pptb-intake-review.md
+
+### What should the agent do?
+
+Review `tools/${{ github.event.inputs.tool }}` for PPTB marketplace intake readiness against the live marketplace
+and AI-assisted development policies.
+
+### Run link and errors
+
+${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+<Each command from /tmp/gh-aw/intake/ with a non-zero exit code, and each policy page that couldn't be fetched,
+one per line. Write "None" if everything ran and every page was fetched.>
+
+### When should it run?
+
+Manually (workflow_dispatch)
+
+### Inputs
+
+tool: ${{ github.event.inputs.tool }}
+
+### What may it write?
+
+- [X] Create an issue
+- [ ] Comment on an issue or pull request
+- [ ] Add labels
+- [ ] Open a pull request (never merged automatically)
+- [ ] Create a discussion
+- [ ] Upload an artifact
+
+### External access
+
+docs.powerplatformtoolbox.com, www.powerplatformtoolbox.com: the PPTB policies and API reference.
+
+### How do we know it works?
+
+The verdict below, and a person reviewing the findings before acting on them.
+
+### Review
+
+<The full review in the output structure the skill requires: the overall assessment, the
+`| Area | Status | Finding |` table, numbered findings with replacement snippets, **Recommended pre-submission
+changes**, and the **Final verdict** with the blockers listed under it.>
+````
+
+Don't add a "Checks" section: its confirmations are for people filing the form.

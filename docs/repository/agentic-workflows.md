@@ -134,8 +134,10 @@ following the repository's `intake-policy-review` skill, and opens an issue with
    fetches the current policy pages, reads the tool's code, manifest, README, docs and testing records, and
    reads the command results from step 1.
 3. **Reports the result.** It creates one issue titled
-   `[intake review] <tool display name>: <verdict>`, labelled `marketplace-intake`. The body has the review table,
-   the numbered findings, the recommended pre-submission changes and the final verdict. A newer review closes
+   `[Agentic Workflow]: Intake review of <tool display name>: <verdict>`, labelled `agentic-workflows` and
+   `marketplace-intake`. The body follows the [Agentic Workflow issue template](https://github.com/aidevme/PPTB-Tools/blob/main/.github/ISSUE_TEMPLATE/agentic_workflow.yml): the run link, any failed
+   commands, the trigger and inputs, then a **Review** section with the review table, the numbered findings, the
+   recommended pre-submission changes and the final verdict. A newer review closes
    the older open one, so there's only ever one open review.
 
 ### Run it
@@ -250,8 +252,8 @@ steps:                          # plain Actions steps that run before the agent
 
 safe-outputs:                   # the only writes the agent can request
   create-issue:
-    title-prefix: "[intake review] "
-    labels: [marketplace-intake]
+    title-prefix: "[Agentic Workflow]: "        # same as the issue template
+    labels: [agentic-workflows, marketplace-intake]
     max: 1
     close-older-issues: true
 ---
