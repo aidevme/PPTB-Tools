@@ -1,0 +1,924 @@
+{
+  "$schema": "./skills-manifest.schema.json",
+  "version": 1,
+  "description": "Registry + classification for every skill the template knows about. 'ported' skills physically exist under agent-src/skills/<scope>/<group>/<name>/ and are fanned out by sync.ps1. 'catalogued' skills are classified here so a later sync can pull them from their source repo; they have no local folder yet. 'drop' entries are recorded so the decision is not silently re-litigated.",
+  "sourceRoots": {
+    "core": "agent-src/skills/core",
+    "project": "agent-src/skills/project"
+  },
+  "targets": {
+    "claude": ".claude/skills",
+    "copilot": ".github/skills"
+  },
+  "roundTripToShared": {
+    "core": true,
+    "project": false,
+    "comment": "Only core skills round-trip to the shared product tier (shared/dv). Project skills never sync upstream."
+  },
+  "defaultTargets": [
+    "claude",
+    "copilot"
+  ],
+  "skills": [
+    {
+      "name": "hso-template-architecture",
+      "scope": "core",
+      "group": "foundation",
+      "ported": true,
+      "source": "HINT",
+      "note": "Master template spine; read before any dev work."
+    },
+    {
+      "name": "hso-architecture-map",
+      "scope": "core",
+      "group": "foundation",
+      "ported": true,
+      "source": "shared",
+      "note": "TOPO living component topology; bidirectional dependency invariant."
+    },
+    {
+      "name": "hso-agent-help",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT",
+      "note": "Onboarding / skill discovery."
+    },
+    {
+      "name": "hso-init-project",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT",
+      "note": "Project bootstrap / init token engine driver."
+    },
+    {
+      "name": "hso-provision-environment",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-init-repo",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-shared-scripts",
+      "scope": "core",
+      "group": "foundation",
+      "ported": true,
+      "source": "ForgeUSA+shared",
+      "note": "Library skill dot-sourced by Dataverse/ADO skills (Invoke-DataverseApi + auth + ProjectConfig). Ported Forge body neutralised to ADR-0003; governance modules (Wiki-Tiers, Resolve-GovernanceContext) deferred to review-later."
+    },
+    {
+      "name": "hso-atlassian-auth",
+      "scope": "core",
+      "group": "foundation",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Library skill: Atlassian Cloud Basic-auth headers + settings for the hso-atlassian-* skills. Separate from hso-shared-scripts (not an Entra provider)."
+    },
+    {
+      "name": "hso-skill-creator",
+      "scope": "core",
+      "group": "meta",
+      "ported": true,
+      "source": "HINT",
+      "note": "Adds required --scope core|project selector."
+    },
+    {
+      "name": "hso-skills-sync",
+      "scope": "core",
+      "group": "meta",
+      "ported": true,
+      "source": "HINT",
+      "note": "Parity backstop, rewritten for the inverted source-is-committed model; double-nesting bug fixed."
+    },
+    {
+      "name": "skill-creator",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "upstream",
+      "note": "Anthropic upstream base scaffolder. Reclassified meta->delivery to match its on-disk placement (delivery batch). hso-skill-creator wraps it and remains in meta."
+    },
+    {
+      "name": "hso-skill-review",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-skill-path-migration",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-skill-update-shared-skill",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-template-audit",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-template-impact-analysis",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-template-improve",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-project-upgrade",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT",
+      "note": "Diff live project against template; apply safe updates."
+    },
+    {
+      "name": "hso-generated-file-review",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT",
+      "note": "Detect hand-edits to generated files."
+    },
+    {
+      "name": "hso-repo-hygiene",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-project-state-assessment",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-data-modeling",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT+shared",
+      "note": "Tables/columns/relationships/choices/solutions via Web API."
+    },
+    {
+      "name": "hso-dataverse-architect",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared",
+      "note": "Orchestration: analysis + design for Dataverse extensions."
+    },
+    {
+      "name": "hso-dataverse-data",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-dataverse-customapi",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT",
+      "note": "aka hso-create-custom-api."
+    },
+    {
+      "name": "hso-dataverse-ui-config",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT+shared",
+      "note": "aka hso-dataverse-form-config."
+    },
+    {
+      "name": "hso-dataverse-securityrole",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-naming-conventions",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-bpf",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-dataverse-dashboards",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-dataverse-flow-docs",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-deployment-settings",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-dataverse-pipelines",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-fetchxml-queries",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-semantic-data-modeling",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-plugin-development",
+      "scope": "core",
+      "group": "server",
+      "ported": true,
+      "source": "HINT+shared",
+      "note": "4-layer plugin architecture + tests + deploy."
+    },
+    {
+      "name": "hso-plugin-code-review",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-server-framework",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-functions-development",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-powerautomate-writer",
+      "scope": "core",
+      "group": "server",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-formscript-development",
+      "scope": "core",
+      "group": "client",
+      "ported": true,
+      "source": "HINT+shared",
+      "note": "Upgrade-safe form-script web resources (documented Client API only)."
+    },
+    {
+      "name": "hso-pcf-control-development",
+      "scope": "core",
+      "group": "client",
+      "ported": true,
+      "source": "HINT+shared",
+      "note": "PCF controls from spec; pac pcf push."
+    },
+    {
+      "name": "hso-client-ruleengine",
+      "scope": "core",
+      "group": "client",
+      "ported": false,
+      "source": "HINT",
+      "note": "JSON-driven form RuleEngine."
+    },
+    {
+      "name": "hso-canvasapp-development",
+      "scope": "core",
+      "group": "client",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-claude-design-handoff",
+      "scope": "core",
+      "group": "client",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-pipeline-generation",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": true,
+      "source": "HINT",
+      "note": "Generate ADO pipeline YAML from config blueprints."
+    },
+    {
+      "name": "hso-pipeline-architecture",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-pipeline-diagnostics",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-update-pipeline-config",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-deployment-parameters",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-ado-deploymenthistory",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Reclassified pipelines->delivery to match on-disk placement. Forge newer body (settings-resolved auth). Dot-source path fixed to flat runtime form."
+    },
+    {
+      "name": "hso-alm-architect",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-production-readiness",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-analyze-dataverse-solution-changes",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (GENERAL-ADOPT, matrix A1); license header dropped, scope added, (project) tags stripped, underscore skill-path fixed to hyphen. Reclassified pipelines->dataverse to match matrix A1 + on-disk placement."
+    },
+    {
+      "name": "hso-architecture-validation",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-solution-design-review",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-repository-decision",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-wiki-lint",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Aggressive self-committing wiki linter; regenerates index.md."
+    },
+    {
+      "name": "hso-wiki-process-inbox",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Routes _inbox/ into raw/ + wiki/work stubs."
+    },
+    {
+      "name": "hso-wiki-capture",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Scaffolds an external-source capture with correct frontmatter."
+    },
+    {
+      "name": "hso-wiki-write-decision",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "ADR scaffolder into wiki/decisions/."
+    },
+    {
+      "name": "worklog",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Per-session gitignored work log; neutralised ticket-key regex."
+    },
+    {
+      "name": "hso-wiki-ingest-transcript",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-ingest-discovery-artifact",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-update-topic",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-query",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-scaffold-client",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-scaffold-project",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-ingest-screenshots",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Registered in Wave 0 so it is not a parity orphan; content ported in a later wave."
+    },
+    {
+      "name": "hso-ado-work-items",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-task-creator",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Retired — renamed/superseded by hso-requirements-author (classification-matrix §G2). Do not port."
+    },
+    {
+      "name": "hso-work-planner",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-solution-documentation",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Retired — deprecated tombstone superseded by hso-engagement-deliverables (classification-matrix §G2, §D). Do not port."
+    },
+    {
+      "name": "hso-update-solution-docs",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (GENERAL-ADOPT, matrix A1); license header dropped, scope added, (project) tags stripped, underscore skill-path fixed to hyphen."
+    },
+    {
+      "name": "hso-engagement-deliverables",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-jira-business-summary",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Reusable pattern; Jira account/project specifics stay in config."
+    },
+    {
+      "name": "hso-timesheet-builder",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Customer-agnostic; reads a config-driven customer map."
+    },
+    {
+      "name": "timesheet-report",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "status",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-diagram-drawio",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-diagram-excalidraw",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-diagram-plotly",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-diagram-reference-architecture",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-revealjs-presentation",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-presales-demo-architect",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-dataverse-sdk-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-dataverse-ui-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-ce-apps-sdk-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-fieldservice-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-d365-guidance-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-fasttrack-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-msaccess-extractor",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "playwright-cli",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-grill-architect",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Reclassified project->core/delivery in the skill-merge (matrix A3; 0 client-estate refs, both source analyses agree). Ported from ForgeUSA."
+    },
+    {
+      "name": "hso-ingest-transcript",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Superseded by hso-wiki-ingest-transcript."
+    },
+    {
+      "name": "hso-ingest-discovery-artifact",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Superseded by hso-wiki-ingest-discovery-artifact."
+    },
+    {
+      "name": "hso-dataverse-bpf.zip",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Stray build artifact, not a skill."
+    },
+    {
+      "name": "hso-pcf-control-development.zip",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Stray build artifact, not a skill."
+    },
+    {
+      "name": "hso-skills-sync/hso-skills-sync",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Double-nesting bug artifact; the inverted sync model cannot reproduce it."
+    },
+    {
+      "name": "hso-ado-pull-requests",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-ai-leverage-review",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-analyze-system-review",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-confluence-pages",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-d365-licensing",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-adversarial-review",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-document-templates",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-sample-data",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-solution-map",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-spec-conformance-review",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-test-execution",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-excel-analyzer",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-jira-work-items",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-learning-pack",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-md-to-docx",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-power-pages-authoring",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-power-pages-config",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-requirements-author",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-rfp-requirements-matrix",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-salesforce-extractor",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-solution-security-scan",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "ForgeUSA",
+      "note": "Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    }
+  ]
+}

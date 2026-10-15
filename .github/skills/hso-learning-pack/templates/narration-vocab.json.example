@@ -1,0 +1,15 @@
+{
+  "_doc": "Per-project pronunciation overrides for the TTS narrator. Copy this file to <project-root>/narration-vocab.json (or next to a single deck) and edit. Kokoro reads ALL-CAPS as letters and Title Case as a word, so brand names spoken as words just need a Title Case spelling. Matching is case-sensitive and whole-word: 'HUB' substitutes in 'HUB International' but 'hub' inside 'GitHub' is untouched. Longer keys are applied before shorter ones, so 'CashHub' substitutes before any 'Hub' rule.",
+  "_examples": {
+    "brand-spoken-as-word":  "HUB International is spoken 'Hub International', not 'H-U-B International'",
+    "acronym-spoken-as-word": "ERISA is spoken as one word (uh-RISS-uh), not as letters",
+    "split-camelcase":        "CashHub / CompHub split cleanly when Kokoro sees them as two title-case tokens",
+    "punctuation-token":      "401(k) is already handled in speakable() but custom retirement codes can be added here"
+  },
+  "pronunciations": {
+    "HUB":     "Hub",
+    "ERISA":   "uh-RISS-uh",
+    "CashHub": "Cash Hub",
+    "CompHub": "Comp Hub"
+  }
+}

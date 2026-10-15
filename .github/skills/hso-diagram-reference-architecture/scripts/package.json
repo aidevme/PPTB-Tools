@@ -1,0 +1,9 @@
+{
+  "name": "hso-diagram-reference-architecture",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "dependencies": {
+    "sharp": "^0.33.0"
+  }
+}

@@ -1,0 +1,473 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hso.com/schemas/dataverse-architect/spec.schema.json",
+  "title": "hso-dataverse-architect spec.json (v2)",
+  "description": "The machine-readable design sidecar the architect emits alongside the markdown spec. SINGLE SOURCE OF TRUTH: the architect validates against it (Validate-SpecJson), the executor renders from it (BuildAllForms / CurateDefaultViews), and every grader (Grade-Metadata, Grade-SliceFidelity, Grade-SolutionExport, Assert-SpecFormsBuilt) diffs the build against it. A Main form's `tabs` here IS the BuildForm LayoutSpec verbatim, so the spec fully specifies — and is reviewable as — the form that gets built.",
+  "type": "object",
+  "required": ["solution", "slices"],
+  "$defs": {
+    "fieldRef": {
+      "description": "A column on the form, by logical name (string) or as an object for extra placement hints.",
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        {
+          "type": "object",
+          "required": ["name"],
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "label": { "type": "string" },
+            "rowspan": { "type": "integer", "minimum": 1 }
+          }
+        }
+      ]
+    },
+    "subgrid": {
+      "type": "object",
+      "description": "A subgrid cell surfacing a child table on the form (Build-SubgridCellXml). Bind a DEDICATED, parent-excluding view, not the default public view.",
+      "properties": {
+        "target": { "type": "string", "minLength": 1, "description": "Child table logical name the grid lists." },
+        "relationship": { "type": "string", "description": "1:N relationship schema name binding the grid." },
+        "view": { "type": "string", "description": "Saved view (name or id) the grid binds." },
+        "label": { "type": "string" }
+      }
+    },
+    "section": {
+      "type": "object",
+      "required": ["name"],
+      "description": "A form section. Normally carries at least one of fields / subgrid / timeline.",
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "label": { "type": "string" },
+        "columns": { "type": "integer", "minimum": 1 },
+        "showlabel": { "type": "boolean" },
+        "fields": { "type": "array", "items": { "$ref": "#/$defs/fieldRef" } },
+        "subgrid": { "$ref": "#/$defs/subgrid" },
+        "timeline": { "type": "boolean", "description": "Render the timeline control here (table must have Notes or Activities enabled)." }
+      }
+    },
+    "lane": {
+      "type": "object",
+      "required": ["width", "sections"],
+      "description": "A vertical lane (form <column>). Lane widths across a tab MUST sum to 100.",
+      "properties": {
+        "width": { "type": "string", "pattern": "^[0-9]{1,3}%?$", "description": "Lane width, e.g. '60%' or '60'. Widths in a tab sum to 100." },
+        "sections": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/section" } }
+      }
+    },
+    "tab": {
+      "type": "object",
+      "required": ["name", "lanes"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "label": { "type": "string" },
+        "lanes": { "type": "array", "minItems": 1, "items": { "$ref": "#/$defs/lane" } }
+      }
+    },
+    "header": {
+      "type": "object",
+      "description": "The KPI header (at-a-glance metrics). Max 4 fields. Mandatory for Patterns A/B/C.",
+      "properties": {
+        "fields": { "type": "array", "maxItems": 4, "items": { "$ref": "#/$defs/fieldRef" } }
+      }
+    }
+  },
+  "properties": {
+    "feature": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Feature name."
+    },
+    "catalogRelease": {
+      "type": "string",
+      "description": "BPC catalog release the brief mapped against (e.g. \"JUL 2026\") — copied verbatim from the brief's catalogRelease frontmatter, never re-derived (ADR 0047 / ADR 0048 A1). Omit when the brief carries no process mapping."
+    },
+    "frProcessMap": {
+      "type": "object",
+      "description": "BPC process tags propagated verbatim from the Requirements Brief's Process Mapping section (ADR 0047) — one entry per FR the spec implements. Per-slice work items derive their BPC tags from this map via the slice's fr_refs. Optional — omit when the brief carries no process mapping.",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^FR-": {
+          "type": "object",
+          "required": ["status"],
+          "additionalProperties": false,
+          "properties": {
+            "processSequenceId": { "type": "string", "description": "BPC ProcessSequenceId, verbatim from the catalog release — fully-qualified padded form, e.g. \"65.20.025.000\" (JUL 2026+). Treat as an opaque string; never trim .000 padding. Omit for proposed-custom/unmapped." },
+            "processName": { "type": "string" },
+            "levelPath": { "type": "string", "description": "Human-readable lineage, e.g. \"85 Prospect to quote › 85.40 Manage sales orders\"." },
+            "status": { "type": "string", "enum": ["mapped", "proposed-custom", "unmapped"] },
+            "proposalKey": { "type": "string", "description": "The brief's custom-process proposal key when status is proposed-custom." }
+          }
+        }
+      }
+    },
+    "solution": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The solution UNIQUE NAME the executor creates/uses — the grader discovers the build by this name."
+    },
+    "publisherPrefix": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9]{1,7}$",
+      "description": "Publisher customization prefix (e.g. hsot)."
+    },
+    "columns": {
+      "type": "array",
+      "description": "The declared data model: every custom column the spec proposes, one entry per (table, name). The validator cross-checks every forms[].header/section field and views[].column against this set (plus system columns and the table's primary name column) — an invented or suffixed field reference fails the spec. Required whenever forms or views are declared.",
+      "items": {
+        "type": "object",
+        "required": ["table", "name"],
+        "properties": {
+          "table": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1, "description": "Column logical name, exactly as declared in the markdown data model (hso_<fieldname>_<suffix> pattern)." }
+        }
+      }
+    },
+    "newTables": {
+      "type": "array",
+      "description": "Net-new custom tables this spec introduces (logical names). Required (possibly empty) whenever the spec declares publisher-owned tables. A non-empty list requires the dedicated semantic-research.md skill-run artifact (hso-semantic-data-modeling) in the spec folder, mentioning every listed table — the semantic-research gate keys on this declaration.",
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "forms": {
+      "type": "array",
+      "description": "One entry per form. For a Main form, `tabs` is the full BuildForm LayoutSpec and is REQUIRED — the spec specifies the whole form (tabs, lanes, sections, fields, KPI header) so it can be reviewed and rendered deterministically. The executor synthesizes a layout only as a fallback for specs that omit it.",
+      "items": {
+        "type": "object",
+        "required": ["table", "timeline"],
+        "properties": {
+          "table": { "type": "string", "minLength": 1 },
+          "type": { "enum": ["Main", "QuickCreate", "QuickView", "Card"] },
+          "timeline": {
+            "type": "boolean",
+            "description": "The recorded per-form timeline verdict — ground truth for whether a missing timeline is a defect or an intentional design choice. Must agree with any section that sets timeline:true."
+          },
+          "layoutPattern": {
+            "type": "string",
+            "enum": ["A", "B", "C", "D", "E"],
+            "description": "Layout pattern. A/B/C are two-lane KPI-header forms; D (hub) and E (simple) are single-lane. Drives the header and lane-count expectations the grader enforces."
+          },
+          "recordLog": {
+            "type": "boolean",
+            "description": "Set false to opt out of the auto-appended HSO Record Log tab (SOP §6). Defaults to appended."
+          },
+          "formDescription": {
+            "type": "string",
+            "description": "Layout rationale recorded in the form Description (spec traceability)."
+          },
+          "header": { "$ref": "#/$defs/header" },
+          "tabs": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "$ref": "#/$defs/tab" },
+            "description": "Full form layout = the BuildForm LayoutSpec. Required for Main forms."
+          }
+        },
+        "if": { "properties": { "type": { "const": "Main" } }, "required": ["type"] },
+        "then": { "required": ["layoutPattern", "tabs"] }
+      }
+    },
+    "views": {
+      "type": "array",
+      "description": "Public views per table. Declare `columns` (the visible column set, in order) so the grader diffs the built view against the spec instead of only counting to a floor.",
+      "items": {
+        "type": "object",
+        "required": ["table", "name"],
+        "properties": {
+          "table": { "type": "string", "minLength": 1 },
+          "name": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "enum": ["PublicView", "Lookup", "QuickFind", "Associated"], "description": "View type. A lookup view must be 'Lookup' (the executor updates the table's existing querytype=64 lookup view, not a new Public view); default is PublicView." },
+          "columns": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "description": "Visible columns by logical name, in display order — the grader diffs the built view's layoutxml cells against this set."
+          },
+          "isDefault": { "type": "boolean", "description": "Whether this is the table's default public view (e.g. the shipped 'Active <x>')." },
+          "activeFilter": { "type": "boolean", "description": "True when the view must filter statecode=0 (any 'Active *' view)." },
+          "floorMin": { "type": "integer" },
+          "floorMax": { "type": "integer" }
+        }
+      }
+    },
+    "relationships": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["parent", "child", "lookupOnChild"],
+        "properties": {
+          "parent": { "type": "string", "minLength": 1 },
+          "child": { "type": "string", "minLength": 1 },
+          "lookupOnChild": { "type": "string", "minLength": 1, "description": "Lookup logical name on the CHILD (side-count rule)." },
+          "cascadeDelete": { "enum": ["RemoveLink", "Cascade", "Restrict"] },
+          "ownedBySlice": { "type": "string", "minLength": 1, "description": "Slice id that builds the lookup." },
+          "mappings": {
+            "type": "array",
+            "description": "Optional attribute mappings (opt-in; no defaults). Fields auto-populated on the CHILD when it is created from the PARENT's subgrid (+New) — fires only on create-from-parent, not on import or direct create. The parent lookup is always set automatically and need not be listed.",
+            "items": {
+              "type": "object",
+              "required": ["source", "target"],
+              "properties": {
+                "source": { "type": "string", "minLength": 1, "description": "PARENT column logical name to copy from." },
+                "target": { "type": "string", "minLength": 1, "description": "CHILD column logical name to copy to (must be type-compatible with source)." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "slices": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "mode", "owner", "blocked_by", "touches", "acceptance"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "type": { "enum": ["capability", "entity", "extension", "foundation", "assembly", "ui-invocation", "design"] },
+          "mode": {
+            "enum": ["AFK", "HITL"],
+            "description": "HITL is legal ONLY on a `design` slice (an architect-owned decision node), and every design slice is HITL — build slices are AFK by definition. Design nodes are settled at spec approval (the grill gate): a SIGNED spec carries zero HITL slices, because approval IS the authorization for every slice. Validate-SpecJson enforces HITL⇔design always, and -Signed refuses any remaining HITL/design slice (E2E round-3, the HITL/OQ episode)."
+          },
+          "owner": { "enum": ["architect", "executor"] },
+          "blocked_by": { "type": "array", "items": { "type": "string" } },
+          "touches": { "type": "string", "minLength": 1 },
+          "spec_ref": { "type": "string" },
+          "preconditions": {
+            "type": "array",
+            "description": "Environment preconditions this slice's build/acceptance needs that Dataverse metadata alone does not provide — a Power Pages site, a deployed plugin package, a connection reference, an environment variable value. The delivery pipeline probes every declared precondition at Stage 0 (preflight) and halts with a clear ask BEFORE any slice builds; a slice that would otherwise discover the gap mid-Stage-1 (round-3 s14: no Power Pages site in the target env) declares it here. Validate-SpecJson REQUIRES a `power-pages-site` precondition on any slice whose touches name a portal / Power Pages surface.",
+            "items": {
+              "type": "object",
+              "required": ["kind", "detail"],
+              "properties": {
+                "kind": { "type": "string", "enum": ["power-pages-site", "plugin-package", "connection-reference", "environment-variable", "app-module", "other"], "description": "What must exist. power-pages-site = a provisioned Power Pages site in the target env (probe: powerpagesites / adx_websites); plugin-package = a deployed pluginpackage; connection-reference / environment-variable = the named record with a value; app-module = an existing app (extend targets); other = free-form, `probe` mandatory." },
+                "detail": { "type": "string", "minLength": 1, "description": "What exactly must exist (site name / package name / reference logical name / variable schema name)." },
+                "probe": { "type": "string", "description": "How Stage 0 checks it (an entity-set query or command). Required when kind is `other`; defaults per kind otherwise." },
+                "askIfMissing": { "type": "string", "description": "The human action the pipeline reports when the probe fails (e.g. 'provision the Power Pages site <name> in <env> before dispatch')." }
+              }
+            }
+          },
+          "budgetAccepted": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Records the architect's decision to keep a slice whole after Validate-SpecJson flagged it over the rule-9 context budget (structural caps: one heavy concern per slice; estimate is a tripwire, not truth). The value is the REASON the slice must not be split (e.g. 'single plugin assembly - cannot split further; nothing else rides in it'). Like an Open-Question disposition: silence is not a valid state - a flagged slice without this field fails the -Signed Stage-0 gate. Omit on unflagged slices; a stale entry on an unflagged slice draws an advisory."
+          },
+          "fr_refs": {
+            "type": "array",
+            "items": { "type": "string", "pattern": "^FR-" },
+            "description": "Functional-requirement ids from the brief this slice implements (e.g. \"FR-1\"). Resolved to work items through the brief's ADO Tracking map; the delivery pipeline's attribution claims are built from this chain. Optional — omit when the engagement has no FR/ADO tracking."
+          },
+          "acceptance": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Env-validated acceptance for THIS slice — the per-slice review gate checks the built slice against it."
+          },
+          "adoProjection": {
+            "type": "object",
+            "description": "ADO Build Management projection (ADR 0048) — derived at spec-authoring time so the grill gate reviews it with the DAG. 1:1 slice→work-item, never split a slice to fit the type taxonomy. Omit when the engagement does not track build work items.",
+            "required": ["buildType"],
+            "additionalProperties": false,
+            "properties": {
+              "buildType": {
+                "enum": ["Data Migration", "Integration", "Workflow", "Report", "Security role", "Extension", "Setup", "none"],
+                "description": "Deterministic precedence over the slice's touches: Data Migration › Integration › Workflow (cloud flow) › Report (incl. dashboards) › Security role › Extension default (Extension covers maker-portal configuration as well as code). Always \"none\" for design slices."
+              },
+              "relatedTargets": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Optional-Related link targets per build-type lineage (template-owner ruling 2026-07-22): FR ids (resolved to Requirement work items via the brief's ADO Tracking map) for Extension-class items; BPC process/process-area ProcessSequenceIds for Data Migration-class items."
+              },
+              "workItemId": {
+                "type": "integer",
+                "description": "The created Build Management work item id — assigned by the pipeline's grill-approval batch-create (ADR 0048 choreography), not by the architect."
+              }
+            }
+          }
+        }
+      }
+    },
+    "assemblies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["artifact", "writerSlice", "addsSubgrid"],
+        "properties": {
+          "artifact": { "type": "string", "minLength": 1 },
+          "parentForm": { "type": "string" },
+          "writerSlice": { "type": "string", "minLength": 1, "description": "The single-writer slice id." },
+          "addsSubgrid": { "type": "boolean" },
+          "subgridTarget": { "type": "string", "description": "Child table the subgrid surfaces." }
+        }
+      }
+    },
+    "sampleData": {
+      "type": "object",
+      "required": ["inScope"],
+      "properties": {
+        "inScope": { "type": "boolean" },
+        "minRecords": { "type": "integer", "minimum": 0 },
+        "writerSlice": { "type": "string" },
+        "tables": { "type": "array", "items": { "type": "string" } }
+      },
+      "if": { "properties": { "inScope": { "const": true } } },
+      "then": {
+        "required": ["minRecords", "writerSlice"],
+        "properties": {
+          "minRecords": { "minimum": 1 },
+          "writerSlice": { "minLength": 1 }
+        }
+      }
+    },
+    "choices": {
+      "type": "array",
+      "description": "Global option sets as a declared contract: the executor renders the exact options (label, value, optional color) and the grader diffs the built set against this. Omit `value` to auto-generate it.",
+      "items": {
+        "type": "object",
+        "required": ["name", "options"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "description": "Global choice logical name (publisher-prefixed)." },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["label"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1 },
+                "value": { "type": "integer", "description": "Explicit option value; omit to auto-generate in the publisher range." },
+                "color": { "type": "string", "pattern": "^#?[0-9a-fA-F]{6}$", "description": "Option color as #RRGGBB." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "statusReasons": {
+      "type": "array",
+      "description": "Declared statuscode lifecycle per table: the full set of status reasons mapped to state (0=Active, 1=Inactive) with the default-active value flagged. The executor renders the whole lifecycle (every value + the default) and the grader diffs it — closing the weak-tier 'stops at the shipped 2-value default' gap.",
+      "items": {
+        "type": "object",
+        "required": ["table", "options"],
+        "properties": {
+          "table": { "type": "string", "minLength": 1 },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["label", "state"],
+              "properties": {
+                "label": { "type": "string", "minLength": 1 },
+                "state": { "type": "integer", "enum": [0, 1], "description": "0 = Active, 1 = Inactive." },
+                "value": { "type": "integer", "description": "Explicit statuscode value; omit to auto-generate." },
+                "default": { "type": "boolean", "description": "Marks the single default-active statuscode (exactly one option should set this)." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "dashboards": {
+      "type": "array",
+      "description": "Declared dashboards as a reachability contract. 'Built' is not 'reachable': a dashboard created, published, and registered as an app component is still invisible if no sitemap node points at it (the §1 gap that shipped three invisible dashboards). Every dashboard a persona is meant to see MUST declare how it is surfaced.",
+      "items": {
+        "type": "object",
+        "required": ["name", "surfacedVia"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "description": "Dashboard display/logical name." },
+          "ownedBySlice": { "type": "string", "description": "Slice id that builds the dashboard." },
+          "surfacedVia": { "type": "string", "minLength": 1, "description": "How a persona reaches it: the id of a dashboard subarea in app.areas[].groups[].subAreas[] (one whose `dashboard` opens this), OR 'unsurfaced: <reason>' to deliberately record a non-navigable dashboard with its justification. A bare table name or empty string is not acceptable." }
+        }
+      }
+    },
+    "customApis": {
+      "type": "array",
+      "description": "Declared Custom APIs whose INVOCATION SURFACE is part of the contract. The API's server behavior is designed in the markdown spec/SOP; this array exists so the design declares HOW a user invokes each user-facing API. A Custom API with a runtime invoker (or none) but no command surface is a server operation no user can reach — the §10 gap that shipped six user-facing operations with zero buttons and zero web resources. Per HSO ruling (2026-06-13), executeprivilegename is intentionally NOT modeled here (table privileges govern; absence is not a finding).",
+      "items": {
+        "type": "object",
+        "required": ["name", "userInvocable"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "description": "Custom API uniquename." },
+          "userInvocable": { "type": "boolean", "description": "True when a human persona is meant to trigger this API directly (commit/correct an amendment, submit a memo, act on an approval step, preview/apply a reassignment). False for APIs invoked only by flows, admin scripts, or other code." },
+          "invoker": { "type": "string", "description": "For a non-user-invocable API, the runtime caller (e.g. 'flow: hso_OnApproveStep', 'admin script', 'plugin') — records that the absent UI is intentional, not a gap." },
+          "commandSurface": {
+            "type": "object",
+            "description": "REQUIRED when userInvocable is true: exactly how the persona invokes the API. Absence on a user-invocable API IS the §10 finding.",
+            "required": ["location", "callingScript", "ownedBySlice"],
+            "properties": {
+              "location": { "type": "string", "enum": ["FormCommandBar", "MainGrid", "SubGrid"], "description": "Where the command appears (modern command / appaction location 0/1/2). Authoring recipe: hso-dataverse-ui-config references/appaction-command-registration.md (SubGrid is flagged UNPROVEN there)." },
+              "label": { "type": "string", "description": "Button label the persona sees." },
+              "visibility": { "type": "string", "description": "Visibility / enable rule — Power Fx binding or a precise description (e.g. 'enabled only when statuscode = Draft')." },
+              "callingScript": { "type": "string", "minLength": 1, "description": "Web resource + JS function that calls the API — the form-script half (hso-formscript-development). Naming the script forces it to actually be written, not just designed." },
+              "ownedBySlice": { "type": "string", "minLength": 1, "description": "The UI-invocation slice that registers the command and deploys the web resource (the slice type the §10 lesson adds)." }
+            }
+          }
+        },
+        "if": { "properties": { "userInvocable": { "const": true } }, "required": ["userInvocable"] },
+        "then": { "required": ["commandSurface"] }
+      }
+    },
+    "app": {
+      "type": "object",
+      "description": "Model-driven app sitemap as a declared contract. The executor renders this (BuildSiteMap — one PATCH + publish + read-back) and the grader diffs the built sitemap against it. Areas -> Groups -> SubAreas, in declared order.",
+      "properties": {
+        "mode": { "type": "string", "enum": ["create", "extend"], "description": "create = build a NEW app from this definition (BuildSiteMap self-creates it; default). extend = add to an EXISTING app by its uniqueName (the app must already exist) — required for non-copyable OOB apps like the Customer Service workspace, which must be extended in place, not recreated. See the app-module SOP." },
+        "uniqueName": { "type": "string", "description": "App module unique name. For mode=extend this MUST be the existing/OOB app's unique name (the extend target)." },
+        "title": { "type": "string" },
+        "unsurfacedTables": {
+          "type": "array",
+          "description": "Publisher-owned tables this spec declares (newTables[] / forms / views) that DELIBERATELY get no sitemap subarea, each with the reason (e.g. an intersect/detail table reached only through its parent's subgrid). Every other publisher-owned table MUST be a subAreas[].entity — Validate-SpecJson fails a spec table that is neither (E2E round-3 F-02: 13 reference tables built and never registered in the app). Unsurfaced means NO NAV NODE, not absent from the app: BuildSiteMap still registers every table listed here as an app component (a subgrid cannot open records of a table the app does not contain), and the reviewer's app-membership sweep covers it. The reason says how a persona reaches it.",
+          "items": {
+            "type": "object",
+            "required": ["table", "reason"],
+            "properties": {
+              "table": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "areas": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "groups"],
+            "properties": {
+              "id": { "type": "string" },
+              "title": { "type": "string", "minLength": 1 },
+              "groups": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["title", "subAreas"],
+                  "properties": {
+                    "id": { "type": "string" },
+                    "title": { "type": "string", "minLength": 1 },
+                    "subAreas": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "object",
+                        "description": "A sitemap nav node. It opens EXACTLY ONE target: a table (entity), a dashboard, or a raw URL. A dashboard subarea is how a built dashboard becomes reachable — without one the dashboard is invisible no matter that it exists ('built' is not 'reachable').",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "title": { "type": "string" },
+                          "entity": { "type": "string", "description": "Table logical name this subarea opens." },
+                          "dashboard": { "type": "string", "description": "Dashboard (id or display name) this subarea opens. Classic dashboards render as a Url subarea bound to DefaultDashboard; the executor resolves the binding (hso-dataverse-ui-config Add-SiteMapSubArea -DefaultDashboard)." },
+                          "url": { "type": "string", "description": "Raw URL subarea (alternative to entity/dashboard)." },
+                          "viewId": { "type": "string", "description": "Optional default view (id or name) for the subarea." }
+                        },
+                        "oneOf": [
+                          { "required": ["entity"] },
+                          { "required": ["dashboard"] },
+                          { "required": ["url"] }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

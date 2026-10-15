@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Agent skills manifest",
+  "type": "object",
+  "required": ["version", "skills"],
+  "properties": {
+    "version": { "type": "integer" },
+    "description": { "type": "string" },
+    "sourceRoots": { "type": "object" },
+    "targets": { "type": "object" },
+    "roundTripToShared": { "type": "object" },
+    "defaultTargets": { "type": "array", "items": { "type": "string" } },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "scope", "ported"],
+        "properties": {
+          "name":   { "type": "string" },
+          "scope":  { "type": "string", "enum": ["core", "project", "drop"] },
+          "group":  { "type": ["string", "null"] },
+          "ported": { "type": "boolean", "description": "true = folder exists on disk and is fanned out by sync.ps1; false = catalogued for a later pull (or, for scope=drop, recorded as removed)." },
+          "source": { "type": "string", "description": "Origin repo(s): HINT | shared | HINT+shared | upstream | template-example." },
+          "target": { "type": "array", "items": { "type": "string", "enum": ["claude", "copilot"] } },
+          "note":   { "type": "string" }
+        }
+      }
+    }
+  }
+}

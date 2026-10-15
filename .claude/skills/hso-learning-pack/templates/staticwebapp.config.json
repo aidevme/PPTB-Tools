@@ -1,0 +1,35 @@
+{
+  "routes": [
+    {
+      "route": "/scripts/*",
+      "statusCode": 404
+    },
+    {
+      "route": "/*.md",
+      "statusCode": 404
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/screens/*", "/screens-onedigital/*", "/*.{pptx,docx,pdf,mp4,webm,png,svg,ico,css,js}"]
+  },
+  "responseOverrides": {
+    "404": {
+      "rewrite": "/index.html",
+      "statusCode": 200
+    }
+  },
+  "globalHeaders": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Cache-Control": "public, max-age=300"
+  },
+  "mimeTypes": {
+    ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ".mp4":  "video/mp4",
+    ".webm": "video/webm",
+    ".pdf":  "application/pdf"
+  }
+}

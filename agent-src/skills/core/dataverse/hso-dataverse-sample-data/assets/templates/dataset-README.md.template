@@ -1,0 +1,42 @@
+# __DATASET__ sample dataset
+
+> Scenario description - what this dataset sets up and what it lets you demo / test.
+> Approximate record counts per table. No client data: use generic / Contoso names.
+
+## Tables (dependency order)
+
+| # | CSV | Table | Records | Notes |
+|---|-----|-------|---------|-------|
+| 01 | `01_ContosoAccounts.csv` | `hso_contosoaccount` | n | parents |
+| 02 | `02_ContosoContracts.csv` | `hso_contosocontract` | n | children -> accounts |
+
+## Run
+
+```powershell
+# Seed (idempotent - safe to re-run)
+.\Import-__DATASET__.ps1 -EnvironmentUrl https://yourorg.crm.dynamics.com/ -Interactive
+
+# Validate without writing
+.\Import-__DATASET__.ps1 -EnvironmentUrl https://yourorg.crm.dynamics.com/ -Interactive -DryRun
+
+# Capture current state back into the CSVs (deterministic)
+.\Export-__DATASET__.ps1 -EnvironmentUrl https://yourorg.crm.dynamics.com/ -Interactive
+
+# Tear down (reverse order; safe to re-run)
+.\Remove-__DATASET__.ps1 -EnvironmentUrl https://yourorg.crm.dynamics.com/ -Interactive
+```
+
+Authentication resolves in this order: `-AccessToken` -> `-Interactive` -> service principal
+(`-ClientId`/`-ClientSecret` or `.claude/auth-settings.json`). Shared helpers come from the
+repo-root `.scripts/Common-Functions.ps1` (provisioned by `hso-dataverse-init-repo`).
+
+## Intentional inconsistencies
+
+> List any records that deliberately look "wrong" to exercise a code path (e.g. out-of-order
+> logs, deliberately-stale rows). The validation workflow must treat these as PASS, not ISSUE.
+> Remove this section if there are none.
+
+## Authority
+
+Built per [`sample-data-validation-workflow.md`](../../../shared/dv/agent/wiki/sop/sample-data/sample-data-validation-workflow.md).
+Never seed sample data into production.

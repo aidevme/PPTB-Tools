@@ -1,0 +1,60 @@
+[
+  {
+    "id": "statement-intake",
+    "group": "Cash Hub",
+    "title": "Statement Intake & Bulk Import",
+    "subtitle": "Receive every carrier statement, fingerprint it, queue it for processing — single file or hundreds at once.",
+    "hero_screenshot": "screens-onedigital/cashhub-statements-list.png",
+    "what_it_does": "Statement Intake is the front door for everything Cash Hub does. Files arrive — Excel, CSV, or PDF — and the system fingerprints each one (a hash of its structural shape), matches it to a saved template if one exists, and queues it for processing.\n\nTwo flavors live side by side: **single-file upload** for ad-hoc statements during the month, and **bulk import** for the month-end batch where the accounting team drops a folder of hundreds of files and walks away. Both go through the same downstream pipeline.",
+    "the_problem": "Brokerages receive commission statements from **200+ carriers** every month, each in its own format. Today this is manual: an analyst opens each one and re-keys the data into the GL. New carriers add days of re-keying work. Errors compound silently; the close slips by hours per missed match.\n\nThe industry pain point Jim B captured at [097:48 of the transcript]: *\"It's not unusual for them to get 200 pages of PDF statements and a check of 4 million.\"* That's a single carrier, one month. Multiply by 200 carriers and you have the workload that *needs* automation.",
+    "what_user_does": [
+      "**Single file:** drop a PDF/Excel/CSV on the upload zone, optionally pick the template manually, hit Upload. System creates a `StatementHeader` shell + saves the file to blob storage.",
+      "**Bulk:** open `/StatementsBulkImport`, drag a folder, watch the per-file fingerprint match. Files that fingerprint to an existing template auto-progress; files that don't fall into 'Awaiting Template' for follow-up.",
+      "**Track progress** on the Statements list (`/Statements`) — stage chips at the top show how many are Ingesting / Processed / Deposit Matched / Cash Matching / Approved.",
+      "**Handle failures** — anything that fails fingerprint matching needs a super user to author or assign a template in Mapping Studio."
+    ],
+    "key_screens": [
+      { "id": "cashhub-statements-list", "title": "Statements list (the queue)" },
+      { "id": "cashhub-statements-bulk", "title": "Bulk import" },
+      { "id": "cashhub-statement-detail-dashboard", "title": "Statement Detail Dashboard" }
+    ],
+    "business_value": "Onboarding a new carrier statement format drops from **2 days of analyst work to minutes** once the template is built. Month-end bulk-import turns a multi-day, error-prone process into an unattended overnight pipeline. Bottom line: the brokerage's commission intake scales with carrier count, not with headcount.",
+    "technical_anchors": "**Entities:** `StatementHeader`, `StatementFileFingerprint`, `DocumentMetadata`.\n\n**Pages:** `Components/Pages/Statements/StatementList.razor`, `StatementsBulkImport.razor`.\n\n**Commands:** `InitiateStatementImportCommandHandler`, `LoadStatementFromFileCommandHandler`, `ProcessStatementImportCommandHandler`, `BackfillFingerprintsCommandHandler`, `AssignStatementUserCommandHandler`, `AssignTemplateToStatementCommandHandler`.\n\n**Queries:** `GetStatementHeadersForGridQueryHandler`, `GetStatementHeadersByProcessingIdQueryHandler`, `GetMaxProcessingIdQueryHandler`, `SuggestTemplatesFromFileQueryHandler`.\n\n**Services / pipeline:** `StatementHeaderCreationService`, `StatementBackgroundProcessingService`, `StatementIngestionPipelineService`, `StatementProcessingOrchestrator`.\n\n**Azure Function (background):** `ProcessStatementBulkImport` (in `Unite.CashHubAutomation`).\n\n**Policies:** `Statement.CanView`, `CanUpload`, `CanDelete`, `CanConfigureImport`.",
+    "related_features": [
+      { "id": "mapping-studio", "title": "Mapping Studio (AI template authoring)" },
+      { "id": "statement-detail-workflow", "title": "Statement Detail workflow (tabs)" }
+    ]
+  },
+  {
+    "id": "mapping-studio",
+    "group": "Cash Hub",
+    "title": "Mapping Studio (AI Template Authoring)",
+    "subtitle": "Google Gemini proposes how each carrier's statement maps to canonical fields. A human reviewer approves. New format onboarded in minutes.",
+    "hero_screenshot": "screens-onedigital/cashhub-mapping-studio-edit-template.png",
+    "what_it_does": "Mapping Studio (titled *Statement Studio* in the UI) is the screen where templates get authored, refined, and re-validated. It takes a statement in any format and uses **Google Gemini** to propose how each column maps into the canonical schema (Customer, Product, Gross Amount, Billing Date, Provider, etc.). A human reviewer accepts or overrides each suggestion; the resulting template handles every subsequent statement from that carrier automatically.\n\nThree entry points, same screen:\n\n- **`/MappingStudio`** — empty drop-zone; start a brand-new template\n- **`/MappingStudio/{TemplateId}`** — open an existing template for refinement (the hero shot above shows Humana Excel 2 with its full section sidebar + source preview)\n- **`/MappingStudio/statement/{StatementId}`** — Review mode anchored to a specific statement, with the PDF + extracted grid side-by-side",
+    "the_problem": "Without templates, every statement is a manual analyst task forever. The industry's existing solutions either (a) require a rules engineer to author per-carrier mappings (slow, expensive) or (b) tolerate 40% match rates and assign humans to the rest.\n\nMapping Studio's AI assist isn't decorative — it's the productivity multiplier. Gemini's suggestions cover the *easy* mappings (carrier column 'GROSS_COMM' → canonical 'Gross Amount') so the reviewer can focus on the *hard* ones (carrier code 'PREM' = canonical 'Premium' for benefits but 'Premium Adjustment' for P&C).",
+    "what_user_does": [
+      "**Author a new template:** open `/MappingStudio`, name + describe, drop a sample carrier file, walk the wizard (Upload → Show File → Map Fields → Test Extraction → Save). Accept the AI's column suggestions; override anything wrong; preview-extract; save.",
+      "**Refine an existing template:** open via the template list or `/MappingStudio/{TemplateId}`. Section sidebar lets you re-map any concept independently (Mapping, Value Mapping Suggestions, Plan Type, Billing Date, Comparison, Extra Fields, More Options).",
+      "**Validate on a real statement:** from any StatementDetails → Statement Review tab → 'Open in Statement Studio' — see the PDF on the left, the extracted grid on the right, fix what extracted wrong.",
+      "**Approve template:** flip from InProgress → Active when satisfied. Activates fingerprint matching for future statements from this carrier."
+    ],
+    "key_screens": [
+      { "id": "cashhub-mapping-studio", "title": "Mapping Studio (edit-template view)" },
+      { "id": "cashhub-statement-templates-active", "title": "Active templates" },
+      { "id": "cashhub-statement-detail-statement-review", "title": "Statement Review tab (Mapping Studio Route 3)" }
+    ],
+    "business_value": "The single most differentiated capability in ERP Unite. Carrier onboarding cost drops from **2 days per format → 30 minutes**. Carrier format changes mid-year stop blocking the close — a super user refreshes the template and the next month's statements flow through. The AI suggestion path means template authoring becomes a reviewable task instead of a developer task — the business owns its own templates.",
+    "technical_anchors": "**AI:** `IAIModelGoogleService` (Gemini wrapper); every inference logged by `IAITraceService` (prompt + response + latency + tokens).\n\n**OCR:** `OcrRegionCommandHandler` for PDF region-extraction.\n\n**Entities:** `StatementTemplate`, `StatementTemplateColumn`, `StatementTemplateColumnAIReference`, `StatementMapping`, `StatementFilters`.\n\n**Pages:** `Components/Pages/Statements/MappingStudio.razor` + a dozen shared components (`UploadStep`, `ShowFileStep`, `MapFieldsStep`, `ExpressionBuilder`, `FieldMappingRow`, `FilePreview`, `NLPromptPanel`, `ValueMappingPanel`).\n\n**Command bundle (under `Commands/Statements/MappingStudio/`):** `DetectProviderCommandHandler`, `SuggestColumnMappingsCommandHandler`, `SuggestValueMappingsCommandHandler`, `PreviewExtractionCommandHandler`, `PreviewColumnScriptCommandHandler`, `ExtractWithProvenanceCommandHandler`, `AcceptMappingStudioResultCommandHandler`, `ActivateStatementTemplateCommandHandler`, `GenerateNLPromptScriptCommandHandler`, `SaveColumnMappingsCommandHandler`, `SaveValueMappingsCommandHandler`, `UpdateTemplateAIPromptCommandHandler`.\n\n**Services:** `StatementMappingEnrichmentOrchestrator`, `StatementProvenanceEnrichmentService`, `MappingStudioExcelColumnMappingService`, `MappingStudioPdfFirstPassService`, `MappingStudioStructuredExcelExtractionService`.\n\n**Policy:** `Statement.CanManageTemplates`.",
+    "related_features": [
+      { "id": "statement-intake", "title": "Statement Intake" },
+      { "id": "statement-detail-workflow", "title": "Statement Detail workflow" }
+    ]
+  },
+  {
+    "id": "statement-detail-workflow",
+    "group": "Cash Hub",
+    "title": "Statement Detail Workflow (the 6-Tab Deep Dive)",
+    "subtitle": "Every statement opens into a tabbed work surface: Dashboard / Lines (Original) / Lines / Statement Review / Unmatched / Review & Approve.",
+    "hero_screenshot": "screens-onedigital/cashhub-statement-detail-review-and-approve.png",
+    "what_it_does": "When you open one statement, the page is a 6-tab work surface that takes that single statement from raw-extraction-output all the way to GL-posted. The user stays inside the same statement's context the whole way through — no jumping between screens, no losing your place.\n\n- **Dashboard** — stage stepper, summary stats, action buttons; the orientation screen\n- **Statement Lines (Original)** — immutable raw extraction; audit trail back to the source file\n- **Statement Lines** — transformed rows (after template rules applied); editable per-row\n- **Statement Review** — side-by-side PDF preview + extracted grid + validation chips + Approve Template / Approve Statement buttons\n- **Unmatched** — manual reconciliation surface for cash app lines the matching engine couldn't auto-resolve\n- **Review & Approve** — the closing tab; approve matched lines for GL posting via the AH integration",

@@ -1,0 +1,20 @@
+{
+  "_comment": "Copy this to <repo-root>/.claude/auth-settings.json (gitignored) and fill in your scenario. NEVER commit real secrets. Modes: Interactive | DeviceCode | ServicePrincipal | ManagedIdentity | Pat (ADO only). Leave a section blank to fall back to Interactive.",
+
+  "DataverseAuthMode": "Interactive",
+  "DataverseEnvironmentUrl": "https://yourorg.crm.dynamics.com",
+  "DataverseClientId": "",
+  "DataverseClientSecret": "",
+  "DataverseTenantId": "",
+
+  "AdoAuthMode": "Interactive",
+  "AdoOrgUrl": "https://dev.azure.com/<org>",
+  "AdoPat": "",
+  "AdoClientId": "",
+  "AdoClientSecret": "",
+  "AdoTenantId": "",
+
+  "AtlassianBaseUrl": "https://yourorg.atlassian.net",
+  "AtlassianEmail": "",
+  "AtlassianApiToken": ""
+}

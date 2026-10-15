@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accrual Batches — ERP Unite Screen Guide</title>
+<style>
+  :root {
+    --navy: #00395F; --navy-dark: #00253D; --navy-light: #1A5A8A;
+    --cyan: #079FC3; --cyan-light: #4AB9D4;
+    --teal: #00B294; --red: #F1554B; --yellow: #F2B949;
+    --slate: #44546A; --mute: #737373;
+    --bg: #FAFBFC; --card-bg: #FFFFFF; --border: #E5E9EE;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--navy); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+  .guide-hero { background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%); color: white; padding: 48px 40px 56px; position: relative; overflow: hidden; }
+  .guide-hero::before { content: ''; position: absolute; top: -40%; right: -10%; width: 500px; height: 500px; background: radial-gradient(circle, rgba(7, 159, 195, 0.22) 0%, transparent 65%); pointer-events: none; }
+  .guide-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--cyan) 0%, var(--teal) 50%, var(--cyan) 100%); }
+  .guide-hero-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .breadcrumb { color: var(--cyan-light); font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; }
+  .breadcrumb a { color: var(--cyan-light); text-decoration: none; border-bottom: 1px dotted rgba(74, 185, 212, 0.5); padding-bottom: 2px; }
+  .breadcrumb a:hover { border-color: var(--cyan-light); }
+  .breadcrumb .sep { opacity: 0.5; margin: 0 8px; }
+  .guide-hero h1 { font-size: 44px; font-weight: 400; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 12px; }
+  .guide-hero .subtitle { font-size: 18px; font-weight: 300; color: rgba(255, 255, 255, 0.82); max-width: 720px; }
+  .guide-hero .pill-row { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .pill { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 999px; }
+  .pill-app { background: rgba(7, 159, 195, 0.25); color: white; border: 1px solid rgba(7, 159, 195, 0.55); }
+  .pill-route { background: rgba(0, 0, 0, 0.25); color: var(--cyan-light); border: 1px solid rgba(74, 185, 212, 0.35); font-family: 'Cascadia Code', 'Consolas', monospace; letter-spacing: 0.5px; }
+  main { max-width: 1100px; margin: 0 auto; padding: 48px 40px 80px; }
+  .screenshot-frame { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 14px 36px rgba(0, 57, 95, 0.10); margin-bottom: 48px; overflow: hidden; }
+  .screenshot-frame img { width: 100%; height: auto; border-radius: 8px; display: block; border: 1px solid var(--border); }
+  .screenshot-caption { display: flex; align-items: center; justify-content: space-between; padding: 14px 6px 4px; font-size: 13px; color: var(--mute); }
+  .screenshot-caption a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+  .screenshot-caption a:hover { color: var(--navy); }
+  section.guide-block { margin-bottom: 36px; }
+  section.guide-block h2 { font-size: 22px; color: var(--navy); font-weight: 600; margin-bottom: 12px; padding-left: 14px; border-left: 4px solid var(--cyan); }
+  section.guide-block p { font-size: 16px; color: #1F2D3D; line-height: 1.7; margin-bottom: 12px; }
+  section.guide-block ul { margin-left: 1.4em; margin-bottom: 8px; }
+  section.guide-block ul li { margin-bottom: 6px; font-size: 15.5px; color: #1F2D3D; }
+  section.guide-block strong { color: var(--navy); font-weight: 600; }
+  section.guide-block em { color: var(--slate); }
+  .vocab-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .vocab-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; border-left: 3px solid var(--cyan); }
+  .vocab-term { font-weight: 600; color: var(--navy); font-size: 14.5px; }
+  .vocab-defn { color: var(--slate); font-size: 13.5px; margin-top: 4px; line-height: 1.5; }
+  .qa-list { list-style: none; margin-left: 0 !important; }
+  .qa-list li { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 14px 18px; margin-bottom: 10px; border-left: 3px solid var(--yellow); }
+  .qa-q { font-weight: 600; color: var(--navy); font-size: 15px; margin-bottom: 6px; display: block; }
+  .qa-a { color: var(--slate); font-size: 14px; line-height: 1.6; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; }
+  .related-card { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; text-decoration: none; color: var(--navy); font-size: 14px; font-weight: 600; transition: border-color 0.15s ease, background 0.15s ease; }
+  .related-card:hover { border-color: var(--cyan); background: #F0F6FB; }
+  .data-note { background: rgba(242, 185, 73, 0.13); border-left: 4px solid var(--yellow); padding: 14px 20px; border-radius: 0 8px 8px 0; font-size: 14px; color: var(--slate); margin-top: 16px; }
+  .data-note strong { color: var(--navy); }
+  /* Guide-block inline elements rendered from markdown */
+  section.guide-block code { background: #F4F7FA; color: var(--navy); padding: 1px 6px; border-radius: 4px; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.92em; border: 1px solid #DCE3EB; }
+  section.guide-block a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(7, 159, 195, 0.3); transition: border-color 0.15s ease; }
+  section.guide-block a:hover { color: var(--navy); border-color: var(--navy); }
+  section.guide-block img { display: block; max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); margin: 16px auto; box-shadow: 0 6px 18px rgba(0, 57, 95, 0.08); }
+  section.guide-block p > img { margin-top: 12px; margin-bottom: 12px; }
+  section.guide-block h3 { font-size: 18px; color: var(--navy); margin-top: 24px; margin-bottom: 10px; font-weight: 600; }
+  section.guide-block ol { margin-left: 1.4em; margin-bottom: 8px; }
+  section.guide-block ol li { margin-bottom: 6px; font-size: 15.5px; color: #1F2D3D; }
+  section.guide-block strong { color: var(--navy); font-weight: 600; }
+  section.guide-block em { color: var(--slate); }
+  /* Prev / Next nav */
+  .guide-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; margin: 24px 0; }
+  .guide-nav-top { margin-top: 0; margin-bottom: 36px; }
+  .guide-nav-bottom { margin-top: 48px; margin-bottom: 0; }
+  .guide-nav-btn { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; text-decoration: none; color: var(--navy); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease; min-width: 0; }
+  .guide-nav-btn:hover:not(.disabled) { border-color: var(--cyan); background: #F0F6FB; transform: translateY(-1px); }
+  .guide-nav-btn.next { text-align: right; }
+  .guide-nav-btn.disabled { opacity: 0.45; cursor: default; }
+  .guide-nav-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); }
+  .guide-nav-btn.disabled .guide-nav-label { color: var(--mute); }
+  .guide-nav-title { font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .guide-nav-pos { display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; text-decoration: none; color: var(--slate); font-size: 12px; letter-spacing: 0.5px; white-space: nowrap; transition: border-color 0.15s ease, color 0.15s ease; }
+  .guide-nav-pos strong { color: var(--navy); font-size: 17px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .guide-nav-pos:hover { border-color: var(--cyan); color: var(--cyan); }
+  @media (max-width: 720px) { .guide-nav { grid-template-columns: 1fr; } .guide-nav-pos { order: -1; } .guide-nav-btn.next { text-align: left; } }
+  footer { background: var(--navy-dark); color: rgba(255, 255, 255, 0.7); padding: 24px 40px; text-align: center; font-size: 13px; }
+  footer a { color: var(--cyan-light); text-decoration: none; border-bottom: 1px dotted rgba(74, 185, 212, 0.5); }
+  footer a:hover { color: white; border-color: white; }
+  @media (max-width: 720px) { .guide-hero { padding: 36px 22px 44px; } .guide-hero h1 { font-size: 32px; } main { padding: 32px 22px 56px; } }
+</style>
+</head>
+<body>
+
+<header class="guide-hero">
+  <div class="guide-hero-inner">
+    <div class="breadcrumb">
+      <a href="index.html">← ERP Unite Learning Pack</a>
+      <span class="sep">/</span>
+      <a href="screens-library.html">Screens library</a>
+    </div>
+    <h1>Accrual Batches</h1>
+    <p class="subtitle">Cost-center × month accrual snapshots with workflow approval</p>
+    <div class="pill-row">
+      <span class="pill pill-app">CashHub</span>
+      <span class="pill pill-route">/Accruals/Batches</span>
+    </div>
+  </div>
+</header>
+
+<main>
+
+<nav class="guide-nav guide-nav-top"><a class="guide-nav-btn prev" href="screen-cashhub-accruals-preview.html"><span class="guide-nav-label">← Previous</span><span class="guide-nav-title">Accruals Preview</span></a><a class="guide-nav-pos" href="screens-library.html"><strong>16</strong> / 51 · all screens</a><a class="guide-nav-btn next" href="screen-cashhub-accruals-config.html"><span class="guide-nav-label">Next →</span><span class="guide-nav-title">Accruals Configuration</span></a></nav>
+  <div class="screenshot-frame">
+    <img loading="lazy" src="screens-onedigital/cashhub-accruals-batches.png" alt="Accrual Batches screen">
+    <div class="screenshot-caption">
+      <span>Captured 2026-05-21</span>
+      <a href="screens-onedigital/cashhub-accruals-batches.png" target="_blank" rel="noopener">Open full-size →</a>
+    </div>
+  </div>
+
+  <section class="guide-block">
+    <h2>What this screen is</h2>
+    <p>The committable side of accruals: take what's in Preview, freeze it as a batch, send through approval, and post the resulting journal. Each batch is one cost center × one month.</p>
+<p>This is the screen where the controller actually performs the close for accruals.</p>
+  </section>
+
+  <section class="guide-block">
+    <h2>What you see on screen</h2>
+    <ul><li><strong>Grid:</strong> Batch Name, Cost Center, Year-Month, Workflow Status (NotSubmitted/Submitted/Approved), Lines, Total, Submitted By, Submitted Date</li><li><strong>Actions:</strong> Create Batch, Submit, Approve, Reject, Reset</li><li><strong>Status pills</strong> color-coded for at-a-glance status</li><li><strong>Drill-in:</strong> opens the Accrual Batch Lines screen for per-line work</li></ul>
+  </section>
+
+  <section class="guide-block">
+    <h2>Where the data comes from</h2>
+    <ul><li><strong>Entity:</strong> <code>AccrualBatch</code> (with workflow status).</li><li><strong>Query handlers:</strong> <code>GetAllAccrualBatchesQueryHandler</code>, <code>GetAccrualBatchHeaderQueryHandler</code>, <code>GetPagedAccrualGroupsQueryHandler</code>.</li><li><strong>Commands (shared library):</strong> <code>CreateAccrualBatchCommandHandler</code>, <code>TriggerAccrualBatchProcessingCommandHandler</code>, <code>UpdateAccrualBatchProcessingStatusCommandHandler</code>.</li><li><strong>Outbound integration:</strong> <code>AccrualsOverrideToAHHandoff</code> / <code>Polling</code> (<code>Unite.CashHub-AH-DataSync.App</code>) — approved batches → AH journals.</li><li><strong>Automation:</strong> <code>ProcessAccrualsBatchByCostCenter</code> Azure Function runs nightly batches.</li></ul>
+  </section>
+
+  <section class="guide-block">
+    <h2>Business workflow context</h2>
+    <p>Typical close cadence: nightly automation creates draft batches → controller reviews + adjusts via Accrual Batch Lines → submits → manager approves → journal posted to AH. The whole cycle is 1-2 days in a well-run close.</p>
+  </section>
+
+  <section class="guide-block">
+    <h2>Vocabulary</h2>
+    <div class="vocab-grid"><div class="vocab-card"><div class="vocab-term">Workflow status</div><div class="vocab-defn">Where the batch sits in its approval lifecycle: NotSubmitted → Submitted → Approved (or Rejected → back to NotSubmitted).</div></div><div class="vocab-card"><div class="vocab-term">Batch processing status</div><div class="vocab-defn">Separate dimension: the technical state of the batch's computation. InProgress → Complete → Failed.</div></div></div>
+  </section>
+
+  <section class="guide-block">
+    <h2>Customer Q&amp;A hooks</h2>
+    <ul class="qa-list"><li><span class="qa-q">Can two cost centers be in one batch?</span><span class="qa-a">No — strict 1:1. Each batch is one cost center × one year-month. Makes ownership and approval cleanest.</span></li><li><span class="qa-q">What happens if a batch fails AH posting?</span><span class="qa-a">The AccountingHubSendStatus flips to Error. The integration team investigates from the ImportsStatistics audit log.</span></li></ul>
+  </section>
+
+  <section class="guide-block">
+    <h2>Related screens</h2>
+    <div class="related-grid"><a class="related-card" href="screen-cashhub-accruals-preview.html">Accruals Preview</a><a class="related-card" href="screen-cashhub-accruals-config.html">Accruals Configuration</a><a class="related-card" href="screen-cashhub-collections-cases.html">Collections Cases</a></div>
+  </section>
+
+<nav class="guide-nav guide-nav-bottom"><a class="guide-nav-btn prev" href="screen-cashhub-accruals-preview.html"><span class="guide-nav-label">← Previous</span><span class="guide-nav-title">Accruals Preview</span></a><a class="guide-nav-pos" href="screens-library.html"><strong>16</strong> / 51 · all screens</a><a class="guide-nav-btn next" href="screen-cashhub-accruals-config.html"><span class="guide-nav-label">Next →</span><span class="guide-nav-title">Accruals Configuration</span></a></nav>
+</main>
+
+<footer>
+  Screen guide · part of the <a href="index.html">ERP Unite Learning Pack</a> · <a href="screens-library.html">full screens library</a>
+</footer>
+
+</body>
+</html>

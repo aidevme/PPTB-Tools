@@ -1,0 +1,534 @@
+---
+marp: true
+theme: hso-knowledge
+paginate: true
+size: 16:9
+title: Insurance Brokerage — Industry Primer
+---
+
+<!-- _class: cover -->
+
+# Insurance Brokerage
+
+The industry behind ERP Unite — in plain English.
+
+<div class="byline">Industry primer · how the business actually works · the vocabulary that matters</div>
+
+---
+
+<!-- _class: stat -->
+
+<div class="number">200+ carriers</div>
+
+## one brokerage. all those formats.
+
+A mid-sized brokerage receives commission statements from **two hundred plus carriers** every month. Different formats. Different cadences. Different rules. **This is the world Unite is built for.**
+
+---
+
+# The cast of characters
+
+If you can't name these five players from memory, the rest of the industry won't make sense.
+
+<div class="cols three">
+<div class="card">
+
+### **Carrier**
+The insurance company. Aetna, Cigna, Humana, MetLife. They underwrite the policy and **pay commission** to the brokerage when policies sell or renew.
+
+</div>
+<div class="card">
+
+### **Brokerage**
+The agency. Holds licenses, sells policies, manages relationships. **Earns commission from carriers**; pays a slice to producers.
+
+</div>
+<div class="card">
+
+### **Producer**
+The salesperson. The brokerage's individual licensed agent. **Receives compensation** as their share of commission earned on the policies they sold.
+
+</div>
+</div>
+
+<div class="cols two">
+<div class="card">
+
+### **Customer**
+The end policyholder — could be an employer (in benefits), an individual (in P&amp;C), or a business.
+
+</div>
+<div class="card">
+
+### **General Agency (MGA)**
+A *wholesale* layer between carrier and retail brokerage. Common when a carrier doesn't want to deal directly with hundreds of small brokerages. Think "master CSP partner."
+
+</div>
+</div>
+
+---
+
+<!-- _class: section -->
+
+# How the money flows
+
+Three words: carrier pays brokerage; brokerage pays producer.
+
+---
+
+# The two billing models
+
+Insurance commission flows two ways. Brokerages run both, often at the same time.
+
+<div class="cols two">
+<div class="card">
+
+### **Direct billing** (carrier billing)
+The customer pays the **carrier** directly. The carrier sends the brokerage a statement showing what commission it earned. The brokerage never touches the customer's money.
+
+*Most common in benefits.*
+
+</div>
+<div class="card">
+
+### **Agency billing**
+The customer pays the **brokerage**. The brokerage holds the funds in a fiduciary account, pays the carrier its share, keeps the commission.
+
+*Most common in P&amp;C.*
+
+</div>
+</div>
+
+> *"Agency billing — who ages you bill them. Where a carrier billing, a direct billing, you just create a relationship between the carrier and the vendor."*
+> — Jim B, morning session [020:16]
+
+---
+
+# The commission math — typical P&C example
+
+A new $1,000-premium policy, year 1.
+
+- Carrier pays the brokerage **10%** of premium = **$100** commission
+- Brokerage's split with the producer: **50/50** → producer gets **$50**, house keeps **$50**
+- Next year, renewal commission drops: carrier pays **5%** = $50
+- Producer's renewal split drops too: **25%** = $12.50
+
+> *"In this particular case, it's $1,000. Our commission, our revenue is 10%. It's $100. We're playing 50% with the producer. So we paid them 50 out of the hundred. And then everything else is history."*
+> — Jim B [029:28]
+
+*Net: new business pays everyone better. Renewals are how the book sustains itself.*
+
+---
+
+# Splits get layered — quickly
+
+Real life doesn't stop at producer + house. Multiple producers split, referral cuts come off the top, admin fees net out before producer payment.
+
+A $100 commission split through a referral:
+
+- Referral producer takes **10% off the top** (gross): **$10** to them
+- Of what remains ($90), primary producer's plan is **20%**: **$18** to them
+- House keeps **$72**
+- Note: primary did not get $20 — the 20% applies to the **net** after referral, not gross
+
+> *"The overrides are getting paid on, but they don't want to share, but they had to split up. Sort of like, instead of the producer getting 50%, they got 41.38 because that was [the correct split]."*
+> — Jim B, afternoon session [006:04]
+
+*Net: a single policy can have three or four people getting paid — and the order of operations matters.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #00B294 -->
+
+# Producer compensation — the system of record
+
+Plans are agreements. Splits happen on every policy. The system has to track both.
+
+---
+
+# Producer Compensation Plan vs. Split — the distinction
+
+Easy to confuse. Critical to keep straight.
+
+<div class="cols two">
+<div class="card">
+
+### **Producer Compensation Plan (PCP)**
+The *agreement* between a producer and the brokerage. "On new business you get 50%; on renewals you get 25%."
+
+A standing rule. One per producer × product vertical × renewal year.
+
+</div>
+<div class="card">
+
+### **Split (a.k.a. Split Intake / SIF)**
+The *specific allocation* on one policy. "Alan introduced this customer; he gets 25% of my 50%."
+
+A per-deal, per-policy record. Versioned. Approved separately.
+
+</div>
+</div>
+
+> *"Think about the plan as the agreement between the producer and the company, and then the split is on a specific deal."*
+> — Jim B [031:53]
+
+*This split-on-top-of-plan model is what makes producer comp so much more complex than payroll.*
+
+---
+
+# Producer payment cadence — the silent retention risk
+
+A brokerage's producers expect to be paid on schedule. Different carriers, different cadences.
+
+- Some carriers pay **monthly**; some pay **twice monthly** (e.g., 15th and last day)
+- Some carriers **require** the brokerage to pay producers in the same cycle ("when we pay you, you have to pay your producers")
+- After an M&amp;A, acquired producers expect their **historical cadence preserved**
+
+> *"When this was acquired, we have an immediate need: producers must continue receiving payment on the day of the month they're used to. Missing it = they leave."*
+> — Jim B, paraphrased [024:42]
+
+*Net: payment cadence is a customer-success metric, not a back-office detail.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F1554B -->
+
+# Carrier statements — the operational nightmare
+
+Two hundred carriers. Two hundred formats. Two hundred ways to be wrong.
+
+---
+
+# What a statement actually looks like
+
+Statements arrive monthly or quarterly. Format depends entirely on the carrier.
+
+- **PDFs** — most carriers. Often a 200-page bundle with thousands of line items
+- **Excel files** — better, but inconsistent column layouts between carriers
+- **CSVs** — rare and cherished
+- **Web portals** — some carriers expect you to download the statement from their portal
+
+> *"It's not unusual for them to get 200 pages of PDF statements and a check of 4 million."*
+> — Jim B [097:48]
+
+*And the brokerage has to reconcile every single line.*
+
+---
+
+# The reconciliation pain — by the numbers
+
+A real industry benchmark: tools like High Radius (a third-party match tool) achieve about a **60% auto-match rate** on payments-to-customers.
+
+- 60% match: "deemed like a success point" — even the best tools leave 40% manual
+- Customer name mismatches: brokerage uses DBA name; statement uses legal name; an ampersand makes them differ
+- Payment timing: customer pays early or late — $1,000 expected, $0 arrives this month and $2,000 next month
+- Missing payment data: carrier statement lists customers; the bank wire doesn't list them. The brokerage matches manually.
+
+> *"Sometimes we call the customer one thing and they call them something else. So the name on the statement is not the same that we have in our system."*
+> — Jim B [100:09]
+
+*This is the workflow Unite's Mapping Studio + Cash Application together compress from days to minutes.*
+
+---
+
+# The 50-person AP team
+
+How brokerages handle the reconciliation today.
+
+- **50 people** in Accounts Payable doing nothing but statement reconciliation
+- Manual matching of names, amounts, periods
+- Tracking learned corrections in spreadsheets so the next month doesn't repeat the same errors
+- Estimating revenue ahead of carrier actuals (the close can't wait for the statement)
+
+> *"This is where they have 50 people in AP, in AP to go through these here."*
+> — Jim B [097:37]
+
+*The labor cost is the business case. Every percentage point of automation pays back in headcount avoidance or redeployment.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F2B949 -->
+
+# The Wholesale Layer — General Agencies
+
+The "CSP" of insurance. They sit between carrier and retail.
+
+---
+
+# What a General Agency does
+
+GAs are wholesale distributors. They have a direct relationship with the carrier; retail brokerages buy through them.
+
+- **Carrier doesn't want to deal with 5,000 small agencies** — they pick a GA to wholesale through
+- **GA gets an override** (extra commission from the carrier) based on aggregate volume
+- **Retail brokerages pay the GA** their commission, and the GA pays the producers
+- **GAs grow via M&amp;A** — acquire retail brokerages to consolidate volume, get bigger overrides
+
+> *"Think about this as similar in our world is CSP. There are a lot of smaller Microsoft partners that don't have a direct relationship with Microsoft. They go to one of these other master CSP partners. So basically, they're a wholesale product because Microsoft has decided they don't want to deal with these smaller companies."*
+> — Jim B [048:04]
+
+*Same model. Different industry. The mental analogy lands every time.*
+
+---
+
+# The three-tier override flow
+
+When a GA + retail broker + producer all earn from the same policy:
+
+- Carrier pays GA **base commission + override** (the override is the wholesale incentive)
+- GA keeps the override entirely; splits base commission with the retail broker
+- Retail broker then splits their commission with the producer
+- "**Double split**" — both sides have producer payments to manage
+
+> *"The override goes to the GA and the commission is split with the retail brokers. But then the retail brokers, if it's a third party, they care about what they pay the producer."*
+> — Jim B [084:26]
+
+*Net: in GA scenarios, the same dollar gets split twice before reaching the producer.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F1554B -->
+
+# Lines of business — they're not all the same
+
+P&C, employee benefits, wealth & retirement. Each has its own commission math.
+
+---
+
+# Property & Casualty (P&C)
+
+The classic insurance vertical — auto, home, commercial liability.
+
+- Carrier pays a fixed **commission percentage** of premium (e.g., 10%)
+- Single payment cycle: new business pays once, renewals pay annually
+- Revenue recognition is **at policy binding** — when coverage starts, regardless of payment timing
+- Direct billing or agency billing both common
+
+*Net: the simplest vertical. Math is clean. Statement formats are still all over the place.*
+
+---
+
+# Employee Benefits
+
+Health, dental, vision, life, 401(k). The most complex vertical.
+
+- Commission tied to **per-employee, per-month** premium — varies as headcount changes
+- Life events (hire, fire, marriage, divorce, plan change) move the number every month
+- Revenue is **estimated ahead** because actual carrier remittance lags 2-3 months
+- COBRA / continuation costs deduct from commission — third-party costs net against producer pay
+- Open enrollment timing rarely aligns with policy renewal — more estimating
+
+> *"Let's say I have 100 employees and I get $1, that's $100. Then I receive the next statement and I get $90 — is this a short payment, or is the actual count down?"*
+> — Jim B, paraphrased [098:40]
+
+*Net: the unique pain of benefits is *uncertainty* — you book revenue you don't yet have, then reconcile when it arrives.*
+
+---
+
+# Wealth & Retirement
+
+401(k), asset management, family services, executive life.
+
+- Fees are **% of assets under management** (typical 1-2%) — not commission on a sale
+- Statements come quarterly, sometimes ad-hoc on plan changes
+- Stricter regulatory environment — **fiduciary obligations** affect how revenue is segregated
+- Wealth lines cannot share a legal entity with insurance lines — separate company structures required
+
+*Net: simpler commission math; harder regulatory compliance.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #00B294 -->
+
+# Book of business — the producer's leverage
+
+The thing a producer can take with them.
+
+---
+
+# Why producer retention rules everything
+
+A producer's "book of business" — the customers and policies they own the relationship to — is portable.
+
+- Customers buy from the **producer**, not from the brokerage
+- If a producer leaves, **most of their customers follow them** to the next brokerage
+- This is why payment delays matter so much: a slighted producer can walk and take revenue with them
+- M&amp;A pricing for brokerages is often **a multiple of the book of business** — not of revenue or earnings
+
+> *"The allegiance is to that agent and not to the company. So if that producer decides to go somewhere else, a lot of their clients will just go with them."*
+> — Jim B [044:38]
+
+*Net: in brokerage M&A, you're buying producers' loyalty. Anything that erodes that loyalty erodes the asset.*
+
+---
+
+# Why this drives the comp tech
+
+Producer retention shapes every back-office decision.
+
+- **Pay producers fast** — pay-on-receipt minimizes their incentive to leave
+- **Pay producers accurately** — disputes destroy trust
+- **Pay producers with transparency** — they need to see the math
+- **Preserve historical cadence on M&amp;A** — never change a producer's payday
+
+*Net: comp tech isn't about cost control. It's about retention.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F2B949 -->
+
+# Hidden complexity — the things you only learn after a year
+
+Industry knowledge that doesn't make it into the textbook.
+
+---
+
+# Five gotchas to know about
+
+These come up in every brokerage engagement.
+
+- **COBRA fees deducted from commission, not A/P** — third-party COBRA admin costs net against producer pay rather than running through accounts payable. Decouples timing, complicates audit.
+- **Carrier promotion dollars** — "extra $1 per PA policy this quarter." Has to be allocated across producers per their split, retroactively. Not a system feature anywhere.
+- **No system link between payment and accrual** — $10,000 paid mid-month against 30 separate accruals. The link is reconstructed manually at close.
+- **Bulk rate changes aren't really bulk** — even "raise renewal rate from 5% to 6% on all PA policies" requires per-policy review because producer mix varies.
+- **Carriers don't agree on data shape** — same customer named three different ways across three statements. Manual normalization required.
+
+> *"Every time you think that I got it now, there's just another thing that just calls YouTube. So don't, don't get fooled. This is complicated stuff."*
+> — Jim B [108:55]
+
+---
+
+# Why brokerages M&A so aggressively
+
+The industry consolidates because the back-office becomes the differentiator.
+
+- Brokerages have **PE-backed acceleration strategies** — buy small, buy fast
+- Acquisition value is in the **book of business** + the producer relationships
+- Post-acquisition, the back-office systems must absorb the new company without breaking what producers expect
+- **Infrastructure becomes the bottleneck** — the firms growing fast have outgrown their spreadsheets
+
+> *"They're all going through M&A. They all have incredible PE backing, and they all have acceleration strategies that are being held back by their infrastructure."*
+> — Jim B, paraphrased [027:00]
+
+*Net: every brokerage growing past a certain size needs better tooling. That's the market for Unite.*
+
+---
+
+<!-- _class: section -->
+
+# So what does Unite solve?
+
+The connect-the-dots slide between industry pain and product capability.
+
+---
+
+# Industry pain → Unite capability
+
+Six concrete connections.
+
+| Industry pain | Unite addresses it via |
+|---|---|
+| 200 carrier statement formats | **Mapping Studio** — AI proposes column mappings; new format onboarded in minutes |
+| 60% auto-match rate on cash | **Match Rules engine** — learning rules from every manual match; reaches 90%+ over time |
+| 50-person AP team for reconciliation | **Cash App Review &amp; Approve** — line-level workflow, bulk approve, cascade splits |
+| Producer comp in spreadsheets | **Compensation Hub** — Split Intake forms, versioned, audited, workflow-approved |
+| No payment-to-accrual link | **Compensation batches** carry invoice IDs back to source SIFs and accruals |
+| M&amp;A integration killing producer retention | **Hierarchy-aware permissions** + payment cadence per-producer per-entity |
+
+*Every line is something Jim called out as a pain point — and something Unite already handles.*
+
+---
+
+# The 20-term vocabulary you need
+
+If you remember nothing else, remember these.
+
+<div class="cols three">
+<div class="card">
+
+**Carrier** — the insurance company
+**Brokerage** — the agency
+**Producer** — the salesperson
+**Customer** — the policyholder
+**MGA / GA** — wholesale layer
+**Direct billing** — carrier collects
+**Agency billing** — brokerage collects
+
+</div>
+<div class="card">
+
+**Commission** — paid by carrier to brokerage
+**Compensation** — paid by brokerage to producer
+**Override / Carry** — carrier bonus to GA
+**Producer Comp Plan (PCP)** — standing agreement
+**Split (SIF)** — per-policy allocation
+**Book of Business** — producer's portable asset
+**Renewal vs. New** — different commission %
+
+</div>
+<div class="card">
+
+**Point-in-time recognition** — earned at binding
+**Fiduciary account** — segregated cash
+**COBRA** — continuation cost; nets against comp
+**Net vs. Gross** — before/after deductions
+**Captive vs. Independent** — single carrier vs. many
+**Statement** — monthly/quarterly carrier report
+**Provider** — synonym for carrier
+
+</div>
+</div>
+
+*Quiz yourself before any customer meeting.*
+
+---
+
+# What this means for HSO
+
+Three implications for HSO's go-to-market.
+
+<div class="cols two">
+<div class="card">
+
+### **A real industry, not a feature**
+Brokerage finance is a category, not a use case. Unite addresses it directly — no other product is purpose-built for this.
+
+</div>
+<div class="card">
+
+### **A buyer with budget pressure**
+Brokerages are PE-backed, growing through M&amp;A, hitting back-office walls. They have budget to spend on the bottleneck.
+
+</div>
+</div>
+
+<div class="cols two">
+<div class="card">
+
+### **A pain that doesn't go away**
+200 carriers × infinitely different statement formats. New carriers added every year. The mapping-studio AI capability *gets more valuable over time*, not less.
+
+</div>
+<div class="card">
+
+### **HSO sells next to D365 — naturally**
+Unite integrates with D365 Finance. Where HSO sells D365 today, Unite is the insurance-specific layer that adds vertical credibility.
+
+</div>
+</div>
+
+---
+
+<!-- _class: cover -->
+
+# Now you speak the industry.
+
+The product makes sense because the industry made sense first.
+
+<div class="byline">Deeper reading: <strong>screens-library.html</strong> · <strong>features.html</strong> · the audience-specific decks</div>

@@ -1,0 +1,50 @@
+{
+  "_comment": "Example manifest for Invoke-JiraIssueBulk.ps1. Field names are resolved against the tenant's field catalog; the ones below are illustrative. File paths are relative to this file.",
+  "projectKey": "PROJ",
+  "defaults": {
+    "labels": ["team-example"],
+    "components": ["Example Component"],
+    "fields": {}
+  },
+  "items": [
+    {
+      "ref": "epic-contract-creation",
+      "op": "update",
+      "key": "PROJ-192",
+      "summary": "Create New Contract",
+      "descriptionFile": "epics/contract-creation.md"
+    },
+    {
+      "ref": "story-contract-number",
+      "op": "create",
+      "issueType": "Story",
+      "parent": "@epic-contract-creation",
+      "summary": "Generate the contract number on save",
+      "descriptionFile": "stories/contract-number.md",
+      "fields": {
+        "Story": "As a Contract Analyst,\nI want the system to generate the contract number when I save a new contract,\nSo that every contract has a unique, correctly formed identifier without manual assembly.",
+        "Acceptance Criteria": { "file": "stories/contract-number.ac.md" },
+        "Business Rules": { "file": "stories/contract-number.rules.md" },
+        "MoSCoW Priority": "Must"
+      },
+      "subtasks": [
+        { "summary": "PMO Checklist review" },
+        { "summary": "Contractual Requirements review" },
+        { "summary": "ACF Requirements review" },
+        { "summary": "OTI Requirements review" }
+      ]
+    },
+    {
+      "ref": "story-existing-rewrite",
+      "op": "update",
+      "key": "PROJ-1593",
+      "parent": "@epic-contract-creation",
+      "summary": "Generate the contract number on save",
+      "fields": {
+        "Story": { "file": "stories/contract-number.story.md" },
+        "Acceptance Criteria": { "file": "stories/contract-number.ac.md" }
+      },
+      "addLabels": ["team-example"]
+    }
+  ]
+}

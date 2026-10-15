@@ -1,0 +1,56 @@
+@{
+    # One-line purpose: what this dataset exercises, approximate record counts, the scenario it powers.
+    Description = '__DATASET__ sample dataset - <purpose, record counts, scenario>.'
+
+    # Optional pointer to the authoring spec / scenario doc (no client data in this repo).
+    Spec        = 'agent/work/specs/__DATASET__/sample-data.md'
+
+    # Tables in DEPENDENCY ORDER (parents before children). The NN_ prefix on each CSV
+    # encodes the same order, so `Get-ChildItem | Sort-Object Name` yields import-safe order.
+    # Replace the two illustrative Contoso tables below with this dataset's real tables.
+    Tables = @(
+
+        @{
+            FileName   = '01_ContosoAccounts.csv'        # numbered by dependency order
+            TableName  = 'hso_contosoaccount'            # logical name
+            EntitySet  = 'hso_contosoaccounts'           # plural entity-set name (Web API)
+            PrimaryKey = 'hso_contosoaccountid'          # MUST be the first column of the CSV
+            NameField  = 'hso_name'                      # human label - used for logging / CONFLICT detection
+            Select     = 'hso_contosoaccountid,hso_name,hso_tier_code'
+            FieldTypes = @{
+                # column -> type code: int | decimal | money | bool | date | lookup   (default: string)
+                hso_tier_code = 'int'
+            }
+            Lookups    = @{
+                # logical-lookup-field -> @{ EntitySet = '<parents-set>'; FieldName = '<logical-lookup-field>' }
+                # CSV column for a lookup is the OData form: _<FieldName>_value (raw GUID).
+            }
+            Ids = @(
+                # Authoritative GUID list this dataset OWNS. Drives the scoped fetch and the Remove script.
+                # Adding/removing an Id here is the reviewable signal that a record joined/left the dataset.
+                'a0000001-0000-4000-8000-000000000001'
+            )
+        }
+
+        @{
+            FileName   = '02_ContosoContracts.csv'
+            TableName  = 'hso_contosocontract'
+            EntitySet  = 'hso_contosocontracts'
+            PrimaryKey = 'hso_contosocontractid'
+            NameField  = 'hso_name'
+            Select     = 'hso_contosocontractid,hso_name,hso_value,hso_startdate,_hso_account_id_value'
+            FieldTypes = @{
+                hso_value      = 'money'
+                hso_startdate  = 'date'
+                hso_account_id = 'lookup'
+            }
+            Lookups    = @{
+                # The CSV carries column _hso_account_id_value; the engine binds it to the parent set.
+                hso_account_id = @{ EntitySet = 'hso_contosoaccounts'; FieldName = 'hso_account_id' }
+            }
+            Ids = @(
+                'b0000001-0000-4000-8000-000000000001'
+            )
+        }
+    )
+}

@@ -6,7 +6,6 @@ description: >-
   surgical scope, the layer boundaries, neutral-by-construction (no client/env identity in core),
   and generated-files-are-never-hand-edited. Returns findings only; makes no edits.
 tools: Read, Grep, Glob
-memory: project
 ---
 
 # change-reviewer (harness-mapped subagent)
@@ -37,7 +36,3 @@ Given a change to review, it:
 - It does not modify files, run builds, or deploy.
 - It does not authenticate to any environment.
 - It is not a substitute for the template's own parity/lint gates — it complements them.
-
-## Memory
-
-Persistent memory (`memory: project`, Claude Code) lives in `.claude/agent-memory/change-reviewer/`. Use it only to record recurring review patterns and repo conventions worth remembering; it is the one place this agent may write, and it never edits repository files.

@@ -1,0 +1,419 @@
+---
+marp: true
+theme: hso-knowledge
+paginate: true
+size: 16:9
+title: ERP Unite — Functional Consultant Guide
+---
+
+<!-- _class: cover -->
+
+# ERP Unite
+
+A functional walkthrough for HSO business consultants.
+
+<div class="byline">Functional consultant pack · feature-by-feature · configuration touchpoints</div>
+
+---
+
+<!-- _class: stat -->
+
+<div class="number">5</div>
+
+## end-to-end business flows
+
+Statement-to-cash. Cash-to-GL. Accrual-to-AH. Split-intake-to-payable. Collections-to-write-off. **You will configure and demo all five.**
+
+---
+
+# The five flows you need to know
+
+Every customer engagement returns to one of these. Learn them in order.
+
+<div class="cols three">
+<div class="card">
+
+### 1. Statement → Cash
+Carrier sends statement → Unite ingests → cash gets applied to the right invoices.
+
+</div>
+<div class="card">
+
+### 2. Cash → GL
+Applied cash flows through the AH integration → ledger posting.
+
+</div>
+<div class="card">
+
+### 3. Accrual → AH
+Month-end accruals computed by cost center → posted to AH as journals.
+
+</div>
+</div>
+
+<div class="cols two">
+<div class="card">
+
+### 4. Split Intake → Payable
+Producer comp rules + product splits → CompensationActualSnapshot → payable transaction → AH.
+
+</div>
+<div class="card">
+
+### 5. Collections → Write-off
+Aging accruals → collections case → workflow approval → write-off journal → AH.
+
+</div>
+</div>
+
+---
+
+<!-- _class: section -->
+
+# Flow 1 — Statement to Cash
+
+The flagship. Lead every demo here.
+
+---
+
+# Step 1.1 — Statement Import
+
+Brokers drop carrier statements into Unite. Two ways: single upload (`/Statements`) or bulk upload (`/StatementsBulkImport`).
+
+- **Single upload** — pick a file, optionally pick a template, hit Upload
+- **Bulk upload** — drop a folder; system fingerprints each file and matches to templates
+- **Backfill mode** — for historical files; same pipeline, different processing-status flag
+- **What gets created:** a `StatementHeader` shell + a `StatementFileFingerprint` row + blob storage entry
+
+*Configuration touchpoint:* `StatementConfiguration` page. Provider filters, statement filter rules, AI prompt overrides.
+
+---
+
+# Step 1.2 — Template Matching
+
+Every statement needs a template. Templates know "this carrier puts the customer name in column C, the gross amount in column F" — and they handle every transformation in between.
+
+- **Auto-suggest by fingerprint** — Unite hashes the file structure and proposes templates that match
+- **Auto-suggest by AI** — Mapping Studio offers Gemini-driven column mappings
+- **Manual assignment** — user picks the template from the dropdown
+- **Status lifecycle:** InProgress → Active → Archived
+- **Versioning:** copy an active template to draft, edit, activate to replace
+
+*Configuration touchpoint:* `StatementTemplateList` (`/StatementTemplateList/{All,InProgress,Blocked,Testing,Active}`) — filter by status, sort by use.
+
+---
+
+# Statement Studio — the AI authoring surface
+
+![bg right:55%](screens/cashhub-mapping-studio.png)
+
+Where new carrier formats get onboarded. Three-step wizard:
+
+- **Step 1 — Upload** (the empty state shown here)
+- **Step 2 — Show file** — PDF/Excel preview with overlays
+- **Step 3 — Map fields** — Gemini suggestions, reviewer accepts
+
+*The most-demoed screen in the product.*
+
+---
+
+# Step 1.3 — Mapping Studio (the AI bit)
+
+This is where new carrier formats get onboarded. Open `/MappingStudio` with a draft template.
+
+- **Step 1 — Upload** the carrier file
+- **Step 2 — Show file** — Mapping Studio renders the PDF/Excel with overlays
+- **Step 3 — Map fields** — click a column header, Gemini suggests a destination
+- **Step 4 — Test extraction** — preview rows before committing
+- **OCR regions** — for PDF tables not parsed by structure, region-select and OCR
+
+*Configuration touchpoint:* `ExpressionBuilder` lets you type column transformations in Gemini-translated NL. "If column starts with 'P' it's premium, else it's fee" — becomes executable script.
+
+---
+
+# Step 1.4 — Cash Application Review
+
+Once statements are extracted, the matching pipeline runs. Open `/CashApplicationReviewV4/{HeaderId}` to review.
+
+- **Auto-matched lines** appear with their proposed `Product` + `Customer`
+- **Unmatched lines** route to Reconcile Unmatched (`/cashapplication/reconcile/...`)
+- **Manual match** creates a `MatchRule` for next time — the system learns
+- **Approve / Unapprove** at line or header level — bulk actions in the toolbar
+- **Split lines** for service-period allocation (parent + N children pattern)
+
+*Configuration touchpoint:* `CashApplicationMatchRules` (`/CashApplicationMatchRules`) — see all learned rules, deactivate the noisy ones.
+
+---
+
+# Step 1.5 — Approve to Accounting Hub
+
+Final step. Approved lines flow out via the AH integration.
+
+- **Per-line approval** — line.IsApproved=true
+- **Cascade** — approving a parent cascades to all split children
+- **Header stats** roll up parent + standalone counts (children are display-only)
+- **AH handoff** runs out-of-band via `CashApplicationToAHHandoff` function
+- **Status tracking** in `ImportsStatistics` — every transfer is auditable
+
+*Configuration touchpoint:* the AH integration blob containers + folder names — set per environment in `appsettings.json` `AzureStorage.Accounting`.
+
+---
+
+<!-- _class: section -->
+<!-- _color: #00B294 -->
+
+# Flow 2 — Accruals & Collections
+
+Month-end. The piece every CFO loves.
+
+---
+
+# Statements list — staged for the workflow
+
+![bg right:55%](screens/cashhub-statements-list.png)
+
+Every statement received, on one screen.
+
+- Stage chips: All / Ingesting / Processed / Deposit Matched / Cash Matching / Approved
+- Assignment toggle: All / Assigned to me
+- Gross/net totals roll up
+- Per-row actions: Open, Configuration, Open in Statement Studio
+
+---
+
+# Cash Application headers — the queue
+
+![bg right:55%](screens/cashhub-cash-applications.png)
+
+The list of cash app headers waiting for review and approval.
+
+- Filter by approval status
+- Drill into Review &amp; Approve V4 for line-level workflow
+- Header stats: approved count, requires-review count, no-match count
+- Multi-header bulk approve from the toolbar
+
+---
+
+# Step 2.1 — Accruals Preview
+
+Read-only dashboard. `/Accruals/Preview`.
+
+- **By cost center × month** — every accruable product
+- **Variance vs. prior month** — flagged with the magnitude
+- **Drilldown** — click into a variance, see the product detail
+- **Override-able** — but overrides go through Accrual Batches, not Preview
+
+*Configuration touchpoint:* `AccrualConfiguration` (cost-center inclusion toggles) + `AccrualBrokerConfigs` (per-broker ignore flag).
+
+---
+
+# Step 2.2 — Accrual Batches
+
+Where overrides + workflow live. `/Accruals/Batches`.
+
+- **Create batch** — pick cost center + month, system computes lines
+- **Edit lines** — override amount per line, document the reason
+- **Submit** → `NotSubmitted → Submitted` workflow transition
+- **Approve** → `Submitted → Approved` (separate permission)
+- **Approved batches** flow out via `AccrualsOverrideToAHHandoff`
+
+*Configuration touchpoint:* the workflow framework lives in shared. To change approval steps, you're editing `WorkflowService` + `WorkflowAuthorizationService` — not config.
+
+---
+
+# Step 2.3 — Collections Cases
+
+For accruals that age. `/Collections/Cases`.
+
+- **Multi-select aged lines** in Accrual Batch Lines detail → "Create Collections Case"
+- **Snapshot** — at creation time, product fields are frozen onto `CollectionsCaseLine`
+- **Actions** (past) and **Tasks** (future) recorded inline
+- **Workflow approval** generates a write-off `JournalBatch` automatically
+- **Audit trail** — every action, every status change, persisted
+
+*Configuration touchpoint:* `WriteOffReasonCode` table — admin/DBA-managed today. Note `OpenQuestions.md` flags this as a productization decision.
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F1554B -->
+
+# Flow 3 — Compensation & Split Intake
+
+The CompHub side. Where producer pay actually happens.
+
+---
+
+# Step 3.1 — Producer Comp Rules
+
+The rules that govern compensation. `/ProducerCompRules`.
+
+- **One rule per producer × vertical × account type × renewal year**
+- **VCP rates** — year 1, year 2/3 renewal, plus separate net/gross flags
+- **Soft-delete** via `IsRuleActive` — rules are never hard-deleted (audit)
+- **Effective dating** — rules carry an `EffectiveDate`; new rules supersede old
+
+*Configuration touchpoint:* `Parties.razor` (`/parties/AllProducers`) for the producer master; comp rules link off the detail.
+
+---
+
+# Accrual Batches — month-end workflow
+
+![bg right:55%](screens/cashhub-accruals-batches.png)
+
+Cost-center × month batches with workflow approval.
+
+- Workflow status pills at top
+- Submitted by / approved by columns drive audit
+- Drill into batch lines for per-line overrides
+- Approved batches handoff to AH
+
+---
+
+# Collections Cases — non-invoiced worklist
+
+![bg right:55%](screens/cashhub-collections-cases.png)
+
+The aged-accrual investigation board.
+
+- Created from Accrual Batch Lines multi-select
+- Actions recorded with timestamps
+- Workflow approval generates the write-off journal
+- Closed cases preserve full audit trail
+
+---
+
+# Step 3.2 — Split Intake (SIF) — the heart of CompHub
+
+How producers split commissions across themselves and cost centers.
+
+- **Header** — broker, opportunity, vertical, effective date
+- **Lines** — payee allocations (producer, %, account type, region)
+- **Cost-center allocations** — sub-tab on the detail
+- **Versioning** — every "request changes" on an approved header creates a new version (`SplitIntakeWorkflowActionHook`)
+- **Audit log** — every field change is captured in `SplitIntakeChangeLog`
+
+*Configuration touchpoint:* templates (`SplitIntakeHeaderTemplate`, `SplitIntakeLineTemplate`) for bulk SIF creation.
+
+---
+
+# Step 3.3 — SIF Coverage Audit
+
+The "have we set up SIFs for every active product?" check.
+
+- **Open `/SifCoverageAudit/{Mode}`** — pick coverage mode
+- **System cross-references** Products vs. SplitIntakeHeaders
+- **Shows uncovered products** — the gap
+- **Direct link** to "Create SIF for this product"
+
+*Configuration touchpoint:* `CreateSplitIntakeAdmin.razor` (`/Administration/CreateSplitIntake`) — admin bulk creation interface.
+
+---
+
+# Split Intake — the SIF list
+
+![bg right:55%](screens/comphub-split-intake-list.png)
+
+Every split intake header, by workflow status.
+
+- Filter: All / My Tasks / My Team
+- Versioning visible in the grid (latest vs. historical)
+- Cost-center allocation on the detail
+- Approval triggers compensation reprocessing
+
+---
+
+# Producer Comp Rules — the rate table
+
+![bg right:55%](screens/comphub-producer-comp-rules.png)
+
+The rates that drive every payable calculation.
+
+- One rule per producer × product vertical × renewal year
+- VCP year-1, year-2 renewal, year-3+ renewal
+- Soft-delete (`IsRuleActive`) preserves history
+- Effective dating supersedes old rules
+
+---
+
+# Step 3.4 — Compensation Actuals
+
+The output. `/compensation-actuals`.
+
+- **Batches** — periodic compensation runs, each with their own workflow
+- **Lines** — per-producer payable amount
+- **Invoice IDs** — auto-generated on Approved status via `CompensationBatchWorkflowActionHook`
+- **Inbound from AH** — `ProducerCompActualsAHToPCHHandoff` pulls actuals from AH after invoices are paid
+- **Outbound to AH** — `ProducerPayableTransactionToAHHandoff` sends approved lines to AH
+
+*Configuration touchpoint:* `AccountingHubSendStatus` enum on the batch — tracks whether AH has acknowledged.
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F2B949 -->
+
+# Producer Portal
+
+What producers see. Different audience, same data.
+
+---
+
+# Producer Portal — the external surface
+
+A separate Blazor app, dual Azure AD auth (internal + external schemes).
+
+- **Home** — public landing; gates Sales Intake card on `IsInternalUser`
+- **`/SplitIntake/{Id}`** — producer self-service of their own splits
+- **`/SplitIntakeList/{All,My,Team,Submitted,Approved}`** — filtered worklist
+- **`/reports/testreport`** — embedded PowerBI report
+- **Hierarchy gate** — `SplitIntakePortal.CanViewOrEdit_Hierarchy` requires matching cost center
+
+*Configuration touchpoint:* `ApplicationAccess.CanAccessProducerPortal` is the master gate. Without it, the drawer stays hidden.
+
+---
+
+<!-- _class: section -->
+
+# Configuration playbook
+
+Where to make changes — and where not to.
+
+---
+
+# The "safe to change" surfaces
+
+These are configured per-tenant without code changes.
+
+- **Statement Templates** — every carrier format
+- **Match Rules** — learned rules (deactivate, don't delete)
+- **Write-off Reason Codes** — lookup table seeded; add new entries via SQL
+- **Accrual Configuration** — cost center inclusion + broker exclusion
+- **Role / Permission / Feature Area / Access Level** — full security CRUD via UI
+- **Provider Filter JSON** — per-header product scoping
+
+*Net: 90% of "we need to change X" is in this list.*
+
+---
+
+# The "needs a developer" surfaces
+
+Don't promise these in scoping. They're code changes.
+
+- **Workflow transitions** — adding/removing status transitions
+- **Permission policy names** — adding a new policy area
+- **Integration handoff destinations** — adding a new AH folder
+- **New entities** — anything requiring an EF migration
+- **AI prompts at the system level** — the foundational prompts in `Prompts/`
+
+*Net: 10% of changes are these. Get developer time in the SOW.*
+
+---
+
+<!-- _class: cover -->
+
+# You're ready.
+
+Five flows. Configuration playbook. Now go consult.
+
+<div class="byline">Slack channel: <strong>#unite-functional</strong> · Office hours: Tues 1pm ET</div>

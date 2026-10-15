@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-15T00:00:00.000Z" agent="hso-diagram-drawio" version="24.0.0">
+  <diagram id="pflow" name="ProcessFlow">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="20" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="HSO Sample Process Flow — Service Request Handling" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=16;fontStyle=1;fontFamily=Segoe UI;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="680" height="36" as="geometry" />
+        </mxCell>
+
+        <!--
+          Horizontal swim lanes. Steps progress LEFT to RIGHT within a lane.
+          Cross-lane handoffs happen ONLY between vertically adjacent lanes.
+          Column x-coordinates (shared across lanes): 60, 300, 540, 780, 1020, 1260.
+          Within-lane arrows are horizontal. Cross-lane arrows are vertical between
+          steps at the SAME column x. Never diagonal. Never skipping lanes.
+        -->
+
+        <!-- Lane: Customer (row 1) -->
+        <mxCell id="lane_cust" value="Customer" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=middle;align=left;spacingLeft=12;container=1;collapsible=0;startSize=180;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="1460" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="step_cust_start" value="Submits&#10;service request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_cust">
+          <mxGeometry x="200" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_cust_approve" value="Confirms&#10;appointment" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_cust">
+          <mxGeometry x="680" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_cust_review" value="Reviews&#10;&amp; rates" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_cust">
+          <mxGeometry x="1160" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Lane: Service Rep (row 2) -->
+        <mxCell id="lane_rep" value="Service Rep" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=middle;align=left;spacingLeft=12;container=1;collapsible=0;startSize=180;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="300" width="1460" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="step_rep_triage" value="Triages&#10;request" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_rep">
+          <mxGeometry x="440" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_rep_close" value="Resolves&#10;&amp; closes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_rep">
+          <mxGeometry x="920" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Lane: System (row 3) -->
+        <mxCell id="lane_sys" value="System" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=middle;align=left;spacingLeft=12;container=1;collapsible=0;startSize=180;horizontal=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="480" width="1460" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="step_sys_create" value="Creates case&#10;record" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_sys">
+          <mxGeometry x="200" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_sys_notify" value="Notifies&#10;customer" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_sys">
+          <mxGeometry x="680" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="step_sys_archive" value="Sends survey&#10;&amp; archives" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=11;fontStyle=1;fontFamily=Segoe UI;arcSize=12;" vertex="1" parent="lane_sys">
+          <mxGeometry x="1160" y="50" width="160" height="60" as="geometry" />
+        </mxCell>
+
+        <!--
+          Edges:
+          - Vertical handoffs between adjacent lanes at same column x (clean drops).
+          - Horizontal within lanes use explicit sourcePoint/targetPoint to avoid
+            orthogonal routing across other lanes.
+        -->
+
+        <!-- Customer submits (col 200, row 1) -> System creates (col 200, row 3) — passes through rep lane but with no step at col 200 in rep lane, so clean vertical. Actually it would cross the rep lane empty area which is fine (lane is a backdrop, no intermediate box). -->
+        <mxCell id="e_cust_to_sys" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_cust_start" target="step_sys_create">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System creates -> Rep triage (col 200 -> col 440). Route as horizontal within system lane first? No — handoff goes UP to rep lane. Use vertical from sys row to rep row at col 440. So we need System -> Rep triage. Sys create is at col 200; Rep triage is at col 440. That's diagonal. -->
+        <!-- Instead: split into two steps. System hands to rep via a horizontal arrow in SYS lane (col 200 -> col 440) then vertical up. Simpler: add an edge from step_sys_create right-face to step_rep_triage bottom-face routing below/beside. For now, use orthogonal with waypoints. -->
+        <mxCell id="e_sys_to_rep_triage" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=1;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_sys_create" target="step_rep_triage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Rep triage -> System notifies (col 440 -> col 680) — diagonal, but rep triage exits right, notifies enters top. Clean L-shape. -->
+        <mxCell id="e_rep_triage_to_sys_notify" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_rep_triage" target="step_sys_notify">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System notifies (col 680, sys) -> Customer confirms (col 680, cust) — clean vertical UP across rep lane empty area. -->
+        <mxCell id="e_sys_notify_to_cust" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_sys_notify" target="step_cust_approve">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Customer confirms -> Rep close (col 680 -> col 920). Customer row 1, Rep row 2. Goes down to rep, then right. -->
+        <mxCell id="e_cust_approve_to_rep_close" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_cust_approve" target="step_rep_close">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Rep close -> System archive (col 920 -> col 1160). Rep to Sys (adjacent lanes). -->
+        <mxCell id="e_rep_close_to_sys_archive" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=1;exitY=0.5;entryX=0.5;entryY=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_rep_close" target="step_sys_archive">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- System archive -> Customer review (col 1160, sys) -> (col 1160, cust). Vertical up. -->
+        <mxCell id="e_sys_archive_to_cust_review" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="step_sys_archive" target="step_cust_review">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

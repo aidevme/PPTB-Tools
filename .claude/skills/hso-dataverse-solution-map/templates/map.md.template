@@ -1,0 +1,94 @@
+---
+title: "Solution Map — <Effort Name>"
+type: design
+status: draft
+scope: project
+client: <client-id>
+project: <project-id>
+topics: [solution-mapping]
+people: [<author-slug>]
+sources: []
+created: <YYYY-MM-DD>
+updated: <YYYY-MM-DD>
+map_status: open
+effort_slug: <effort-slug>
+---
+
+# Solution Map — <Effort Name>
+
+<!--
+  This file is an INDEX, not a store. It gists each closed decision in one line and links the
+  ticket that holds it. Never restate a decision here. Never list open tickets here — query them:
+    & claude-code/skills/hso-dataverse-solution-map/scripts/Get-SolutionMapFrontier.ps1 -MapPath <this folder>
+-->
+
+## Destination
+
+<One or two lines: what reaching the end of this map looks like — the solution shape a Statement of
+Work can be written from. Every session orients to this before choosing a ticket.>
+
+## Notes
+
+- **Domain:** <the client's business and the process language they use>
+- **Incumbent system:** <what is being replaced, if anything>
+- **Skills every session should consult:** <e.g. hso-grill-architect, hso-semantic-data-modeling>
+- **Standing preferences:** <anything that applies to every ticket on this map>
+- **Overrides:** <if this map deliberately departs from "decide shape, don't design", say so here and
+  say why. Absent this line, the default holds.>
+
+## Decision spine
+
+<!--
+  Fifteen areas, each with exactly one disposition. Authority: references/decision-spine.md.
+  resolved (link the ticket) | ticketed (link the ticket) | fog (+ a line in Not yet specified)
+  | out-of-scope (+ a line in Out of scope) | n/a (+ a reason)
+  A map cannot be closed with any area at `fog`.
+-->
+
+| # | Area | Disposition | Ticket / reason |
+|---|---|---|---|
+| 1 | Business capability & process footprint | | |
+| 2 | Product & module footprint | | |
+| 3 | Fit-gap: OOB vs custom | | |
+| 4 | Conceptual data model & core entities | | |
+| 5 | Personas, security & access shape | | |
+| 6 | Licensing & cost baseline | | |
+| 7 | Integration landscape | | |
+| 8 | Data migration, config data & MDM | | |
+| 9 | Reporting & analytics | | |
+| 10 | Extensibility posture (technology ladder) | | |
+| 11 | Environment strategy, topology & ALM | | |
+| 12 | AI / Copilot leverage | | |
+| 13 | Non-functional: performance, volume, availability | | |
+| 14 | Delivery shape: phasing, testing, go-live | | |
+| 15 | HSO IP & accelerator fit | | |
+
+## Decisions so far
+
+<!-- One line per CLOSED ticket, in closing order. Enough to judge relevance; the ticket holds the
+     detail. Refer to tickets by title, never by a bare id. -->
+
+- [<closed ticket title>](tickets/T-001-<slug>.md) — <one-line gist of the answer>
+
+## Not yet specified
+
+<!-- In-scope fog: questions you can tell are coming but cannot yet state precisely. Write as loosely
+     as the view allows. Each patch is cleared from here the moment it graduates into a ticket.
+     Spine areas dispositioned `fog` are named here. -->
+
+- <area or suspected question, and what it hangs on>
+
+## Out of scope
+
+<!-- Work consciously ruled beyond this map's destination. Never graduates. Becomes the SOW's
+     exclusions verbatim. One line each: the gist, the reason, and the closed ticket if one existed. -->
+
+- <gist> — out of scope because <reason>. ([<ticket title>](tickets/T-00n-<slug>.md))
+
+## Solution Map Summary
+
+<!-- Written in CLOSE MODE ONLY, and only once the frontier is empty and no area is at `fog`.
+     Required sections and their SOW mapping: references/sow-handoff.md.
+     Do not synthesize over a gap. -->
+
+*(not yet written — the map is still open)*

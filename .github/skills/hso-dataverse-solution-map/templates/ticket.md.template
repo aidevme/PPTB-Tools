@@ -1,0 +1,118 @@
+---
+title: "<The question, phrased as a question — this is the ticket's NAME and how humans refer to it>"
+type: design
+status: draft
+scope: project
+client: <client-id>
+project: <project-id>
+topics: [solution-mapping]
+people: [<claimant-slug>]
+sources: [<relative paths to agent/raw/ or agent/wiki/digests/ this ticket rests on>]
+created: <YYYY-MM-DD>
+updated: <YYYY-MM-DD>
+ticket_id: T-00n
+ticket_type: research | fit-gap | grilling | prototype | task
+mode: AFK | HITL
+ticket_state: open
+claimed_by:
+blocked_by: []
+spine: [<spine area slugs — e.g. fit-gap, licensing, integration>]
+map: ../map.md
+---
+
+# <Same as title — the question>
+
+<!--
+  ONE AGENT SESSION's worth of question. If it needs two, split it.
+  Wiki `status:` tracks the DECISION's lifecycle, not the ticket's:
+    draft   = open or claimed
+    active  = closed (the decision is now live)
+    archived = ruled out of scope
+  `ticket_state` tracks the ticket: open | claimed | closed | out-of-scope
+-->
+
+## Question
+
+<The decision or investigation this ticket resolves. State it sharply — if you cannot, this is fog
+and belongs in the map's "Not yet specified", not here.>
+
+## Why it matters
+
+<What this unblocks. Which spine area(s) it disposes of. What stays foggy until it is answered.>
+
+## Context
+
+<Pointers only, no restatement: the digests, prior tickets, and system-state files a session should
+load. Refer to prior tickets by title.>
+
+- [<prior ticket title>](T-00n-<slug>.md) — <why it is relevant>
+- [<digest title>](../../../../../wiki/digests/<file>.md)
+
+## Standards to read before deciding
+
+<!-- From references/decision-spine.md, for every area in `spine`. Naming them here means the next
+     session does not have to re-route. This is a pointer — the SOP is the authority.
+     Write SOP paths from the REPO ROOT, not relatively: a ticket sits six levels down
+     (agent/work/design/solution-map/<effort>/tickets/), and a relative chain that deep breaks
+     the moment anything is reorganised. -->
+
+- `shared/dv/agent/wiki/sop/<family>/<sop-file>.md` — <what it governs here, and which sections>
+
+## Session prep
+
+<!-- OPTIONAL but strongly recommended, and MAINTAINED: everything already known, so a session
+     opens on the decision rather than on research. Date-stamp it. Every closing session that
+     changes this ticket's inputs updates this section (work mode, Propagate) — a stale prep is
+     worse than none. -->
+
+<Settled facts from closed tickets (cite by title) · the pre-filled recommendation · the exact
+missing inputs, each with a named owner.>
+
+## Grill script
+
+<!-- OPTIONAL, for decision tickets (grilling / fit-gap verdicts / prototype reactions): the
+     numbered questions pre-seeded at charting or by a later enrichment pass, so answers can be
+     collected ASYNCHRONOUSLY. Contract per question: the question · a recommendation with its
+     source (SOP §, schema fact, digest, prior ticket) · a scenario probe · an inline answer slot.
+     A human typing under "> Answer:" IS the human side of the exchange — but the script is the
+     opening, not the session: the resolving session reads the answers, chases the follow-ups no
+     script predicts, and still produces the full five-part Resolution. Date-stamp; maintained by
+     Propagate like Session prep. -->
+
+**Q<n> — <the question>?**
+Rec: <recommended answer> — <source>.
+Probe: <one concrete scenario that would change the answer>.
+> Answer:
+
+---
+
+<!-- ================= EVERYTHING BELOW IS WRITTEN ON RESOLUTION ONLY ================= -->
+
+## Resolution
+
+<!-- Appended when the ticket closes. All five parts are required — see references/ticket-types.md.
+     Then: ticket_state: closed, status: active, and ONE gist line appended to the map's
+     "Decisions so far". -->
+
+**Decision.** <X, because Y. Stated as a decision, not a summary of the discussion.>
+
+**Standards grounding.**
+- `<sop-file>.md` §§<n>,<n> — <what it established>
+
+**Alternatives rejected.**
+- <alternative> — rejected because <reason>
+
+**Assumptions.**
+- <falsifiable assumption this rests on, and who owns confirming it>
+
+**Consequences.**
+- Unblocks: <ticket titles>
+- Constrains: <what downstream work this now bounds>
+- Fog cleared: <what graduated out of "Not yet specified">
+
+**Assets.** <links into ../assets/ — never paste artifacts inline>
+
+**ADR.** <link if this rationale was durable enough to warrant one via hso-wiki-write-decision;
+omit the line otherwise>
+
+**Resolved by** <author-name> on <YYYY-MM-DD>.

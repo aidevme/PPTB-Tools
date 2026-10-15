@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accruals Workflow — ERP Unite Feature Guide</title>
+<style>
+  :root {
+    --navy: #00395F; --navy-dark: #00253D; --navy-light: #1A5A8A;
+    --cyan: #079FC3; --cyan-light: #4AB9D4;
+    --teal: #00B294; --red: #F1554B; --yellow: #F2B949;
+    --slate: #44546A; --mute: #737373;
+    --bg: #FAFBFC; --card-bg: #FFFFFF; --border: #E5E9EE;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif; color: var(--navy); background: var(--bg); line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+  .feature-hero { background: linear-gradient(135deg, var(--navy-dark) 0%, var(--navy) 50%, var(--navy-light) 100%); color: white; padding: 56px 40px 64px; position: relative; overflow: hidden; }
+  .feature-hero::before { content: ''; position: absolute; top: -40%; right: -10%; width: 600px; height: 600px; background: radial-gradient(circle, rgba(7, 159, 195, 0.22) 0%, transparent 65%); pointer-events: none; }
+  .feature-hero::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, var(--cyan) 0%, var(--teal) 50%, var(--cyan) 100%); }
+  .feature-hero-inner { max-width: 1100px; margin: 0 auto; position: relative; }
+  .breadcrumb { color: var(--cyan-light); font-size: 13px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 12px; }
+  .breadcrumb a { color: var(--cyan-light); text-decoration: none; border-bottom: 1px dotted rgba(74, 185, 212, 0.5); padding-bottom: 2px; }
+  .breadcrumb a:hover { border-color: var(--cyan-light); }
+  .breadcrumb .sep { opacity: 0.5; margin: 0 8px; }
+  .feature-hero h1 { font-size: 48px; font-weight: 400; letter-spacing: -0.5px; line-height: 1.08; margin-bottom: 14px; }
+  .feature-hero .subtitle { font-size: 19px; font-weight: 300; color: rgba(255, 255, 255, 0.85); max-width: 760px; }
+  .feature-hero .pill-row { margin-top: 22px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .pill { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 999px; background: rgba(7, 159, 195, 0.22); color: white; border: 1px solid rgba(7, 159, 195, 0.55); }
+
+  main { max-width: 1100px; margin: 0 auto; padding: 40px 40px 80px; }
+
+  .feature-hero-image { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 14px; box-shadow: 0 14px 36px rgba(0, 57, 95, 0.10); margin-bottom: 40px; overflow: hidden; }
+  .feature-hero-image img { width: 100%; height: auto; border-radius: 8px; display: block; border: 1px solid var(--border); }
+  .feature-hero-image .caption { display: flex; align-items: center; justify-content: space-between; padding: 14px 6px 4px; font-size: 13px; color: var(--mute); }
+  .feature-hero-image .caption a { color: var(--cyan); text-decoration: none; font-weight: 600; }
+
+  section.feature-block { margin-bottom: 40px; }
+  section.feature-block h2 { font-size: 24px; color: var(--navy); font-weight: 600; margin-bottom: 14px; padding-left: 14px; border-left: 4px solid var(--cyan); }
+  section.feature-block p { font-size: 16.5px; color: #1F2D3D; line-height: 1.72; margin-bottom: 14px; }
+  section.feature-block ul, section.feature-block ol { margin-left: 1.4em; margin-bottom: 10px; }
+  section.feature-block li { margin-bottom: 8px; font-size: 16px; color: #1F2D3D; line-height: 1.65; }
+  section.feature-block strong { color: var(--navy); font-weight: 600; }
+  section.feature-block em { color: var(--slate); }
+  section.feature-block code { background: #F4F7FA; color: var(--navy); padding: 1px 6px; border-radius: 4px; font-family: 'Cascadia Code', 'Consolas', monospace; font-size: 0.9em; border: 1px solid #DCE3EB; }
+  section.feature-block a { color: var(--cyan); text-decoration: none; border-bottom: 1px solid rgba(7, 159, 195, 0.3); }
+  section.feature-block a:hover { color: var(--navy); border-color: var(--navy); }
+
+  .key-screens { background: #F0F6FB; border: 1px solid var(--border); border-radius: 12px; padding: 24px 28px; }
+  .key-screens-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin-top: 10px; }
+  .key-screens-grid a { background: white; border: 1px solid var(--border); border-left: 3px solid var(--cyan); border-radius: 6px; padding: 12px 14px; text-decoration: none; color: var(--navy); font-weight: 600; font-size: 14.5px; transition: all 0.15s ease; display: block; }
+  .key-screens-grid a:hover { border-color: var(--cyan); background: #E6F4F9; transform: translateY(-1px); }
+
+  .value-callout { background: linear-gradient(135deg, #E5F8F3 0%, #D1F2EA 100%); border-left: 4px solid var(--teal); border-radius: 0 12px 12px 0; padding: 20px 26px; margin: 0; }
+  .value-callout p { color: var(--navy); font-weight: 500; }
+  .value-callout p:first-of-type::before { content: '★ '; color: var(--teal); font-weight: 700; }
+
+  details.tech-anchors { background: #FAFBFC; border: 1px solid var(--border); border-radius: 8px; padding: 14px 22px; margin-top: 30px; }
+  details.tech-anchors summary { font-weight: 600; color: var(--navy); cursor: pointer; padding: 4px 0; font-size: 15px; letter-spacing: 0.3px; }
+  details.tech-anchors summary:hover { color: var(--cyan); }
+  details.tech-anchors[open] summary { margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+  details.tech-anchors .tech-body p { font-size: 14.5px; color: var(--slate); line-height: 1.65; margin-bottom: 10px; }
+  details.tech-anchors .tech-body code { background: #F0F4F8; }
+
+  .related-features { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 10px; }
+  .related-features a { background: white; border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; text-decoration: none; color: var(--navy); font-size: 14px; font-weight: 600; }
+  .related-features a:hover { border-color: var(--cyan); background: #F0F6FB; }
+
+  /* Prev/Next nav (same as screen guides) */
+  .feature-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; margin: 24px 0; }
+  .feature-nav-top { margin-top: 0; margin-bottom: 36px; }
+  .feature-nav-bottom { margin-top: 56px; margin-bottom: 0; }
+  .feature-nav-btn { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; text-decoration: none; color: var(--navy); display: flex; flex-direction: column; gap: 4px; transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease; min-width: 0; }
+  .feature-nav-btn:hover:not(.disabled) { border-color: var(--cyan); background: #F0F6FB; transform: translateY(-1px); }
+  .feature-nav-btn.next { text-align: right; }
+  .feature-nav-btn.disabled { opacity: 0.45; cursor: default; }
+  .feature-nav-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--cyan); }
+  .feature-nav-btn.disabled .feature-nav-label { color: var(--mute); }
+  .feature-nav-title { font-size: 14px; font-weight: 600; color: var(--navy); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .feature-nav-pos { display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 12px 22px; text-decoration: none; color: var(--slate); font-size: 12px; letter-spacing: 0.5px; white-space: nowrap; }
+  .feature-nav-pos strong { color: var(--navy); font-size: 17px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+  .feature-nav-pos:hover { border-color: var(--cyan); color: var(--cyan); }
+  @media (max-width: 720px) { .feature-nav { grid-template-columns: 1fr; } .feature-nav-pos { order: -1; } .feature-nav-btn.next { text-align: left; } }
+
+  footer { background: var(--navy-dark); color: rgba(255, 255, 255, 0.7); padding: 24px 40px; text-align: center; font-size: 13px; }
+  footer a { color: var(--cyan-light); text-decoration: none; border-bottom: 1px dotted rgba(74, 185, 212, 0.5); }
+  footer a:hover { color: white; border-color: white; }
+
+  @media (max-width: 720px) { .feature-hero { padding: 40px 22px 48px; } .feature-hero h1 { font-size: 34px; } main { padding: 32px 22px 56px; } }
+</style>
+</head>
+<body>
+
+<header class="feature-hero">
+  <div class="feature-hero-inner">
+    <div class="breadcrumb">
+      <a href="index.html">← ERP Unite Learning Pack</a>
+      <span class="sep">/</span>
+      <a href="feature-library.html">Feature library</a>
+    </div>
+    <h1>Accruals Workflow</h1>
+    <p class="subtitle">Month-end accruals from preview through approval to AH journal. Workflow-controlled, audit-trailed, configurable per cost center.</p>
+    <div class="pill-row">
+      <span class="pill">Cash Hub</span>
+    </div>
+  </div>
+</header>
+
+<main>
+<nav class="feature-nav feature-nav-top"><a class="feature-nav-btn prev" href="feature-ah-journals.html"><span class="feature-nav-label">← Previous</span><span class="feature-nav-title">AH Journals & Manual Journal Batches</span></a><a class="feature-nav-pos" href="feature-library.html"><strong>8</strong> / 25 · all features</a><a class="feature-nav-btn next" href="feature-collections-cases.html"><span class="feature-nav-label">Next →</span><span class="feature-nav-title">Collections Cases (Aged Accrual Write-Offs)</span></a></nav>
+  <div class="feature-hero-image">
+    <img loading="lazy" src="screens-onedigital/cashhub-accruals-batches.png" alt="Accruals Workflow representative screen">
+    <div class="caption">
+      <span>Representative screen</span>
+      <a href="screens-onedigital/cashhub-accruals-batches.png" target="_blank" rel="noopener">Open full-size →</a>
+    </div>
+  </div>
+
+  <section class="feature-block">
+    <h2>What it does</h2>
+    <p>Accruals close the gap between <em>commission earned</em> and <em>commission received</em>. The carrier owes the brokerage money for policies sold; that revenue is recognized in the period earned, not in the period the carrier writes the check.</p>
+<p>The accruals system has four moving parts:</p>
+<ul>
+<li><strong>Preview</strong> (<code>/Accruals/Preview</code>) — read-only dashboard of computed accruals with variance vs. prior month</li>
+<li><strong>Batches</strong> (<code>/Accruals/Batches</code>) — committable workflow surface; create batch, edit lines, submit, approve</li>
+<li><strong>Configuration</strong> (<code>/Accruals/Configuration</code>) — admin: cost center inclusion toggles + per-broker ignore flags</li>
+<li><strong>Process trigger</strong> (<code>/Accruals/ProcessBatches</code>) — on-demand batch computation outside the nightly automation</li>
+</ul>
+  </section>
+
+  <section class="feature-block">
+    <h2>The problem it solves</h2>
+    <p>Accruals are the controller's monthly nightmare. The 12-month rolling-average calc is straightforward in principle; the complications come from data quality (a product with no transaction history, a broker on leave, a cost center being sunset). Without a workflow surface, accruals are spreadsheet-driven and error-prone.</p>
+<p>The Unite accrual flow makes the math visible (Preview), the overrides controlled (Batches with workflow status), and the policy explicit (Configuration). The nightly automation does the heavy lifting; humans review + adjust + approve.</p>
+  </section>
+
+  <section class="feature-block">
+    <h2>What the user actually does</h2>
+    <ul><li><strong>Morning of the close:</strong> controller opens <code>/Accruals/Preview</code>. Variance indicators show what changed vs. prior month. Anomalies flagged for investigation.</li><li><strong>Investigate variance:</strong> drill into a row, see the per-product detail. Decide if it's a real change or a data-quality issue.</li><li><strong>Open Accrual Batches:</strong> find the relevant batch (one per cost center × month). Edit individual lines to apply overrides where needed.</li><li><strong>Submit</strong> the batch → workflow transitions NotSubmitted → Submitted. Manager approves → status becomes Approved. Approved batches handoff to AH via the integration function.</li><li><strong>Configure once a year:</strong> which cost centers participate in accruals, which brokers are flagged 'Ignore for Accruals' (terminated, on leave, etc.).</li></ul>
+  </section>
+
+  <section class="feature-block">
+    <h2>Key screens</h2>
+    <div class="key-screens">
+      <p style="margin-bottom: 12px; color: var(--slate); font-size: 14.5px;">Click any screen to open its dedicated guide — what's on the page, where the data comes from, vocabulary, and customer Q&amp;A.</p>
+      <div class="key-screens-grid"><a href="screen-cashhub-accruals-preview.html">Accruals Preview →</a><a href="screen-cashhub-accruals-batches.html">Accrual Batches →</a><a href="screen-cashhub-accruals-config.html">Accruals Configuration →</a><a href="screen-cashhub-accruals-broker.html">Broker Config →</a><a href="screen-cashhub-accruals-process.html">Process Accrual Batches (on-demand) →</a></div>
+    </div>
+  </section>
+
+  <section class="feature-block">
+    <h2>Business value</h2>
+    <div class="value-callout">
+      <p>Month-end accruals go from 'a multi-day fire drill done in Excel' to <strong>a 1-2 day workflow with explicit ownership at every step</strong>. Variance investigations happen early (Preview catches anomalies before commitment); the close becomes predictable.</p>
+    </div>
+  </section>
+
+  <details class="tech-anchors">
+    <summary>Technical anchors (entities, handlers, integrations)</summary>
+    <div class="tech-body">
+      <p><strong>Entities:</strong> <code>AccrualBatch</code>, <code>AccrualLine</code>, <code>AccrualCostCenterConfiguration</code>, <code>Broker.IgnoreForAccruals</code>, <code>AccrualPeriodConfig</code>.</p>
+<p><strong>Pages:</strong> <code>AccrualPreview.razor</code>, <code>AccrualBatches.razor</code>, <code>AccrualBatchLines.razor</code>, <code>AccrualBatchTrigger.razor</code>, <code>AccrualConfiguration.razor</code>, <code>AccrualBrokerConfigs.razor</code>.</p>
+<p><strong>Calculation:</strong> <code>IAccrualsCalculationService</code> runs a 12-month rolling-average per product.</p>
+<p><strong>Queries:</strong> <code>GetAllAccrualBatchesQueryHandler</code>, <code>GetAccrualBatchHeaderQueryHandler</code>, <code>GetPagedAccrualGroupsQueryHandler</code>, <code>PreviewAccrualLinesQueryHandler</code>, <code>GetAccrualVarianceAnalysisQueryHandler</code>, <code>GetAccrualVarianceProductDetailQueryHandler</code>, <code>GetPagedAccrualBatchLinesQueryHandler</code>, <code>GetAccrualGroupLinesQueryHandler</code>, <code>RecalculateSingleAccrualLineQueryHandler</code>, <code>GetPagedAccrualBrokerConfigsQueryHandler</code>.</p>
+<p><strong>Commands (shared library):</strong> <code>CreateAccrualBatchCommandHandler</code>, <code>TriggerAccrualBatchProcessingCommandHandler</code>, <code>SaveAccrualOverrideCommandHandler</code>, <code>ApplyFinanceTerminationToAccrualLinesCommandHandler</code>, <code>UpdateBrokerIgnoreForAccrualsCommandHandler</code>.</p>
+<p><strong>Outbound integration:</strong> <code>AccrualsOverrideToAHHandoff</code> / <code>Polling</code>.</p>
+<p><strong>Automation:</strong> <code>ProcessAccrualsBatchByCostCenter</code> Azure Function (nightly).</p>
+<p><strong>Policies:</strong> <code>Accruals.CanView</code>, <code>CanManageBatches</code>, <code>CanApprove</code>.</p>
+    </div>
+  </details>
+
+  <section class="feature-block">
+    <h2>Related features</h2>
+    <div class="related-features"><a href="feature-ah-journals.html">AH Journals</a><a href="feature-collections-cases.html">Collections Cases</a></div>
+  </section>
+
+<nav class="feature-nav feature-nav-bottom"><a class="feature-nav-btn prev" href="feature-ah-journals.html"><span class="feature-nav-label">← Previous</span><span class="feature-nav-title">AH Journals & Manual Journal Batches</span></a><a class="feature-nav-pos" href="feature-library.html"><strong>8</strong> / 25 · all features</a><a class="feature-nav-btn next" href="feature-collections-cases.html"><span class="feature-nav-label">Next →</span><span class="feature-nav-title">Collections Cases (Aged Accrual Write-Offs)</span></a></nav>
+</main>
+
+<footer>
+  Feature guide · part of the <a href="index.html">ERP Unite Learning Pack</a> · <a href="feature-library.html">full feature library</a>
+</footer>
+
+</body>
+</html>

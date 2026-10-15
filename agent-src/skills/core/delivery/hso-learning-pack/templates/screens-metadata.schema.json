@@ -1,0 +1,60 @@
+[
+  {
+    "id": "cashhub-home",
+    "app": "CashHub",
+    "group": "Cash Hub — entry",
+    "title": "Cash Hub Home",
+    "subtitle": "The landing dashboard for the cash and statements workflow",
+    "route": "/",
+    "screenshot": "screens-onedigital/cashhub-home.png",
+    "captured_at": "2026-05-21",
+    "what_it_is": "The first screen a Cash Hub user sees after signing in. It anchors the rest of the application — the AppBar across the top, the navigation drawer collapsed on the left, and the body where every other screen renders. Most customers will reach this screen first; what they see here sets the tone for the whole product.\n\nThis is also where role-based navigation is enforced: the drawer items that show up here depend on the signed-in user's role and hierarchy assignment. Two users on the same brokerage's instance can have entirely different drawer contents.",
+    "what_you_see": [
+      "**OneDigital logo + Cash hub title** in the top-left of the AppBar (placeholder until HSO productization is locked).",
+      "**Drawer toggle** (the 3-bar icon) to expand or collapse the navigation pane.",
+      "**Notifications bell**, **settings gear**, and **user menu** on the right of the AppBar.",
+      "**Drawer categories** (visible when expanded): Overview, Statements, Templates, Cash, Cash Application, Accruals — each gated by user permissions."
+    ],
+    "data_sources": [
+      "**No data query runs on this screen** — it's pure navigation. The drawer items are built from the user's permission set returned by `IUserSecurityPermissionViewService`.",
+      "**Permissions** come from the `UserRole` + `RolePermission` + `Permission` tables in `UniteHubCoreDb`.",
+      "**Hierarchy filtering** (Region / Market / PnL / CostCenter) is evaluated by `PermissionHandler` to decide which drawer entries to render."
+    ],
+    "workflow_context": "Cash Hub is one of three internal Blazor apps in ERP Unite. Cash Hub owns the statement-to-cash and accruals-to-GL workflows; Compensation Hub owns the producer compensation side; Producer Portal is the external-facing surface. They share the same underlying database and a common Microsoft Entra ID sign-on.\n\nThe Home screen exists primarily to validate sign-on and route the user to their actual work. Most users will navigate immediately to Statements, Cash Applications, or Accrual Batches from here.",
+    "vocabulary": [
+      {
+        "term": "AppBar",
+        "definition": "The bar across the top of the screen that holds the logo, app title, and the notification/settings/user menus."
+      },
+      {
+        "term": "Drawer",
+        "definition": "The collapsible left-side navigation pane. Items shown depend on user permissions and hierarchy scope."
+      },
+      {
+        "term": "Hierarchy assignment",
+        "definition": "The combination of Region / Market / P&L / Cost Center attached to a UserRole that scopes what the user can see."
+      }
+    ],
+    "questions": [
+      {
+        "q": "Why does my user see different drawer items than someone else?",
+        "a": "Drawer items are permission-gated. Each user's UserRole carries a set of permissions (and optionally a regional or hierarchy scope). The drawer only renders items the user has access to."
+      },
+      {
+        "q": "Can we put a customer logo here instead of OneDigital?",
+        "a": "Yes — the logo is in `Unite.Shared.UI/wwwroot/`. Productization Phase 3 swaps it. Until then, it shows the OneDigital placeholder."
+      }
+    ],
+    "related": [
+      {
+        "id": "cashhub-statements-list",
+        "title": "Statements list"
+      },
+      {
+        "id": "cashhub-accruals-batches",
+        "title": "Accrual Batches"
+      }
+    ]
+  },
+  {
+    "id": "cashhub-statements-list",

@@ -1,0 +1,63 @@
+{
+  "$schema": "./solution-security-policy.schema.json",
+  "version": 1,
+  "_comment": [
+    "HSO solution security scan policy. Copy to the repo root as solution-security-policy.json.",
+    "ENFORCEMENT MODEL: every rule is advisory ('warn') unless a human explicitly sets",
+    "'enforcement': 'block'. The scanner never promotes a rule to blocking on its own, and",
+    "adding a rule in a future version lands as 'warn'. 'off' disables a rule entirely.",
+    "SEVERITY is the reader-facing label (error|warning|info) and does NOT gate the build."
+  ],
+
+  "connectorAllowlist": [
+    "shared_commondataserviceforapps",
+    "shared_commondataservice",
+    "shared_teams",
+    "shared_office365users",
+    "shared_office365",
+    "shared_sharepointonline",
+    "shared_approvals",
+    "shared_flowpush",
+    "shared_powerplatformforadmins"
+  ],
+
+  "domainAllowlist": [
+    "*.dynamics.com",
+    "*.crm.dynamics.com",
+    "*.api.crm.dynamics.com",
+    "*.sharepoint.com",
+    "*.microsoftonline.com",
+    "*.azure-api.net",
+    "*.hso.com"
+  ],
+
+  "codePaths": ["src", "Plugins"],
+
+  "rules": {
+    "flow-external-connector":        { "severity": "warning", "enforcement": "warn" },
+    "flow-http-action":               { "severity": "warning", "enforcement": "warn" },
+    "flow-external-domain":           { "severity": "warning", "enforcement": "warn" },
+    "flow-embedded-secret":           { "severity": "error",   "enforcement": "warn" },
+    "connectionref-embedded-value":   { "severity": "warning", "enforcement": "warn" },
+    "settings-literal-secret":        { "severity": "error",   "enforcement": "warn" },
+    "webresource-eval":               { "severity": "warning", "enforcement": "warn" },
+    "webresource-remote-script":      { "severity": "warning", "enforcement": "warn" },
+    "webresource-external-fetch":     { "severity": "info",    "enforcement": "warn" },
+    "plugin-outbound-http":           { "severity": "warning", "enforcement": "warn" },
+    "plugin-dynamic-execution":       { "severity": "warning", "enforcement": "warn" },
+    "policy-suppression-expired":     { "severity": "info",    "enforcement": "warn" }
+  },
+
+  "suppressions": [
+    {
+      "_example": "Delete this entry. Every field except 'notes' is required; 'expires' is enforced.",
+      "rule": "flow-external-connector",
+      "path": "Solutions/Example/Workflows/Example-*.json",
+      "match": "shared_sql",
+      "reason": "Legacy finance sync, replaced by the ADF pipeline in PBI 1234.",
+      "approvedBy": "architect@example.com",
+      "expires": "2000-01-01",
+      "notes": "Expired suppressions are ignored and reported as policy-suppression-expired."
+    }
+  ]
+}

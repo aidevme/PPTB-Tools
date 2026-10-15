@@ -1,0 +1,269 @@
+---
+marp: true
+theme: hso-knowledge
+paginate: true
+size: 16:9
+title: ERP Unite — Sales Enablement
+---
+
+<!-- _class: cover -->
+
+# ERP Unite
+
+The HSO sales playbook for insurance brokerage finance.
+
+<div class="byline">Sales enablement · talk track + demo path + objection handling</div>
+
+---
+
+<!-- _class: stat -->
+
+<div class="number">3 pains</div>
+
+## that every insurance brokerage has
+
+Cash that doesn't apply itself. Commissions calculated in spreadsheets. Month-end close that bleeds three days. **Unite kills all three.**
+
+---
+
+# Who you're selling to
+
+Insurance brokerages — independent agencies, MGAs, wholesalers, regional carriers' direct arms. Anywhere commissions and producer compensation drive the P&amp;L.
+
+<div class="cols three">
+<div class="card">
+
+### **CFO / Controller**
+Owns the close. Cares about audit-readiness, transaction completeness, GL integrity. Buys on **time-to-close** and **error rate**.
+
+</div>
+<div class="card">
+
+### **VP Operations**
+Owns the back office. Cares about staff time, throughput, productivity. Buys on **headcount avoidance** and **SLA compliance**.
+
+</div>
+<div class="card">
+
+### **CIO / IT Director**
+Owns the platform. Cares about integration cost, security, vendor risk. Buys on **time-to-value** and **TCO**.
+
+</div>
+</div>
+
+---
+
+<!-- _class: section -->
+
+# The pain we eliminate
+
+Three concrete jobs the broker's back office does today, badly.
+
+---
+
+# Pain #1 — Statement chaos
+
+Brokers receive commission statements from hundreds of carriers. Every carrier sends a different format. PDFs. Excels. CSVs of every shape.
+
+- **Today:** an analyst opens each one and re-keys it into the GL
+- **Today:** template work for a new carrier eats two days
+- **Today:** errors are silent until reconciliation finds them weeks later
+- **With Unite:** AI-driven Mapping Studio onboards a new format in minutes
+- **With Unite:** every statement is fingerprinted; templates auto-suggest
+
+*Net: data entry as a profession disappears.*
+
+---
+
+# Pain #2 — Cash that doesn't apply itself
+
+Once statements are loaded, they have to be matched to invoices, customers, products. Today this is manual.
+
+- **Today:** open a statement, find the right product, type the match
+- **Today:** "research cases" pile up for ambiguous matches; ages out into write-offs
+- **With Unite:** rule-based + learning matching applies cash automatically
+- **With Unite:** rules learned from each manual match; the system gets faster every week
+- **With Unite:** unmatched cash lives in Research Cases — visible, assigned, tracked
+
+*Net: cash-to-GL is a same-day cycle, not a same-week cycle.*
+
+---
+
+# Pain #3 — Producer compensation in spreadsheets
+
+Producer pay is the brokerage's biggest expense and its biggest source of disputes. Today it lives in Excel.
+
+- **Today:** comp calc happens in a workbook that one person owns
+- **Today:** split intake (who-gets-what-percent) lives in a shared drive
+- **Today:** disputes take a week to research because there's no audit trail
+- **With Unite:** Compensation Hub is the system of record, with workflow + history
+- **With Unite:** Split Intake has versions, audit log, SIF coverage audit, hierarchy permissions
+- **With Unite:** Producer Portal lets producers self-serve their own statements
+
+*Net: comp disputes drop to near-zero. Producer satisfaction goes up.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #00B294 -->
+
+# Why Unite, not the alternatives
+
+Three honest comparisons.
+
+---
+
+# vs. "we'll build it ourselves"
+
+The brokerage's IT shop says "give us six months and we'll do it." They won't.
+
+- **Unite is .NET 10 + Blazor + EF Core** — the stack their team already runs
+- **Unite has 70+ entities and 200+ handlers** — six months of in-house work, minimum
+- **Unite has AI integrations** they'd never build (Gemini, OCR, durable orchestration)
+- **Unite has six Azure Function bridges** to AH, FinOps, Workday, Mulesoft — fully wired
+- **In-house effort burns 2-3 FTEs for a year** — Unite ships in weeks
+
+*Talk track:* "Your team is great. They're not building a six-person-year-equivalent product on the side."
+
+---
+
+# vs. a generic ERP (NetSuite, D365 Finance)
+
+Generic ERPs don't speak insurance.
+
+- **No native concept of "commission statement"** — every carrier integration is custom
+- **No native concept of "split intake"** — producer compensation is configured, not modeled
+- **No native concept of "research case"** — unmatched cash sits in clearing accounts
+- **Customization cost: $500k-$2M** — and a multi-year project
+- **Unite is purpose-built for brokerage finance** — these concepts are first-class
+
+*Talk track:* "NetSuite is a great accounting platform. It's not an insurance platform."
+
+---
+
+# vs. niche brokerage software (BenefitMall, AgencyBloc, etc.)
+
+Niche brokerage software handles agency management. It doesn't handle the GL.
+
+- **Niche tools own producer + policy data** — fine
+- **Niche tools don't integrate to the GL** — finance still rekeys
+- **Niche tools have no AI on the import side** — manual templates forever
+- **Unite is the missing finance layer** — it sits next to the niche tools, not against them
+- **Unite is also a credible upgrade path** when the niche tool's accounting module gives out
+
+*Talk track:* "Keep your AMS. Add Unite where the GL lives. We don't compete with your AMS — we complete the picture."
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F1554B -->
+
+# The demo path
+
+Twenty minutes. Always lead with the AI.
+
+---
+
+# Demo screen #1 — Mapping Studio
+
+![bg right:58%](screens/cashhub-mapping-studio.png)
+
+Open Mapping Studio. Drop in a carrier statement PDF. Wait three seconds.
+
+- Show the AI's proposed column mappings
+- Show the "valid license" link in the corner (HSO licenses on productization)
+- Click Accept; the template saves
+- Run extraction → preview rows
+- *"This used to be a two-day analyst task."*
+
+---
+
+# Demo screen #2 — Cash Application Review
+
+![bg right:58%](screens/cashhub-cash-applications.png)
+
+Open a Cash Application header. Walk the room through the matched lines.
+
+- Approved lines tinted green
+- Match Status badge: Auto / Manual / Requires Review
+- Multi-select toolbar: Approve all visible, Unapprove, Unmatch
+- *"The matching engine learns from every manual fix."*
+
+---
+
+# Demo screen #3 — Compensation Actuals
+
+![bg right:58%](screens/comphub-comp-actuals.png)
+
+Switch to CompHub. Show the comp batch list with workflow status pills.
+
+- Filter by Submitted / In Progress / Approved
+- Drill into a batch — payable lines per producer
+- Show invoice IDs auto-generated on the Approved transition
+- *"Producer comp out of the spreadsheet, into the audit trail."*
+
+---
+
+# Demo flow — the 20-minute version
+
+The order matters. Lead with the magic; finish with the math.
+
+- **5 min — Mapping Studio.** Drop in a carrier statement PDF. AI suggests the columns. Click accept. Done.
+- **5 min — Cash Application Review.** Open a header. Show matched lines. Approve. Show parent/child splits.
+- **3 min — Research Cases.** The unmatched cash. Assignable, notes-able, audit-trailed.
+- **4 min — Compensation Actuals.** Show batch detail, invoice IDs auto-generated on approval.
+- **3 min — Producer Portal.** Switch hat — log in as a producer. See your own statement.
+
+*Net: by minute 12 they're asking about pricing.*
+
+---
+
+<!-- _class: section -->
+<!-- _color: #F2B949 -->
+
+# Objection handling
+
+The three things you'll hear. The three things to say.
+
+---
+
+# Top three objections
+
+The patterns are universal. The answers are the same every time.
+
+- **"We're already on [X]."** → "Great. Unite sits next to [X], not against. Let me show you the integration footprint." (Open the integration diagram.)
+- **"Your AI scares my auditors."** → "AI suggests; humans approve. Every line has provenance. Every transition has a workflow history row. Audit-ready by design."
+- **"What's your roadmap?"** → "HSO acquired this from OneDigital. Phase 3 is the AI feature pipeline. You're not buying a snapshot — you're buying a product on an HSO investment trajectory."
+
+*Net: 80% of objections are these three. Memorize the answers.*
+
+---
+
+# What to leave behind
+
+Always leave the buyer with two things — never just one.
+
+<div class="cols two">
+<div class="card">
+
+### **The executive deck**
+`01-executive-overview.pptx` in the learning pack. Fifteen slides, brand-clean. Email it to the CFO that night.
+
+</div>
+<div class="card">
+
+### **The follow-up commitment**
+A discovery call with HSO's solution architect. Calendar it before you leave the room.
+
+</div>
+</div>
+
+---
+
+<!-- _class: cover -->
+
+# Now go sell it.
+
+ERP Unite. The HSO answer to brokerage finance.
+
+<div class="byline">Questions? <strong>solution-architects@hso.com</strong></div>

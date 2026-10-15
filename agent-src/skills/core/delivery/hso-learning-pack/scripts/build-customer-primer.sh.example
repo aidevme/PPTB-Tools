@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# build-hubintl-primer.sh
+# One-shot rebuild of the HUB International primer track:
+#   1. Run the Python generator → HTML reading pages + Marp .md sources + primer landing
+#   2. Render each .md to .pptx (HSO theme)
+#   3. Render each .md to slide HTML (HSO theme)
+#
+# Usage:
+#   ./scripts/build-hubintl-primer.sh
+#
+# Run from repo root. Requires Node (for npx) and Python 3.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$REPO_ROOT"
+
+# Resolve theme + wrapper. Prefer the copies committed alongside this script in
+# the target repo; fall back to the learning-pack-builder skill's bundled copies.
+THEME="${HSO_THEME_CSS:-$REPO_ROOT/themes/hso-theme.css}"
+WRAPPER="$SCRIPT_DIR/make-deck.sh"
+SKILL_DIR="$HOME/.claude/skills/learning-pack-builder"
+[[ -f "$THEME"   ]] || THEME="$SKILL_DIR/themes/hso-theme.css"
+[[ -f "$WRAPPER" ]] || WRAPPER="$SKILL_DIR/scripts/make-deck.sh"
+
+if [[ ! -f "$THEME" ]]; then
+  echo "HSO theme CSS not found at $THEME" >&2
+  exit 1
+fi
+
+# ─── 1. Python generator ──
+echo "==> Running Python generator..."
+python3 scripts/generate-hubintl-primer.py
+echo ""
+
+# Modules we care about
+MODULES=(
+  "hubintl-01-overview"
+  "hubintl-02-business-model"
+  "hubintl-03-rpw"
+  "hubintl-04-rpa-industry"
+  "hubintl-05-regulatory"
+  "hubintl-06-outlook"
+)
+
+# ─── 2. .pptx (via wrapper, uses Edge for PPTX export) ──
+echo "==> Rendering .pptx decks..."
+for m in "${MODULES[@]}"; do
+  echo "  $m.md -> $m.pptx"
+  "$WRAPPER" "$m.md" "$m.pptx" 2>&1 | grep -E "(=>|ERROR)" | head -2 || true
+done
+echo ""
+
+# ─── 3. -slides.html (direct marp-cli, no browser dependency) ──
+echo "==> Rendering -slides.html ..."
+for m in "${MODULES[@]}"; do
+  echo "  $m.md -> $m-slides.html"
+  npx --yes @marp-team/marp-cli@latest \
+    --theme-set "$THEME" \
+    --html \
+    --allow-local-files \
+    -o "$m-slides.html" \
+    "$m.md" 2>&1 | grep -E "(=>|ERROR)" | head -1 || true
+done
+echo ""
+
+echo "==> Done. Output files:"
+ls -lh hubintl-*.{html,md,pptx} 2>/dev/null | awk '{printf "  %6s  %s\n", $5, $9}'
