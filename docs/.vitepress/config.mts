@@ -9,8 +9,15 @@ export default defineConfig({
         nav: [
             { text: "Home", link: "/" },
             { text: "Dataverse Early-Bound TypeScript Generator", link: "/pptb-tools/dataverse-early-bound-typescript-generator/" },
+            { text: "Repository", link: "/repository/agentic-workflows" },
         ],
         sidebar: {
+            "/repository/": [
+                {
+                    text: "Repository",
+                    items: [{ text: "GitHub Agentic Workflows", link: "/repository/agentic-workflows" }],
+                },
+            ],
             "/pptb-tools/dataverse-early-bound-typescript-generator/": [
                 {
                     text: "Dataverse Early-Bound TypeScript Generator",
