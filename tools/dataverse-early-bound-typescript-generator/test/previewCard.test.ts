@@ -3,7 +3,10 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PreviewCard, fileType, sortFiles, summarizePlan, visibleFiles, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { PreviewCard, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { fileType } from '../src/components/shared/generatedFiles';
+import { clampListWidth, sortFiles, visibleFiles } from '../src/components/shared/previewFiles';
+import { summarizePlan } from '../src/services';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import type { PlannedFile, WritePlan } from '../src/types';
 
@@ -321,5 +324,18 @@ describe('Delete orphaned files switch', () => {
         };
         await render({ plan: orphansOnly });
         expect(button('Nothing to write').disabled).toBe(true);
+    });
+});
+
+describe('clampListWidth', () => {
+    it('keeps the list at least 280 px and leaves 320 px for the viewer', () => {
+        expect(clampListWidth(100, 1200)).toBe(280);
+        expect(clampListWidth(600, 1200)).toBe(600);
+        expect(clampListWidth(1100, 1200)).toBe(880);
+    });
+
+    it('only applies the minimum while the split has no measured width', () => {
+        expect(clampListWidth(5000, 0)).toBe(5000);
+        expect(clampListWidth(10, 0)).toBe(280);
     });
 });

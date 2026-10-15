@@ -53,3 +53,11 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
     Parameters: their types are built from the custom API definition.
 - **Missing items:** names that are in the config but not in the environment are listed above the list.
   They stay in the config and are skipped when generating.
+
+## Where the code lives
+
+- `components/cards/SelectionCard.tsx`: the card.
+- `components/cards/selectionColumns.tsx`: the column definitions per tab (`ENTITY_COLUMNS`, `ACTION_COLUMNS`,
+  `FUNCTION_COLUMNS`) with their header tooltips, and the badge colour per table type (`TABLE_TYPE_COLORS`).
+- `components/shared/sorting.ts`: `sortSelectionRows`, which sorts the rows by the chosen column, listing rows
+  without a value last.

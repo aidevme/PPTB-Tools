@@ -1,5 +1,7 @@
 # Components
 
+Part of the [Contributor guide](../contributing/).
+
 The tool's UI is built from presentational React components in
 [`src/components/`](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-early-bound-typescript-generator/src/components),
 using Fluent UI v9. They hold no app state: `App.tsx` owns all state and orchestration and passes data and

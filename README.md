@@ -24,14 +24,14 @@ This repository hosts individual tools that plug into Power Platform ToolBox (PP
 
 ### Dataverse Early-Bound TypeScript Generator
 
-This tool generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. Its output works with Scott Durow's [dataverse-ify](https://github.com/scottdurow/dataverse-ify), and it shares the `.dataverse-gen.json` project file with his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, whose generator it ports. Source: [tools/dataverse-type-gen](tools/dataverse-type-gen/) · Docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator](docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
+This tool generates early-bound TypeScript types and metadata for Dataverse tables, actions and functions. Its output works with Scott Durow's [dataverse-ify](https://github.com/scottdurow/dataverse-ify), and it shares the `.dataverse-gen.json` project file with his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, whose generator it ports. Source: [tools/dataverse-early-bound-typescript-generator](tools/dataverse-early-bound-typescript-generator/) · Docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator](docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
 - Pick a project folder and load or create `.dataverse-gen.json`.
 - Select tables (with search and a solution filter), actions and functions.
 - Preview generated files as new, changed, unchanged or orphaned against the output folder.
 - Write only what changed and save the config.
 
-**Status:** initial implementation; output verified against dataverse-gen test fixtures, not yet validated against a live environment.
+**Status:** version 1.0.0. Output verified against dataverse-gen's test fixtures; tested in Power Platform ToolBox against a live environment, with Generate, orphan deletion and the dark theme still to test live ([TESTING.md](tools/dataverse-early-bound-typescript-generator/TESTING.md)).
 
 ## Contributing
 

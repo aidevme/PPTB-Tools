@@ -7,6 +7,8 @@ export type { NotificationType } from './notifications';
 export { PptbFileSink, InMemoryFileSink, buildDeleteCommands, isWindowsPath } from './fileSink';
 export type { DirectoryEntry, FileSink } from './fileSink';
 export { PptbMetadataProvider, METADATA_CONCURRENCY, toTableType } from './metadataProvider';
+export { QUERY_MAX_PAGES, QUERY_PAGE_SIZE, buildPageQuery, queryAllPages } from './paging';
+export type { PagedQuery, QueryRunner } from './paging';
 export { separatorOf, isAbsolutePath, isSamePath, joinPath, dirname, basename, toPosix } from './paths';
 export { resolveOutputRoot, createWritePlan, applyWritePlan, deleteOrphanedFiles, summarizeGeneration, summarizePlan } from './plan';
 export type { DeleteResult } from './plan';

@@ -37,7 +37,7 @@ import {
     TableRegular,
     TextBulletListLtrRegular,
 } from '@fluentui/react-icons';
-import type { FileStatus, PlannedFile, WritePlan } from '../../types';
+import type { FileStatus, WritePlan } from '../../types';
 import { summarizePlan } from '../../services';
 import { usePreviewCardStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
@@ -45,89 +45,21 @@ import { STATUS_META, STATUS_ORDER, fileName, fileType, type GeneratedFileType }
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
+import {
+    DEFAULT_LIST_WIDTH,
+    HEADER_HELP,
+    MIN_LIST_WIDTH,
+    clampListWidth,
+    sortFiles,
+    visibleFiles,
+    type FileFilter,
+    type FileSortColumn,
+} from '../shared/previewFiles';
 
-export { fileType } from '../shared/generatedFiles';
-export { summarizePlan } from '../../services';
 
-type SortColumn = 'name' | 'type' | 'status';
-
-const textCompare = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
-
-const COMPARERS: Record<SortColumn, (a: PlannedFile, b: PlannedFile) => number> = {
-    name: (a, b) => textCompare(fileName(a.relativePath), fileName(b.relativePath)),
-    type: (a, b) => textCompare(fileType(a.relativePath), fileType(b.relativePath)),
-    status: (a, b) => STATUS_ORDER.indexOf(a.status) - STATUS_ORDER.indexOf(b.status),
-};
-
-/**
- * Files in the order to list them: the plan's own order (grouped by folder) until a column is sorted, then by
- * that column, with ties in name order.
- */
-export function sortFiles(files: PlannedFile[], sort: { column: SortColumn; direction: SortDirection } | null): PlannedFile[] {
-    if (!sort) return files;
-    const sign = sort.direction === 'ascending' ? 1 : -1;
-    return [...files].sort((a, b) => sign * COMPARERS[sort.column](a, b) || COMPARERS.name(a, b) || textCompare(a.relativePath, b.relativePath));
-}
-
-export interface FileFilter {
-    /** Only files with this status; `null` for the default view. */
-    status: FileStatus | null;
-    /** In the default view, also list unchanged files. */
-    showUnchanged: boolean;
-    /** Case-insensitive text matched against the file's path. */
-    search: string;
-}
-
-/**
- * The files the table shows. By default, only what Generate acts on or reports (new, changed and orphaned);
- * unchanged files appear with `showUnchanged` or when their tile is selected.
- */
-export function visibleFiles(files: PlannedFile[], filter: FileFilter): PlannedFile[] {
-    const term = filter.search.trim().toLowerCase();
-    return files.filter(
-        (f) =>
-            (filter.status ? f.status === filter.status : filter.showUnchanged || f.status !== 'unchanged') &&
-            (!term || f.relativePath.toLowerCase().includes(term)),
-    );
-}
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
-/** Explanations shown in the header cells' tooltips. */
-const HEADER_HELP: Record<SortColumn, JSX.Element> = {
-    name: (
-        <>
-            <strong>Name:</strong> the file name, without its output folder. "(generated as …)" means a file with the same name in
-            different casing already exists and is reused, so imports elsewhere keep working. Hover over a name for its full
-            path. Click to sort by name.
-        </>
-    ),
-    type: (
-        <>
-            <strong>Type:</strong> what the file contains, from its output folder.
-            <ul>
-                <li><strong>entities</strong>: a table's interface, attribute constants and metadata</li>
-                <li><strong>enums</strong>: choice (option set) values</li>
-                <li><strong>actions</strong>, <strong>functions</strong>: request types for Dataverse messages</li>
-                <li><strong>metadata</strong>: metadata.ts, the cache passed to dataverse-ify</li>
-                <li><strong>other</strong>: complex types and the index.ts barrel</li>
-            </ul>
-            Click to sort by type.
-        </>
-    ),
-    status: (
-        <>
-            <strong>Status:</strong> how the generated file compares with the output folder.
-            <ul>
-                <li><strong>new</strong>: doesn't exist yet; Generate creates it</li>
-                <li><strong>changed</strong>: content differs; Generate overwrites it</li>
-                <li><strong>unchanged</strong>: identical; not rewritten</li>
-                <li><strong>orphaned</strong>: in the output folder but no longer generated; only reported, unless Delete orphaned files is on</li>
-            </ul>
-            Click to sort by status (new first).
-        </>
-    ),
-};
 
 /** Explanation shown in the Delete orphaned files switch's tooltip. */
 const DELETE_ORPHANS_HELP = (
@@ -154,9 +86,6 @@ const STATUS_ICONS: Record<FileStatus, JSX.Element> = {
     orphaned: <DocumentQuestionMarkRegular />,
 };
 
-const MIN_LIST_WIDTH = 280;
-const MIN_VIEWER_WIDTH = 320;
-const DEFAULT_LIST_WIDTH = 480;
 
 export interface PreviewCardProps {
     step: StepState;
@@ -191,7 +120,7 @@ export function PreviewCard(props: PreviewCardProps) {
     const styles = usePreviewCardStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
-    const [sort, setSort] = useState<{ column: SortColumn; direction: SortDirection } | null>(null);
+    const [sort, setSort] = useState<{ column: FileSortColumn; direction: SortDirection } | null>(null);
     const [listWidth, setListWidth] = useState(DEFAULT_LIST_WIDTH);
     const splitRef = useRef<HTMLDivElement>(null);
     const tableRef = useRef<HTMLTableElement>(null);
@@ -200,11 +129,11 @@ export function PreviewCard(props: PreviewCardProps) {
     const selected = plan?.files.find((f) => f.relativePath === selectedPath) ?? null;
     const writable = plan ? plan.counts.new + plan.counts.changed : 0;
 
-    const toggleSort = (column: SortColumn) =>
+    const toggleSort = (column: FileSortColumn) =>
         setSort((current) =>
             current?.column === column ? { column, direction: current.direction === 'ascending' ? 'descending' : 'ascending' } : { column, direction: 'ascending' },
         );
-    const sortDirection = (column: SortColumn) => (sort?.column === column ? sort.direction : undefined);
+    const sortDirection = (column: FileSortColumn) => (sort?.column === column ? sort.direction : undefined);
     const toggleStatus = (status: FileStatus) => setFilter((f) => ({ ...f, status: f.status === status ? null : status }));
 
     /** ↑/↓ move the selection to the neighbouring row and focus it. */
@@ -220,11 +149,7 @@ export function PreviewCard(props: PreviewCardProps) {
         }
     };
 
-    const clampWidth = (width: number) => {
-        const total = splitRef.current?.clientWidth ?? 0;
-        const max = total > 0 ? total - MIN_VIEWER_WIDTH : Number.MAX_SAFE_INTEGER;
-        return Math.max(MIN_LIST_WIDTH, Math.min(width, max));
-    };
+    const clampWidth = (width: number) => clampListWidth(width, splitRef.current?.clientWidth ?? 0);
     const startResize = (e: ReactPointerEvent<HTMLDivElement>) => {
         const startX = e.clientX;
         const startWidth = listWidth;

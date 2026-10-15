@@ -123,16 +123,8 @@ const client = new XrmContextDataverseClient(Xrm.WebApi);
 const account = await client.retrieve<Account>(accountMetadata.logicalName, id, ["name"]);
 ```
 
-With **Form context helpers** on, form scripts get typed controls and attributes:
-
-```ts
-import { AccountFormContext } from "./dataverse-gen";
-
-export function onLoad(context: Xrm.Events.EventContext) {
-    const form = context.getFormContext() as AccountFormContext;
-    form.getAttribute("name"); // typed as Xrm.Attributes.StringAttribute
-}
-```
+[Using the generated code](../guide/using-the-generated-code.md) has more, including the typed form-context
+helpers.
 
 ## Keeping types up to date
 
@@ -142,21 +134,18 @@ automatically.
 
 ## If something goes wrong
 
-Errors appear as a notification and in a red bar at the top of the tool, with a short explanation:
-
-| Message | What to do |
-| --- | --- |
-| You don't have permission to perform this action. | Your Dataverse security role can't read the metadata. Ask an administrator for read access to the tables. |
-| Authentication failed. Please reconnect… | Reconnect to the environment in PPTB. |
-| Too many requests. Please wait a moment… | Dataverse is throttling. The tool already retries a few times; wait and try again. |
-| Power Platform ToolBox hasn't granted access to that folder. | Open the project again with **Load Existing Project** and confirm the folder. |
-| .dataverse-gen.json isn't valid JSON. | Fix the file's syntax, or remove it to start from defaults. |
-
-In very large environments, a short warning may say the `$metadata` document is too large for PPTB. The tool
-then builds types from table metadata instead: tables and custom APIs still work, but built-in actions and
-functions aren't available.
+Errors appear as a notification and in a red bar at the top of the tool, with a short explanation. In very
+large environments, a short warning may say the `$metadata` document is too large for PPTB. See
+[Troubleshooting & limitations](../guide/troubleshooting.md) for each message and what to do, and for what's
+unavailable in that case.
 
 ## Next steps
 
-- [Components](../components/) and [Architecture](../architecture/) explain how the tool is built.
-- The [overview](../index.md) lists what's generated and the known limitations.
+- [Using the generated code](../guide/using-the-generated-code.md): dataverse-ify setup and form-context helpers.
+- [Why generate metadata?](../guide/why-generate-metadata.md) explains what dataverse-ify uses the generated
+  metadata for.
+- [What gets generated](../guide/what-gets-generated.md) and the [project file](../guide/project-file.md)
+  reference.
+- [Tool settings](../guide/tool-settings.md), [Safety](../guide/safety.md) and
+  [Moving from dataverse-gen](../guide/moving-from-dataverse-gen.md).
+- [Contributing](../contributing/) explains how the tool is built.

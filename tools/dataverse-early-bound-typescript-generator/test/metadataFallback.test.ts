@@ -139,7 +139,9 @@ describe('metadata provider fallback', () => {
                         value: [{ customapiid: 'c1', uniquename: 'contoso_Ping', displayname: 'Ping', isfunction: false, isprivate: false, bindingtype: 0 }],
                     };
                 }
-                if (query.startsWith('customapirequestparameters?') || query.startsWith('workflows?')) return { value: [] };
+                if (query.startsWith('customapirequestparameters?') || query.startsWith('customapiresponseproperties?') || query.startsWith('workflows?')) {
+                    return { value: [] };
+                }
                 throw new Error('unexpected query ' + query);
             },
         };

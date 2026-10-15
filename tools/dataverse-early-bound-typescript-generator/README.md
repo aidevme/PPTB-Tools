@@ -6,8 +6,8 @@ Dataverse tables, actions and functions. The output is compatible with Scott Dur
 `.dataverse-gen.json` project file as his [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI, so a
 project can be regenerated from either.
 
-Implementation guide: [docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/dataverse-type-forge-implementation-guide.md).
-User docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
+Original design (kept for history): [docs/pptb-tools/dataverse-early-bound-typescript-generator/contributing/design-history.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/contributing/design-history.md).
+User and contributor docs: [docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/index.md).
 
 ## Why this tool exists
 
@@ -44,12 +44,25 @@ Node:
 Use this tool for client-side TypeScript, and the Early Bound Generator for server-side .NET code; a solution
 with both can use both.
 
-## Attribution
+## What this tool changes
 
-The generator logic and templates are a TypeScript port of `dataverse-gen` 2.0.17 (MIT, © Scott Durow).
-`dataverse-auth` is not ported because PPTB owns connections and tokens. Generated code depends on the
-unchanged `dataverse-ify` npm package. Contact the original author before publishing this tool to the PPTB
-marketplace, as the implementation guide asks.
+In Dataverse: nothing, since the tool is read-only. On disk, it writes only on **Generate** and only inside the
+project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. See the
+[Safety guide](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/safety.md) for the details.
+
+## Credits
+
+- **Original tool:** [dataverse-gen](https://github.com/scottdurow/dataverse-gen) 2.0.17 by **Scott Durow**,
+  licensed **MIT**. This tool's generator logic and output templates are a TypeScript port of dataverse-gen, and
+  its test fixtures come from dataverse-gen's test data. The MIT licence and copyright notice are reproduced in
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), which is also included in the published package.
+- **Runtime:** the generated code is for [dataverse-ify](https://github.com/scottdurow/dataverse-ify), also by
+  Scott Durow (MIT). It isn't included in this tool; projects install it themselves.
+- **Not ported:** [dataverse-auth](https://github.com/scottdurow/dataverse-auth), because Power Platform ToolBox
+  provides the Dataverse connection.
+
+This tool is licensed under the GPL-2.0, like the rest of this repository; MIT-licensed code can be included in
+GPL-licensed software as long as its notice is kept.
 
 ## Features
 
@@ -61,7 +74,7 @@ marketplace, as the implementation guide asks.
   file viewer.
 - Generate writes only new and changed files, then saves `.dataverse-gen.json`.
 
-## Commands (run from `tools/dataverse-type-gen/`)
+## Commands (run from `tools/dataverse-early-bound-typescript-generator/`)
 
 ```bash
 npm install
@@ -165,8 +178,11 @@ These only affect cases where dataverse-gen emits code that does not compile:
 
 ## Known limitations
 
-- Not yet validated against a live Dataverse environment inside PPTB. The full flow was exercised in a browser
-  with mocked PPTB APIs fed by dataverse-gen's test fixtures.
+- **Live testing:** tested in PPTB Desktop 1.2.7 against a Dataverse environment with about 2,900 tables:
+  connecting, listing tables, creating and opening projects, selecting, the Settings panel, and previewing against
+  an existing output folder. **Not yet tested live:** writing files with Generate, deleting orphaned files, the
+  dark theme and error paths. See [TESTING.md](TESTING.md) for the results and the steps for the remaining
+  checks. The unit tests cover the same flows with mocked PPTB APIs and dataverse-gen's test fixtures.
 - The CSDL is usually 1 to 5 MB and is fetched once per connection when Actions/Functions are opened or on first
   preview. Environments whose CSDL is over PPTB's 16 MiB limit use the metadata fallback above, without built-in
   actions/functions or custom process actions.

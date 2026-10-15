@@ -18,6 +18,7 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 | `errors.ts` | Error handling per PPTB's guide: `errorStatus` reads the HTTP status from PPTB's error messages and known Dataverse codes; `friendlyError` maps it to a user message; `reportError` logs with context, shows a persistent error notification and returns the error bar text; `withRetry` / `withRetries` retry 429, 502, 503 and 504 failures with growing delays. |
 | `notifications.ts` | PPTB notifications. `NOTIFICATION_TYPES` defines the four presets (success 3 s, info 5 s, warning and error persistent), and `notificationOptions(kind, body, title?)` builds `showNotification` options from one. It also shows `notifyProjectLoaded` (info) after a saved project opens, `notifyPreviewReady` (info) after a preview succeeds, and `notifyGenerationComplete` (success) after Generate. Best effort: failures are only logged. |
 | `concurrency.ts` | `mapWithConcurrency` runs async work with a cap on how many run at once. |
+| `paging.ts` | `queryAllPages` reads every row of a `queryData` query, one page of 5,000 at a time, by key (see [Paging](#paging)). |
 
 ## Metadata provider
 
@@ -36,6 +37,23 @@ and turn the results into the inputs the core needs. Like the core, they don't i
   in this mode; custom APIs still are. Any other error still fails as before.
 - **Private custom APIs** aren't in `$metadata`. `getSchemaForSelection` builds their definitions from the
   `customapi` record and its `customapirequestparameters`, mapped to the EDM types `$metadata` would use.
+
+## Paging
+
+`dataverseAPI.queryData` returns one page, at most 5,000 rows, and PPTB documents its result as just
+`{ value }`, so `@odata.nextLink` can't be relied on. Queries that could return more than one page go through
+`queryAllPages` (`paging.ts`) instead:
+
+- **Keyset paging:** it orders by a unique key (`$orderby=<key> asc`), asks for 5,000 rows (`$top=5000`), and
+  continues after the last key of each page (`$filter=… and <key> gt <last key>`) until a page comes back short.
+  Only `$select`, `$filter`, `$orderby` and `$top` are used, which PPTB documents for `queryData`.
+- **Bounded:** it stops with an error, rather than returning a partial list, if the key doesn't advance between
+  pages or if more than 200 pages (1,000,000 rows) would be needed.
+- **Used for** the two environment-wide lists: custom APIs (`customapis`, by `customapiid`) and custom process
+  actions (`workflows`, by `workflowid`).
+- **Not needed for** the other queries: solution membership of custom APIs and actions is queried 40 ids at a
+  time; a solution's tables can't exceed the environment's table count; and each custom API's request
+  parameters are a handful of rows. Metadata endpoints (`EntityDefinitions…`) aren't paged by Dataverse.
 
 ## Write planning
 

@@ -5,9 +5,10 @@
  * Everything is cached per instance; the app creates a new instance whenever the active connection
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
-import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
+import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxComplexType, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
+import { queryAllPages } from './paging';
 import { withRetries } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
@@ -208,16 +209,23 @@ export class PptbMetadataProvider {
         const customApis = await this.getCustomApis();
         const extraActions: EdmxOperation[] = [];
         const extraFunctions: EdmxOperation[] = [];
+        const extraComplexTypes: EdmxComplexType[] = [];
+        const knownComplex = new Set(schema.complexTypes.map((c) => c.Name));
         for (const name of wanted) {
             const custom = customApis.find((c) => c.uniqueName === name);
             if (!custom) continue;
-            const operation = await buildCustomApiOperation(custom);
+            const { operation, response } = await buildCustomApiOperation(custom);
             (custom.isFunction ? extraFunctions : extraActions).push(operation);
+            if (response && !knownComplex.has(response.Name)) {
+                knownComplex.add(response.Name);
+                extraComplexTypes.push(response);
+            }
         }
         if (extraActions.length === 0 && extraFunctions.length === 0) return schema;
-        const byName = (a: EdmxOperation, b: EdmxOperation) => (a.Name > b.Name ? 1 : -1);
+        const byName = <T extends { Name: string }>(a: T, b: T) => (a.Name > b.Name ? 1 : -1);
         return {
             ...schema,
+            complexTypes: [...schema.complexTypes, ...extraComplexTypes].sort(byName),
             actions: [...schema.actions, ...extraActions].sort(byName),
             functions: [...schema.functions, ...extraFunctions].sort(byName),
         };
@@ -369,8 +377,13 @@ interface CustomApiRecord {
  */
 async function listCustomApis(): Promise<CustomApiRecord[]> {
     try {
-        const result = await api().queryData('customapis?$select=customapiid,uniquename,displayname,isfunction,isprivate,bindingtype,boundentitylogicalname');
-        return result.value.map((row) => ({
+        // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
+        const rows = await queryAllPages((query) => api().queryData(query), {
+            entitySet: 'customapis',
+            select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
+            idField: 'customapiid',
+        });
+        return rows.map((row) => ({
             id: row.customapiid as string,
             uniqueName: row.uniquename as string,
             displayName: (row.displayname as string | null) || undefined,
@@ -420,11 +433,16 @@ function customApiParameterType(type: number, logicalEntityName: string | null |
     }
 }
 
-/** Build an operation definition from a `customapi` record and its request parameters. */
-async function buildCustomApiOperation(custom: CustomApiRecord): Promise<EdmxOperation> {
-    const result = await api().queryData(
-        `customapirequestparameters?$select=uniquename,type,isoptional,logicalentityname&$filter=_customapiid_value eq ${custom.id}`,
-    );
+/**
+ * Build an operation definition from a `customapi` record and its request parameters, plus the
+ * `<UniqueName>Response` complex type `$metadata` would publish for its response properties (none when
+ * the custom API has no response properties).
+ */
+async function buildCustomApiOperation(custom: CustomApiRecord): Promise<{ operation: EdmxOperation; response?: EdmxComplexType }> {
+    const [requestResult, responseResult] = await Promise.all([
+        api().queryData(`customapirequestparameters?$select=uniquename,type,isoptional,logicalentityname&$filter=_customapiid_value eq ${custom.id}`),
+        api().queryData(`customapiresponseproperties?$select=uniquename,type,logicalentityname&$filter=_customapiid_value eq ${custom.id}`),
+    ]);
     const parameters: EdmxParameter[] = [];
     const bound = custom.bindingType !== 0 && !!custom.boundEntity;
     if (bound) {
@@ -436,7 +454,7 @@ async function buildCustomApiOperation(custom: CustomApiRecord): Promise<EdmxOpe
             Nullable: false,
         });
     }
-    const requestParameters = result.value
+    const requestParameters = requestResult.value
         .map((row) => ({
             Name: row.uniquename as string,
             Type: customApiParameterType(Number(row.type), row.logicalentityname as string | null),
@@ -444,7 +462,23 @@ async function buildCustomApiOperation(custom: CustomApiRecord): Promise<EdmxOpe
         }))
         .sort((a, b) => a.Name.localeCompare(b.Name));
     parameters.push(...requestParameters);
-    return { Name: custom.uniqueName, IsBound: bound, ReturnsCollection: false, Parameters: parameters };
+
+    const operation: EdmxOperation = { Name: custom.uniqueName, IsBound: bound, ReturnsCollection: false, Parameters: parameters };
+    if (responseResult.value.length === 0) return { operation };
+    const response: EdmxComplexType = {
+        Name: `${custom.uniqueName}Response`,
+        // Sorted like the CSDL parser's `readProperties`.
+        Properties: responseResult.value
+            .map((row) => ({
+                Name: row.uniquename as string,
+                Type: customApiParameterType(Number(row.type), row.logicalentityname as string | null),
+                Nullable: true,
+            }))
+            .sort((a, b) => (a.Name > b.Name ? 1 : -1)),
+        NavigationProperties: [],
+    };
+    operation.ReturnType = `mscrm.${response.Name}`;
+    return { operation, response };
 }
 
 interface ProcessActionRecord {
@@ -460,8 +494,14 @@ interface ProcessActionRecord {
  */
 async function listProcessActions(): Promise<ProcessActionRecord[]> {
     try {
-        const result = await api().queryData('workflows?$select=workflowid,uniquename,name&$filter=category eq 3 and type eq 1');
-        return result.value
+        // All of them, page by page, like the custom APIs.
+        const rows = await queryAllPages((query) => api().queryData(query), {
+            entitySet: 'workflows',
+            select: ['workflowid', 'uniquename', 'name'],
+            idField: 'workflowid',
+            filter: 'category eq 3 and type eq 1',
+        });
+        return rows
             .filter((row) => typeof row.uniquename === 'string' && row.uniquename)
             .map((row) => ({
                 id: row.workflowid as string,

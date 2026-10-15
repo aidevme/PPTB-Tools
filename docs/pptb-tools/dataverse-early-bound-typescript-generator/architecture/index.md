@@ -1,5 +1,7 @@
 # Architecture
 
+Part of the [Contributor guide](../contributing/).
+
 The tool is one self-contained React + TypeScript package in
 [`tools/dataverse-early-bound-typescript-generator/`](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-early-bound-typescript-generator).
 It ports Scott Durow's [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI to PPTB, and its
@@ -45,6 +47,6 @@ saves `.dataverse-gen.json`.
 
 - [Core](./core.md), [Services](./services.md), [App state and hooks](./app-state.md),
   [Build and testing](./build-and-testing.md)
-- The [implementation guide](../dataverse-early-bound-typescript-generator.md) for the original design
+- The [design history](../contributing/design-history.md) for the original design
 - The tool's [README](https://github.com/aidevme/PPTB-Tools/tree/main/tools/dataverse-early-bound-typescript-generator#readme)
   for design decisions and deliberate deviations from dataverse-gen output
