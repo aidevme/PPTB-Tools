@@ -455,6 +455,10 @@ dependencies and runs its scripts, as the repository's normal build workflows do
 **From GitHub:** Actions → **PPTB marketplace intake review** → **Run workflow** → choose the branch and the tool
 → **Run workflow**.
 
+Leave **Agent caller context (Reserved for Agentic Workflows)** empty. gh-aw adds this `aw_context` input to every
+manual workflow and fills it with JSON when it starts a run on behalf of an issue, pull request or comment. Empty
+means `{}`; anything that isn't valid JSON can break the run.
+
 **From the terminal:**
 
 ```bash
