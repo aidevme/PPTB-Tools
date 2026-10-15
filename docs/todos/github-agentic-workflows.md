@@ -22,7 +22,7 @@ For gh-aw in general (installing the CLI, how compiling works, monitoring runs, 
 | Engine | Claude (`engine: claude`), secret `ANTHROPIC_API_KEY` |
 | Trigger | Manual only (`workflow_dispatch`) |
 | Output | One GitHub issue, labelled `marketplace-intake` |
-| Compiled with | `gh aw` v0.89.21, `--strict --validate`: 0 errors, 0 warnings |
+| Compiled with | `gh aw` v0.91.12, `--strict --validate`: 0 errors, 0 warnings |
 
 ## Contents
 
@@ -65,7 +65,7 @@ reports that status from the tool's own testing records.
 
 ## Status and open items
 
-The workflow compiles, and its pre-agent script was tested locally, but it **hasn't run in GitHub yet**.
+First run: 2026-10-15 on `main` ([run 38708049805](https://github.com/aidevme/PPTB-Tools/actions/runs/38708049805)). The review worked and created issue #9 (🟡), but threat detection failed on its model name; see [`threat-detection`](#threat-detection). That's fixed and needs a second run to confirm.
 
 - [ ] Add the engine secret: `gh aw secrets set ANTHROPIC_API_KEY`.
 - [ ] Approve the new secret in the compiler's safe update mode:
@@ -310,6 +310,21 @@ safe-outputs:
 | `max: 1` | At most one issue per run. |
 | `close-older-issues: true` | Once the new issue is created, older open issues from this workflow are closed. It only runs if the new issue was created. |
 
+#### `threat-detection`
+
+```yaml
+safe-outputs:
+  threat-detection:
+    engine:
+      id: claude
+      model: sonnet
+```
+
+Sets the model for the `detection` job. Without it, gh-aw v0.89.21 sent Claude Code the model name `detection`,
+which the Anthropic API rejected (`400 Model "detection" not found`). Detection has `continue-on-error` on by
+default, so the run still succeeded, and the issue was created **without** a threat scan (first run,
+2026-10-15, issue #9). `sonnet` is an alias Claude Code resolves to the current Sonnet model.
+
 `noop` and `missing_tool` are always available too. The agent uses them to report that it had nothing to create,
 or that it needed a tool it didn't have.
 
@@ -508,6 +523,7 @@ repository's other workflows; update them together.
 | The review says `npm ci` failed | The tool's `package-lock.json` is missing or out of date. Run `npm install` in the tool folder and commit it. |
 | The review says a policy page couldn't be fetched | The page moved to a domain that isn't allowed. Add the domain under `network.allowed` and recompile. |
 | The agent hit the 30-minute timeout | Check `gh aw logs` for where the time went. Raise `timeout-minutes` only if the review needs it. |
+| The run is green but **detection** shows `ERR_SYSTEM: Detection result file not found` | The detection model failed; look for `Model "…" not found` or `unrecognized_model` in the **Execute threat detection** step. The issue is then created without a scan. Check `safe-outputs.threat-detection.engine.model`. |
 | No issue was created | Check the `detection` job (it may have blocked the output), then `safe_outputs`. In the agent job's summary, look for `noop` or `missing_tool`. |
 | The issue has no `marketplace-intake` label | The label didn't exist and wasn't created. Create it once in the repository. |
 | Two reviews are open | `close-older-issues` only closes issues created by this workflow. Close a manually created one by hand. |

@@ -81,6 +81,12 @@ safe-outputs:
     labels: [marketplace-intake]
     max: 1
     close-older-issues: true
+  # Threat detection's default model ("detection") isn't resolved for the Anthropic API in gh-aw v0.89.21, which
+  # failed with 400 "Model not found" and let the issue through unscanned. Name a model Claude Code knows instead.
+  threat-detection:
+    engine:
+      id: claude
+      model: sonnet
 ---
 
 # PPTB marketplace intake review
