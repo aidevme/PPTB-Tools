@@ -1,7 +1,8 @@
 # NewProjectDialog
 
 A modal dialog for creating a new project. It opens from the **New Project** button on the
-[ProjectCard](./project-card.md).
+[ProjectCard](./project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s **Edit** button reuses it,
+titled **Edit project**, to edit a saved project.
 
 Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/NewProjectDialog.tsx)
 
@@ -11,7 +12,8 @@ Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidev
 | --- | --- | --- |
 | `open` | `boolean` | Whether the dialog is shown. |
 | `onOpenChange` | `(open: boolean) => void` | Called when the dialog opens or closes. |
-| `existingNames` | `string[]` | Names of saved projects; a new project can't reuse one. |
+| `existingNames` | `string[]` | Names of the other saved projects; the project can't reuse one (case-insensitive). |
+| `project` | `ProjectEntry` (optional) | The saved project to edit. The form opens with its values and the title is **Edit project**. Omitted for a new project. |
 | `onBrowseLocation` | `(current: string) => Promise<string \| null>` | Opens PPTB's folder picker for Location. Resolves to the folder, or `null` when cancelled. |
 | `onSave` | `(project: NewProject) => Promise<void>` | Saves the project, then opens it. The dialog closes when it resolves and shows the error when it rejects. |
 

@@ -394,7 +394,7 @@ describe('load existing project dialog', () => {
     });
 
     async function render(props: Partial<Parameters<typeof LoadProjectDialog>[0]> = {}) {
-        const all = { open: true, onOpenChange: vi.fn(), projects: [PROJECT, OTHER], onLoad: vi.fn(async () => true), onDelete: vi.fn(async () => {}), ...props };
+        const all = { open: true, onOpenChange: vi.fn(), projects: [PROJECT, OTHER], onLoad: vi.fn(async () => true), onDelete: vi.fn(async () => {}), onEdit: vi.fn(async () => {}), onBrowseLocation: vi.fn(async () => null), ...props };
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
@@ -509,7 +509,7 @@ describe('load existing project dialog', () => {
         // Keeps the real open state, so this checks what's rendered rather than only the callback.
         function Host() {
             const [open, setOpen] = useState(true);
-            return createElement(LoadProjectDialog, { open, onOpenChange: setOpen, projects: [PROJECT], onLoad: async () => true, onDelete: async () => {} });
+            return createElement(LoadProjectDialog, { open, onOpenChange: setOpen, projects: [PROJECT], onLoad: async () => true, onDelete: async () => {}, onEdit: async () => {}, onBrowseLocation: async () => null });
         }
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);

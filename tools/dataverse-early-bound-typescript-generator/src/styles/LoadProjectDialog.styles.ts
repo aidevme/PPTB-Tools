@@ -11,8 +11,10 @@ export const useLoadProjectDialogStyles = makeStyles({
     },
     row: { cursor: 'pointer' },
     headerCell: { fontWeight: tokens.fontWeightSemibold },
-    actionsCell: { width: '48px' },
+    actionsCell: { width: '88px' },
     path: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200, wordBreak: 'break-all' },
     muted: { color: tokens.colorNeutralForeground3 },
+    /** Full description in the tooltip, keeping the line breaks typed in the project form. */
+    descriptionTooltip: { whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' },
     empty: { color: tokens.colorNeutralForeground3 },
 });

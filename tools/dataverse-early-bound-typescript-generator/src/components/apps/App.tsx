@@ -233,7 +233,20 @@ export default function App() {
         [toolSettings],
     );
 
-    /** Folder picker for the New Project dialog's Location; `null` when cancelled or outside PPTB. */
+    /**
+     * Saves the name, description and location edited in the Load Project dialog and saves the config. The version
+     * and dates are left alone; they track generation. A project that's open stays open at its current folder.
+     */
+    const editProject = useCallback(
+        async (project: ProjectEntry, changes: NewProject) => {
+            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.map((p) => (p.id === project.id ? { ...p, ...changes } : p)) };
+            await saveToolConfig(next);
+            setToolSettings(next);
+        },
+        [toolSettings],
+    );
+
+    /** Folder picker for the New Project and edit dialogs' Location; `null` when cancelled or outside PPTB. */
     const pickProjectLocation = useCallback(async (current: string) => {
         if (!window.toolboxAPI) return null;
         return window.toolboxAPI.fileSystem.selectPath({
@@ -599,6 +612,8 @@ export default function App() {
                 projects={toolSettings.projects}
                 onLoad={openSavedProject}
                 onDelete={deleteProject}
+                onEdit={editProject}
+                onBrowseLocation={pickProjectLocation}
             />
             <main className={styles.main}>
                 {!inPptb && (

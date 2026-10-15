@@ -24,16 +24,21 @@ export type NewProject = Pick<ProjectEntry, 'name' | 'description' | 'location'>
 export interface INewProjectDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    /** Names of existing projects; a new project can't reuse one (case-insensitive). */
+    /** Names of the other saved projects; the project can't reuse one (case-insensitive). */
     existingNames: string[];
+    /** The saved project to edit. Omitted for a new project. */
+    project?: ProjectEntry;
     /** Opens the folder picker for Location; resolves to the chosen folder, or `null` when cancelled. */
     onBrowseLocation: (current: string) => Promise<string | null>;
     /** Saves the project. The dialog closes when it resolves and shows the error when it rejects. */
     onSave: (project: NewProject) => Promise<void>;
 }
 
-/** Modal dialog for creating a new project: name, description and location, saved with Save. */
-export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLocation, onSave }: INewProjectDialogProps) {
+/**
+ * Modal dialog for a project's name, description and location, saved with Save. Creates a new project, or edits
+ * `project` when one is given.
+ */
+export function NewProjectDialog({ open, onOpenChange, existingNames, project, onBrowseLocation, onSave }: INewProjectDialogProps) {
     const styles = useNewProjectDialogStyles();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -41,15 +46,15 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLo
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
 
-    // Start every visit with an empty form.
+    // Start every visit with an empty form, or with the edited project's values.
     useEffect(() => {
         if (open) {
-            setName('');
-            setDescription('');
-            setLocation('');
+            setName(project?.name ?? '');
+            setDescription(project?.description ?? '');
+            setLocation(project?.location ?? '');
             setSaveError(null);
         }
-    }, [open]);
+    }, [open, project]);
 
     const trimmedName = name.trim();
     const duplicate = trimmedName !== '' && existingNames.some((n) => n.trim().toLowerCase() === trimmedName.toLowerCase());
@@ -81,7 +86,7 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, onBrowseLo
         <Dialog open={open} onOpenChange={(_, data) => !saving && onOpenChange(data.open)}>
             <DialogSurface>
                 <DialogBody>
-                    <DialogTitle>New project</DialogTitle>
+                    <DialogTitle>{project ? 'Edit project' : 'New project'}</DialogTitle>
                     <DialogContent className={styles.form}>
                         <Field
                             label="Project Name"

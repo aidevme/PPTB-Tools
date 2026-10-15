@@ -49,6 +49,10 @@ To open a saved project later, click **Load Existing Project**, select your proj
 the project's name opens it straight away.) PPTB may ask you to confirm the folder first; that's how it grants
 the tool access to it.
 
+To rename a saved project, change its description, or point it at another folder, click the pencil (**Edit**)
+button on its row in that table. The trash button next to it removes the project from the list; its files
+aren't touched.
+
 A notification confirms the project loaded. The Project card then shows its name, version, path and whether a
 `.dataverse-gen.json` was found. Next time, the projects you used most recently appear as tiles on the Project
 card; click one to reopen it.
