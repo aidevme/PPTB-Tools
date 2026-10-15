@@ -22,10 +22,11 @@ import {
     Tooltip,
     type SortDirection,
 } from '@fluentui/react-components';
-import { DeleteRegular } from '@fluentui/react-icons';
+import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useLoadProjectDialogStyles } from '../../styles';
 import { ConfirmationDialog } from './ConfirmationDialog';
+import { NewProjectDialog, type NewProject } from './NewProjectDialog';
 import { reportError } from '../../services';
 
 export interface ILoadProjectDialogProps {
@@ -43,6 +44,13 @@ export interface ILoadProjectDialogProps {
      * a rejection is shown as an error.
      */
     onDelete: (project: ProjectEntry) => Promise<void>;
+    /**
+     * Saves the name, description and location edited for the project. The edit dialog closes when it resolves
+     * and shows the error when it rejects.
+     */
+    onEdit: (project: ProjectEntry, changes: NewProject) => Promise<void>;
+    /** Opens the folder picker for the edited Location; resolves to the chosen folder, or `null` when cancelled. */
+    onBrowseLocation: (current: string) => Promise<string | null>;
 }
 
 function formatDateTime(iso: string): string {
@@ -82,9 +90,9 @@ const DEFAULT_SORT: { column: ColumnKey; direction: SortDirection } = { column: 
 
 /**
  * Modal dialog listing the saved projects in a table with single-row selection. Load opens the selected
- * project; clicking a project's name opens it directly.
+ * project; clicking a project's name opens it directly. Each row can be edited or deleted.
  */
-export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete }: ILoadProjectDialogProps) {
+export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onBrowseLocation }: ILoadProjectDialogProps) {
     const styles = useLoadProjectDialogStyles();
     const [selectedId, setSelectedId] = useState<string>('');
     const [loading, setLoading] = useState(false);
@@ -92,6 +100,8 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
     /** The project waiting for the user to confirm its deletion. */
     const [pendingDelete, setPendingDelete] = useState<ProjectEntry | null>(null);
     const [deleting, setDeleting] = useState(false);
+    /** The project open in the edit dialog. */
+    const [editing, setEditing] = useState<ProjectEntry | null>(null);
     const [sort, setSort] = useState(DEFAULT_SORT);
 
     const sorted = useMemo(() => {
@@ -115,6 +125,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
             setLoadError(null);
             setSort(DEFAULT_SORT);
             setPendingDelete(null);
+            setEditing(null);
         }
     }, [open]);
 
@@ -153,7 +164,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
         if (!loading) setSelectedId(project.id);
     };
 
-    // The confirmation dialog is a sibling, not a child: a Dialog with two children treats the first as its
+    // The confirmation and edit dialogs are siblings, not children: a Dialog with two children treats the first as its
     // trigger, which would keep the main surface on screen regardless of `open`.
     return (
         <>
@@ -221,9 +232,19 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                                             </TableCellLayout>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <TableCellLayout truncate>
-                                                                {project.description || <span className={styles.muted}>—</span>}
-                                                            </TableCellLayout>
+                                                            {project.description ? (
+                                                                <Tooltip
+                                                                    content={{ children: project.description, className: styles.descriptionTooltip }}
+                                                                    relationship="description"
+                                                                    withArrow
+                                                                >
+                                                                    <TableCellLayout truncate>{project.description}</TableCellLayout>
+                                                                </Tooltip>
+                                                            ) : (
+                                                                <TableCellLayout truncate>
+                                                                    <span className={styles.muted}>—</span>
+                                                                </TableCellLayout>
+                                                            )}
                                                         </TableCell>
                                                         <TableCell>{project.version}</TableCell>
                                                         <TableCell>
@@ -234,6 +255,19 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                                         <TableCell>{formatDateTime(project.createdOn)}</TableCell>
                                                         <TableCell>{formatDateTime(project.modifiedOn)}</TableCell>
                                                         <TableCell className={styles.actionsCell}>
+                                                            <Tooltip content="Edit project" relationship="label" withArrow>
+                                                                <Button
+                                                                    appearance="subtle"
+                                                                    icon={<EditRegular />}
+                                                                    aria-label={`Edit ${project.name}`}
+                                                                    disabled={busy}
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setEditing(project);
+                                                                    }}
+                                                                    onKeyDown={(e) => e.stopPropagation()}
+                                                                />
+                                                            </Tooltip>
                                                             <Tooltip content="Delete project" relationship="label" withArrow>
                                                                 <Button
                                                                     appearance="subtle"
@@ -282,6 +316,14 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                 busy={deleting}
                 onConfirm={() => void confirmDelete()}
                 onCancel={() => setPendingDelete(null)}
+            />
+            <NewProjectDialog
+                open={editing !== null}
+                onOpenChange={(isOpen) => !isOpen && setEditing(null)}
+                project={editing ?? undefined}
+                existingNames={projects.filter((p) => p.id !== editing?.id).map((p) => p.name)}
+                onBrowseLocation={onBrowseLocation}
+                onSave={(changes) => (editing ? onEdit(editing, changes) : Promise.resolve())}
             />
         </>
     );
