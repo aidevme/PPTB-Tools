@@ -185,15 +185,15 @@ describe('settings panel', () => {
         expect(document.body.textContent).toContain('No unsaved changes');
 
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(button('Save').disabled).toBe(false);
         expect(document.body.textContent).toContain('Unsaved changes');
 
         // Changing it back means nothing to save.
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(button('Save').disabled).toBe(true);
 
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ deleteOrphanedFiles: true }));
         expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -258,9 +258,9 @@ describe('settings panel', () => {
         expect(document.body.textContent).toContain('Permanent');
         const warning = 'Files are deleted permanently';
         expect(document.body.textContent).not.toContain(warning);
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(document.body.textContent).toContain(warning);
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
 
         await click(control('Ask before generating'));
         await click(button('Save'));
@@ -294,20 +294,20 @@ describe('settings panel', () => {
         expect(button('Save').disabled).toBe(true);
     });
 
-    it('offers Rename Duplicated Identifier(s) on the Generate & files tab', async () => {
+    it('offers Rename duplicated identifier(s) on the Generate & files tab', async () => {
         const onSave = vi.fn(async () => {});
         await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Rename Duplicated Identifier(s)'));
+        await click(control('Rename duplicated identifier(s)'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ renameDuplicateIdentifiers: true }));
     });
 
-    it('offers Skip Duplicated Identifier(s) on the Generate & files tab', async () => {
+    it('offers Skip duplicated identifier(s) on the Generate & files tab', async () => {
         const onSave = vi.fn(async () => {});
         await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Skip Duplicated Identifier(s)'));
+        await click(control('Skip duplicated identifier(s)'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
@@ -317,7 +317,7 @@ describe('settings panel', () => {
         const search = document.querySelector('input[aria-label="Search settings"]') as HTMLInputElement;
         await typeInto(search, 'orphan');
         // The setting from the third tab shows while General is still the selected tab.
-        expect(control('Delete Orphaned Files')).toBeTruthy();
+        expect(control('Delete orphaned files')).toBeTruthy();
         expect(control('Project loaded')).toBeUndefined();
         expect(document.body.textContent).toContain('Orphaned files · Generate & files');
 
@@ -344,7 +344,7 @@ describe('settings panel', () => {
         const onSave = vi.fn(async () => {});
         const onOpenChange = await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Cancel'));
         expect(onSave).not.toHaveBeenCalled();
         expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -356,7 +356,7 @@ describe('settings panel', () => {
         });
         const onOpenChange = await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Save'));
         expect(onOpenChange).not.toHaveBeenCalledWith(false);
         expect(document.body.textContent).toContain('Could not save the settings: disk full');

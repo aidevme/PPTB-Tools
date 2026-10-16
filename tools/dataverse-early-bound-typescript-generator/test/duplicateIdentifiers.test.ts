@@ -155,7 +155,7 @@ describe('write plan', () => {
             "2 new files will be created. 2 files declare duplicate identifiers and won't compile until the option labels are fixed in Dataverse.",
         );
         expect(summarizeGeneration(2, counts)).toBe('2 files written · 3 unchanged · 2 with duplicate identifiers · 0 orphaned · .dataverse-gen.json saved');
-        // With Skip Duplicated Identifier(s) on.
+        // With Skip duplicated identifier(s) on.
         expect(summarizePlan(counts, false, { created: 1, overwritten: 0 }, true)).toBe(
             "1 new file will be created. 2 files declare duplicate identifiers and won't be written.",
         );
@@ -283,7 +283,8 @@ describe('PreviewCard', () => {
 
     it('hides the switch without a handler', async () => {
         await mount(createElement(PreviewCard, props([DUPLICATE], 1)));
-        expect(document.body.textContent).not.toContain('Skip duplicated identifier(s)');
+        // The duplicate status tooltip names the setting too, so look for the switch's label, not the text.
+        expect(Array.from(document.querySelectorAll('label')).some((l) => l.textContent === 'Skip duplicated identifier(s)')).toBe(false);
     });
 });
 
@@ -327,9 +328,9 @@ describe('FileViewer', () => {
         expect(flagged.every((row) => row.title === 'Duplicate identifier A (values 1, 2)')).toBe(true);
     });
 
-    it('says the file is skipped when Skip Duplicated Identifier(s) is on', async () => {
+    it('says the file is skipped when Skip duplicated identifier(s) is on', async () => {
         await mount(createElement(FileViewer, { file: DUPLICATE, onCopyText: vi.fn(), skipDuplicates: true }));
-        expect(document.body.textContent).toContain("Skip Duplicated Identifier(s) is on, so Generate doesn't write it.");
+        expect(document.body.textContent).toContain("Skip duplicated identifier(s) is on, so Generate doesn't write it.");
     });
 
     it('explains which names are duplicated', async () => {

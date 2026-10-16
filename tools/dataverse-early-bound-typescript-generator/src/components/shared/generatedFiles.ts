@@ -36,7 +36,7 @@ export const STATUS_META: Record<FileStatus, { color: NonNullable<BadgeProps['co
         color: 'severe',
         label: 'Duplicate identifiers',
         meaning:
-            "Declares the same name more than once, so TypeScript won't compile it. Fix the option labels in Dataverse. Generate writes it when it's new or changed, unless Skip Duplicated Identifier(s) is on.",
+            "Declares the same name more than once, so TypeScript won't compile it. Fix the option labels in Dataverse. Generate writes it when it's new or changed, unless Skip duplicated identifier(s) is on.",
     },
 };
 

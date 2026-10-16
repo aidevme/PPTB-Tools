@@ -8,7 +8,9 @@ Settings button in the [Header](./header.md).
 Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx)
 (the panel and the list of settings) and
 [`SettingsParts.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsParts.tsx)
-(`SettingsSection`, `SettingRow`, `OutputPreview`); styles in `src/styles/SettingsPanel.styles.ts`.
+(`SettingsSection`, `SettingRow`, `OutputPreview`); styles in `src/styles/SettingsPanel.styles.ts`. The draft, Save and
+Reset to defaults are in `src/hooks/useSettingsDraft.ts`, and the titles and info text the panel shares with the
+Preview card are in `src/components/shared/settingsInfo.tsx`.
 
 ## Props (`SettingsPanelProps`)
 
@@ -53,9 +55,9 @@ Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/t
 | Options | Output (Default for every project, .dataverse-gen.json) | Output folder | Text box | `projectDefaults.outputRoot` |
 | Options | Generated files (same badges) | Early-bound entity interfaces, Form context helpers, index.ts barrel file | Switch each | `projectDefaults.generateEntityTypes`, `generateFormContext`, `generateIndex` |
 | Generate & files | Before generating (All projects) | Ask before generating | Switch, off by default | `confirmBeforeGenerate` |
-| Generate & files | Duplicate identifiers (All projects) | Rename Duplicated Identifier(s) | Switch, off by default | `renameDuplicateIdentifiers` |
-| Generate & files | Duplicate identifiers (All projects) | Skip Duplicated Identifier(s) | Switch, off by default | `skipDuplicateIdentifiers` |
-| Generate & files | Orphaned files (All projects, **Permanent**) | Delete Orphaned Files | Switch, off by default | `deleteOrphanedFiles` |
+| Generate & files | Duplicate identifiers (All projects) | Rename duplicated identifier(s) | Switch, off by default | `renameDuplicateIdentifiers` |
+| Generate & files | Duplicate identifiers (All projects) | Skip duplicated identifier(s) | Switch, off by default | `skipDuplicateIdentifiers` |
+| Generate & files | Orphaned files (All projects, **Permanent**) | Delete orphaned files | Switch, off by default | `deleteOrphanedFiles` |
 
 - **Notifications:** error notifications are always shown; only the three success notifications can be turned off.
 - **Numbers:** out-of-range or fractional values are rounded and clamped to the range when saved
@@ -70,11 +72,11 @@ Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/t
 - **Ask before generating:** when on, Generate opens a "Generate files?" confirmation naming the output folder and
   how many files will be created and overwritten, and saying overwrites can't be undone. When orphaned files are
   deleted too, their confirmation covers both.
-- **Skip Duplicated Identifier(s):** when on, Generate doesn't write files with the **duplicate identifiers** status
+- **Skip duplicated identifier(s):** when on, Generate doesn't write files with the **duplicate identifiers** status
   (two choice labels that become the same enum member name), so an existing copy on disk stays as it is. The
   Generate button, the Preview summary, the confirmation and the result line count only the files that are
   written. When off, those files are written and only reported.
-- **Delete Orphaned Files:** its card has a red accent stripe and a red **Permanent** badge, and while the switch is
+- **Delete orphaned files:** its card has a red accent stripe and a red **Permanent** badge, and while the switch is
   on, a warning says files are deleted permanently, not moved to the Recycle Bin or Trash. When on, Generate
   deletes orphaned files after you confirm the list; when off, they're only reported. It's the same setting as the
   **Delete orphaned files** switch in the [PreviewCard](./preview-card.md), so the two stay in sync. Skip

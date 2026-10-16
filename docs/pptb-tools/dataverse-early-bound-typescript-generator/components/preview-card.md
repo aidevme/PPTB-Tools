@@ -154,7 +154,7 @@ member twice, and TypeScript rejects the file.
   `generate` sets `duplicateIdentifiers` on the enum's file. The output itself stays as dataverse-gen writes it.
 - **Status:** `createWritePlan` gives such a file the `duplicate` status instead of new, changed or unchanged,
   and keeps that underlying state in `writeStatus`, with the names in `duplicateIdentifiers`.
-- **Generate still writes it** when it's new or changed (`willWrite`), unless the **Skip Duplicated Identifier(s)**
+- **Generate still writes it** when it's new or changed (`willWrite`), unless the **Skip duplicated identifier(s)**
   setting (`skipDuplicateIdentifiers`, passed as the `skipDuplicates` prop and as `WriteOptions.skipDuplicates`) is
   on. The Generate button label, the summary, the confirmation and the progress count follow the setting
   (`writeCounts`).

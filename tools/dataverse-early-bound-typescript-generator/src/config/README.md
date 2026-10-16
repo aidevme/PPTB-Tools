@@ -98,10 +98,10 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 - **`confirmBeforeGenerate`:** `false`. Shown as the **Ask before generating** switch on the Generate & files
   tab. When on, Generate asks for confirmation before writing, naming the output folder and how many files will
   be created and overwritten. When orphans are deleted too, the delete confirmation covers the writes as well.
-- **`renameDuplicateIdentifiers`:** `false`. Shown as the **Rename Duplicated Identifier(s)** switch on the Generate &
+- **`renameDuplicateIdentifiers`:** `false`. Shown as the **Rename duplicated identifier(s)** switch on the Generate &
   files tab and in Preview and generate. When on, `generate` renames later duplicate enum members to
   `<Name>_<Value>`, so the files compile; when off, the output matches dataverse-gen.
-- **`skipDuplicateIdentifiers`:** `false`. Shown as the **Skip Duplicated Identifier(s)** switch on the Generate &
+- **`skipDuplicateIdentifiers`:** `false`. Shown as the **Skip duplicated identifier(s)** switch on the Generate &
   files tab. When on, Generate doesn't write files with duplicate identifiers (two choice labels that become the
   same enum member name, so the file won't compile); when off, they're written and only reported.
 - **`deleteOrphanedFiles`:** `false`. Shown as a switch on the Settings panel's Generate & files tab and

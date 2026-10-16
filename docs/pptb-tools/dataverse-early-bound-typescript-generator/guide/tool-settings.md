@@ -35,9 +35,9 @@ Where the values apply: all projects.
 | Setting | Default | What it does |
 | --- | --- | --- |
 | Ask before generating | Off | Asks for confirmation before Generate writes, naming the output folder and how many files will be created and overwritten. Overwrites can't be undone. |
-| Rename Duplicated Identifier(s) | Off | Renames later duplicate enum members to `<Name>_<Value>` (for example `InProgress_700970000`), so files with duplicate identifiers compile. Code using a renamed member must use the new name. Changing it needs a new preview. Same switch as **Rename duplicated identifier(s)** next to the Generate button. |
-| Skip Duplicated Identifier(s) | Off | Generate doesn't write files that declare the same name twice (two choice labels that become the same enum member, so the file won't compile). An existing copy on disk stays as it is. When off, these files are written and only reported. This is the same switch as **Skip duplicated identifier(s)** next to the Generate button. See [Troubleshooting](./troubleshooting.md#duplicate-identifiers). |
-| Delete Orphaned Files | Off | Generate also deletes generated files the current selection no longer produces, after you confirm the list. Deletion is permanent. This is the same switch as **Delete orphaned files** next to the Generate button, so the two stay in sync. |
+| Rename duplicated identifier(s) | Off | Renames later duplicate enum members to `<Name>_<Value>` (for example `InProgress_700970000`), so files with duplicate identifiers compile. Code using a renamed member must use the new name. Changing it needs a new preview. Same switch as **Rename duplicated identifier(s)** next to the Generate button. |
+| Skip duplicated identifier(s) | Off | Generate doesn't write files that declare the same name twice (two choice labels that become the same enum member, so the file won't compile). An existing copy on disk stays as it is. When off, these files are written and only reported. This is the same switch as **Skip duplicated identifier(s)** next to the Generate button. See [Troubleshooting](./troubleshooting.md#duplicate-identifiers). |
+| Delete orphaned files | Off | Generate also deletes generated files the current selection no longer produces, after you confirm the list. Deletion is permanent. This is the same switch as **Delete orphaned files** next to the Generate button, so the two stay in sync. |
 
 When both are on, the orphan confirmation covers the writes too. See [Safety](./safety.md).
 

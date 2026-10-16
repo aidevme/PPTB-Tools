@@ -40,7 +40,14 @@ import {
 import type { FileStatus, WritePlan } from '../../types';
 import { summarizePlan, writeCounts } from '../../services';
 import { infoLabel } from '../shared/infoLabel';
-import { DELETE_ORPHANS_INFO, RENAME_DUPLICATES_INFO, SKIP_DUPLICATES_INFO } from '../shared/settingsInfo';
+import {
+    DELETE_ORPHANS_INFO,
+    DELETE_ORPHANS_TITLE,
+    RENAME_DUPLICATES_INFO,
+    RENAME_DUPLICATES_TITLE,
+    SKIP_DUPLICATES_INFO,
+    SKIP_DUPLICATES_TITLE,
+} from '../shared/settingsInfo';
 import { usePreviewCardStyles, useSortableTableStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
 import { STATUS_META, STATUS_ORDER, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
@@ -260,7 +267,7 @@ export function PreviewCard(props: PreviewCardProps) {
                     {/* Both switches only apply to files a preview found: they're disabled before a preview and while it found
                         none. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
                     <Switch
-                        label={infoLabel('Delete orphaned files', switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
+                        label={infoLabel(DELETE_ORPHANS_TITLE, switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
                         checked={deleteOrphans}
                         disabled={!plan || plan.counts.orphaned === 0 || busy}
                         onChange={(_, data) => onDeleteOrphansChange(data.checked)}
@@ -268,7 +275,7 @@ export function PreviewCard(props: PreviewCardProps) {
                     {props.onRenameDuplicatesChange && (
                         <Switch
                             label={infoLabel(
-                                'Rename duplicated identifier(s)',
+                                RENAME_DUPLICATES_TITLE,
                                 // Once on, the preview has no duplicates left, but the switch must stay usable to turn it off.
                                 switchInfo(RENAME_DUPLICATES_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (props.renameDuplicates ? 1 : 0), 'files with duplicate identifiers'),
                             )}
@@ -280,7 +287,7 @@ export function PreviewCard(props: PreviewCardProps) {
                     {props.onSkipDuplicatesChange && (
                         <Switch
                             label={infoLabel(
-                                'Skip duplicated identifier(s)',
+                                SKIP_DUPLICATES_TITLE,
                                 switchInfo(SKIP_DUPLICATES_INFO, !!plan, plan?.counts.duplicate ?? 0, 'files with duplicate identifiers'),
                             )}
                             checked={skipDuplicates}

@@ -49,7 +49,7 @@ and each later one gets its value appended, so
 becomes `InProgress = 3` and `InProgress_700970000 = 700970000`, and the file compiles. Code that used the second
 value must use the new name. This differs from dataverse-gen's output, which is why it's off by default; when it's
 off, the output stays the same as dataverse-gen's. Generate still writes the file, unless you turn on **Skip duplicated identifier(s)** next to the
-Generate button (or **Skip Duplicated Identifier(s)** in **Settings** → **Generate & files**); then it leaves the file unwritten and any existing copy stays as it is.
+Generate button (or **Skip duplicated identifier(s)** in **Settings** → **Generate & files**); then it leaves the file unwritten and any existing copy stays as it is.
 
 ## Private custom APIs
 

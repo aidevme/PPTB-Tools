@@ -16,7 +16,7 @@ export interface IFileViewerProps {
     file: PlannedFile | null;
     /** Copies text to the clipboard; `label` names it in the confirmation. */
     onCopyText: (text: string, label: string) => void;
-    /** Whether Generate leaves files with duplicate identifiers unwritten (Skip Duplicated Identifier(s)). */
+    /** Whether Generate leaves files with duplicate identifiers unwritten (Skip duplicated identifier(s)). */
     skipDuplicates?: boolean;
 }
 
@@ -110,7 +110,7 @@ export function FileViewer({ file, onCopyText, skipDuplicates = false }: IFileVi
                         ))}
                         . The lines are highlighted below. Two choice labels become the same enum member name. Rename one of the labels in Dataverse, then preview again.{' '}
                         {skipDuplicates
-                            ? "Skip Duplicated Identifier(s) is on, so Generate doesn't write it."
+                            ? "Skip duplicated identifier(s) is on, so Generate doesn't write it."
                             : `Generate still writes this file${writeStatusOf(file) === 'unchanged' ? ' when it changes' : ''}.`}
                     </MessageBarBody>
                 </MessageBar>

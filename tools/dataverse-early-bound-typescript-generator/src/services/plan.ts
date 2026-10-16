@@ -81,7 +81,7 @@ export function countStatuses(files: PlannedFile[]): Record<FileStatus, number> 
 /**
  * One sentence saying what Generate would do with a plan; `deleteOrphans` when Delete orphaned files is on.
  * `writes` defaults to the new and changed counts; pass {@link writeCounts} so `duplicate` files are included.
- * `skipDuplicates` when Skip Duplicated Identifier(s) is on.
+ * `skipDuplicates` when Skip duplicated identifier(s) is on.
  */
 export function summarizePlan(
     counts: WritePlan['counts'],

@@ -22,7 +22,7 @@ Sources:
   full path, the line count, and a **Copy** button for the generated content.
 - **Files with duplicate identifiers** show a warning above the content, naming each repeated identifier with
   its values (for example `Open` (values 1, 3)) and saying to rename one of the labels in Dataverse. Generate
-  still writes the file, unless Skip Duplicated Identifier(s) is on. The lines that declare a duplicated identifier
+  still writes the file, unless Skip duplicated identifier(s) is on. The lines that declare a duplicated identifier
   are highlighted in both the Generated content and Changes views (dark orange tint, accent edge on the line
   number), with a tooltip such as "Duplicate identifier Open (values 1, 3)". `duplicateLineNotes` finds them: lines
   of the form `Name = value` whose name is one of the file's `duplicateIdentifiers`.

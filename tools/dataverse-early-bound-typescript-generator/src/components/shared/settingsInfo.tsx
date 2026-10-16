@@ -1,9 +1,13 @@
 /**
- * Explanations for the settings that have a switch both in the Settings panel and in Preview and generate. Both
- * places show the same text in their info labels, so it lives here once.
+ * Titles and explanations for the settings that have a switch both in the Settings panel and in Preview and
+ * generate. Both places show the same title and info text, so they live here once.
  */
 
-/** Skip Duplicated Identifier(s): `skipDuplicateIdentifiers`. */
+export const SKIP_DUPLICATES_TITLE = 'Skip duplicated identifier(s)';
+export const RENAME_DUPLICATES_TITLE = 'Rename duplicated identifier(s)';
+export const DELETE_ORPHANS_TITLE = 'Delete orphaned files';
+
+/** Skip duplicated identifier(s): `skipDuplicateIdentifiers`. */
 export const SKIP_DUPLICATES_INFO = (
     <>
         When two choice labels become the same enum member name (for example "Open" and "Open!"), the generated file declares it
@@ -14,7 +18,7 @@ export const SKIP_DUPLICATES_INFO = (
     </>
 );
 
-/** Rename Duplicated Identifier(s): `renameDuplicateIdentifiers`. */
+/** Rename duplicated identifier(s): `renameDuplicateIdentifiers`. */
 export const RENAME_DUPLICATES_INFO = (
     <>
         When two choice labels become the same enum member name (for example "In Progress" twice), dataverse-gen writes the name
@@ -26,7 +30,7 @@ export const RENAME_DUPLICATES_INFO = (
     </>
 );
 
-/** Delete Orphaned Files: `deleteOrphanedFiles`. */
+/** Delete orphaned files: `deleteOrphanedFiles`. */
 export const DELETE_ORPHANS_INFO = (
     <>
         Orphaned files are files in the output folders that the current selection no longer generates. When on, Generate deletes them
