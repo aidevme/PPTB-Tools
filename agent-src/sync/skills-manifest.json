@@ -984,6 +984,14 @@
       "ported": true,
       "source": "authored",
       "note": "Validate Markdown, sync cspell.json and sync the docs/ entries in .github/CODEOWNERS; scripts moved from the repository scripts/ folder."
+    },
+    {
+      "name": "aidevme-pptb-tool-refactoring",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "authored",
+      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
     }
   ]
 }

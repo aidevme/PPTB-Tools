@@ -166,6 +166,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `pptb-tool-dev` | Building, debugging, validating or publishing a PPTB tool |
 | `intake-policy-review` | Checking a tool against the PPTB marketplace and AI-assisted development policies |
 | `tool-verification` | Checking a tool against the Verified badge requirements |
+| `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/`) |
 | `playwright-cli` | Driving a browser: testing, screenshots, scraping |
 | `aidevme-dataverse-sdk-reference` | Dataverse SDK / Web API / metadata reference |
 | `aidevme-fetchxml-queries` | Writing or optimizing FetchXML |
