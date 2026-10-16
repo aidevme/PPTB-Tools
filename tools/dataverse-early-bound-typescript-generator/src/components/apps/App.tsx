@@ -2,9 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
 import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
 import { ConfirmationDialog, Footer, GenerateSummary, Header, LoadProjectDialog, OrphanList, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
-import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../../core';
-import { applyProjectDefaults, type ProjectDefaults } from '../../config';
-import { useConnection, usePlanState, useStickyBarHeights, useToolSettings } from '../../hooks';
+import { buildSchemaModel, generate, resolveConfig, resolveSelection, type EntityMetadataInput } from '../../core';
+import { useConnection, usePlanState, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
 import {
     PptbFileSink,
     PptbMetadataProvider,
@@ -14,24 +13,18 @@ import {
     createWritePlan,
     dataverseGenTemplateFiles,
     deleteOrphanedFiles,
-    getRememberedProjectFolder,
     getSolutionEntityIds,
     getSolutionMemberIds,
     listSolutions,
-    loadProjectConfig,
     notifyGenerationComplete,
     notifyPreviewReady,
-    notifyProjectLoaded,
     pendingWriteCount,
-    rememberProjectFolder,
     reportError,
     resolveOutputRoot,
     saveProjectConfig,
     summarizeGeneration,
-    technicalMessage,
     willWrite,
     writeCounts,
-    type ProjectConfigState,
 } from '../../services';
 import { useAppStyles } from '../../styles';
 import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from '../../types';
@@ -68,12 +61,6 @@ export default function App() {
     /** The fallback warning is shown for a few seconds when the fallback starts, then hides itself. */
     const [showMetadataFallbackWarning, setShowMetadataFallbackWarning] = useState(false);
 
-    const [projectRoot, setProjectRoot] = useState<string | null>(null);
-    /** Folder used last time with this connection; shown as a hint and used as the picker's default. */
-    const [rememberedFolder, setRememberedFolder] = useState<string | null>(null);
-    // Until a project folder is picked this holds an in-memory draft, so tables, actions and functions
-    // can be selected first; the draft selection is merged into the folder's config when it is loaded.
-    const [configState, setConfigState] = useState<ProjectConfigState>(() => ({ path: '', exists: false, config: createDefaultConfig() }));
     const [entities, setEntities] = useState<EntitySummary[]>([]);
     const [operations, setOperations] = useState<OperationSummary[] | null>(null);
     const [solutions, setSolutions] = useState<SolutionSummary[]>([]);
@@ -84,10 +71,21 @@ export default function App() {
     const [loadingSolution, setLoadingSolution] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const { plan, setPlan, previewedAt, setPreviewedAt, lastResult, setLastResult, planStale, setPlanStale, markPlanStale } = usePlanState();
+    const { plan, setPlan, previewedAt, setPreviewedAt, lastResult, setLastResult, planStale, setPlanStale, resetPlan, markPlanStale } = usePlanState();
     const { toolSettings, saveToolSettings, saveNewProject, deleteProject, editProject, recordProjectGeneration, changeSetting } = useToolSettings({
         onError: setError,
         onPlanStale: markPlanStale,
+    });
+    const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear, clearAll } = useProject({
+        sink,
+        connKey,
+        inPptb,
+        connection,
+        projectDefaults: toolSettings.projectDefaults,
+        showProjectLoaded: toolSettings.general.showProjectLoadedNotification,
+        setError,
+        resetPlan,
+        markPlanStale,
     });
     const solutionCache = useRef(new Map<string, Set<string>>());
     /** Component ids (custom APIs, process actions) of the selected solution; `null` when not filtering. */
@@ -95,83 +93,7 @@ export default function App() {
     const [loadingSolutionOperations, setLoadingSolutionOperations] = useState(false);
     const solutionOperationCache = useRef(new Map<string, Set<string>>());
 
-    const config = configState.config;
     const busy = progress !== null;
-
-    // ----- project folder -------------------------------------------------------------------------
-
-    /** Opens `folder` as the project and reads its `.dataverse-gen.json`; throws when it can't be read. Returns what was loaded. */
-    const openProjectFolder = useCallback(
-        async (folder: string) => {
-            const state = await loadProjectConfig(sink, folder);
-            // The Options (output folder, entity types, form context, index.ts) always start from Settings, also
-            // over the values in an existing .dataverse-gen.json; the Options card can change them afterwards.
-            state.config = applyProjectDefaults(state.config, toolSettings.projectDefaults);
-            if (!projectRoot) {
-                // Keep anything selected before the folder was picked.
-                const merge = (loaded: string[] | undefined, draft: string[] | undefined) => [...new Set([...(loaded ?? []), ...(draft ?? [])])];
-                state.config = {
-                    ...state.config,
-                    entities: merge(state.config.entities, config.entities),
-                    actions: merge(state.config.actions, config.actions),
-                    functions: merge(state.config.functions, config.functions),
-                };
-            }
-            setProjectRoot(folder);
-            setConfigState(state);
-            setPlan(null);
-            setPlanStale(false);
-            await rememberProjectFolder(connKey, folder);
-            return state;
-        },
-        [sink, connKey, projectRoot, config, toolSettings.projectDefaults],
-    );
-
-    const loadProject = useCallback(
-        async (folder: string) => {
-            setError(null);
-            try {
-                await openProjectFolder(folder);
-            } catch (e) {
-                setError(reportError(`Could not load ${folder}`, e, { folder }));
-            }
-        },
-        [openProjectFolder],
-    );
-
-    /**
-     * Opens a project saved with the New Project dialog: its location becomes the project folder and its
-     * `.dataverse-gen.json` is read. If PPTB hasn't granted access to that folder in this session, the folder
-     * picker opens there for the user to confirm instead. Resolves to `false` when that picker is cancelled.
-     */
-    const showProjectLoaded = toolSettings.general.showProjectLoadedNotification;
-    const openSavedProject = useCallback(
-        async (project: ProjectOpenTarget) => {
-            if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
-            setError(null);
-            try {
-                // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
-                // otherwise just look like a new project.
-                await window.toolboxAPI.fileSystem.readDirectory(project.location);
-                const state = await openProjectFolder(project.location);
-                if (showProjectLoaded) void notifyProjectLoaded(project.name, state);
-                return true;
-            } catch (e) {
-                if (!/access denied|permission|not allowed|not permitted/i.test(technicalMessage(e))) throw e;
-            }
-            const folder = await window.toolboxAPI.fileSystem.selectPath({
-                type: 'folder',
-                title: `Open ${project.name}`,
-                message: 'Confirm the project folder so Power Platform ToolBox lets the tool read it',
-                defaultPath: project.location,
-            });
-            if (!folder) return false;
-            const state = await openProjectFolder(folder);
-            if (showProjectLoaded) void notifyProjectLoaded(project.name, state);
-            return true;
-        },
-        [openProjectFolder, showProjectLoaded],
-    );
 
     // ----- environment lists ----------------------------------------------------------------------
 
@@ -196,16 +118,6 @@ export default function App() {
         },
         [saveNewProject, openSavedProject],
     );
-
-    /** Folder picker for the New Project and edit dialogs' Location; `null` when cancelled or outside PPTB. */
-    const pickProjectLocation = useCallback(async (current: string) => {
-        if (!window.toolboxAPI) return null;
-        return window.toolboxAPI.fileSystem.selectPath({
-            type: 'folder',
-            title: 'Select the project location',
-            defaultPath: current || undefined,
-        });
-    }, []);
 
     /** Tables, solutions and the selection are only listed once a project is open (created or loaded). */
     const hasProject = !!projectRoot;
@@ -237,19 +149,6 @@ export default function App() {
         };
         // Only re-run when the connection (and so the provider) changes, or the first project is opened.
     }, [provider, inPptb, connection, hasProject]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    // PPTB only grants file access to folders picked with selectPath in the current session, so the
-    // remembered folder cannot be read directly; it only pre-fills the folder picker.
-    useEffect(() => {
-        if (!inPptb || !connection) return;
-        let cancelled = false;
-        getRememberedProjectFolder(connKey).then((folder) => {
-            if (!cancelled) setRememberedFolder(folder ?? null);
-        });
-        return () => {
-            cancelled = true;
-        };
-    }, [inPptb, connection, connKey]);
 
     const ensureOperations = useCallback(() => {
         if (operations !== null || loadingOperations || !inPptb || !hasProject) return;
@@ -314,41 +213,6 @@ export default function App() {
             cancelled = true;
         };
     }, [selectedSolutionId, operations]);
-
-    // ----- config edits ---------------------------------------------------------------------------
-
-    const updateConfig = useCallback((update: Partial<DataverseGenConfig>) => {
-        setConfigState((state) => ({ ...state, config: { ...state.config, ...update } }));
-        setPlanStale(true);
-    }, []);
-
-    /**
-     * Applies the Settings panel's Options to the current config when they change: once the saved settings load
-     * (which may finish after a remembered project opened), and when the user saves different ones. Edits made in
-     * the Options card are kept until then.
-     */
-    const configRef = useRef(config);
-    configRef.current = config;
-    const projectDefaultsKey = JSON.stringify(toolSettings.projectDefaults);
-    useEffect(() => {
-        const current = configRef.current;
-        const next = applyProjectDefaults(current, JSON.parse(projectDefaultsKey) as ProjectDefaults);
-        const options = (c: DataverseGenConfig) => [c.output?.outputRoot, c.generateEntityTypes, c.generateFormContext, c.generateIndex];
-        if (JSON.stringify(options(current)) === JSON.stringify(options(next))) return;
-        updateConfig({ output: next.output, generateEntityTypes: next.generateEntityTypes, generateFormContext: next.generateFormContext, generateIndex: next.generateIndex });
-    }, [projectDefaultsKey, updateConfig]);
-
-    const toggle = useCallback(
-        (kind: SelectionKind, name: string, checked: boolean) => {
-            const current = config[kind] ?? [];
-            const next = checked ? (current.includes(name) ? current : [...current, name]) : current.filter((n) => n !== name);
-            updateConfig({ [kind]: next });
-        },
-        [config, updateConfig],
-    );
-
-    const clear = useCallback((kind: SelectionKind) => updateConfig({ [kind]: [] }), [updateConfig]);
-    const clearAll = useCallback(() => updateConfig({ entities: [], actions: [], functions: [] }), [updateConfig]);
 
     const copyPath = useCallback(async (path: string, label: string) => {
         try {
@@ -424,7 +288,7 @@ export default function App() {
                     writeOptions,
                 );
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
-                setConfigState((state) => ({ ...state, exists: true, path: configPath }));
+                markConfigSaved(configPath);
                 await recordProjectGeneration(projectRoot, planToApply);
 
                 let deleted: Set<string> | undefined;
@@ -466,7 +330,7 @@ export default function App() {
                 setProgress(null);
             }
         },
-        [projectRoot, config, sink, recordProjectGeneration, toolSettings.skipDuplicateIdentifiers, toolSettings.general.showGenerationCompleteNotification],
+        [projectRoot, config, sink, markConfigSaved, recordProjectGeneration, toolSettings.skipDuplicateIdentifiers, toolSettings.general.showGenerationCompleteNotification],
     );
 
     /**

@@ -5,3 +5,5 @@ export { usePlanState } from './usePlanState';
 export type { PlanState } from './usePlanState';
 export { useToolSettings } from './useToolSettings';
 export type { PreviewSettingKey, UseToolSettingsOptions } from './useToolSettings';
+export { useProject } from './useProject';
+export type { UseProjectOptions } from './useProject';
