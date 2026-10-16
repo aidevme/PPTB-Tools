@@ -9,10 +9,6 @@ export function separatorOf(absolutePath: string): '\\' | '/' {
     return /^[a-zA-Z]:|^\\\\/.test(absolutePath) || (absolutePath.includes('\\') && !absolutePath.includes('/')) ? '\\' : '/';
 }
 
-export function isAbsolutePath(p: string): boolean {
-    return /^[a-zA-Z]:[\\/]/.test(p) || p.startsWith('\\\\') || p.startsWith('/');
-}
-
 /** Normalise `./a/b\c/../d` style segments relative to nothing (keeps leading `..`). */
 function normalizeSegments(segments: string[]): string[] {
     const out: string[] = [];

@@ -10,9 +10,3 @@ export interface Progress {
     completed: number;
     total: number;
 }
-
-export interface LogEntry {
-    timestamp: Date;
-    message: string;
-    type: 'info' | 'success' | 'warning' | 'error';
-}

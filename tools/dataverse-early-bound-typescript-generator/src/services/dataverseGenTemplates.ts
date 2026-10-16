@@ -16,9 +16,6 @@ import index from '../assets/dataverse-gen-templates/index.ejs?raw';
 import metadata from '../assets/dataverse-gen-templates/metadata.ejs?raw';
 import { toPosix } from './paths';
 
-/** The dataverse-gen version the templates come from. */
-export const DATAVERSE_GEN_TEMPLATES_VERSION = '2.0.17';
-
 /** dataverse-gen's default `templateRoot`, used when the config leaves it blank. */
 export const DEFAULT_TEMPLATE_ROOT = './_templates';
 
