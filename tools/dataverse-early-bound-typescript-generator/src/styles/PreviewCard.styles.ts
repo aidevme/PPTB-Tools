@@ -80,12 +80,6 @@ export const usePreviewCardStyles = makeStyles({
         ':hover::after': { backgroundColor: tokens.colorBrandStroke1 },
         ':focus-visible': { outline: `${tokens.strokeWidthThick} solid ${tokens.colorStrokeFocus2}`, borderRadius: tokens.borderRadiusMedium },
     },
-    row: { cursor: 'pointer' },
-    // Keeps the column headers visible while the file list scrolls.
-    headerRow: { position: 'sticky', top: 0, zIndex: 1, backgroundColor: tokens.colorNeutralBackground1 },
-    headerCell: { fontWeight: tokens.fontWeightSemibold },
-    // Wider than Fluent's default tooltip, for the per-value explanations.
-    headerTooltip: { maxWidth: '360px', '& ul': { margin: `${tokens.spacingVerticalXS} 0`, paddingLeft: tokens.spacingHorizontalL } },
     typeColumn: { width: '104px' },
     statusColumn: { width: '112px' },
     fileName: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },

@@ -61,3 +61,6 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
   `FUNCTION_COLUMNS`) with their header tooltips, and the badge colour per table type (`TABLE_TYPE_COLORS`).
 - `components/shared/sorting.ts`: `sortSelectionRows`, which sorts the rows by the chosen column, listing rows
   without a value last.
+- `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
+  `components/shared/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
+  sortable tables (Select card, Preview card, Load Existing Project dialog), styled by `useSortableTableStyles`.

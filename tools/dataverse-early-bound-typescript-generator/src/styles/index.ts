@@ -12,5 +12,6 @@ export { usePreviewCardStyles } from './PreviewCard.styles';
 export { useProjectCardStyles } from './ProjectCard.styles';
 export { useSelectionCardStyles } from './SelectionCard.styles';
 export { useSettingsPanelStyles } from './SettingsPanel.styles';
+export { useSortableTableStyles } from './SortableTable.styles';
 export { useStepCardStyles } from './StepCard.styles';
 export { useWorkflowProgressStyles } from './WorkflowProgress.styles';

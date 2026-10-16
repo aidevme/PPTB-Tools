@@ -12,7 +12,6 @@ import {
     TableCell,
     TableCellLayout,
     TableHeader,
-    TableHeaderCell,
     TableRow,
     Text,
     Tooltip,
@@ -42,10 +41,13 @@ import type { FileStatus, WritePlan } from '../../types';
 import { summarizePlan, writeCounts } from '../../services';
 import { infoLabel } from '../shared/infoLabel';
 import { DELETE_ORPHANS_INFO, RENAME_DUPLICATES_INFO, SKIP_DUPLICATES_INFO } from '../shared/settingsInfo';
-import { usePreviewCardStyles } from '../../styles';
+import { usePreviewCardStyles, useSortableTableStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
 import { STATUS_META, STATUS_ORDER, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
+import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import { nextSort } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
+import { activateRowOnKey } from '../shared/tableRows';
 import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
@@ -153,6 +155,7 @@ export function PreviewCard(props: PreviewCardProps) {
     const { step, plan, stale, canPreview, needsProject, busy, previewedAt, lastResult, deleteOrphans, onDeleteOrphansChange, onPreview, onGenerate, onCopyText } = props;
     const skipDuplicates = props.skipDuplicates ?? false;
     const styles = usePreviewCardStyles();
+    const tableStyles = useSortableTableStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
     const [sort, setSort] = useState<{ column: FileSortColumn; direction: SortDirection } | null>(null);
@@ -165,20 +168,15 @@ export function PreviewCard(props: PreviewCardProps) {
     const writes = useMemo(() => (plan ? writeCounts(plan, { skipDuplicates }) : { created: 0, overwritten: 0 }), [plan, skipDuplicates]);
     const writable = writes.created + writes.overwritten;
 
-    const toggleSort = (column: FileSortColumn) =>
-        setSort((current) =>
-            current?.column === column ? { column, direction: current.direction === 'ascending' ? 'descending' : 'ascending' } : { column, direction: 'ascending' },
-        );
+    const toggleSort = (column: FileSortColumn) => setSort((current) => nextSort(current, column));
     const sortDirection = (column: FileSortColumn) => (sort?.column === column ? sort.direction : undefined);
     const toggleStatus = (status: FileStatus) => setFilter((f) => ({ ...f, status: f.status === status ? null : status }));
 
     /** ↑/↓ move the selection to the neighbouring row and focus it. */
     const onRowKeyDown = (e: KeyboardEvent, index: number) => {
+        if (activateRowOnKey(e, () => setSelectedPath(files[index].relativePath))) return;
         const target = e.key === 'ArrowDown' ? index + 1 : e.key === 'ArrowUp' ? index - 1 : -1;
-        if (e.key === ' ' || e.key === 'Enter') {
-            e.preventDefault();
-            setSelectedPath(files[index].relativePath);
-        } else if (target >= 0 && target < files.length) {
+        if (target >= 0 && target < files.length) {
             e.preventDefault();
             setSelectedPath(files[target].relativePath);
             tableRef.current?.querySelectorAll<HTMLElement>('tbody tr')[target]?.focus();
@@ -381,7 +379,7 @@ export function PreviewCard(props: PreviewCardProps) {
                         ) : (
                             <Table aria-label="Generated files" size="extra-small" sortable ref={tableRef}>
                                 <TableHeader>
-                                    <TableRow className={styles.headerRow}>
+                                    <TableRow className={tableStyles.headerRow}>
                                         {(
                                             [
                                                 ['name', 'Name', undefined],
@@ -389,22 +387,15 @@ export function PreviewCard(props: PreviewCardProps) {
                                                 ['status', 'Status', styles.statusColumn],
                                             ] as const
                                         ).map(([column, label, widthClass]) => (
-                                            // Wrapping the cell means the tooltip opens on hover and when its sort button gets focus.
-                                            <Tooltip
+                                            <SortableHeaderCell
                                                 key={column}
-                                                content={{ children: HEADER_HELP[column], className: styles.headerTooltip }}
-                                                relationship="description"
-                                                positioning="above"
-                                                withArrow
+                                                help={HEADER_HELP[column]}
+                                                className={widthClass}
+                                                sortDirection={sortDirection(column)}
+                                                onClick={() => toggleSort(column)}
                                             >
-                                                <TableHeaderCell
-                                                    className={mergeClasses(styles.headerCell, widthClass)}
-                                                    sortDirection={sortDirection(column)}
-                                                    onClick={() => toggleSort(column)}
-                                                >
-                                                    {label}
-                                                </TableHeaderCell>
-                                            </Tooltip>
+                                                {label}
+                                            </SortableHeaderCell>
                                         ))}
                                     </TableRow>
                                 </TableHeader>
@@ -422,7 +413,7 @@ export function PreviewCard(props: PreviewCardProps) {
                                         return (
                                             <TableRow
                                                 key={file.relativePath}
-                                                className={styles.row}
+                                                className={tableStyles.row}
                                                 aria-selected={isSelected}
                                                 appearance={isSelected ? 'brand' : 'none'}
                                                 tabIndex={0}

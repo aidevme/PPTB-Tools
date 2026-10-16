@@ -1,8 +1,13 @@
 /**
- * Sorting helpers for the tool's sortable tables. Started with the Select card's rows; the Preview card and the Load
- * Existing Project dialog are to move here too (refactoring plan, row 9).
+ * Sorting helpers for the tool's sortable tables: the Select card, the Preview card and the Load Existing Project
+ * dialog all toggle their sort with `nextSort`; the Select card's rows are also ordered here.
  */
 import type { SortDirection } from '@fluentui/react-components';
+
+/** First click on a column sorts ascending; clicking the sorted column again flips the direction. */
+export function nextSort<C>(current: { column: C; direction: SortDirection } | null, column: C): { column: C; direction: SortDirection } {
+    return current?.column === column && current.direction === 'ascending' ? { column, direction: 'descending' } : { column, direction: 'ascending' };
+}
 
 /** A value to sort a column by; `undefined` (no value) is always listed last. */
 export type SortValue = string | number | undefined;

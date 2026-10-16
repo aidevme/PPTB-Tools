@@ -14,19 +14,19 @@ import {
     TableCell,
     TableCellLayout,
     TableHeader,
-    TableHeaderCell,
     TableRow,
     TableSelectionCell,
     Text,
     Tooltip,
     type SelectTabData,
-    type SortDirection,
     type SelectTabEvent,
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
 import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
-import { useSelectionCardStyles } from '../../styles';
-import { sortSelectionRows, type SortState, type SortValue } from '../shared/sorting';
+import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
+import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import { nextSort, sortSelectionRows, type SortState, type SortValue } from '../shared/sorting';
+import { activateRowOnKey } from '../shared/tableRows';
 import { StepCard } from '../shared/StepCard';
 import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from './selectionColumns';
 import type { StepState } from '../shared/workflowSteps';
@@ -87,6 +87,7 @@ export interface SelectionCardProps {
 export function SelectionCard(props: SelectionCardProps) {
     const { step } = props;
     const styles = useSelectionCardStyles();
+    const tableStyles = useSortableTableStyles();
     /** Nothing to browse until a project is open, so every control is disabled. */
     const noProject = !!props.needsProject;
     const [tab, setTab] = useState<SelectionKind>('entities');
@@ -194,12 +195,7 @@ export function SelectionCard(props: SelectionCardProps) {
     const shown = sorted.slice(0, rowLimit);
     const columns = tab === 'entities' ? ENTITY_COLUMNS : tab === 'actions' ? ACTION_COLUMNS : FUNCTION_COLUMNS;
 
-    const toggleSort = (column: number) =>
-        setSorts((current) => {
-            const active = current[tab];
-            const direction: SortDirection = active?.column === column && active.direction === 'ascending' ? 'descending' : 'ascending';
-            return { ...current, [tab]: { column, direction } };
-        });
+    const toggleSort = (column: number) => setSorts((current) => ({ ...current, [tab]: nextSort(current[tab], column) }));
 
     return (
         <StepCard step={step} description={
@@ -276,25 +272,17 @@ export function SelectionCard(props: SelectionCardProps) {
                     ) : (
                         <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small" sortable>
                             <TableHeader>
-                                <TableRow className={styles.headerRow}>
+                                <TableRow className={tableStyles.headerRow}>
                                     <TableSelectionCell type="checkbox" invisible />
                                     {columns.map((column, index) => (
-                                        // Wrapping the cell means the tooltip opens on hover and when its sort button gets focus.
-                                        <Tooltip
+                                        <SortableHeaderCell
                                             key={column.label}
-                                            content={{ children: column.help, className: styles.headerTooltip }}
-                                            relationship="description"
-                                            positioning="above"
-                                            withArrow
+                                            help={column.help}
+                                            sortDirection={sort?.column === index ? sort.direction : undefined}
+                                            onClick={() => toggleSort(index)}
                                         >
-                                            <TableHeaderCell
-                                                className={styles.headerCell}
-                                                sortDirection={sort?.column === index ? sort.direction : undefined}
-                                                onClick={() => toggleSort(index)}
-                                            >
-                                                {column.label}
-                                            </TableHeaderCell>
-                                        </Tooltip>
+                                            {column.label}
+                                        </SortableHeaderCell>
                                     ))}
                                 </TableRow>
                             </TableHeader>
@@ -307,17 +295,12 @@ export function SelectionCard(props: SelectionCardProps) {
                                     return (
                                         <TableRow
                                             key={row.key}
-                                            className={props.disabled ? styles.rowDisabled : styles.row}
+                                            className={props.disabled ? styles.rowDisabled : tableStyles.row}
                                             aria-selected={checked}
                                             appearance={checked ? 'brand' : 'none'}
                                             tabIndex={0}
                                             onClick={toggleRow}
-                                            onKeyDown={(e) => {
-                                                if (e.key === ' ' || e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    toggleRow();
-                                                }
-                                            }}
+                                            onKeyDown={(e) => activateRowOnKey(e, toggleRow)}
                                         >
                                             <TableSelectionCell
                                                 type="checkbox"

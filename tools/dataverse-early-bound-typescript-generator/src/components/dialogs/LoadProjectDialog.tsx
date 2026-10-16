@@ -24,7 +24,10 @@ import {
 } from '@fluentui/react-components';
 import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
-import { useLoadProjectDialogStyles } from '../../styles';
+import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles';
+import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import { nextSort } from '../shared/sorting';
+import { activateRowOnKey } from '../shared/tableRows';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { NewProjectDialog, type NewProject } from './NewProjectDialog';
 import { reportError } from '../../services';
@@ -94,6 +97,7 @@ const DEFAULT_SORT: { column: ColumnKey; direction: SortDirection } = { column: 
  */
 export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onBrowseLocation }: ILoadProjectDialogProps) {
     const styles = useLoadProjectDialogStyles();
+    const tableStyles = useSortableTableStyles();
     const [selectedId, setSelectedId] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -111,11 +115,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
         return [...projects].sort((a, b) => sign * column.compare(a, b) || textCompare(a.name, b.name));
     }, [projects, sort]);
 
-    /** First click on a column sorts ascending; clicking the sorted column again flips the direction. */
-    const toggleSort = (column: ColumnKey) =>
-        setSort((current) =>
-            current.column === column ? { column, direction: current.direction === 'ascending' ? 'descending' : 'ascending' } : { column, direction: 'ascending' },
-        );
+    const toggleSort = (column: ColumnKey) => setSort((current) => nextSort(current, column));
     const selected = projects.find((p) => p.id === selectedId);
 
     // Start every visit with nothing selected.
@@ -182,14 +182,13 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                             <TableRow>
                                                 <TableSelectionCell type="radio" invisible />
                                                 {COLUMNS.map((column) => (
-                                                    <TableHeaderCell
+                                                    <SortableHeaderCell
                                                         key={column.key}
-                                                        className={styles.headerCell}
                                                         sortDirection={sort.column === column.key ? sort.direction : undefined}
                                                         onClick={() => toggleSort(column.key)}
                                                     >
                                                         {column.label}
-                                                    </TableHeaderCell>
+                                                    </SortableHeaderCell>
                                                 ))}
                                                 <TableHeaderCell className={styles.actionsCell} aria-label="Actions" />
                                             </TableRow>
@@ -200,17 +199,12 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                                 return (
                                                     <TableRow
                                                         key={project.id}
-                                                        className={styles.row}
+                                                        className={tableStyles.row}
                                                         aria-selected={isSelected}
                                                         appearance={isSelected ? 'brand' : 'none'}
                                                         tabIndex={0}
                                                         onClick={() => select(project)}
-                                                        onKeyDown={(e) => {
-                                                            if (e.key === ' ' || e.key === 'Enter') {
-                                                                e.preventDefault();
-                                                                select(project);
-                                                            }
-                                                        }}
+                                                        onKeyDown={(e) => activateRowOnKey(e, () => select(project))}
                                                     >
                                                         <TableSelectionCell
                                                             type="radio"

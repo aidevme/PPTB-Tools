@@ -14,6 +14,8 @@ export { LoadProjectDialog } from './dialogs/LoadProjectDialog';
 export type { ILoadProjectDialogProps } from './dialogs/LoadProjectDialog';
 export { FileSearchBox } from './shared/FileSearchBox';
 export type { IFileSearchBoxProps } from './shared/FileSearchBox';
+export { SortableHeaderCell } from './shared/SortableHeaderCell';
+export type { ISortableHeaderCellProps } from './shared/SortableHeaderCell';
 export { StepCard, StepIndicator } from './shared/StepCard';
 export type { IStepCardProps } from './shared/StepCard';
 export { WorkflowProgress } from './shared/WorkflowProgress';

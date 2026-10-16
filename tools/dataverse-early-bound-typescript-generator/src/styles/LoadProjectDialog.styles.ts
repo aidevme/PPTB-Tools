@@ -9,8 +9,6 @@ export const useLoadProjectDialogStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: tokens.borderRadiusMedium,
     },
-    row: { cursor: 'pointer' },
-    headerCell: { fontWeight: tokens.fontWeightSemibold },
     actionsCell: { width: '88px' },
     path: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200, wordBreak: 'break-all' },
     muted: { color: tokens.colorNeutralForeground3 },
