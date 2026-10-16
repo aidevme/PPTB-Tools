@@ -9,3 +9,5 @@ export { useProject } from './useProject';
 export type { UseProjectOptions } from './useProject';
 export { useEnvironmentMetadata } from './useEnvironmentMetadata';
 export type { UseEnvironmentMetadataOptions } from './useEnvironmentMetadata';
+export { usePreviewGenerate } from './usePreviewGenerate';
+export type { UsePreviewGenerateOptions } from './usePreviewGenerate';

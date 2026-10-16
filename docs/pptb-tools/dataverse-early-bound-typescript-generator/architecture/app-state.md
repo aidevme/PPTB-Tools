@@ -1,50 +1,48 @@
 # App state and hooks
 
-`src/components/apps/App.tsx` owns all of the tool's state and orchestration; there's no state management library. The
+The tool's state lives in custom hooks in `src/hooks/`; there's no state management library.
+`src/components/apps/App.tsx` calls the hooks, wires them together and renders the cards. The
 [components](../components/) are presentational and receive everything as props.
-
-## State in `App.tsx`
-
-| State | Purpose |
-| --- | --- |
-| `projectRoot`, `rememberedFolder` | The open project folder, and the one last used with this connection. |
-| `configState` | The `.dataverse-gen.json` contents, its path, and whether it exists yet. The selection lives here too. |
-| `entities`, `operations`, `solutions` | Lists loaded from the environment. `operations` stays `null` until the `$metadata` document is loaded. |
-| `selectedSolutionId`, `solutionEntityIds`, `solutionComponentIds` | The solution filter and the ids in that solution. Results are cached per solution in refs. |
-| `plan`, `planStale` | The last preview, and whether the selection or options changed since. |
-| `previewedAt`, `lastResult` | When the plan was computed, and the summary of the last Generate run, for the Preview card. Set by `runPreview` and `runGenerate`. |
-| `progress`, `error` | The progress bar and the error message bar. |
-| `steps` (derived, not state) | `computeWorkflowSteps` from the open project, the selection count and the plan; passed to `WorkflowProgress` and each card. |
-| `settingsOpen` | Whether the [SettingsPanel](../components/settings-panel.md) drawer is open. |
-| `toolSettings` | Tool config: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves on load. `saveToolSettings` and `addProject` save and update it. |
-| `newProjectOpen` | Whether the [NewProjectDialog](../components/new-project-dialog.md) is open. |
-| `loadProjectOpen` | Whether the [LoadProjectDialog](../components/load-project-dialog.md) is open. |
-| `metadataFallback`, `showMetadataFallbackWarning` | The provider is using the metadata fallback because `$metadata` is too large. When it starts, a warning shows for 5 seconds (`METADATA_FALLBACK_WARNING_MS`) and then hides itself. |
-
-Two service objects are held with `useMemo`: a `PptbMetadataProvider`, recreated with an empty cache whenever
-the connection changes, and a single `PptbFileSink`.
-
-## Key callbacks
-
-| Callback | What it does |
-| --- | --- |
-| `loadProject`, `openProjectFolder` | Load a folder's `.dataverse-gen.json` (or defaults for a new project), then apply the Settings panel's Options (`applyProjectDefaults`). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
-| `openSavedProject` | Opens a project (`{ name, location }`) directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. Once loaded, `notifyProjectLoaded` shows an info notification. |
-| `openRecent` | Opens a project from the Project card's recent list with `openSavedProject`, showing errors in the page. |
-| `updateConfig` | Merges a change into the config and marks the plan stale. `toggle`, `clear` and `clearAll` build on it. |
-| `ensureOperations` | Loads actions and functions the first time the Actions or Functions tab opens. |
-| `changeSolution` | Loads the chosen solution's components for the filter. |
-| `runPreview` | Builds the write plan. See the data flow on the [Architecture](./index.md#data-flow) page. |
-| `runGenerate` | Writes new and changed files, saves the config, marks written files unchanged, then calls `recordProjectGeneration`. |
-| `recordProjectGeneration` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified On when the run added or dropped files. |
 
 ## Hooks
 
-`src/hooks/` has one hook:
+`App.tsx` calls them in this order, because each one takes values or callbacks from the ones before it:
 
-- **`useConnection`** reads the active PPTB connection on mount and again whenever PPTB raises
-  `connection:created`, `connection:updated` or `connection:deleted`. Outside PPTB (for example under
-  `npm run dev`) it resolves to `null`. It returns `{ connection, isLoading, refreshConnection }`.
+| Hook | Owns |
+| --- | --- |
+| `useConnection` | The active PPTB connection. Read on mount and again whenever PPTB raises `connection:created`, `connection:updated` or `connection:deleted`; `null` outside PPTB (for example under `npm run dev`). Returns `{ connection, isLoading, refreshConnection }`. |
+| `useStickyBarHeights` | Publishes the sticky header and footer heights as CSS variables, so scrolling to a step card lands below the header. |
+| `usePlanState` | `plan`, `planStale`, `previewedAt` and `lastResult`. It comes first so the hooks below can invalidate the plan: `clearPlan` drops it, `resetPlan` also clears the stale flag (another project opened), and `markPlanStale` keeps it but asks for a new preview. |
+| `useToolSettings` | `toolSettings`: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves. `saveToolSettings`, `saveNewProject`, `deleteProject`, `editProject`, `recordProjectGeneration`, and `changeSetting` for the Preview card's switches. |
+| `useProject` | `projectRoot`, `rememberedFolder` and `configState` (the `.dataverse-gen.json` contents, its path, and whether it exists yet; the selection lives here too). Opening a folder or a saved project, the folder picker for project locations, config edits, and applying the Settings panel's Options. |
+| `useEnvironmentMetadata` | `entities`, `operations` and `solutions`, the solution filter (`selectedSolutionId`, `solutionEntityIds`, `solutionComponentIds`, cached per solution in refs), the selected names the environment lacks (`missing`), and the `$metadata` fallback warning. |
+| `usePreviewGenerate` | `progress`, Preview and Generate, and whether the two Generate confirmation dialogs are open. |
+
+`App.tsx` itself keeps only `error`, `settingsOpen`, `newProjectOpen` and `loadProjectOpen`, plus `steps`
+(derived, not state): `computeWorkflowSteps` from the open project, the selection count and the plan, passed to
+`WorkflowProgress` and each card.
+
+Two service objects are held with `useMemo` in `App.tsx` and passed to the hooks: a `PptbMetadataProvider`,
+recreated with an empty cache whenever the connection changes, and a single `PptbFileSink`.
+
+## Key callbacks
+
+| Callback | Hook | What it does |
+| --- | --- | --- |
+| `loadProject`, `openProjectFolder` | `useProject` | Load a folder's `.dataverse-gen.json` (or defaults for a new project), then apply the Settings panel's Options (`applyProjectDefaults`). `loadProject` shows errors in the page and backs **Reload config**; `openProjectFolder` does the loading and throws instead. |
+| `openSavedProject` | `useProject` | Opens a project (`{ name, location }`) directly with `openProjectFolder`. Only if PPTB refuses access does the folder picker open there for the user to confirm. Once loaded, `notifyProjectLoaded` shows an info notification. |
+| `addProject` | `App.tsx` | Saves a project from the New Project dialog (`saveNewProject`), then opens it with `openSavedProject`. |
+| `openRecent` | `App.tsx` | Opens a project from the Project card's recent list with `openSavedProject`, showing errors in the page. |
+| `updateConfig` | `useProject` | Merges a change into the config and marks the plan stale. `toggle`, `clear` and `clearAll` build on it. |
+| `ensureOperations` | `useEnvironmentMetadata` | Loads actions and functions the first time the Actions or Functions tab opens. |
+| `changeSolution` | `useEnvironmentMetadata` | Loads the chosen solution's components for the filter. |
+| `runPreview` | `usePreviewGenerate` | Builds the write plan. See the data flow on the [Architecture](./index.md#data-flow) page. |
+| `runGenerate` | `usePreviewGenerate` | Writes new and changed files, saves the config, marks written files unchanged, then calls `recordProjectGeneration`. |
+| `startGenerate` | `usePreviewGenerate` | Opens the right confirmation (Delete orphaned files, or Ask before generating) or runs Generate straight away. |
+| `recordProjectGeneration` | `useToolSettings` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified On when the run added or dropped files. |
+
+The metadata fallback warning shows for 5 seconds (`METADATA_FALLBACK_WARNING_MS` in `useEnvironmentMetadata`) when
+the provider starts using it because `$metadata` is too large, then hides itself.
 
 ## Errors and notifications
 
