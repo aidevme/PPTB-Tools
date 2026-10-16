@@ -25,7 +25,7 @@ product tier.
 | Scope | Lives in | Round-trips to `shared/` | Use for |
 |---|---|---|---|
 | `core` | `agent-src/skills/core/<group>/` | Yes | Reusable, customer-agnostic capability |
-| `project` | `agent-src/skills/project/` | No | Anything naming a client, pipeline ID, env URL, or sprint convention |
+| `project` | `agent-src/skills/project/<group>/` | No | Anything naming a client, pipeline ID, env URL, or sprint convention |
 
 **Rule:** if the skill would contain a real customer name, a hardcoded environment URL, a specific
 pipeline ID, or an engagement-specific workflow, it is `project` until those are externalised to
@@ -42,7 +42,7 @@ Core groups: `foundation dataverse server client pipelines delivery reference me
 
 ```powershell
 $scope = "core"; $group = "delivery"; $name = "aidevme-your-skill"
-$base = "agent-src/skills/$scope/$group/$name"        # project scope: agent-src/skills/project/$name
+$base = "agent-src/skills/$scope/$group/$name"        # same for project scope: agent-src/skills/project/<group>/<name>
 New-Item -ItemType Directory -Force -Path $base | Out-Null
 New-Item -ItemType Directory -Force -Path "$base/scripts","$base/references" | Out-Null   # only if used
 ```
