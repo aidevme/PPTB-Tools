@@ -134,6 +134,12 @@ export function withRetries<T extends object>(api: T, options?: RetryOptions): T
     return proxy;
 }
 
+/** PPTB's Dataverse API, with throttling and temporary-unavailability errors retried (see {@link withRetries}). */
+export function dataverseApi(): typeof window.dataverseAPI {
+    if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
+    return withRetries(window.dataverseAPI);
+}
+
 export interface RetryOptions {
     /** Total attempts, including the first. Default 3. */
     attempts?: number;

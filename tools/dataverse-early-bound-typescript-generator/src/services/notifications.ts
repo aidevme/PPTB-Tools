@@ -3,7 +3,7 @@
  * logged and never interrupts what the user was doing.
  */
 import type { WritePlan } from '../types';
-import { summarizeGeneration, summarizePlan, writeCounts } from './plan';
+import { plural, summarizeGeneration, summarizePlan, writeCounts } from './plan';
 import type { ProjectConfigState } from './projectConfig';
 
 /** The notification types PPTB supports. */
@@ -29,8 +29,6 @@ export function notificationOptions(kind: NotificationType, body: string, title?
     const preset = NOTIFICATION_TYPES[kind];
     return { title: title ?? preset.title, body, type: preset.type, duration: preset.duration };
 }
-
-const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 /** Title and body for the notification shown after a saved project is opened. */
 export function projectLoadedMessage(projectName: string, state: ProjectConfigState): { title: string; body: string } {

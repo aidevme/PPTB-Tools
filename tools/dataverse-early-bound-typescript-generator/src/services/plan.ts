@@ -29,7 +29,8 @@ function splitRelative(relativePath: string): { dir: string; name: string } {
     return index === -1 ? { dir: '', name: relativePath } : { dir: relativePath.substring(0, index), name: relativePath.substring(index + 1) };
 }
 
-const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
+/** `1 file`, `2 files`: the count with the singular or plural noun. */
+export const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 /** What Generate does with a file, including `duplicate` files, which are written like any other. */
 export function writeStatusOf(file: PlannedFile): WriteStatus | undefined {

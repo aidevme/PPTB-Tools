@@ -5,11 +5,11 @@
  * Everything is cached per instance; the app creates a new instance whenever the active connection
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
-import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxComplexType, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
+import { createMetadataSchema, labelText, parseCsdl, type AttributeMetadataInput, type EdmxComplexType, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
 import { queryAllPages } from './paging';
-import { technicalMessage, withRetries } from './errors';
+import { dataverseApi as api, technicalMessage } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
 const OPTION_SET_CASTS: Record<string, string> = {
@@ -23,16 +23,8 @@ export const METADATA_CONCURRENCY = 4;
 
 type RawRecord = Record<string, unknown>;
 
-function label(value: unknown): string {
-    const l = value as { UserLocalizedLabel?: { Label?: string } | null } | null | undefined;
-    return l?.UserLocalizedLabel?.Label ?? '';
-}
-
-/** PPTB's Dataverse API, with throttling and temporary-unavailability errors retried (see `withRetries`). */
-function api(): typeof window.dataverseAPI {
-    if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
-    return withRetries(window.dataverseAPI);
-}
+/** A metadata label's user-localized text, via core's `labelText`. */
+const label = (value: unknown): string => labelText(value as Parameters<typeof labelText>[0]);
 
 /**
  * PPTB's `getCSDLDocument` caps the `$metadata` response at 16 MiB (its batch response limit), and large
@@ -40,7 +32,7 @@ function api(): typeof window.dataverseAPI {
  * create a Buffer larger than … bytes"). Those environments fall back to {@link createMetadataSchema}.
  */
 function isCsdlSizeLimitError(error: unknown): boolean {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = technicalMessage(error);
     return /larger than \d+ bytes|exceeds the maximum size/i.test(message);
 }
 
@@ -377,7 +369,7 @@ export class PptbMetadataProvider {
             }
         }
         throw new Error(
-            `Could not load the option set for ${logicalName}.${attribute.LogicalName}: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+            `Could not load the option set for ${logicalName}.${attribute.LogicalName}: ${technicalMessage(lastError)}`,
         );
     }
 }
