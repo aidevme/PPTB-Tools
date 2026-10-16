@@ -15,9 +15,9 @@ export interface UseEnvironmentMetadataOptions {
     hasProject: boolean;
     /** The project's selection, to tell which selected names the environment doesn't have. */
     selected: Record<SelectionKind, string[]>;
-    /** Shows an error in the page (the error bar), or clears it with `null`. */
+    /** Shows an error in the page (the error bar), or clears it with `null`. Must be stable (a state setter): effects depend on it. */
     setError: (message: string | null) => void;
-    /** Drops the write plan when the environment's lists reload. */
+    /** Drops the write plan when the environment's lists reload. Must be stable. */
     clearPlan: () => void;
 }
 

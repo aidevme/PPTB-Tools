@@ -45,6 +45,9 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | `workflow.test.ts` | Step states, relative times, shortened paths, recent projects (including the recent project count), the Project card's empty and open states, and the progress bar |
 | `paging.test.ts` | Keyset paging over `queryData`: the page query (key selected, ordered, `gt` the last key, caller filter kept), combining pages without gaps or duplicates, stopping on a short or empty page, and stopping with an error when the key doesn't advance or the page limit is reached |
 | `services.test.ts` | Path helpers, config round-trip, and write planning (statuses, casing reuse, first-time folder creation), deleting orphaned files (only plan orphans, the output-folder guard, failure reporting, summaries), and the delete commands (PowerShell and POSIX quoting, batching) |
+| `hooks.test.ts` | The state hooks: plan invalidation (`usePlanState`); loading, saving and recording generations in the tool config (`useToolSettings`); opening a project, keeping the draft selection, applying the Settings Options and remembering the folder (`useProject`); listing tables, solutions and operations, the solution filter cache and missing names (`useEnvironmentMetadata`); and Generate with its confirmations (`usePreviewGenerate`) |
+| `solutions.test.ts` | The solution filter's reads: visible unmanaged solutions, a solution's tables, and component membership queried in chunks |
+| `rememberedFolder.test.ts` | The project folder remembered per connection, with the last one used as the fallback |
 
 Test data:
 
