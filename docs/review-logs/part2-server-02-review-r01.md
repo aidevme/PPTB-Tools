@@ -1,6 +1,6 @@
 ---
 title: "Part 2 — Server Template Self-Review (build → critique → improve loop)"
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: draft
 scope: Expert self-review of ProjectTemplate/Server across iterations r01..r03 until no blocker/major remains

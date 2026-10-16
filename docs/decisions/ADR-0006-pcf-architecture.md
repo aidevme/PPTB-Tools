@@ -3,7 +3,7 @@ adr: 0006
 title: PCF control template architecture
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

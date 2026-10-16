@@ -3,7 +3,7 @@ title: "Part 5 — PCF Control Template: Source Analysis"
 part: 5
 kind: review-log
 iteration: 01
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: draft
 scope: read-only comparative analysis of PCF tooling across the live-delivery source / HINT / CDX

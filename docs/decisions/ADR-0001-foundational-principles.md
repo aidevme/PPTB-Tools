@@ -3,7 +3,7 @@ adr: 0001
 title: Foundational principles for the HSO Power Platform project template
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

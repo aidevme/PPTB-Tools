@@ -126,4 +126,4 @@ Never place skill files directly in `.claude/skills` or `.github/skills` — the
 
 | Date | Author | Description |
 |---|---|---|
-| 2026-09-10 | maciejnowicki | Ported from HINT; added the required core|project scope selector, manifest registration, and the sync/verify step for the inverted model. |
+| 2026-09-10 | aidevme | Ported from HINT; added the required core|project scope selector, manifest registration, and the sync/verify step for the inverted model. |

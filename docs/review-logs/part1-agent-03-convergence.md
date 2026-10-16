@@ -1,6 +1,6 @@
 ---
 title: "Part 1 — Agent: Convergence"
-author: maciejnowicki
+author: aidevme
 type: analysis
 status: active
 created: 2026-09-10

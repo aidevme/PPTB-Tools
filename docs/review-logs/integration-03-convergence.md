@@ -3,7 +3,7 @@ title: "Integration — whole-solution convergence"
 part: 6
 kind: review-log
 iteration: 03
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: accepted
 ---

@@ -3,7 +3,7 @@ adr: NNNN
 title: <short decision title>
 status: proposed | accepted | superseded
 date: YYYY-MM-DD
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

@@ -3,7 +3,7 @@ adr: 0007
 title: Pipeline architecture — config-driven marker-block generation with live-delivery-source runtime hardening
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

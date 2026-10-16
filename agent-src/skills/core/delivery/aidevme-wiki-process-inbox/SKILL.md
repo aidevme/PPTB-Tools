@@ -46,4 +46,4 @@ its permanent home. Authority for placement: [`agent/schema.md`](../../../../age
 
 | Date | Author | Description |
 |---|---|---|
-| 2026-09-10 | maciejnowicki | Ported from prior in-house skills and neutralised for the template. |
+| 2026-09-10 | aidevme | Ported from prior in-house skills and neutralised for the template. |

@@ -1,6 +1,6 @@
 ---
 title: "Part 1 — Agent: Expert self-review (r01)"
-author: maciejnowicki
+author: aidevme
 type: analysis
 status: draft
 created: 2026-09-10

@@ -1,6 +1,6 @@
 ---
 title: "Part 3 · Client Template — Expert Self-Review r01"
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: review
 scope: ProjectTemplate/Client/clientjs

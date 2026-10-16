@@ -78,4 +78,4 @@ fix `agent-src/sync/skills-manifest.json` or the folder location, then sync.
 
 | Date | Author | Description |
 |---|---|---|
-| 2026-09-10 | maciejnowicki | Rewritten from HINT's twin-mirror reconciler into a verification backstop for the inverted (source-committed) model; the double-nesting bug is designed out. |
+| 2026-09-10 | aidevme | Rewritten from HINT's twin-mirror reconciler into a verification backstop for the inverted (source-committed) model; the double-nesting bug is designed out. |

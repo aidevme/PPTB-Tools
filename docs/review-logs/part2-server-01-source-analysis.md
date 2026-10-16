@@ -1,6 +1,6 @@
 ---
 title: "Part 2 — Server-Side Source Analysis (CDX vs the live-delivery source)"
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: draft
 scope: Read-only comparative architect review of server-side (plugins/services) templates feeding a new best-in-class server template

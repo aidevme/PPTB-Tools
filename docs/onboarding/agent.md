@@ -1,6 +1,6 @@
 ---
 title: "Onboarding — the agent layer"
-author: maciejnowicki
+author: aidevme
 type: analysis
 status: active
 created: 2026-09-10

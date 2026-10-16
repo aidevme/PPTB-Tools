@@ -3,7 +3,7 @@ adr: 0002
 title: Canonical repository structure for the template
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "Part 3 · Client-Side Template — Source Comparative Analysis"
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: analysis
 scope: Client-side (TypeScript web resources / form scripting) templates across CDX, HINT and the live-delivery source

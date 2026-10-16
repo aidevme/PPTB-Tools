@@ -3,7 +3,7 @@ title: "Part 5 — PCF Control Template: Expert Self-Review (r01)"
 part: 5
 kind: review-log
 iteration: 02
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: draft
 ---

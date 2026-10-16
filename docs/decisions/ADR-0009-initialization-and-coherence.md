@@ -3,7 +3,7 @@ adr: 0009
 title: Initialization engine & whole-solution coherence contract
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

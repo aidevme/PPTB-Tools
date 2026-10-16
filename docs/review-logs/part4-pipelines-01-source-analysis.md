@@ -1,6 +1,6 @@
 ---
 title: "Part 4 — Pipelines / ALM: Source Analysis"
-author: maciejnowicki
+author: aidevme
 type: analysis
 status: accepted
 created: 2026-09-10

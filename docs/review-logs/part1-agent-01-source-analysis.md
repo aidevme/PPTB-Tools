@@ -1,6 +1,6 @@
 ---
 title: "Part 1 — Agent / AI-Assistant Tooling: Source Analysis"
-author: maciejnowicki
+author: aidevme
 type: analysis
 status: draft
 created: 2026-09-10

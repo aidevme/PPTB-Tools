@@ -3,7 +3,7 @@ adr: 0005
 title: Client-side (TypeScript web resource) architecture
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

@@ -3,7 +3,7 @@ title: "Part 5 — PCF Control Template: Convergence"
 part: 5
 kind: review-log
 iteration: 03
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: accepted
 ---

@@ -3,7 +3,7 @@ adr: 0003
 title: Naming & token contract (the reusability spine)
 status: accepted
 date: 2026-09-10
-author: maciejnowicki
+author: aidevme
 supersedes: []
 ---
 

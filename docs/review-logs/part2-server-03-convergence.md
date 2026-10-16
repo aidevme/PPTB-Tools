@@ -1,6 +1,6 @@
 ---
 title: "Part 2 — Server Template Convergence"
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: draft
 scope: Final state of ProjectTemplate/Server — what changed across iterations, why it is best-in-class, residual risks, evidence

@@ -3,7 +3,7 @@ title: "Integration — whole-solution review r01"
 part: 6
 kind: review-log
 iteration: 01
-author: maciejnowicki
+author: aidevme
 date: 2026-09-10
 status: accepted
 ---
@@ -49,7 +49,7 @@ Independent scan of `ProjectTemplate/**` (excluding build output), `AGENTS.md`, 
 | L2 | Real ticket IDs `AP-nnnn` in PCF gotchas/tests | HIGH | 14 | Stripped the `(AP-nnnn)` ref, kept the platform lesson. |
 | L3 | Real solution names (the wave + PCF-wave aggregators) | MED | 2 | Genericised to descriptive neutral. |
 | L4 | Real environment URL `dev1demos14.crm3.dynamics.com` (CDX toolchain leftover) | MED | 1 | → placeholder `your-dev-org.crm4.dynamics.com`. |
-| L5 | Person names (`Author: maciejnowicki` in a shipped tool; `Keith Whatling` in a skill changelog) | MED | 2 | Neutralised shipped-tool author; dropped the contributor name. |
+| L5 | Person names (`Author: aidevme` in a shipped tool; `Keith Whatling` in a skill changelog) | MED | 2 | Neutralised shipped-tool author; dropped the contributor name. |
 | L6 | Real-looking Dataverse record GUID as a test fixture | LOW | 1 | Swapped for an obviously-synthetic GUID (kept the test consistent). |
 
 **Deliberately preserved** (per task scope): `agent-src/sync/skills-manifest.json` `source:` fields

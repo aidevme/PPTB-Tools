@@ -127,4 +127,4 @@ IDs (Common Data Service `51f81489-…`, Azure CLI `04b07795-…`) and the fixed
 
 | Date | Author | Description |
 |---|---|---|
-| 2026-09-11 | maciejnowicki | Wave-0 port from ForgeUSA; neutralised; governance modules deferred; placed as a foundation library skill under the ADR-0008 sync (no sync change needed). |
+| 2026-09-11 | aidevme | Wave-0 port from ForgeUSA; neutralised; governance modules deferred; placed as a foundation library skill under the ADR-0008 sync (no sync change needed). |
