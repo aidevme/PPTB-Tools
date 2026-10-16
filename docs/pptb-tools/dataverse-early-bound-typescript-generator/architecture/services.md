@@ -19,6 +19,7 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 | `notifications.ts` | PPTB notifications. `NOTIFICATION_TYPES` defines the four presets (success 3 s, info 5 s, warning and error persistent), and `notificationOptions(kind, body, title?)` builds `showNotification` options from one. It also shows `notifyProjectLoaded` (info) after a saved project opens, `notifyPreviewReady` (info) after a preview succeeds, and `notifyGenerationComplete` (success) after Generate. Best effort: failures are only logged. |
 | `concurrency.ts` | `mapWithConcurrency` runs async work with a cap on how many run at once. |
 | `paging.ts` | `queryAllPages` reads every row of a `queryData` query, one page of 5,000 at a time, by key (see [Paging](#paging)). |
+| `webApiRow.ts` | `textOf(row, column)` reads a Web API row column as a string (or `undefined`), in place of `as string` casts. |
 
 ## Metadata provider
 
