@@ -3,8 +3,8 @@ import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '
 import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
 import { ConfirmationDialog, Footer, GenerateSummary, Header, LoadProjectDialog, OrphanList, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../../core';
-import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from '../../config';
-import { useConnection, useStickyBarHeights } from '../../hooks';
+import { applyProjectDefaults, type ProjectDefaults } from '../../config';
+import { useConnection, usePlanState, useStickyBarHeights, useToolSettings } from '../../hooks';
 import {
     PptbFileSink,
     PptbMetadataProvider,
@@ -17,10 +17,8 @@ import {
     getRememberedProjectFolder,
     getSolutionEntityIds,
     getSolutionMemberIds,
-    isSamePath,
     listSolutions,
     loadProjectConfig,
-    loadToolConfig,
     notifyGenerationComplete,
     notifyPreviewReady,
     notifyProjectLoaded,
@@ -29,12 +27,10 @@ import {
     reportError,
     resolveOutputRoot,
     saveProjectConfig,
-    saveToolConfig,
     summarizeGeneration,
     technicalMessage,
     willWrite,
     writeCounts,
-    writeStatusOf,
     type ProjectConfigState,
 } from '../../services';
 import { useAppStyles } from '../../styles';
@@ -67,8 +63,6 @@ export default function App() {
     const [confirmGenerateOpen, setConfirmGenerateOpen] = useState(false);
     const [newProjectOpen, setNewProjectOpen] = useState(false);
     const [loadProjectOpen, setLoadProjectOpen] = useState(false);
-    /** Settings-panel values: the bundled defaults until the saved values have loaded. */
-    const [toolSettings, setToolSettings] = useState<ToolConfig>(toolConfig);
     /** The $metadata document is too large for PPTB, so the schema was rebuilt from table metadata. */
     const [metadataFallback, setMetadataFallback] = useState(false);
     /** The fallback warning is shown for a few seconds when the fallback starts, then hides itself. */
@@ -88,14 +82,13 @@ export default function App() {
     const [loadingEntities, setLoadingEntities] = useState(false);
     const [loadingOperations, setLoadingOperations] = useState(false);
     const [loadingSolution, setLoadingSolution] = useState(false);
-    const [plan, setPlan] = useState<WritePlan | null>(null);
-    /** When the current plan was computed (ISO), for the Preview card's "Previewed … ago". */
-    const [previewedAt, setPreviewedAt] = useState<string | null>(null);
-    /** Summary of the last Generate run, shown in the Preview card until the next preview. */
-    const [lastResult, setLastResult] = useState<string | null>(null);
-    const [planStale, setPlanStale] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { plan, setPlan, previewedAt, setPreviewedAt, lastResult, setLastResult, planStale, setPlanStale, markPlanStale } = usePlanState();
+    const { toolSettings, saveToolSettings, saveNewProject, deleteProject, editProject, recordProjectGeneration, changeSetting } = useToolSettings({
+        onError: setError,
+        onPlanStale: markPlanStale,
+    });
     const solutionCache = useRef(new Map<string, Set<string>>());
     /** Component ids (custom APIs, process actions) of the selected solution; `null` when not filtering. */
     const [solutionComponentIds, setSolutionComponentIds] = useState<Set<string> | null>(null);
@@ -183,14 +176,6 @@ export default function App() {
     // ----- environment lists ----------------------------------------------------------------------
 
     useEffect(() => {
-        let cancelled = false;
-        void loadToolConfig().then((loaded) => !cancelled && setToolSettings(loaded));
-        return () => {
-            cancelled = true;
-        };
-    }, []);
-
-    useEffect(() => {
         if (!metadataFallback) {
             setShowMetadataFallbackWarning(false);
             return;
@@ -200,59 +185,16 @@ export default function App() {
         return () => window.clearTimeout(timer);
     }, [metadataFallback]);
 
-    /** Saves the Settings-panel values; the panel stays open and shows the error if saving fails. */
-    const saveToolSettings = useCallback(
-        async (draft: ToolConfig) => {
-            // Same normalization as on load, so e.g. a blank output folder saves as the default, not as "".
-            const next = mergeToolConfig(draft);
-            await saveToolConfig(next);
-            setToolSettings(next);
-            // Renaming duplicates changes the generated files, so the current preview no longer matches.
-            if (next.renameDuplicateIdentifiers !== toolSettings.renameDuplicateIdentifiers) setPlanStale(true);
-        },
-        [toolSettings.renameDuplicateIdentifiers],
-    );
-
     /**
-     * Adds a project from the New Project dialog to `projects`, saves the config, and opens the project, which
-     * also lists the tables. A failure to save stays in the dialog; a failure to open shows in the page, since
-     * the project was saved.
+     * Adds a project from the New Project dialog, saves the config, and opens the project, which also lists the
+     * tables. A failure to save stays in the dialog; a failure to open shows in the page, since the project was saved.
      */
     const addProject = useCallback(
         async (project: NewProject) => {
-            const now = new Date().toISOString();
-            const next: ToolConfig = {
-                ...toolSettings,
-                projects: [...toolSettings.projects, { ...project, id: crypto.randomUUID(), version: DEFAULT_PROJECT_VERSION, createdOn: now, modifiedOn: now }],
-            };
-            await saveToolConfig(next);
-            setToolSettings(next);
+            await saveNewProject(project);
             openSavedProject(project).catch((e: unknown) => setError(reportError(`Could not open ${project.name}`, e, { location: project.location })));
         },
-        [toolSettings, openSavedProject],
-    );
-
-    /** Removes a saved project from `projects` and saves the config; files in its folder are left alone. */
-    const deleteProject = useCallback(
-        async (project: ProjectEntry) => {
-            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.filter((p) => p.id !== project.id) };
-            await saveToolConfig(next);
-            setToolSettings(next);
-        },
-        [toolSettings],
-    );
-
-    /**
-     * Saves the name, description and location edited in the Load Project dialog and saves the config. The version
-     * and dates are left alone; they track generation. A project that's open stays open at its current folder.
-     */
-    const editProject = useCallback(
-        async (project: ProjectEntry, changes: NewProject) => {
-            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.map((p) => (p.id === project.id ? { ...p, ...changes } : p)) };
-            await saveToolConfig(next);
-            setToolSettings(next);
-        },
-        [toolSettings],
+        [saveNewProject, openSavedProject],
     );
 
     /** Folder picker for the New Project and edit dialogs' Location; `null` when cancelled or outside PPTB. */
@@ -464,35 +406,6 @@ export default function App() {
     ]);
 
     /**
-     * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
-     * Modified On when the run added files or stopped producing ones the previous run did. Folders that
-     * aren't saved projects are left alone; a failure to save is logged, since the files were written.
-     */
-    const recordProjectGeneration = useCallback(
-        async (root: string, applied: WritePlan) => {
-            const index = toolSettings.projects.findIndex((p) => isSamePath(p.location, root));
-            if (index === -1) return;
-            const updated = recordGeneration(
-                toolSettings.projects[index],
-                {
-                    files: applied.files.filter((f) => f.status !== 'orphaned').map((f) => f.relativePath),
-                    newFiles: applied.files.filter((f) => writeStatusOf(f) === 'new').map((f) => f.relativePath),
-                },
-                new Date().toISOString(),
-            );
-            if (!updated) return;
-            const next: ToolConfig = { ...toolSettings, projects: toolSettings.projects.map((p, i) => (i === index ? updated : p)) };
-            try {
-                await saveToolConfig(next);
-                setToolSettings(next);
-            } catch (e) {
-                console.warn('Could not update the project after generating', e);
-            }
-        },
-        [toolSettings],
-    );
-
-    /**
      * Writes the plan's new and changed files and saves the project config; with `deleteOrphans`, then deletes the
      * plan's orphaned files. A failed delete is reported on its own, since the files were already written.
      */
@@ -565,18 +478,6 @@ export default function App() {
         if (toolSettings.deleteOrphanedFiles && plan.counts.orphaned > 0) setConfirmDeleteOpen(true);
         else if (toolSettings.confirmBeforeGenerate && pendingWriteCount(plan, { skipDuplicates }) > 0) setConfirmGenerateOpen(true);
         else void runGenerate(plan, false);
-    };
-
-    /**
-     * The Preview card's switches (Delete orphaned files, Skip and Rename duplicated identifier(s)): each saves
-     * its key in the tool config, like the Settings panel.
-     */
-    const changeSetting = async (key: 'deleteOrphanedFiles' | 'skipDuplicateIdentifiers' | 'renameDuplicateIdentifiers', checked: boolean) => {
-        try {
-            await saveToolSettings({ ...toolSettings, [key]: checked } satisfies ToolConfig);
-        } catch (e) {
-            setError(reportError('Could not save the setting', e));
-        }
     };
 
     // ----- derived --------------------------------------------------------------------------------
