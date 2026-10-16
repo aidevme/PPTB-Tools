@@ -566,28 +566,13 @@ export default function App() {
         else void runGenerate(plan, false);
     };
 
-    /** The Delete orphaned files switch: saves `deleteOrphanedFiles` in the tool config, like the Settings panel. */
-    const changeDeleteOrphans = async (checked: boolean) => {
+    /**
+     * The Preview card's switches (Delete orphaned files, Skip and Rename duplicated identifier(s)): each saves
+     * its key in the tool config, like the Settings panel.
+     */
+    const changeSetting = async (key: 'deleteOrphanedFiles' | 'skipDuplicateIdentifiers' | 'renameDuplicateIdentifiers', checked: boolean) => {
         try {
-            await saveToolSettings({ ...toolSettings, deleteOrphanedFiles: checked });
-        } catch (e) {
-            setError(reportError('Could not save the setting', e));
-        }
-    };
-
-    /** The Skip duplicated identifier(s) switch: saves `skipDuplicateIdentifiers` in the tool config, like the Settings panel. */
-    const changeSkipDuplicates = async (checked: boolean) => {
-        try {
-            await saveToolSettings({ ...toolSettings, skipDuplicateIdentifiers: checked });
-        } catch (e) {
-            setError(reportError('Could not save the setting', e));
-        }
-    };
-
-    /** The Rename duplicated identifier(s) switch: saves `renameDuplicateIdentifiers`, like the Settings panel. */
-    const changeRenameDuplicates = async (checked: boolean) => {
-        try {
-            await saveToolSettings({ ...toolSettings, renameDuplicateIdentifiers: checked });
+            await saveToolSettings({ ...toolSettings, [key]: checked } satisfies ToolConfig);
         } catch (e) {
             setError(reportError('Could not save the setting', e));
         }
@@ -745,10 +730,10 @@ export default function App() {
                     onPreview={() => void runPreview()}
                     deleteOrphans={toolSettings.deleteOrphanedFiles}
                     skipDuplicates={skipDuplicates}
-                    onSkipDuplicatesChange={(checked) => void changeSkipDuplicates(checked)}
+                    onSkipDuplicatesChange={(checked) => void changeSetting('skipDuplicateIdentifiers', checked)}
                     renameDuplicates={toolSettings.renameDuplicateIdentifiers}
-                    onRenameDuplicatesChange={(checked) => void changeRenameDuplicates(checked)}
-                    onDeleteOrphansChange={(checked) => void changeDeleteOrphans(checked)}
+                    onRenameDuplicatesChange={(checked) => void changeSetting('renameDuplicateIdentifiers', checked)}
+                    onDeleteOrphansChange={(checked) => void changeSetting('deleteOrphanedFiles', checked)}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
                 />
