@@ -9,7 +9,7 @@ import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type Edmx
 import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
 import { queryAllPages } from './paging';
-import { withRetries } from './errors';
+import { technicalMessage, withRetries } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
 const OPTION_SET_CASTS: Record<string, string> = {
@@ -144,7 +144,12 @@ export class PptbMetadataProvider {
 
     /** Actions and functions from the CSDL, for the Select step. */
     async listOperations(): Promise<OperationSummary[]> {
-        const [schema, customApis, processActions] = await Promise.all([this.getSchema(), this.getCustomApis(), listProcessActions()]);
+        // Without read access to `customapi` the CSDL list still works; the custom-API flags are just missing.
+        const customApisOrNone = this.getCustomApis().catch((error: unknown): CustomApiRecord[] => {
+            console.warn('Could not list custom APIs', error);
+            return [];
+        });
+        const [schema, customApis, processActions] = await Promise.all([this.getSchema(), customApisOrNone, listProcessActions()]);
         const customByName = new Map(customApis.map((c) => [c.uniqueName, c]));
         const processByName = new Map(processActions.map((p) => [p.uniqueName, p]));
         const summarize = (kind: 'action' | 'function') => (op: EdmxSchema['actions'][number]): OperationSummary => {
@@ -189,9 +194,14 @@ export class PptbMetadataProvider {
         return operations;
     }
 
-    /** Custom API records, fetched once per connection. */
+    /** Custom API records, fetched once per connection. A failed fetch isn't cached, so the next call retries. */
     getCustomApis(): Promise<CustomApiRecord[]> {
-        if (!this.customApis) this.customApis = listCustomApis();
+        if (!this.customApis) {
+            this.customApis = listCustomApis().catch((error: unknown) => {
+                this.customApis = undefined;
+                throw error;
+            });
+        }
         return this.customApis;
     }
 
@@ -199,6 +209,10 @@ export class PptbMetadataProvider {
      * The CSDL schema plus definitions for any selected custom API that `$metadata` does not contain
      * (private custom APIs, or ones created after the environment's metadata cache was built). Those are
      * built from the `customapi` record and its request parameters.
+     *
+     * Throws when the custom API records can't be read, rather than generating without the selected
+     * operations. A selected name that isn't a custom API in the environment (for example one deleted since
+     * it was selected) is skipped with a console warning.
      */
     async getSchemaForSelection(actions: readonly string[], functions: readonly string[]): Promise<EdmxSchema> {
         const schema = await this.getSchema();
@@ -206,14 +220,22 @@ export class PptbMetadataProvider {
         const wanted = [...actions, ...functions].filter((name) => !known.has(name));
         if (wanted.length === 0) return schema;
 
-        const customApis = await this.getCustomApis();
+        let customApis: CustomApiRecord[];
+        try {
+            customApis = await this.getCustomApis();
+        } catch (error) {
+            throw new Error(`Could not read the custom API definitions for ${wanted.join(', ')}: ${technicalMessage(error)}`, { cause: error });
+        }
         const extraActions: EdmxOperation[] = [];
         const extraFunctions: EdmxOperation[] = [];
         const extraComplexTypes: EdmxComplexType[] = [];
         const knownComplex = new Set(schema.complexTypes.map((c) => c.Name));
         for (const name of wanted) {
             const custom = customApis.find((c) => c.uniqueName === name);
-            if (!custom) continue;
+            if (!custom) {
+                console.warn(`Selected operation ${name} is neither in $metadata nor a custom API in this environment; skipped.`);
+                continue;
+            }
             const { operation, response } = await buildCustomApiOperation(custom);
             (custom.isFunction ? extraFunctions : extraActions).push(operation);
             if (response && !knownComplex.has(response.Name)) {
@@ -373,30 +395,25 @@ interface CustomApiRecord {
 
 /**
  * Custom API records, used to flag operations as custom and to surface private ones that `$metadata`
- * leaves out. Failure (e.g. no read privilege on `customapi`) is not fatal: the CSDL list still works.
+ * leaves out. Throws on failure (e.g. no read privilege on `customapi`); callers decide whether that's fatal.
  */
 async function listCustomApis(): Promise<CustomApiRecord[]> {
-    try {
-        // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
-        const rows = await queryAllPages((query) => api().queryData(query), {
-            entitySet: 'customapis',
-            select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
-            idField: 'customapiid',
-        });
-        return rows.map((row) => ({
-            id: row.customapiid as string,
-            uniqueName: row.uniquename as string,
-            displayName: (row.displayname as string | null) || undefined,
-            isFunction: row.isfunction === true,
-            isPrivate: row.isprivate === true,
-            bindingType: typeof row.bindingtype === 'number' ? row.bindingtype : 0,
-            // bindingtype: 0 = Global, 1 = Entity, 2 = EntityCollection
-            boundEntity: row.bindingtype === 0 ? undefined : ((row.boundentitylogicalname as string | null) ?? undefined),
-        }));
-    } catch (error) {
-        console.warn('Could not list custom APIs', error);
-        return [];
-    }
+    // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
+    const rows = await queryAllPages((query) => api().queryData(query), {
+        entitySet: 'customapis',
+        select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
+        idField: 'customapiid',
+    });
+    return rows.map((row) => ({
+        id: row.customapiid as string,
+        uniqueName: row.uniquename as string,
+        displayName: (row.displayname as string | null) || undefined,
+        isFunction: row.isfunction === true,
+        isPrivate: row.isprivate === true,
+        bindingType: typeof row.bindingtype === 'number' ? row.bindingtype : 0,
+        // bindingtype: 0 = Global, 1 = Entity, 2 = EntityCollection
+        boundEntity: row.bindingtype === 0 ? undefined : ((row.boundentitylogicalname as string | null) ?? undefined),
+    }));
 }
 
 /**

@@ -57,6 +57,10 @@ Private custom APIs, and ones the environment's metadata cache doesn't include y
 selectable. The tool builds them from the custom API record, its request parameters and its response properties.
 dataverse-gen can't generate these.
 
+If the custom API records can't be read (for example, without read access to the `customapi` table), Preview stops
+with an error that names the selected custom APIs, rather than generating without them. Preview tries again the next
+time you run it. The table list still loads; custom APIs just aren't flagged in it.
+
 ## Known limitations
 
 - **Live testing:** the tool has been tested inside PPTB against a live environment for connecting, listing

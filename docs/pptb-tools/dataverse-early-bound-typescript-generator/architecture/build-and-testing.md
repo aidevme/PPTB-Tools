@@ -34,7 +34,7 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | `errors.test.ts` | Error handling: reading the status from each PPTB error format and Dataverse code, friendly messages, logging and the error notification, and retries |
 | `generator.test.ts` | CSDL parsing, selection expansion, and generated output compared file by file with the real dataverse-gen CLI's output |
 | `confirmationDialog.test.ts` | The reusable confirmation dialog: alert role, Confirm and Cancel, Escape, and the busy state |
-| `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions |
+| `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions; an unreadable `customapi` table fails Preview and isn't cached |
 | `metadataFallback.test.ts` | The `$metadata`-too-large fallback: navigation rebuilt from relationships matches the CSDL's, table files match the reference output, and the provider switches only on PPTB's size-limit errors |
 | `settings.test.ts` | Tool config: defaults from the config JSON, saved values and projects merged over them, the `general` settings (defaults, merge, rounding and clamping, mistyped values) and `confirmBeforeGenerate`, the Settings panel's General and Generate & files controls and Save/Cancel, and the New Project dialog's validation and saving |
 | `notifications.test.ts` | The "project loaded", "preview ready" and "generation complete" notifications: message wording, type and duration, and that failures or a missing PPTB don't throw |

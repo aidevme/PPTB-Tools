@@ -36,7 +36,10 @@ and turn the results into the inputs the core needs. Like the core, they don't i
   turns into navigation properties. Built-in actions and functions and custom process actions aren't available
   in this mode; custom APIs still are. Any other error still fails as before.
 - **Private custom APIs** aren't in `$metadata`. `getSchemaForSelection` builds their definitions from the
-  `customapi` record and its `customapirequestparameters`, mapped to the EDM types `$metadata` would use.
+  `customapi` record and its `customapirequestparameters`, mapped to the EDM types `$metadata` would use. The
+  `customapi` records are cached per connection, but a failed read isn't, so the next call retries.
+  `getSchemaForSelection` throws when the records can't be read, naming the selected operations; `listOperations`
+  carries on without the custom-API flags.
 
 ## Paging
 

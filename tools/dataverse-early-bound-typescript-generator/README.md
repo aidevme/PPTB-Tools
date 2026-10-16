@@ -135,7 +135,9 @@ into its own package when the CLI is built.
   attribute. This has not been verified against a live PPTB host yet.
 - **Custom APIs missing from `$metadata`.** Private custom APIs, and ones the environment's metadata cache does not
   include yet, are still listed and selectable. Their definitions are built from the `customapi` record and its
-  `customapirequestparameters`, mapped to the EDM types `$metadata` would publish.
+  `customapirequestparameters`, mapped to the EDM types `$metadata` would publish. If the `customapi` records
+  can't be read, Preview fails with an error naming the selected custom APIs instead of generating without them, and
+  the failed read isn't cached.
 - **`$metadata` too large for PPTB.** PPTB's `getCSDLDocument` rejects documents over 16 MiB, compressed or
   decompressed. On that error the provider rebuilds the schema from the table list (`createMetadataSchema`), and
   each selected table's navigation properties from its `ManyToOne`/`OneToMany`/`ManyToManyRelationships`
