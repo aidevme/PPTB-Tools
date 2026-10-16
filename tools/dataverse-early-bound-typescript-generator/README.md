@@ -93,9 +93,9 @@ code-splitting or ESM output.
 
 ## Architecture
 
-```
+```text
 src/
-├── main.tsx                # theme; renders components/apps/App.tsx (top-level state and orchestration)
+├── main.tsx                # theme; renders components/apps/App.tsx
 ├── core/                   # pure TS, no DOM-UI, no PPTB, no I/O (DOMParser only for the CSDL)
 │   ├── config.ts           # .dataverse-gen.json schema, defaults, parse/serialize
 │   ├── csdl.ts             # $metadata (EDMX) parser
@@ -109,9 +109,17 @@ src/
 │   ├── plan.ts             # diff against disk, casing reuse, orphans, write
 │   ├── projectConfig.ts    # load/save .dataverse-gen.json
 │   ├── solutions.ts        # solution list + solution table membership
-│   ├── settings.ts         # remembered project folder per connection
+│   ├── settings.ts         # remembered project folder per connection, tool config storage
+│   ├── errors.ts           # friendly errors, reportError, retries, dataverseApi()
+│   ├── notifications.ts    # PPTB notifications
+│   ├── paging.ts           # keyset paging over queryData
+│   ├── concurrency.ts      # mapWithConcurrency
+│   ├── dataverseGenTemplates.ts # dataverse-gen's EJS templates written to templateRoot
+│   ├── webApiRow.ts        # typed reads of Web API row columns
 │   └── paths.ts            # absolute host path helpers
-├── components/             # apps/App.tsx (state and orchestration), plus presentational cards, dialogs, panels
+├── config/                 # the tool's own settings: defaults, normalization, project versioning
+├── hooks/                  # the state: tool settings, project, environment lists, plan, Preview/Generate
+├── components/             # apps/App.tsx wires the hooks together; presentational cards, dialogs, panels
 └── types/
 test/
 ├── fixtures/               # trimmed dataverse-gen test data (EDMX + entity metadata)

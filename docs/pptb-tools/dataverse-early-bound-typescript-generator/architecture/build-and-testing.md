@@ -33,6 +33,9 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | --- | --- |
 | `errors.test.ts` | Error handling: reading the status from each PPTB error format and Dataverse code, friendly messages, logging and the error notification, and retries |
 | `generator.test.ts` | CSDL parsing, selection expansion, and generated output compared file by file with the real dataverse-gen CLI's output |
+| `dataverseGenTemplates.test.ts` | dataverse-gen's seven EJS templates: byte for byte, written under the `templateRoot` on Generate, and never counted as orphans |
+| `duplicateIdentifiers.test.ts` | Duplicate enum member names: finding and renaming them, the `duplicate` status in the write plan, Skip duplicated identifier(s), the summaries, and how the Preview card and FileViewer show them |
+| `loadProjectDialog.test.ts` | The Load Existing Project dialog: editing a saved project from its row, name validation, and the full description in a tooltip |
 | `confirmationDialog.test.ts` | The reusable confirmation dialog: alert role, Confirm and Cancel, Escape, and the busy state |
 | `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions; an unreadable `customapi` table fails Preview and isn't cached |
 | `metadataFallback.test.ts` | The `$metadata`-too-large fallback: navigation rebuilt from relationships matches the CSDL's, table files match the reference output, and the provider switches only on PPTB's size-limit errors |

@@ -13,8 +13,8 @@ in `src/core/config.ts`.
 | [`dataverse-early-bound-typescript-generator-config.schema.json`](./dataverse-early-bound-typescript-generator-config.schema.json) | JSON Schema (draft-07) for the two files above | No |
 | [`index.ts`](./index.ts) | Types, defaults, normalization, comparison, and project versioning | Yes |
 
-The module is framework-free: `index.ts` imports nothing but the default JSON, uses no React or browser
-APIs, and never touches PPTB. Reading and writing the stored values is done by `src/services/settings.ts`.
+The module is framework-free: `index.ts` imports only the default JSON and the `DataverseGenConfig` type from
+`../core`, uses no React or browser APIs, and never touches PPTB. Reading and writing the stored values is done by `src/services/settings.ts`.
 
 ## Contents
 

@@ -102,9 +102,11 @@ src/
 ├── main.tsx           # theme; renders components/apps/App.tsx
 ├── core/              # pure TS: no PPTB, no I/O, no DOM-UI (DOMParser only for the CSDL)
 ├── services/          # PPTB adapters: dataverseAPI metadata, toolboxAPI file system, write planning
-├── hooks/             # useConnection, useStickyBarHeights
-├── components/        # apps/App.tsx: all top-level state and orchestration (no state management library);
-│                      # the other folders are presentational and receive data/callbacks from App as props
+├── config/            # the tool's own settings (ToolConfig): defaults, normalization, project versioning
+├── hooks/             # the state (no state management library): useToolSettings, useProject,
+│                      # useEnvironmentMetadata, usePlanState, usePreviewGenerate, useSettingsDraft, ...
+├── components/        # apps/App.tsx wires the hooks together and renders the cards; the other folders are
+│                      # presentational and receive data/callbacks from App as props
 ├── assets/            # dataverse-gen's EJS templates, bundled as raw text
 ├── styles/            # one makeStyles hook file per component
 └── types/
@@ -121,7 +123,7 @@ Things that aren't obvious from a single file:
 - **dataverse-gen's original templates are also written to projects.** `src/assets/dataverse-gen-templates/*.ejs`
   (2.0.17, byte for byte, protected by `.gitattributes`) go to the project's `templateRoot` (`_templates`) on every
   Generate, like `dataverse-gen eject`. The tool never reads them.
-- **Each folder has an `index.ts` barrel** (`components`, `hooks`, `services`, `core`, `types`, `styles`). Add new
+- **Each folder has an `index.ts` barrel** (`components`, `hooks`, `services`, `core`, `config`, `types`, `styles`). Add new
   exports there. Inside `services/`, files import each other directly rather than through the barrel, to avoid cycles.
 - **Private custom APIs aren't in `$metadata`.** They're still listed; their definitions are built from the
   `customapi` record, its `customapirequestparameters`, and its `customapiresponseproperties` (the `<Name>Response`

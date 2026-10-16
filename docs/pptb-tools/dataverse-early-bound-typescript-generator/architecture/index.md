@@ -14,7 +14,8 @@ The code is split so that the generator itself has no dependency on PPTB, React 
 | Layer | Folder | Depends on | Page |
 | --- | --- | --- | --- |
 | UI | `src/components/` | React, Fluent UI | [Components](../components/) |
-| App state | `src/components/apps/App.tsx`, `src/hooks/` | UI, services, core | [App state and hooks](./app-state.md) |
+| App state | `src/hooks/`, wired together in `src/components/apps/App.tsx` | services, config, core | [App state and hooks](./app-state.md) |
+| Tool settings | `src/config/` | core (types only) | [`src/config/README.md`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/README.md) |
 | Services | `src/services/` | `window.dataverseAPI`, `window.toolboxAPI`, core | [Services](./services.md) |
 | Core | `src/core/` | Nothing (only `DOMParser`) | [Core](./core.md) |
 | Shared types | `src/types/` | — | — |
@@ -27,7 +28,7 @@ inside `services/` import each other directly to avoid import cycles.
 
 ## Data flow
 
-**Preview** (`runPreview` in `App.tsx`):
+**Preview** (`runPreview` in `usePreviewGenerate`):
 
 1. `resolveConfig` fills in defaults for `.dataverse-gen.json`.
 2. `PptbMetadataProvider.getSchemaForSelection` loads and parses the `$metadata` (CSDL) document. Private
@@ -39,10 +40,14 @@ inside `services/` import each other directly to avoid import cycles.
 5. `buildSchemaModel` combines the CSDL and attribute metadata into a `SchemaModel`.
 6. `generate` renders that model into a list of files.
 7. `createWritePlan` compares each file with disk and marks it `new`, `changed`, `unchanged` or `orphaned`, or
-   `duplicate` when `generate` found duplicate identifiers in it.
+   `duplicate` when `generate` found duplicate identifiers in it. dataverse-gen's own EJS templates
+   (`dataverseGenTemplateFiles`) are planned with them, for the project's `templateRoot` (`_templates` by default).
 
-**Generate** (`runGenerate`): `applyWritePlan` writes only new and changed files, then `saveProjectConfig`
-saves `.dataverse-gen.json`.
+**Generate** (`runGenerate`): `applyWritePlan` writes only new and changed files, including the templates (files
+with duplicate identifiers too, unless **Skip duplicated identifier(s)** is on). Then `saveProjectConfig` saves
+`.dataverse-gen.json` and `recordProjectGeneration` updates the saved project's version. With **Delete orphaned
+files** on, and only after the user confirms the list, `deleteOrphanedFiles` then deletes the plan's orphaned files
+through a hidden PPTB terminal, since PPTB's file API has no delete.
 
 ## Further reading
 
