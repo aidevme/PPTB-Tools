@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
 import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
-import { ConfirmationDialog, Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
+import { ConfirmationDialog, Footer, GenerateSummary, Header, LoadProjectDialog, OrphanList, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../../core';
 import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from '../../config';
 import { useConnection, useStickyBarHeights } from '../../hooks';
@@ -24,6 +24,7 @@ import {
     notifyGenerationComplete,
     notifyPreviewReady,
     notifyProjectLoaded,
+    pendingWriteCount,
     rememberProjectFolder,
     reportError,
     resolveOutputRoot,
@@ -562,7 +563,7 @@ export default function App() {
     const startGenerate = () => {
         if (!plan) return;
         if (toolSettings.deleteOrphanedFiles && plan.counts.orphaned > 0) setConfirmDeleteOpen(true);
-        else if (toolSettings.confirmBeforeGenerate && pendingWrites(plan, skipDuplicates) > 0) setConfirmGenerateOpen(true);
+        else if (toolSettings.confirmBeforeGenerate && pendingWriteCount(plan, { skipDuplicates }) > 0) setConfirmGenerateOpen(true);
         else void runGenerate(plan, false);
     };
 
@@ -604,7 +605,7 @@ export default function App() {
     const steps = computeWorkflowSteps({
         hasProject: !!projectRoot,
         selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
-        plan: plan ? { pending: pendingWrites(plan, skipDuplicates) + (toolSettings.deleteOrphanedFiles ? plan.counts.orphaned : 0), stale: planStale } : null,
+        plan: plan ? { pending: pendingWriteCount(plan, { skipDuplicates }) + (toolSettings.deleteOrphanedFiles ? plan.counts.orphaned : 0), stale: planStale } : null,
     });
 
     /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
@@ -743,7 +744,7 @@ export default function App() {
                 title="Delete orphaned files?"
                 message={plan && <OrphanList plan={plan} />}
                 confirmLabel={
-                    plan && pendingWrites(plan, skipDuplicates) > 0
+                    plan && pendingWriteCount(plan, { skipDuplicates }) > 0
                         ? `Generate and delete ${plan.counts.orphaned}`
                         : `Delete ${plan?.counts.orphaned ?? 0} ${plan?.counts.orphaned === 1 ? 'file' : 'files'}`
                 }
@@ -758,7 +759,7 @@ export default function App() {
                 open={confirmGenerateOpen && !!plan}
                 title="Generate files?"
                 message={plan && <GenerateSummary plan={plan} skipDuplicates={skipDuplicates} />}
-                confirmLabel={`Generate ${plan ? pendingWrites(plan, skipDuplicates) : 0} ${plan && pendingWrites(plan, skipDuplicates) === 1 ? 'file' : 'files'}`}
+                confirmLabel={`Generate ${plan ? pendingWriteCount(plan, { skipDuplicates }) : 0} ${plan && pendingWriteCount(plan, { skipDuplicates }) === 1 ? 'file' : 'files'}`}
                 confirmIcon={<SaveRegular />}
                 onConfirm={() => {
                     setConfirmGenerateOpen(false);
@@ -770,61 +771,5 @@ export default function App() {
                 <Footer />
             </div>
         </div>
-    );
-}
-
-/** How many files Generate writes: new and changed, including files with duplicate identifiers unless they're skipped. */
-function pendingWrites(plan: WritePlan, skipDuplicates: boolean): number {
-    const { created, overwritten } = writeCounts(plan, { skipDuplicates });
-    return created + overwritten;
-}
-
-/** How many orphans the confirmation names before summarizing the rest. */
-const ORPHANS_LISTED = 10;
-
-/** The confirmation's message: what will be deleted, from which folder, and that it can't be undone. */
-function OrphanList({ plan }: { plan: WritePlan }) {
-    const orphans = plan.files.filter((f) => f.status === 'orphaned');
-    const more = orphans.length - ORPHANS_LISTED;
-    return (
-        <>
-            <Text block>
-                {orphans.length === 1 ? 'This file is' : `These ${orphans.length} files are`} in the output folder ({plan.outputRoot}) but no longer
-                generated. {orphans.length === 1 ? 'It' : 'They'} will be permanently deleted, not moved to the Recycle Bin or Trash.
-            </Text>
-            <ul>
-                {orphans.slice(0, ORPHANS_LISTED).map((f) => (
-                    <li key={f.relativePath}>
-                        <code>{f.relativePath}</code>
-                    </li>
-                ))}
-                {more > 0 && <li>…and {more} more</li>}
-            </ul>
-        </>
-    );
-}
-
-/** The "Ask before generating" confirmation's message: where files go, what's created and overwritten, and that it can't be undone. */
-function GenerateSummary({ plan, skipDuplicates }: { plan: WritePlan; skipDuplicates: boolean }) {
-    const { created, overwritten: changed } = writeCounts(plan, { skipDuplicates });
-    const duplicates = plan.counts.duplicate;
-    const files = (n: number) => `${n} ${n === 1 ? 'file' : 'files'}`;
-    return (
-        <>
-            <Text block>
-                Generate writes to <code>{plan.outputRoot}</code> and saves <code>.dataverse-gen.json</code>.
-            </Text>
-            <ul>
-                {created > 0 && <li>{files(created)} will be created</li>}
-                {changed > 0 && <li>{files(changed)} will be overwritten</li>}
-            </ul>
-            {duplicates > 0 && (
-                <Text block>
-                    {files(duplicates)} {duplicates === 1 ? 'declares' : 'declare'} duplicate identifiers and{' '}
-                    {skipDuplicates ? "won't be written." : "won't compile until the option labels are fixed in Dataverse."}
-                </Text>
-            )}
-            <Text block>Overwritten files can't be restored by the tool; use source control to undo changes.</Text>
-        </>
     );
 }

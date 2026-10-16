@@ -20,6 +20,7 @@ export {
     writeStatusOf,
     willWrite,
     writeCounts,
+    pendingWriteCount,
     countStatuses,
 } from './plan';
 export type { WriteOptions } from './plan';

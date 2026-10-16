@@ -65,6 +65,12 @@ export function writeCounts(plan: Pick<WritePlan, 'files'>, options: WriteOption
     return { created, overwritten };
 }
 
+/** How many files Generate writes: new and changed, including files with duplicate identifiers unless they're skipped. */
+export function pendingWriteCount(plan: Pick<WritePlan, 'files'>, options: WriteOptions = {}): number {
+    const { created, overwritten } = writeCounts(plan, options);
+    return created + overwritten;
+}
+
 /** The number of files with each status. */
 export function countStatuses(files: PlannedFile[]): Record<FileStatus, number> {
     const counts: Record<FileStatus, number> = { new: 0, changed: 0, unchanged: 0, orphaned: 0, duplicate: 0 };

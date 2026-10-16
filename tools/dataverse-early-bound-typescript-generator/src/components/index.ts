@@ -9,6 +9,7 @@ export { Header } from './layout/Header';
 export type { HeaderProps } from './layout/Header';
 export { ConfirmationDialog } from './dialogs/ConfirmationDialog';
 export type { IConfirmationDialogProps } from './dialogs/ConfirmationDialog';
+export { GenerateSummary, OrphanList } from './dialogs/GenerateConfirmations';
 export { LoadProjectDialog } from './dialogs/LoadProjectDialog';
 export type { ILoadProjectDialogProps } from './dialogs/LoadProjectDialog';
 export { FileSearchBox } from './shared/FileSearchBox';
