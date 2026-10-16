@@ -1,0 +1,76 @@
+{
+  "skill_name": "aidevme-docs-maintenance",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I just edited a few docs pages for the TypeScript generator. Can you validate the markdown before I commit?",
+      "expected_output": "Validate-Markdown.ps1 is run on only the changed Markdown files, both checks' results are reported with the exit code, and markdownlint findings are fixed in the files.",
+      "files": [],
+      "expectations": [
+        "Finds the changed Markdown files (git diff --name-only -- '*.md', plus new files) instead of checking the whole repository",
+        "Runs the skill's scripts/Validate-Markdown.ps1 with -Path and the files comma-separated (not space-separated) when using pwsh -File",
+        "Reports which checks failed and the exit code, and says plainly if the check couldn't run",
+        "Fixes markdownlint findings in the files rather than disabling rules in .markdownlint.jsonc",
+        "Hands cspell findings to the cspell workflow instead of adding words straight away"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "cspell is complaining about a bunch of words in docs/repository/agentic-workflows.md. Fix the spelling check.",
+      "expected_output": "The unknown words are listed with -ListOnly, classified as typos, one-off identifiers or genuine terms, shown to the user, and only approved terms are added with -Word.",
+      "files": [],
+      "expectations": [
+        "Runs Sync-Cspell.ps1 -ListOnly -MarkdownPath docs/repository/agentic-workflows.md first, changing nothing",
+        "Never runs Sync-Cspell.ps1 with -AutoAdd",
+        "Classifies each word as a typo (fixed in the document), a one-off identifier (added to the page's cspell:ignore comment) or a genuine recurring term (proposed for cspell.json)",
+        "Shows the proposed cspell.json additions to the user and waits for approval before running Sync-Cspell.ps1 -Word",
+        "Re-runs Validate-Markdown.ps1 on the file afterwards to confirm the spelling check passes"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Add Durow and dataverse-ify to the cspell word list.",
+      "expected_output": "The two words the user named are added with Sync-Cspell.ps1 -Word, without running a scan or prompting, and the change to cspell.json is reported.",
+      "files": [],
+      "expectations": [
+        "Runs Sync-Cspell.ps1 -Word Durow,dataverse-ify (the user already approved these words)",
+        "Doesn't edit cspell.json by hand and doesn't use -AutoAdd",
+        "Reports which words were added and which were skipped because they were already in the list"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "I added a new docs folder for another tool. Update CODEOWNERS.",
+      "expected_output": "Sync-Code-Owners.ps1 -WhatIf previews the change; if CODEOWNERS has no markers, the user is told and the markers are proposed, not added silently; the block is written only after the user agrees.",
+      "files": [],
+      "expectations": [
+        "Runs Sync-Code-Owners.ps1 -WhatIf before writing anything",
+        "If the run stops with \"Could not find '# BEGIN AUTO-GENERATED: docs'\", explains that .github/CODEOWNERS needs the marker lines and proposes adding them after the * @aidevme rule, without adding them unasked",
+        "Shows the +/- preview and writes with Sync-Code-Owners.ps1 only after the user agrees",
+        "Leaves the rest of .github/CODEOWNERS untouched"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Before I push, check that CODEOWNERS is still in sync with the docs folder. Don't change anything.",
+      "expected_output": "Sync-Code-Owners.ps1 -Check is run, which writes nothing, and its result and exit code are reported.",
+      "files": [],
+      "expectations": [
+        "Runs Sync-Code-Owners.ps1 -Check, not the writing mode",
+        "Reports exit code 1 as out of date (with the expected block) and 0 as up to date",
+        "Doesn't modify .github/CODEOWNERS"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "The Validate-Markdown script should also skip the .claude folder. Change it.",
+      "expected_output": "The change is made in the skill's source under agent-src/skills/project/repo/aidevme-docs-maintenance/scripts/, then the sync and parity check are run; the generated copies aren't edited by hand.",
+      "files": [],
+      "expectations": [
+        "Edits agent-src/skills/project/repo/aidevme-docs-maintenance/scripts/Validate-Markdown.ps1, not the copies under .claude/skills or .github/skills",
+        "Updates references/scripts.md to describe the new exclusion",
+        "Runs pwsh -File agent-src/sync/sync.ps1 and agent-src/sync/verify-parity.ps1, and reports the parity result"
+      ]
+    }
+  ]
+}

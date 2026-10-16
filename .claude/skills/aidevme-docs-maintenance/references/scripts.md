@@ -1,6 +1,9 @@
 # Repository scripts
 
-PowerShell maintenance scripts for the PPTB-Tools repository. They keep the documentation tooling in order:
+<!-- cspell:ignore toplevel -->
+
+PowerShell maintenance scripts for the PPTB-Tools repository, part of the `aidevme-docs-maintenance` skill
+(`scripts/` next to this file). They keep the documentation tooling in order:
 Markdown linting, spell-check vocabulary, and code ownership of the `docs/` folder. None of them builds, tests or
 publishes a tool; each tool under `tools/` has its own npm scripts for that.
 
@@ -10,21 +13,27 @@ publishes a tool; each tool under `tools/` has its own npm scripts for that.
 | [`Sync-Cspell.ps1`](#sync-cspellps1) | Adds words cspell doesn't know to `cspell.json`, asking first | `cspell.json` |
 | [`Sync-Code-Owners.ps1`](#sync-code-ownersps1) | Regenerates the `docs/` entries in `.github/CODEOWNERS` | `.github/CODEOWNERS` |
 
-All three resolve paths from the repository root (the folder above `scripts/`), so they can be run from any
-working directory. None of them is called by CI or by an npm script today; run them by hand.
+**Where they are.** The source is `agent-src/skills/project/repo/aidevme-docs-maintenance/scripts/`; the sync
+copies them to `.claude/skills/aidevme-docs-maintenance/scripts/` and `.github/skills/aidevme-docs-maintenance/scripts/`.
+Run any copy: each finds the repository root with `git rev-parse --show-toplevel`, so it works from any working
+directory inside the repository. Edit only the source, then re-run `agent-src/sync/sync.ps1`.
+
+None of them is called by CI or by an npm script today; run them by hand or through the skill. In the examples
+below, `$scripts` is one of those folders, for example
+`$scripts = '.claude/skills/aidevme-docs-maintenance/scripts'`.
 
 ## Prerequisites
 
 | Requirement | Needed by | Notes |
 | --- | --- | --- |
 | PowerShell 7+ (`pwsh`) | All | Each script starts with `#!/usr/bin/env pwsh`. Windows PowerShell 5.1 may work but isn't the target. |
-| Node.js and npm | `Sync-Cspell.ps1` | Runs cspell through `npx` and formats `cspell.json` with `node`. |
-| `markdownlint-cli2` on `PATH` | `Validate-Markdown.ps1` | A root devDependency (`npm install` at the root), but the script calls it directly, so it must be on `PATH`: install it globally (`npm install -g markdownlint-cli2`) or run the script from a shell where `node_modules/.bin` is on `PATH`. |
-| `cspell` | `Validate-Markdown.ps1`, `Sync-Cspell.ps1` | Not a repository dependency. `Validate-Markdown.ps1` calls it directly, so install it globally (`npm install -g cspell`); `Sync-Cspell.ps1` uses `npx cspell`, which downloads it if needed. |
-| Git | `Sync-Code-Owners.ps1` | Lists the tracked files under `docs/` with `git ls-files`. |
+| Node.js and npm | All but `Sync-Code-Owners.ps1` | Run the tools through `npx`; `Sync-Cspell.ps1` also formats `cspell.json` with `node`. |
+| `markdownlint-cli2` | `Validate-Markdown.ps1` | A root devDependency: run `npm install` at the repository root once. The script runs it with `npx --no-install`, so no global install is needed. |
+| `cspell` | `Validate-Markdown.ps1`, `Sync-Cspell.ps1` | Not a repository dependency. Both run it through `npx`, which uses an installed copy or downloads it (`Validate-Markdown.ps1` passes `--yes`, so it never prompts). |
+| Git | All | Finds the repository root; `Sync-Code-Owners.ps1` also lists the tracked files under `docs/` with `git ls-files`. |
 
 If PowerShell blocks the scripts on Windows, run them with
-`pwsh -ExecutionPolicy Bypass -File scripts\<Script>.ps1`, or allow local scripts once with
+`pwsh -ExecutionPolicy Bypass -File $scripts\<Script>.ps1`, or allow local scripts once with
 `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`.
 
 ## Configuration files
@@ -41,25 +50,29 @@ The scripts read the repository's shared lint configuration, which the VS Code e
 
 ## Validate-Markdown.ps1
 
-Runs the two Markdown checks over the whole repository: **markdownlint** for formatting and structure, then
-**cspell** for spelling. It only reports; it never changes a file.
+Runs the two Markdown checks: **markdownlint** for formatting and structure, then **cspell** for spelling. It
+only reports; it never changes a file.
 
 ### Validate-Markdown: usage
 
 ```powershell
-./scripts/Validate-Markdown.ps1
+& "$scripts/Validate-Markdown.ps1" [-Path <string[]>]
 ```
 
-It takes no parameters.
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `-Path` | string[] | `**/*.md` | Markdown files or glob patterns to check, relative to the repository root. Separate several with commas (`-Path a.md,b.md`), which also works with `pwsh -File`, or list them after the script name. |
 
 ### Validate-Markdown: what it runs
 
+From the repository root:
+
 ```powershell
-markdownlint-cli2 "**/*.md" "!.venv" "!.github" "!node_modules"
-cspell --no-progress --no-summary "**/*.md"
+npx --no-install markdownlint-cli2 <Path> "!.venv" "!.github" "!node_modules"
+npx --yes cspell --no-progress --no-summary <Path>
 ```
 
-- **markdownlint-cli2** checks every `*.md` file except those under `.venv`, `.github` and `node_modules`, using
+- **markdownlint-cli2** checks the files except those under `.venv`, `.github` and `node_modules`, using
   `.markdownlint.jsonc`.
 - **cspell** checks every `*.md` file, skipping the `ignorePaths` in `cspell.json`, and prints one line per
   unknown word, in the form `file.md:12:5 - Unknown word (someWord)`.
@@ -68,9 +81,9 @@ cspell --no-progress --no-summary "**/*.md"
 
 - Problems are printed to the console; fix them in the files, or add genuine words with
   [`Sync-Cspell.ps1`](#sync-cspellps1).
-- **Exit code:** the script reports cspell's exit code only, because it doesn't stop or combine results when
-  markdownlint fails. Read the markdownlint output rather than relying on the exit code, and don't use the script
-  as a CI gate as it stands.
+- **Both checks always run.** The script ends with `Markdown validation passed.` or `Markdown validation failed:
+  markdownlint, cspell` (naming the checks that failed).
+- **Exit code:** 0 when both pass, 1 when either fails, so it can be used as a CI gate.
 
 ### Validate-Markdown: related
 
@@ -87,7 +100,9 @@ Finds the words cspell doesn't know in the Markdown files and adds the ones you 
 ### Sync-Cspell: usage
 
 ```powershell
-./scripts/Sync-Cspell.ps1 [-AutoAdd] [-MarkdownPath <string[]>]
+& "$scripts/Sync-Cspell.ps1" [-AutoAdd] [-MarkdownPath <string[]>]   # review each word interactively
+& "$scripts/Sync-Cspell.ps1" -ListOnly [-MarkdownPath <string[]>]    # list the new words, change nothing
+& "$scripts/Sync-Cspell.ps1" -Word <string[]>                       # add exactly these words
 ```
 
 ### Sync-Cspell: parameters
@@ -96,6 +111,14 @@ Finds the words cspell doesn't know in the Markdown files and adds the ones you 
 | --- | --- | --- | --- |
 | `-AutoAdd` | switch | off | Adds every unknown word without asking. |
 | `-MarkdownPath` | string[] | `**/*.md` | Markdown files or glob patterns to check, relative to the repository root. |
+| `-ListOnly` | switch | off | Prints the unknown words that aren't in `cspell.json` yet, one per line, and changes nothing. |
+| `-Word` | string[] | none | Adds exactly these words without running cspell or prompting; words already listed are skipped. Can't be combined with `-ListOnly`. |
+
+`-MarkdownPath` and `-Word` also accept comma-separated values (`-Word word1,word2`), so they work with
+`pwsh -File`, which can't pass an array.
+
+`-ListOnly` then `-Word` is the non-interactive way to review words, for example with an AI assistant, which can't
+answer the prompts: list them, decide which are genuine, add those.
 
 ### Sync-Cspell: what it does
 
@@ -121,23 +144,24 @@ Finds the words cspell doesn't know in the Markdown files and adds the ones you 
 
 ```powershell
 # Review each unknown word in the whole repository
-./scripts/Sync-Cspell.ps1
+& "$scripts/Sync-Cspell.ps1"
 
 # Accept every unknown word without prompting
-./scripts/Sync-Cspell.ps1 -AutoAdd
+& "$scripts/Sync-Cspell.ps1" -AutoAdd
 
 # Only check one document
-./scripts/Sync-Cspell.ps1 -MarkdownPath docs/index.md
+& "$scripts/Sync-Cspell.ps1" -MarkdownPath docs/index.md
 
 # Several files or patterns
-./scripts/Sync-Cspell.ps1 -MarkdownPath 'docs/**/*.md', README.md -AutoAdd
+& "$scripts/Sync-Cspell.ps1" -MarkdownPath 'docs/**/*.md', README.md -AutoAdd
 ```
 
 ### Sync-Cspell: notes
 
 - **Review before `-AutoAdd`.** It accepts genuine typos as well as genuine words; prefer the interactive mode, or
   check the `cspell.json` diff before committing.
-- **Interactive by default.** Without `-AutoAdd` it waits for input, so it can't run unattended.
+- **Interactive by default.** Without `-AutoAdd`, `-ListOnly` or `-Word` it waits for input, so it can't run
+  unattended.
 - **Only "Unknown word" lines count.** If cspell fails for another reason (a bad glob, a broken config), the
   script reports no unknown words instead of the failure. If that looks wrong, run `npx cspell <paths>` directly.
 - **Whole-file rewrite.** `cspell.json` is read and rewritten in full, so manual formatting in it isn't kept
@@ -159,7 +183,7 @@ alone.
 ### Sync-Code-Owners: usage
 
 ```powershell
-./scripts/Sync-Code-Owners.ps1 [-Owner <string>] [-Check] [-WhatIf]
+& "$scripts/Sync-Code-Owners.ps1" [-Owner <string>] [-Check] [-WhatIf]
 ```
 
 ### Sync-Code-Owners: parameters
@@ -214,16 +238,16 @@ When it writes, the whole file is saved as UTF-8 without a BOM, with LF line end
 
 ```powershell
 # Update the block
-./scripts/Sync-Code-Owners.ps1
+& "$scripts/Sync-Code-Owners.ps1"
 
 # Preview the change
-./scripts/Sync-Code-Owners.ps1 -WhatIf
+& "$scripts/Sync-Code-Owners.ps1" -WhatIf
 
 # Fail if out of date (CI)
-./scripts/Sync-Code-Owners.ps1 -Check
+& "$scripts/Sync-Code-Owners.ps1" -Check
 
 # Assign the docs to a team
-./scripts/Sync-Code-Owners.ps1 -Owner '@aidevme/docs-team'
+& "$scripts/Sync-Code-Owners.ps1" -Owner '@aidevme/docs-team'
 ```
 
 ### Sync-Code-Owners: setting it up
@@ -240,7 +264,7 @@ When it writes, the whole file is saved as UTF-8 without a BOM, with LF line end
    # END AUTO-GENERATED: docs
    ```
 
-2. Run `./scripts/Sync-Code-Owners.ps1 -WhatIf` to preview, then without `-WhatIf` to fill the block.
+2. Run `& "$scripts/Sync-Code-Owners.ps1" -WhatIf` to preview, then without `-WhatIf` to fill the block.
 3. **Re-run it whenever docs are added, moved or deleted.** New files must be committed (tracked) first, because
    untracked files are ignored.
 4. Optionally run it with `-Check` in a workflow that triggers on changes under `docs/`, so CI catches drift.

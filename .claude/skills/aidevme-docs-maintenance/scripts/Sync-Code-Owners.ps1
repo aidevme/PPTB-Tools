@@ -44,7 +44,11 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$repoRoot       = Resolve-Path (Join-Path $PSScriptRoot '..')
+# The repository root, wherever this copy of the script lives (the skill source or a generated skill folder).
+$repoRoot = & git -C $PSScriptRoot rev-parse --show-toplevel 2>$null
+if ($LASTEXITCODE -ne 0 -or -not $repoRoot) {
+    throw 'Run this script from inside the PPTB-Tools git repository.'
+}
 $codeownersPath = Join-Path $repoRoot '.github/CODEOWNERS'
 $beginMarker    = '# BEGIN AUTO-GENERATED: docs'
 $endMarker      = '# END AUTO-GENERATED: docs'

@@ -27,6 +27,8 @@ Check the tool's README for the original it's based on, what was intentionally l
 
 - **Docs site:** VitePress in `docs/`, published to GitHub Pages. `npm run docs:build` (repo root) fails on dead
   links; run it after changing docs. New pages must be added to the sidebar in `docs/.vitepress/config.mts`.
+- **Markdown checks:** after editing Markdown, run markdownlint and cspell through the `aidevme-docs-maintenance`
+  skill (`Validate-Markdown.ps1`); it also maintains `cspell.json` and the `docs/` entries in `.github/CODEOWNERS`.
 - **Per tool:** `docs/pptb-tools/<tool-name>/`, split into a **user guide** (`getting-started/`, `guide/`) and a
   **contributor guide** (`contributing/`, `architecture/`, `components/`). `tools/<tool-name>/README.md` holds
   implementation notes.
@@ -161,6 +163,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `aidevme-wiki-*` | The `agent/` wiki: `capture`, `lint`, `process-inbox`, `query`, `scaffold-project`, `update-topic`, `write-decision` |
 | `aidevme-skill-creator`, `skill-creator` | Creating or improving skills |
 | `aidevme-skills-sync` | Checking that the generated skill folders match the source |
+| `aidevme-docs-maintenance` | Validating Markdown (markdownlint + cspell), syncing `cspell.json`, syncing the `docs/` entries in `.github/CODEOWNERS` |
 
 ### The `agent/` wiki
 

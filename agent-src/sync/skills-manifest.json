@@ -976,6 +976,14 @@
       "ported": true,
       "source": "aidevme",
       "note": "draw.io diagrams for the docs site."
+    },
+    {
+      "name": "aidevme-docs-maintenance",
+      "scope": "project",
+      "group": "repo",
+      "ported": true,
+      "source": "authored",
+      "note": "Validate Markdown, sync cspell.json and sync the docs/ entries in .github/CODEOWNERS; scripts moved from the repository scripts/ folder."
     }
   ]
 }
