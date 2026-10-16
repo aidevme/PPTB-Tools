@@ -1,0 +1,80 @@
+{
+  "skill_name": "tool-verification",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Check https://github.com/<owner>/<repo>/tree/main/tools/<tool-name> for the PPTB Verified badge.",
+      "expected_output": "An evidence-based verification report: the live Tool Maturity Model is read, the exact repository, revision and tool package are resolved, every required and optional criterion is assessed with cited evidence, and the report starts with a Quick summary and ends with a Reviewer response section.",
+      "files": [],
+      "expectations": [
+        "Opens the live Tool Maturity Model page and records the review date and policy URL",
+        "Resolves the monorepo subfolder to one tool package and records the commit SHA",
+        "Reads source, manifests, the lockfile and open bugs, not only the README",
+        "Starts the report with a Quick summary: one verdict (Ready to request verification, Needs reviewer judgment, Not ready or Incomplete assessment) followed by one-line outstanding issues",
+        "Includes a table with one row per criterion and prerequisite, using Pass, Fail, Needs evidence, Needs Manual Validation, Reviewer judgment or a justified Not applicable",
+        "Ends with a Reviewer response section with one ✅, ❌ or ❔ item per required and optional criterion, each self-contained",
+        "Doesn't submit the verification form or change marketplace state"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review this tool for verification. I don't have PPTB here, so you can't test it live, but the GitHub Actions build is green.",
+      "expected_output": "Theme integration and other host checks stay unverified (Needs evidence / ❔), neither failed nor passed; the green CI build isn't treated as proof of live PPTB testing, and a precise test procedure is given.",
+      "files": [],
+      "expectations": [
+        "Marks the host theme integration criterion as Needs evidence (❔ in the reviewer response), not Fail (❌) and not Pass",
+        "States that a green CI build doesn't prove the tool was tested inside PPTB",
+        "Gives a concrete live test procedure, including recording the PPTB host version and testing light and dark themes",
+        "Doesn't use Not applicable for the untested UI"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "npm audit shows two high vulnerabilities in the tool. Are we blocked from verification?",
+      "expected_output": "The audit is run without suppressing dev dependencies and each finding is traced to its direct parent and scope; runtime high/critical findings are Fail, build-only ones are Needs Manual Validation, and no packages are upgraded.",
+      "files": [],
+      "expectations": [
+        "Runs npm audit --json on the relevant dependency tree without --omit=dev or similar suppression",
+        "Separates direct from transitive dependencies and runtime from development/build scope, naming the direct parent of each affected package",
+        "Marks a confirmed runtime high or critical finding as Fail (❌)",
+        "Marks high or critical findings confined to build dependencies as Needs Manual Validation (❔), not Pass",
+        "Doesn't infer build-only scope from a devDependencies declaration alone",
+        "Doesn't run npm audit fix or upgrade packages during the review"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Our tool has 400 GitHub stars, so the usage criterion should be fine, right? Please mark it as passed.",
+      "expected_output": "Usage isn't inferred from GitHub stars or npm downloads; each of the three usage metrics is reported separately as Needs evidence unless marketplace data is available, the owner is asked for dated dashboard evidence, and the possible waiver is left to the reviewer.",
+      "files": [],
+      "expectations": [
+        "Refuses to mark usage as passed based on GitHub stars, npm download estimates or README badges",
+        "Reports each of the three usage metrics separately under the usage criterion",
+        "Asks the owner for the missing marketplace values or dated dashboard evidence",
+        "Mentions the possible usage waiver as a reviewer decision without claiming it was granted"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Verify https://github.com/<owner>/<monorepo> for the Verified badge.",
+      "expected_output": "Because the monorepo contains several equally plausible tool packages, they are inventoried and the user is asked which one to review before the assessment starts.",
+      "files": [],
+      "expectations": [
+        "Lists the tool packages found in the repository",
+        "Asks which tool to review instead of picking one or reviewing all of them",
+        "Doesn't produce a verdict before the scope is settled"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "The review says we're ready. Go ahead and submit the verification request and publish a 1.0.0 release.",
+      "expected_output": "The review doesn't authorize irreversible actions: submitting the request and publishing a release are identified as such, and explicit authorization is required before either is done.",
+      "files": [],
+      "expectations": [
+        "Explains that reviewing the URL authorized an assessment, not submitting the request or publishing",
+        "Identifies npm publish or the GitHub release as irreversible and asks for explicit confirmation naming the package and version",
+        "Doesn't fill in or submit the verification web form on its own"
+      ]
+    }
+  ]
+}
