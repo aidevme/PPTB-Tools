@@ -1,0 +1,92 @@
+{
+  "skill_name": "aidevme-skill-creator",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Create a skill that summarizes the changes on the current branch into release notes. It should work in any repo.",
+      "expected_output": "A core skill named aidevme-<domain>-<purpose> is created under agent-src/skills/core/<group>/<name>/ with complete frontmatter and an evals/evals.json, registered in skills-manifest.json, and synced; verify-parity.ps1 passes.",
+      "files": [],
+      "expectations": [
+        "Chooses scope core (reusable, no client data) and one of the core groups (foundation, dataverse, server, client, pipelines, delivery, reference, meta)",
+        "Names the skill with the aidevme- prefix in hyphen-case, for example aidevme-release-notes",
+        "Creates the folder under agent-src/skills/core/<group>/<name>/, never directly in .claude/skills or .github/skills",
+        "Writes SKILL.md frontmatter with name, layer, scope: core and a description containing a 'Use when' list and a 'Does NOT' clause",
+        "Doesn't create README.md or CHANGELOG.md files, and adds a Changelog section (date, author, description) to SKILL.md",
+        "Creates evals/evals.json in the skill folder with skill_name matching the skill, at least three cases (id, prompt, expected_output, files, expectations) and at least one edge or boundary case",
+        "Adds a manifest entry with name, scope core, the group, ported true and source authored",
+        "Runs pwsh -File agent-src/sync/sync.ps1, then agent-src/sync/verify-parity.ps1, and reports the parity result"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make a skill that deploys our Contoso solution to https://contoso-dev.crm4.dynamics.com using pipeline 42.",
+      "expected_output": "Because the skill names a client, an environment URL and a pipeline ID, it's created with project scope under agent-src/skills/project/<group>/<name>/, not in the reusable core.",
+      "files": [],
+      "expectations": [
+        "Recognizes that a client name, environment URL or pipeline ID makes the skill project-scoped",
+        "Places it under agent-src/skills/project/<group>/<name>/ with scope: project in the frontmatter, matching the folder",
+        "Registers it in the manifest with scope project",
+        "Suggests moving the URL and pipeline ID into configuration if the skill should later become core"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Add a new skill for checking broken links in the docs. Just drop it into .claude/skills so I can use it right away.",
+      "expected_output": "The skill is authored in agent-src and synced instead of being written into the generated .claude/skills folder, with the reason explained.",
+      "files": [],
+      "expectations": [
+        "Explains that .claude/skills and .github/skills are generated and that the sync deletes and recreates them, so a skill placed there would be lost",
+        "Creates the skill under agent-src/skills/<scope>/<group>/<name>/ and registers it in the manifest",
+        "Runs the sync so the skill appears in .claude/skills (and .github/skills) for immediate use",
+        "Asks which scope to use, or states the scope chosen and why, since scope is required"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a skill to triage new GitHub issues.",
+      "expected_output": "The scope isn't obvious from the request, so it's asked for (or chosen with the reason stated) before any files are created.",
+      "files": [],
+      "expectations": [
+        "Doesn't create files before the scope (core or project) is settled",
+        "Asks whether the triage rules are specific to this repository (project) or reusable (core), or states the assumption made",
+        "Asks for or derives the triggers and what the skill should not do, for the description"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I want a skill I can call like /aidevme-ticket-summary ABC-123 that only reads files and never edits anything.",
+      "expected_output": "An interactive skill with allowed-tools limited to read-only tools and an argument-hint declaring the ticket key.",
+      "files": [],
+      "expectations": [
+        "Adds allowed-tools to the frontmatter with read-only tools only (for example Read, Grep, Glob)",
+        "Adds argument-hint for the ticket key, for example <ticket-key>",
+        "Uses a placeholder such as <ticket-key> in examples instead of a real ticket key",
+        "Registers the skill in the manifest and runs the sync and parity check"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Create a skill that runs Markdown validation, then syncs cspell, then updates CODEOWNERS in one go, reusing what aidevme-docs-maintenance already does.",
+      "expected_output": "An orchestration skill that references aidevme-docs-maintenance and invokes it, without copying its workflow steps.",
+      "files": [],
+      "expectations": [
+        "Sets layer: orchestration",
+        "References aidevme-docs-maintenance by name and delegates to it instead of pasting its steps or scripts",
+        "Keeps SKILL.md short (well under about 400 lines), putting any detail in references/"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Promote our project skill that formats release notes to the reusable core. It currently has our client's name and repo URL in it.",
+      "expected_output": "The client-specific values are moved to configuration or placeholders, the folder moves from project/<group>/ to core/<group>/, the frontmatter and manifest scope change to core, and the sync and parity check are run.",
+      "files": [],
+      "expectations": [
+        "Removes the client name and repository URL from the skill, reading them from configuration or using <placeholder> syntax",
+        "Moves the folder from agent-src/skills/project/<group>/<name>/ to agent-src/skills/core/<group>/<name>/",
+        "Changes scope to core in both the SKILL.md frontmatter and the manifest entry",
+        "Adds a Changelog row describing the promotion",
+        "Runs the sync and verify-parity.ps1 and reports the result"
+      ]
+    }
+  ]
+}

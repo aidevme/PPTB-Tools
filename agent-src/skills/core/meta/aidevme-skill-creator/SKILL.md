@@ -38,16 +38,17 @@ Core groups: `foundation dataverse server client pipelines delivery reference me
 - Prefix `aidevme-` for product skills (core). Format `aidevme-<domain>-<purpose>` in hyphen-case.
 - Examples: `aidevme-dataverse-data`, `aidevme-wiki-lint`, `aidevme-diagram-drawio`.
 
-## Step 3 — Create the folder + SKILL.md
+## Step 3 — Create the folder, SKILL.md and evals/
 
 ```powershell
 $scope = "core"; $group = "delivery"; $name = "aidevme-your-skill"
 $base = "agent-src/skills/$scope/$group/$name"        # same for project scope: agent-src/skills/project/<group>/<name>
-New-Item -ItemType Directory -Force -Path $base | Out-Null
+New-Item -ItemType Directory -Force -Path $base, "$base/evals" | Out-Null                 # evals/ always
 New-Item -ItemType Directory -Force -Path "$base/scripts","$base/references" | Out-Null   # only if used
 ```
 
-Do NOT create `README.md`/`CHANGELOG.md` files — only files the skill actively uses.
+Do NOT create `README.md`/`CHANGELOG.md` files — only files the skill actively uses, plus `evals/evals.json`,
+which every skill has (Step 4).
 
 ### Frontmatter
 
@@ -89,7 +90,38 @@ so the tool surface and expected argument are declared up front.
 **Rule (orchestration & scenario):** these layers *reference* atomic skills by name and invoke them;
 they must not paste an atomic skill's steps inline. Duplicated content drifts — point at the source.
 
-## Step 4 — No hardcoding (especially core)
+## Step 4 — Write evals/evals.json
+
+Every skill ships test prompts in `evals/evals.json`, in the format all the repository's skills share (the
+`skill-creator` skill runs and grades them):
+
+```json
+{
+  "skill_name": "aidevme-your-skill",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "A realistic request a user would type",
+      "expected_output": "One or two sentences describing a good result",
+      "files": [],
+      "expectations": [
+        "A specific, checkable behavior (which script or command is run, which file changes, what is asked first)",
+        "Another one"
+      ]
+    }
+  ]
+}
+```
+
+- **At least three cases**, written as a user would ask, drawn from the description's "Use when" triggers.
+- **Cover the risks:** at least one case for an edge or a "Does NOT" boundary (an ambiguous request, a refused
+  shortcut, an action that needs approval first).
+- **Checkable expectations:** name the exact script, parameter, file or question, so a grader can mark each one
+  passed or failed. Avoid vague ones such as "does it well".
+- `skill_name` must equal the folder name and the frontmatter `name`; `id`s count up from 1; `files` lists input
+  files under `evals/files/`, or stays `[]`.
+
+## Step 5 — No hardcoding (especially core)
 
 Read project-specific values from config, never hardcode them:
 
@@ -97,7 +129,7 @@ Read project-specific values from config, never hardcode them:
 - From `CLAUDE.local.md`: author name, tool paths, ADO org/PAT.
 - If a required value is missing, ASK — never guess. Use `<placeholder>` syntax in examples.
 
-## Step 5 — Register in the manifest
+## Step 6 — Register in the manifest
 
 Add an entry to `agent-src/sync/skills-manifest.json`:
 
@@ -107,23 +139,26 @@ Add an entry to `agent-src/sync/skills-manifest.json`:
 
 `ported: true` means the folder exists and the sync will fan it out.
 
-## Step 6 — Sync + verify
+## Step 7 — Sync + verify
 
 ```powershell
 pwsh -File agent-src/sync/sync.ps1
 pwsh -File agent-src/sync/verify-parity.ps1     # must be clean
 ```
 
-Never place skill files directly in `.claude/skills` or `.github/skills` — they are generated.
+The sync copies the whole folder, `evals/` included, to `.claude/skills` and `.github/skills`. Never place skill
+files directly there — they are generated.
 
 ## Critical rules
 
 - NEVER put client names, environment URLs, org/PAT, or secrets in a `core` skill.
 - ALWAYS register in the manifest with the correct scope, then sync.
 - ALWAYS include a `Changelog` section (date · author · description).
+- ALWAYS create `evals/evals.json` with at least three test cases, one of them an edge or boundary case.
 
 ## Changelog
 
 | Date | Author | Description |
 |---|---|---|
-| 2026-09-10 | aidevme | Ported from HINT; added the required core|project scope selector, manifest registration, and the sync/verify step for the inverted model. |
+| 2026-09-10 | aidevme | Ported from HINT; added the required core\|project scope selector, manifest registration, and the sync/verify step for the inverted model. |
+| 2026-10-16 | aidevme | New skills always get `evals/evals.json` (new Step 4 with the shared format and guidance; critical rule); steps renumbered. |
