@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
 import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
 import { ConfirmationDialog, Footer, GenerateSummary, Header, LoadProjectDialog, OrphanList, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { buildSchemaModel, generate, resolveConfig, resolveSelection, type EntityMetadataInput } from '../../core';
-import { useConnection, usePlanState, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
+import { useConnection, useEnvironmentMetadata, usePlanState, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
 import {
     PptbFileSink,
     PptbMetadataProvider,
@@ -13,9 +13,6 @@ import {
     createWritePlan,
     dataverseGenTemplateFiles,
     deleteOrphanedFiles,
-    getSolutionEntityIds,
-    getSolutionMemberIds,
-    listSolutions,
     notifyGenerationComplete,
     notifyPreviewReady,
     pendingWriteCount,
@@ -27,10 +24,7 @@ import {
     writeCounts,
 } from '../../services';
 import { useAppStyles } from '../../styles';
-import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WritePlan } from '../../types';
-
-/** How long the "$metadata is too large" warning stays visible. */
-const METADATA_FALLBACK_WARNING_MS = 5000;
+import type { Progress, WritePlan } from '../../types';
 
 /**
  * Top-level state and orchestration. Holds the project folder and its `.dataverse-gen.json`, the
@@ -56,22 +50,9 @@ export default function App() {
     const [confirmGenerateOpen, setConfirmGenerateOpen] = useState(false);
     const [newProjectOpen, setNewProjectOpen] = useState(false);
     const [loadProjectOpen, setLoadProjectOpen] = useState(false);
-    /** The $metadata document is too large for PPTB, so the schema was rebuilt from table metadata. */
-    const [metadataFallback, setMetadataFallback] = useState(false);
-    /** The fallback warning is shown for a few seconds when the fallback starts, then hides itself. */
-    const [showMetadataFallbackWarning, setShowMetadataFallbackWarning] = useState(false);
-
-    const [entities, setEntities] = useState<EntitySummary[]>([]);
-    const [operations, setOperations] = useState<OperationSummary[] | null>(null);
-    const [solutions, setSolutions] = useState<SolutionSummary[]>([]);
-    const [selectedSolutionId, setSelectedSolutionId] = useState<string | null>(null);
-    const [solutionEntityIds, setSolutionEntityIds] = useState<Set<string> | null>(null);
-    const [loadingEntities, setLoadingEntities] = useState(false);
-    const [loadingOperations, setLoadingOperations] = useState(false);
-    const [loadingSolution, setLoadingSolution] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const { plan, setPlan, previewedAt, setPreviewedAt, lastResult, setLastResult, planStale, setPlanStale, resetPlan, markPlanStale } = usePlanState();
+    const { plan, setPlan, previewedAt, setPreviewedAt, lastResult, setLastResult, planStale, setPlanStale, clearPlan, resetPlan, markPlanStale } = usePlanState();
     const { toolSettings, saveToolSettings, saveNewProject, deleteProject, editProject, recordProjectGeneration, changeSetting } = useToolSettings({
         onError: setError,
         onPlanStale: markPlanStale,
@@ -87,25 +68,30 @@ export default function App() {
         resetPlan,
         markPlanStale,
     });
-    const solutionCache = useRef(new Map<string, Set<string>>());
-    /** Component ids (custom APIs, process actions) of the selected solution; `null` when not filtering. */
-    const [solutionComponentIds, setSolutionComponentIds] = useState<Set<string> | null>(null);
-    const [loadingSolutionOperations, setLoadingSolutionOperations] = useState(false);
-    const solutionOperationCache = useRef(new Map<string, Set<string>>());
+    const selected = useMemo<Record<SelectionKind, string[]>>(
+        () => ({ entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] }),
+        [config],
+    );
+    /** Tables, solutions and the selection are only listed once a project is open (created or loaded). */
+    const hasProject = !!projectRoot;
+    const {
+        showMetadataFallbackWarning,
+        noteMetadataFallback,
+        entities,
+        operations,
+        solutions,
+        selectedSolutionId,
+        solutionEntityIds,
+        solutionComponentIds,
+        loadingEntities,
+        loadingOperations,
+        loadingSolution,
+        ensureOperations,
+        changeSolution,
+        missing,
+    } = useEnvironmentMetadata({ provider, inPptb, connection, hasProject, selected, setError, clearPlan });
 
     const busy = progress !== null;
-
-    // ----- environment lists ----------------------------------------------------------------------
-
-    useEffect(() => {
-        if (!metadataFallback) {
-            setShowMetadataFallbackWarning(false);
-            return;
-        }
-        setShowMetadataFallbackWarning(true);
-        const timer = window.setTimeout(() => setShowMetadataFallbackWarning(false), METADATA_FALLBACK_WARNING_MS);
-        return () => window.clearTimeout(timer);
-    }, [metadataFallback]);
 
     /**
      * Adds a project from the New Project dialog, saves the config, and opens the project, which also lists the
@@ -118,101 +104,6 @@ export default function App() {
         },
         [saveNewProject, openSavedProject],
     );
-
-    /** Tables, solutions and the selection are only listed once a project is open (created or loaded). */
-    const hasProject = !!projectRoot;
-
-    useEffect(() => {
-        if (!inPptb || !connection || !hasProject) return;
-        let cancelled = false;
-        setEntities([]);
-        setOperations(null);
-        setMetadataFallback(false);
-        setSolutions([]);
-        setSelectedSolutionId(null);
-        setSolutionEntityIds(null);
-        setSolutionComponentIds(null);
-        solutionCache.current.clear();
-        solutionOperationCache.current.clear();
-        setPlan(null);
-        setLoadingEntities(true);
-        provider
-            .listEntities()
-            .then((list) => !cancelled && setEntities(list))
-            .catch((e) => !cancelled && setError(reportError(`Could not list tables`, e)))
-            .finally(() => !cancelled && setLoadingEntities(false));
-        listSolutions()
-            .then((list) => !cancelled && setSolutions(list))
-            .catch((e) => console.warn('Could not list solutions', e));
-        return () => {
-            cancelled = true;
-        };
-        // Only re-run when the connection (and so the provider) changes, or the first project is opened.
-    }, [provider, inPptb, connection, hasProject]); // eslint-disable-line react-hooks/exhaustive-deps
-
-    const ensureOperations = useCallback(() => {
-        if (operations !== null || loadingOperations || !inPptb || !hasProject) return;
-        setLoadingOperations(true);
-        provider
-            .listOperations()
-            .then((list) => {
-                setOperations(list);
-                setMetadataFallback(provider.usesMetadataFallback);
-            })
-            .catch((e) => setError(reportError(`Could not load the $metadata document`, e)))
-            .finally(() => setLoadingOperations(false));
-    }, [operations, loadingOperations, inPptb, hasProject, provider]);
-
-    const changeSolution = useCallback(async (solutionId: string | null) => {
-        setSelectedSolutionId(solutionId);
-        if (!solutionId) {
-            setSolutionEntityIds(null);
-            return;
-        }
-        const cached = solutionCache.current.get(solutionId);
-        if (cached) {
-            setSolutionEntityIds(cached);
-            return;
-        }
-        setLoadingSolution(true);
-        try {
-            const ids = await getSolutionEntityIds(solutionId);
-            solutionCache.current.set(solutionId, ids);
-            setSolutionEntityIds(ids);
-        } catch (e) {
-            setError(reportError(`Could not load the solution's tables`, e));
-            setSelectedSolutionId(null);
-        } finally {
-            setLoadingSolution(false);
-        }
-    }, []);
-
-    // Solution membership of actions/functions: needs both a solution and the operation list.
-    useEffect(() => {
-        if (!selectedSolutionId || !operations) {
-            setSolutionComponentIds(null);
-            return;
-        }
-        const cached = solutionOperationCache.current.get(selectedSolutionId);
-        if (cached) {
-            setSolutionComponentIds(cached);
-            return;
-        }
-        let cancelled = false;
-        const solutionId = selectedSolutionId;
-        const ids = operations.map((o) => o.componentId).filter((id): id is string => !!id);
-        setLoadingSolutionOperations(true);
-        getSolutionMemberIds(solutionId, ids)
-            .then((members) => {
-                solutionOperationCache.current.set(solutionId, members);
-                if (!cancelled) setSolutionComponentIds(members);
-            })
-            .catch((e) => !cancelled && setError(reportError(`Could not load the solution's actions and functions`, e)))
-            .finally(() => !cancelled && setLoadingSolutionOperations(false));
-        return () => {
-            cancelled = true;
-        };
-    }, [selectedSolutionId, operations]);
 
     const copyPath = useCallback(async (path: string, label: string) => {
         try {
@@ -232,7 +123,7 @@ export default function App() {
             const resolved = resolveConfig(config);
             setProgress({ message: 'Loading the $metadata document…', completed: 0, total: 1 });
             const schema = await provider.getSchemaForSelection(resolved.actions, resolved.functions);
-            setMetadataFallback(provider.usesMetadataFallback);
+            noteMetadataFallback();
             const selection = resolveSelection(schema, resolved);
             const names = selection.entities.map((e) => e.Name);
             setProgress({ message: `Loading metadata for ${names.length} table(s)…`, completed: 0, total: names.length });
@@ -262,6 +153,7 @@ export default function App() {
         projectRoot,
         config,
         provider,
+        noteMetadataFallback,
         sink,
         toolSettings.deleteOrphanedFiles,
         toolSettings.skipDuplicateIdentifiers,
@@ -347,21 +239,6 @@ export default function App() {
     // ----- derived --------------------------------------------------------------------------------
 
     const skipDuplicates = toolSettings.skipDuplicateIdentifiers;
-
-    const selected = useMemo<Record<SelectionKind, string[]>>(
-        () => ({ entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] }),
-        [config],
-    );
-    const missing = useMemo<Record<SelectionKind, string[]>>(() => {
-        const entityNames = new Set(entities.map((e) => e.logicalName));
-        const actionNames = new Set((operations ?? []).filter((o) => o.kind === 'action').map((o) => o.name));
-        const functionNames = new Set((operations ?? []).filter((o) => o.kind === 'function').map((o) => o.name));
-        return {
-            entities: entities.length ? selected.entities.filter((n) => !entityNames.has(n)) : [],
-            actions: operations ? selected.actions.filter((n) => !actionNames.has(n)) : [],
-            functions: operations ? selected.functions.filter((n) => !functionNames.has(n)) : [],
-        };
-    }, [entities, operations, selected]);
 
     const hasSelection = selected.entities.length + selected.actions.length + selected.functions.length > 0;
     /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
@@ -472,7 +349,7 @@ export default function App() {
                     selectedSolutionId={selectedSolutionId}
                     loadingEntities={loadingEntities}
                     loadingOperations={loadingOperations}
-                    loadingSolution={loadingSolution || loadingSolutionOperations}
+                    loadingSolution={loadingSolution}
                     selected={selected}
                     missing={missing}
                     disabled={!canSelect || busy}
