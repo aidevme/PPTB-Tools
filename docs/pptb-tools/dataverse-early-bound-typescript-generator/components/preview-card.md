@@ -137,7 +137,10 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 
 ## Where the code lives
 
-- `components/cards/PreviewCard.tsx`: the card.
+- `components/cards/PreviewCard.tsx`: the card, its state (selection, filter, sort) and layout.
+- `components/cards/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches), `StatusTiles` and
+  `FileTable`.
+- `components/shared/useResizableSplit.ts`: the divider between the file list and the viewer.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the
   header tooltips (`HEADER_HELP`), and the list and viewer widths with `clampListWidth`.
 - `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
