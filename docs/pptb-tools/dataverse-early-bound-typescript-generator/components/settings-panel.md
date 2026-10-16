@@ -1,5 +1,7 @@
 # SettingsPanel
 
+<!-- cspell:ignore complextype -->
+
 Tool settings, shown in a Fluent UI `OverlayDrawer` that slides in from the right edge. It opens from the
 Settings button in the [Header](./header.md).
 
@@ -26,8 +28,8 @@ Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/t
   (`settingsOpen`).
 - **Navigation column** (left, sticky):
   - a **Search settings** box;
-  - three vertical tabs, each with a one-line subtitle: **General** (notifications and lists), **Options** (what
-    every project generates) and **Generate & files** (confirmations and orphans). The selected tab is view state
+  - four vertical tabs, each with a one-line subtitle: **General** (notifications and lists), **Options** (what
+    every project generates), **Generate & files** (confirmations and orphans) and **Templates** (EJS templates). The selected tab is view state
     inside the component and starts on General.
 - **Content** (right, at most 560 px wide): a one-line intro for the tab, then **section cards**. Each card has an
   icon, a title and **scope badges** saying where its values apply, then one **row** per setting:
@@ -51,6 +53,8 @@ Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/t
 | Options | Output (Default for every project, .dataverse-gen.json) | Output folder | Text box | `projectDefaults.outputRoot` |
 | Options | Generated files (same badges) | Early-bound entity interfaces, Form context helpers, index.ts barrel file | Switch each | `projectDefaults.generateEntityTypes`, `generateFormContext`, `generateIndex` |
 | Generate & files | Before generating (All projects) | Ask before generating | Switch, off by default | `confirmBeforeGenerate` |
+| Generate & files | Duplicate identifiers (All projects) | Rename Duplicated Identifier(s) | Switch, off by default | `renameDuplicateIdentifiers` |
+| Generate & files | Duplicate identifiers (All projects) | Skip Duplicated Identifier(s) | Switch, off by default | `skipDuplicateIdentifiers` |
 | Generate & files | Orphaned files (All projects, **Permanent**) | Delete Orphaned Files | Switch, off by default | `deleteOrphanedFiles` |
 
 - **Notifications:** error notifications are always shown; only the three success notifications can be turned off.
@@ -66,10 +70,31 @@ Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/t
 - **Ask before generating:** when on, Generate opens a "Generate files?" confirmation naming the output folder and
   how many files will be created and overwritten, and saying overwrites can't be undone. When orphaned files are
   deleted too, their confirmation covers both.
+- **Skip Duplicated Identifier(s):** when on, Generate doesn't write files with the **duplicate identifiers** status
+  (two choice labels that become the same enum member name), so an existing copy on disk stays as it is. The
+  Generate button, the Preview summary, the confirmation and the result line count only the files that are
+  written. When off, those files are written and only reported.
 - **Delete Orphaned Files:** its card has a red accent stripe and a red **Permanent** badge, and while the switch is
   on, a warning says files are deleted permanently, not moved to the Recycle Bin or Trash. When on, Generate
   deletes orphaned files after you confirm the list; when off, they're only reported. It's the same setting as the
-  **Delete orphaned files** switch in the [PreviewCard](./preview-card.md), so the two stay in sync.
+  **Delete orphaned files** switch in the [PreviewCard](./preview-card.md), so the two stay in sync. Skip
+  Duplicated Identifier(s) is likewise the same setting as the Preview card's **Skip duplicated identifier(s)** switch.
+
+## Templates tab
+
+One card, **dataverse-early-bound-typescript-generator templates** (badges: the tool's version from `package.json`,
+as in the header, and **Read-only**), with no settings. `TemplatesViewer` in `SettingsParts.tsx` shows:
+
+- a note that Generate writes these templates to the project's `templateRoot` (`./_templates` by default),
+  overwriting edited copies, and that the tool generates with built-in copies, so editing the written files doesn't
+  change its output;
+- a tab per template (`action.ejs`, `complextype.ejs`, `entity.ejs`, `enum.ejs`, `function.ejs`, `index.ejs`,
+  `metadata.ejs`), with the path and line count;
+- the selected template, read-only, in a [CodeViewer](./code-viewer.md) with line numbers and TypeScript highlighting,
+  scrolling inside a 420px box.
+
+The content comes from `DATAVERSE_GEN_TEMPLATES` in `services/dataverseGenTemplates.ts`, so it's exactly what
+Generate writes. The tab isn't searchable, since it has no settings, and Save and Reset to defaults don't affect it.
 
 ## Search
 
@@ -89,7 +114,7 @@ With no matches it says so.
   everything already has its default value, and it only changes the draft: Save still has to be clicked.
 - **Where values come from:** the defaults are in
   `src/config/dataverse-early-bound-typescript-generator-config.json` (`general`, `deleteOrphanedFiles: false`,
-  `confirmBeforeGenerate: false`, `projectDefaults`), bundled at build time. Saved values are stored in PPTB's
+  `confirmBeforeGenerate: false`, `skipDuplicateIdentifiers: false`, `projectDefaults`), bundled at build time. Saved values are stored in PPTB's
   per-tool settings (`toolboxAPI.settings`, key `toolConfig`) and applied over the defaults every time the tool
   loads. The tool can't write the JSON file itself: PPTB doesn't tell a tool where it's installed and only lets
   it write to folders the user picked.

@@ -20,7 +20,13 @@ Sources:
 - **Empty state:** an icon, "Select a file to preview it", and a hint about the **↑**/**↓** keys.
 - **Header bar:** the file name, its type and status as badges (the status badge's tooltip explains it), the
   full path, the line count, and a **Copy** button for the generated content.
-- **Changed files** get two tabs, **Changes** (the default) and **Generated content**. Selecting another file
+- **Files with duplicate identifiers** show a warning above the content, naming each repeated identifier with
+  its values (for example `Open` (values 1, 3)) and saying to rename one of the labels in Dataverse. Generate
+  still writes the file, unless Skip Duplicated Identifier(s) is on. The lines that declare a duplicated identifier
+  are highlighted in both the Generated content and Changes views (dark orange tint, accent edge on the line
+  number), with a tooltip such as "Duplicate identifier Open (values 1, 3)". `duplicateLineNotes` finds them: lines
+  of the form `Name = value` whose name is one of the file's `duplicateIdentifiers`.
+- **Changed files** (including duplicate-identifier files that would be overwritten) get two tabs, **Changes** (the default) and **Generated content**. Selecting another file
   goes back to Changes.
 - **New and unchanged files** show the generated content in a [CodeViewer](./code-viewer.md).
 - **Orphaned files** have no generated content. A warning explains that the selection no longer generates

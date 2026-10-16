@@ -4,8 +4,9 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { PreviewCard, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { FileSearchBox } from '../src/components/shared/FileSearchBox';
 import { fileType } from '../src/components/shared/generatedFiles';
-import { clampListWidth, sortFiles, visibleFiles } from '../src/components/shared/previewFiles';
+import { clampListWidth, matchesSearch, sortFiles, visibleFiles } from '../src/components/shared/previewFiles';
 import { summarizePlan } from '../src/services';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import type { PlannedFile, WritePlan } from '../src/types';
@@ -37,7 +38,7 @@ const PLAN: WritePlan = {
     projectRoot: 'C:/repo',
     outputRoot: 'C:/repo/src/dataverse-gen',
     files: [file('entities/Account.ts', 'unchanged'), file('entities/Competitor.ts', 'changed'), file('metadata.ts', 'new'), file('enums/old.ts', 'orphaned')],
-    counts: { new: 1, changed: 1, unchanged: 1, orphaned: 1 },
+    counts: { new: 1, changed: 1, unchanged: 1, orphaned: 1, duplicate: 0 },
 };
 
 let root: Root | undefined;
@@ -166,11 +167,11 @@ describe('sorting the file table', () => {
 
 describe('summary and filtering', () => {
     it('describes what Generate would do', () => {
-        expect(summarizePlan({ new: 1, changed: 2, unchanged: 5, orphaned: 3 })).toBe(
+        expect(summarizePlan({ new: 1, changed: 2, unchanged: 5, orphaned: 3, duplicate: 0 })).toBe(
             '1 new file will be created and 2 files will be updated, and 3 orphaned files will be left untouched.',
         );
-        expect(summarizePlan({ new: 0, changed: 0, unchanged: 5, orphaned: 0 })).toBe('Everything is up to date; nothing will be written.');
-        expect(summarizePlan({ new: 0, changed: 1, unchanged: 5, orphaned: 1 }, true)).toBe('1 file will be updated, and 1 orphaned file will be deleted.');
+        expect(summarizePlan({ new: 0, changed: 0, unchanged: 5, orphaned: 0, duplicate: 0 })).toBe('Everything is up to date; nothing will be written.');
+        expect(summarizePlan({ new: 0, changed: 1, unchanged: 5, orphaned: 1, duplicate: 0 }, true)).toBe('1 file will be updated, and 1 orphaned file will be deleted.');
     });
 
     it('hides unchanged files by default, and filters by status and search', () => {
@@ -209,10 +210,13 @@ describe('PreviewCard layout', () => {
 
     it('says when nothing needs writing, and offers to preview again when stale', async () => {
         const onPreview = vi.fn();
-        const upToDate: WritePlan = { ...PLAN, files: [file('entities/Account.ts', 'unchanged')], counts: { new: 0, changed: 0, unchanged: 1, orphaned: 0 } };
+        const upToDate: WritePlan = { ...PLAN, files: [file('entities/Account.ts', 'unchanged')], counts: { new: 0, changed: 0, unchanged: 1, orphaned: 0, duplicate: 0 } };
         await render({ plan: upToDate, stale: true, onPreview }, { showUnchanged: false });
         expect(button('Nothing to write').disabled).toBe(true);
         expect(document.body.textContent).toContain('Nothing to write. Turn on Show unchanged to list every file.');
+        const info = document.querySelector('button[aria-label="About Show unchanged"]') as HTMLButtonElement;
+        await act(async () => info.click());
+        expect(document.body.textContent).toContain('It only changes the list, not what Generate does');
         await act(async () => button('Preview again').click());
         expect(onPreview).toHaveBeenCalled();
     });
@@ -252,7 +256,7 @@ describe('FileViewer in the Preview card', () => {
     it('shows a header, copies content, and shows the changes for a changed file', async () => {
         const onCopyText = vi.fn();
         const changed: PlannedFile = { ...file('entities/Competitor.ts', 'changed'), content: 'a\nB\nc', existingContent: 'a\nb\nc' };
-        await render({ plan: { ...PLAN, files: [changed], counts: { new: 0, changed: 1, unchanged: 0, orphaned: 0 } }, onCopyText });
+        await render({ plan: { ...PLAN, files: [changed], counts: { new: 0, changed: 1, unchanged: 0, orphaned: 0, duplicate: 0 } }, onCopyText });
         await select('Competitor.ts');
         const region = document.querySelector('[role="region"]') as HTMLElement;
         expect(document.body.textContent).toContain('3 lines');
@@ -285,22 +289,24 @@ describe('Delete orphaned files switch', () => {
             document.querySelector(`label[for="${input.id}"]`)?.textContent?.includes('Delete orphaned files'),
         ) as HTMLInputElement;
 
-    it('reflects the setting, reports changes, and explains itself in a tooltip', async () => {
+    it('reflects the setting, reports changes, and explains itself in an info label', async () => {
         const onDeleteOrphansChange = vi.fn();
         await render({ onDeleteOrphansChange });
         const input = deleteSwitch();
         expect(input.checked).toBe(false);
         await act(async () => input.click());
         expect(onDeleteOrphansChange).toHaveBeenCalledWith(true);
-        const tooltip = document.getElementById(input.closest('[aria-describedby]')?.getAttribute('aria-describedby') ?? input.getAttribute('aria-describedby') ?? '');
-        expect(tooltip?.textContent).toMatch(/permanently/);
+        const info = document.querySelector('button[aria-label="About Delete orphaned files"]') as HTMLButtonElement;
+        await act(async () => info.click());
+        expect(document.body.textContent).toMatch(/permanently/);
+        expect(document.body.textContent).not.toMatch(/Available after Preview/);
     });
 
     it('says orphans will be deleted, and lets Generate run when only deletions are pending', async () => {
         const orphansOnly = {
             ...PLAN,
             files: PLAN.files.filter((f) => f.status === 'orphaned' || f.status === 'unchanged'),
-            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1 },
+            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1, duplicate: 0 },
         };
         await render({ plan: orphansOnly, deleteOrphans: true });
         expect(document.body.textContent).toContain('1 orphaned file will be deleted.');
@@ -312,18 +318,83 @@ describe('Delete orphaned files switch', () => {
         await render({ plan: null }, { showUnchanged: false });
         const input = deleteSwitch();
         expect(input.disabled).toBe(true);
-        const tooltip = document.getElementById(input.closest('[aria-describedby]')?.getAttribute('aria-describedby') ?? input.getAttribute('aria-describedby') ?? '');
-        expect(tooltip?.textContent).toMatch(/Available after Preview/);
+        // The explanation is in the info label, shared with the Settings panel.
+        const info = document.querySelector('button[aria-label="About Delete orphaned files"]') as HTMLButtonElement;
+        await act(async () => info.click());
+        expect(document.body.textContent).toMatch(/permanently after you confirm the list.*Available after Preview/);
+    });
+
+    it('is disabled when the preview found no orphaned files, and says so', async () => {
+        const noOrphans = { ...PLAN, files: PLAN.files.filter((f) => f.status !== 'orphaned'), counts: { new: 1, changed: 1, unchanged: 1, orphaned: 0, duplicate: 0 } };
+        await render({ plan: noOrphans });
+        expect(deleteSwitch().disabled).toBe(true);
+        const info = document.querySelector('button[aria-label="About Delete orphaned files"]') as HTMLButtonElement;
+        await act(async () => info.click());
+        expect(document.body.textContent).toContain('Disabled: the last preview found no orphaned files.');
     });
 
     it('keeps Generate disabled with nothing to write while the switch is off', async () => {
         const orphansOnly = {
             ...PLAN,
             files: PLAN.files.filter((f) => f.status === 'orphaned' || f.status === 'unchanged'),
-            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1 },
+            counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1, duplicate: 0 },
         };
         await render({ plan: orphansOnly });
         expect(button('Nothing to write').disabled).toBe(true);
+    });
+});
+
+describe('searching the file table', () => {
+    const names = (files: PlannedFile[]) => files.map((f) => f.relativePath);
+    const all = (search: string) => names(visibleFiles(PLAN.files, { status: null, showUnchanged: false, search }));
+
+    it('filters from three characters by names or paths that start with the text, ignoring case', () => {
+        // Fewer than three characters: no search, just the default view.
+        expect(all('ac')).toEqual(['entities/Competitor.ts', 'metadata.ts', 'enums/old.ts']);
+        expect(all('ACC')).toEqual(['entities/Account.ts']);
+        expect(all('entities/')).toEqual(['entities/Account.ts', 'entities/Competitor.ts']);
+        // Starts with, not contains: "count" is inside Account.ts but doesn't start it.
+        expect(all('count')).toEqual([]);
+        expect(matchesSearch(PLAN.files[0], '  acc ')).toBe(true);
+    });
+
+    it('includes unchanged files while searching, but keeps a selected status tile', () => {
+        expect(all('acc')).toEqual(['entities/Account.ts']);
+        expect(names(visibleFiles(PLAN.files, { status: 'changed', showUnchanged: false, search: 'acc' }))).toEqual([]);
+        expect(names(visibleFiles(PLAN.files, { status: 'changed', showUnchanged: false, search: 'com' }))).toEqual(['entities/Competitor.ts']);
+    });
+
+    const input = () => document.querySelector('input[aria-label="Search files"]') as HTMLInputElement;
+    async function typeSearch(value: string) {
+        await act(async () => {
+            Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input(), value);
+            input().dispatchEvent(new Event('input', { bubbles: true }));
+        });
+    }
+
+    it('FileSearchBox reports each keystroke', async () => {
+        const onChange = vi.fn();
+        container = document.body.appendChild(document.createElement('div'));
+        root = createRoot(container);
+        await act(async () => root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(FileSearchBox, { value: '', onChange }))));
+        expect(input().placeholder).toBe('Search files');
+        await typeSearch('hso');
+        expect(onChange).toHaveBeenCalledWith('hso');
+    });
+
+    it('filters the table as you type in the search box', async () => {
+        await render({}, { showUnchanged: false });
+        expect(input().placeholder).toBe('Search files');
+        await typeSearch('ac');
+        expect(rows().map((r) => cells(r)[0])).toEqual(['Competitor.ts', 'metadata.ts', 'old.ts']);
+
+        await typeSearch('acc');
+        expect(rows().map((r) => cells(r)[0])).toEqual(['Account.ts']);
+        expect(document.body.textContent).toContain('Showing 1 of 4 files');
+        const showUnchanged = Array.from(document.querySelectorAll('input[role="switch"]')).find((i) =>
+            document.querySelector(`label[for="${i.id}"]`)?.textContent?.includes('Show unchanged'),
+        ) as HTMLInputElement;
+        expect(showUnchanged.disabled).toBe(true);
     });
 });
 

@@ -4,7 +4,6 @@ import {
     MessageBar,
     MessageBarActions,
     MessageBarBody,
-    SearchBox,
     Skeleton,
     SkeletonItem,
     Switch,
@@ -25,6 +24,7 @@ import {
     ArrowSyncRegular,
     CheckmarkCircleRegular,
     CopyRegular,
+    CodeTextRegular,
     DatabaseRegular,
     DocumentQuestionMarkRegular,
     DocumentRegular,
@@ -36,21 +36,26 @@ import {
     SaveRegular,
     TableRegular,
     TextBulletListLtrRegular,
+    WarningRegular,
 } from '@fluentui/react-icons';
 import type { FileStatus, WritePlan } from '../../types';
-import { summarizePlan } from '../../services';
+import { summarizePlan, writeCounts } from '../../services';
+import { infoLabel } from '../shared/infoLabel';
+import { DELETE_ORPHANS_INFO, RENAME_DUPLICATES_INFO, SKIP_DUPLICATES_INFO } from '../shared/settingsInfo';
 import { usePreviewCardStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
 import { STATUS_META, STATUS_ORDER, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
+import { FileSearchBox } from '../shared/FileSearchBox';
 import {
     DEFAULT_LIST_WIDTH,
     HEADER_HELP,
     MIN_LIST_WIDTH,
     clampListWidth,
     sortFiles,
+    isSearchActive,
     visibleFiles,
     type FileFilter,
     type FileSortColumn,
@@ -61,12 +66,31 @@ import {
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 
-/** Explanation shown in the Delete orphaned files switch's tooltip. */
-const DELETE_ORPHANS_HELP = (
+/**
+ * A Preview switch's explanation, plus why it's disabled: before the first preview nobody knows which files it
+ * affects, and after one it stays disabled while the preview found none.
+ */
+const switchInfo = (info: JSX.Element, previewed: boolean, found: number, what: string) =>
+    !previewed ? (
+        <>
+            {info} Available after Preview, once {what} are known.
+        </>
+    ) : found === 0 ? (
+        <>
+            {info} Disabled: the last preview found no {what}.
+        </>
+    ) : (
+        info
+    );
+
+/** Explanation in the Show unchanged switch's info label. */
+const SHOW_UNCHANGED_INFO = (
     <>
-        <strong>Delete orphaned files:</strong> when on, Generate also deletes orphaned files: files in the output folders that the
-        current selection no longer generates, such as a table you removed. You confirm the list first. Files are deleted permanently,
-        not moved to the Recycle Bin or Trash. When off, orphaned files are only reported. Saved in the tool settings.
+        By default the list shows only what needs attention: new, changed and orphaned files, and files with duplicate identifiers.
+        Turn this on to list the unchanged files too: generated files identical to the ones in the output folder, which Generate
+        doesn't rewrite. It only changes the list, not what Generate does, and isn't saved. It's disabled while a status tile
+        filters the list (click the tile again to go back to the full list) and while a search is active, since a search
+        includes unchanged files.
     </>
 );
 
@@ -76,6 +100,7 @@ const TYPE_ICONS: Record<GeneratedFileType, JSX.Element> = {
     actions: <FlashRegular />,
     functions: <MathFormulaRegular />,
     metadata: <DatabaseRegular />,
+    templates: <CodeTextRegular />,
     other: <DocumentRegular />,
 };
 
@@ -84,6 +109,7 @@ const STATUS_ICONS: Record<FileStatus, JSX.Element> = {
     changed: <EditRegular />,
     unchanged: <CheckmarkCircleRegular />,
     orphaned: <DocumentQuestionMarkRegular />,
+    duplicate: <WarningRegular />,
 };
 
 
@@ -100,6 +126,14 @@ export interface PreviewCardProps {
     previewedAt: string | null;
     /** Summary of the last Generate run, shown as a success message until the next preview. */
     lastResult: string | null;
+    /** Whether Generate leaves files with duplicate identifiers unwritten (the tool config's `skipDuplicateIdentifiers`). */
+    skipDuplicates?: boolean;
+    /** The Skip duplicated identifier(s) switch; saves `skipDuplicateIdentifiers`. The switch is hidden without it. */
+    onSkipDuplicatesChange?: (checked: boolean) => void;
+    /** Whether later duplicate enum members are renamed (the tool config's `renameDuplicateIdentifiers`). */
+    renameDuplicates?: boolean;
+    /** The Rename duplicated identifier(s) switch; saves `renameDuplicateIdentifiers`. The switch is hidden without it. */
+    onRenameDuplicatesChange?: (checked: boolean) => void;
     /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
     deleteOrphans: boolean;
     onDeleteOrphansChange: (checked: boolean) => void;
@@ -117,6 +151,7 @@ export interface PreviewCardProps {
  */
 export function PreviewCard(props: PreviewCardProps) {
     const { step, plan, stale, canPreview, needsProject, busy, previewedAt, lastResult, deleteOrphans, onDeleteOrphansChange, onPreview, onGenerate, onCopyText } = props;
+    const skipDuplicates = props.skipDuplicates ?? false;
     const styles = usePreviewCardStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
@@ -127,7 +162,8 @@ export function PreviewCard(props: PreviewCardProps) {
 
     const files = useMemo(() => (plan ? sortFiles(visibleFiles(plan.files, filter), sort) : []), [plan, filter, sort]);
     const selected = plan?.files.find((f) => f.relativePath === selectedPath) ?? null;
-    const writable = plan ? plan.counts.new + plan.counts.changed : 0;
+    const writes = useMemo(() => (plan ? writeCounts(plan, { skipDuplicates }) : { created: 0, overwritten: 0 }), [plan, skipDuplicates]);
+    const writable = writes.created + writes.overwritten;
 
     const toggleSort = (column: FileSortColumn) =>
         setSort((current) =>
@@ -223,22 +259,37 @@ export function PreviewCard(props: PreviewCardProps) {
                             {generateLabel}
                         </Button>
                     </Tooltip>
-                    <Tooltip
-                        content={{
-                            children: plan ? DELETE_ORPHANS_HELP : <>{DELETE_ORPHANS_HELP} Available after Preview, once the orphaned files are known.</>,
-                            className: styles.headerTooltip,
-                        }}
-                        relationship="description"
-                        withArrow
-                    >
-                        {/* Only after a preview: until then nobody knows which files would be deleted. */}
+                    {/* Both switches only apply to files a preview found: they're disabled before a preview and while it found
+                        none. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
+                    <Switch
+                        label={infoLabel('Delete orphaned files', switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
+                        checked={deleteOrphans}
+                        disabled={!plan || plan.counts.orphaned === 0 || busy}
+                        onChange={(_, data) => onDeleteOrphansChange(data.checked)}
+                    />
+                    {props.onRenameDuplicatesChange && (
                         <Switch
-                            label="Delete orphaned files"
-                            checked={deleteOrphans}
-                            disabled={!plan || busy}
-                            onChange={(_, data) => onDeleteOrphansChange(data.checked)}
+                            label={infoLabel(
+                                'Rename duplicated identifier(s)',
+                                // Once on, the preview has no duplicates left, but the switch must stay usable to turn it off.
+                                switchInfo(RENAME_DUPLICATES_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (props.renameDuplicates ? 1 : 0), 'files with duplicate identifiers'),
+                            )}
+                            checked={props.renameDuplicates ?? false}
+                            disabled={!plan || (plan.counts.duplicate === 0 && !props.renameDuplicates) || busy}
+                            onChange={(_, data) => props.onRenameDuplicatesChange?.(data.checked)}
                         />
-                    </Tooltip>
+                    )}
+                    {props.onSkipDuplicatesChange && (
+                        <Switch
+                            label={infoLabel(
+                                'Skip duplicated identifier(s)',
+                                switchInfo(SKIP_DUPLICATES_INFO, !!plan, plan?.counts.duplicate ?? 0, 'files with duplicate identifiers'),
+                            )}
+                            checked={skipDuplicates}
+                            disabled={!plan || plan.counts.duplicate === 0 || busy}
+                            onChange={(_, data) => props.onSkipDuplicatesChange?.(data.checked)}
+                        />
+                    )}
                     {previewedAt && (
                         <Text size={200} className={styles.muted}>
                             Previewed {formatRelativeTime(previewedAt, props.now)}
@@ -254,10 +305,17 @@ export function PreviewCard(props: PreviewCardProps) {
 
                 {plan && (
                     <>
-                        <Text className={styles.summary}>{summarizePlan(plan.counts, deleteOrphans)}</Text>
+                        <Text className={styles.summary}>{summarizePlan(plan.counts, deleteOrphans, writes, skipDuplicates)}</Text>
                         <div className={styles.tiles} role="group" aria-label="Filter by status">
-                            {STATUS_ORDER.map((status) => {
-                                const accent = { new: styles.accentNew, changed: styles.accentChanged, unchanged: styles.accentUnchanged, orphaned: styles.accentOrphaned }[status];
+                            {/* The duplicate identifiers tile only appears when there are some. */}
+                            {STATUS_ORDER.filter((status) => status !== 'duplicate' || plan.counts.duplicate > 0).map((status) => {
+                                const accent = {
+                                    new: styles.accentNew,
+                                    changed: styles.accentChanged,
+                                    unchanged: styles.accentUnchanged,
+                                    orphaned: styles.accentOrphaned,
+                                    duplicate: styles.accentDuplicate,
+                                }[status];
                                 const pressed = filter.status === status;
                                 return (
                                     <Tooltip key={status} content={`${STATUS_META[status].meaning} Click to ${pressed ? 'show all changes' : 'show only these'}.`} relationship="description" withArrow>
@@ -291,17 +349,12 @@ export function PreviewCard(props: PreviewCardProps) {
                             </Tooltip>
                         </div>
                         <div className={styles.filterBar}>
-                            <SearchBox
-                                className={styles.search}
-                                placeholder="Search files"
-                                value={filter.search}
-                                onChange={(_, data) => setFilter((f) => ({ ...f, search: data.value }))}
-                                aria-label="Search files"
-                            />
+                            <FileSearchBox value={filter.search} onChange={(search) => setFilter((f) => ({ ...f, search }))} />
                             <Switch
-                                label="Show unchanged"
+                                label={infoLabel('Show unchanged', SHOW_UNCHANGED_INFO)}
                                 checked={filter.showUnchanged}
-                                disabled={filter.status !== null}
+                                // A status tile or an active search already decides whether unchanged files are listed.
+                                disabled={filter.status !== null || isSearchActive(filter.search)}
                                 onChange={(_, data) => setFilter((f) => ({ ...f, showUnchanged: data.checked }))}
                             />
                             <Text size={200} className={styles.muted} aria-live="polite">
@@ -359,7 +412,13 @@ export function PreviewCard(props: PreviewCardProps) {
                                     {files.map((file, index) => {
                                         const isSelected = file.relativePath === selectedPath;
                                         const type = fileType(file.relativePath);
-                                        const dot = { new: styles.dotNew, changed: styles.dotChanged, unchanged: styles.dotUnchanged, orphaned: styles.dotOrphaned }[file.status];
+                                        const dot = {
+                                            new: styles.dotNew,
+                                            changed: styles.dotChanged,
+                                            unchanged: styles.dotUnchanged,
+                                            orphaned: styles.dotOrphaned,
+                                            duplicate: styles.dotDuplicate,
+                                        }[file.status];
                                         return (
                                             <TableRow
                                                 key={file.relativePath}
@@ -384,7 +443,7 @@ export function PreviewCard(props: PreviewCardProps) {
                                                 <TableCell className={styles.statusColumn}>
                                                     <span className={styles.status}>
                                                         <span className={mergeClasses(styles.dot, dot)} aria-hidden="true" />
-                                                        {file.status}
+                                                        {STATUS_META[file.status].label.toLowerCase()}
                                                     </span>
                                                 </TableCell>
                                             </TableRow>
@@ -406,7 +465,7 @@ export function PreviewCard(props: PreviewCardProps) {
                         onKeyDown={onSplitterKeyDown}
                     />
                     <div className={mergeClasses(styles.panel, styles.viewer)}>
-                        <FileViewer file={selected} onCopyText={onCopyText} />
+                        <FileViewer file={selected} onCopyText={onCopyText} skipDuplicates={skipDuplicates} />
                     </div>
                 </div>
             </div>

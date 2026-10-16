@@ -20,6 +20,8 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 | `lastResult` | `string \| null` | Summary of the last Generate run, shown as a success message until the next preview. |
 | `deleteOrphans` | `boolean` | Whether the **Delete orphaned files** switch is on (the tool setting `deleteOrphanedFiles`). |
 | `onDeleteOrphansChange` | `(checked: boolean) => void` | Called when the switch is toggled; the app saves the setting. |
+| `skipDuplicates` | `boolean` (optional) | Whether the **Skip duplicated identifier(s)** switch is on (the tool setting `skipDuplicateIdentifiers`). |
+| `onSkipDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled; the app saves the setting. Without it, the switch isn't shown. |
 | `onPreview` | `() => void` | Loads metadata, generates the files and compares them with disk. |
 | `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`; with `deleteOrphans` on and orphans present, the app asks for confirmation first, then also deletes them. |
 | `onCopyText` | `(text: string, label: string) => void` | Copies a file's content or the output folder path. |
@@ -38,10 +40,13 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Preview** (secondary) and **Generate** (primary). The Generate button names the count: **Generate 2
   files**, or **Nothing to write** when every file is up to date. It's disabled without an up-to-date
   preview or with nothing to write, and its tooltip says why.
-- **Delete orphaned files** (`Switch`), right after Generate, with a tooltip explaining it. It reads and saves
+- **Delete orphaned files** (`Switch`), right after Generate. Its label is an info label (ⓘ, the shared `infoLabel`
+  helper) with the same explanation as the Settings panel (`DELETE_ORPHANS_INFO` in
+  `components/shared/settingsInfo.tsx`). It reads and saves
   the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](./settings-panel.md) switch, so they stay
   in sync. It's disabled until a preview exists, since only a preview tells which files are orphaned; its
-  tooltip then adds "Available after Preview". When on:
+  info label then adds "Available after Preview". It also stays disabled while the last preview found no
+  orphaned files, and the info label says so. When on:
   - The summary says "…and N orphaned files will be deleted." instead of "left untouched", and the card
     description changes.
   - Generate is enabled even when only deletions are pending, and reads **Delete N orphaned files** in that
@@ -59,6 +64,20 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
     "Generate files?". It shows the output folder, how many files will be created and overwritten, and that
     source control is the way to undo. Its confirm button reads **Generate N files**. The delete confirmation
     above covers the writes too, so only one dialog appears.
+- **Rename duplicated identifier(s)** (`Switch`), after Delete orphaned files, with an info label (ⓘ) showing the
+  same explanation as the Settings panel (`RENAME_DUPLICATES_INFO`). It reads and saves `renameDuplicateIdentifiers`.
+  `App.tsx` passes it to `generate`, which then renames later duplicate enum members (`renameDuplicateEnumMembers`
+  in `core/generator.ts`), so changing it marks the preview stale. It's disabled before a preview and when the
+  preview found no duplicates, except while it's on: renaming removes the duplicates, and the switch must stay
+  usable to turn it off.
+- **Skip duplicated identifier(s)** (`Switch`), after Rename duplicated identifier(s), with an info label (ⓘ) showing the
+  same explanation as the Settings panel (`SKIP_DUPLICATES_INFO`). It reads
+  and saves the same `skipDuplicateIdentifiers` tool setting as the Settings panel's **Skip Duplicated
+  Identifier(s)** switch. Like Delete orphaned files, it's disabled until a preview exists (its info label then adds "Available after
+  Preview"), while the last preview found no files with duplicate identifiers (the info label says so), and while
+  the tool is busy. A setting that's already on stays on while disabled. When on,
+  files with the duplicate identifiers status aren't written: the Generate button, the summary ("…won't be
+  written."), the confirmation and the progress count leave them out.
 - The "Preview ready" and "Generation complete" notifications can be turned off in the Settings panel's General tab.
 - "Previewed *2 minutes ago*" after a preview.
 - Without a project folder, a hint says to open a project first.
@@ -66,10 +85,13 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 ## Summary and status tiles
 
 - **Summary:** one sentence saying what Generate would do, for example "1 new file will be created and 1 file
-  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan(counts, deleteOrphans)` in `services/plan.ts`; with the switch on, "will be deleted"). The same
-  sentence appears in a PPTB info notification, "Preview ready", for 5 seconds after each successful preview.
+  will be updated, and 9 orphaned files will be left untouched." (`summarizePlan(counts, deleteOrphans, writeCounts(plan))` in `services/plan.ts`; with the switch on, "will be deleted"). When files declare
+  duplicate identifiers, a second sentence says how many and that they won't compile until the option labels are
+  fixed in Dataverse. The same text appears in a PPTB info notification, "Preview ready", for 5 seconds after each
+  successful preview.
 - **Tiles:** **New**, **Changed**, **Unchanged** and **Orphaned**, each with an icon, a large count and a
-  colored left edge. A tooltip explains what Generate does with that status.
+  colored left edge. A **Duplicate identifiers** tile (warning icon, dark orange) comes first, but only when at
+  least one file has that status. A tooltip explains what Generate does with each status.
 - **Tiles as filters:** clicking a tile shows only that status, and the tile is highlighted (`aria-pressed`).
   Clicking it again goes back to the default view.
 - **Output folder:** shown as a chip, shortened in the middle, with the full path in a tooltip and a copy
@@ -77,20 +99,26 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 
 ## File table
 
-- **Default view: changes only.** New, changed and orphaned files are listed; unchanged files appear when
+- **Default view: changes only.** New, changed, orphaned and duplicate-identifier files are listed; unchanged files appear when
   **Show unchanged** is on, or when the Unchanged tile is selected (`visibleFiles` in `components/shared/previewFiles.tsx`). With nothing to show, the
-  table suggests turning on **Show unchanged**.
-- **Search:** filters by path, ignoring case. "Showing *n* of *total* files" updates as you filter, and is
-  announced to screen readers.
+  table suggests turning on **Show unchanged**. The switch has an info label (ⓘ) explaining what the default list
+  hides, that it only changes the list (it isn't saved and doesn't affect Generate), and that it's disabled while a
+  status tile filters the list or a search is active.
+- **Search:** a [FileSearchBox](./file-search-box.md) (a Fluent UI `SearchBox`, placeholder "Search files"). From three characters, the
+  table lists only the files whose name, or path, starts with the typed text, ignoring case; fewer characters
+  don't filter (`isSearchActive` and `matchesSearch` in `components/shared/previewFiles.tsx`). While searching,
+  unchanged files are included, so a search finds every file; a selected status tile still narrows the results,
+  and **Show unchanged** is disabled. "Showing *n* of *total* files" updates as you filter, and is announced to
+  screen readers.
 - **Columns:**
   - **Name:** a type icon (table, list, lightning bolt, ƒx, database or document), the file name without its
     folder, and "(generated as …)" when an existing file's casing was reused. The full path is in a tooltip.
   - **Type:** `entities`, `enums`, `actions`, `functions`, `metadata`, or `other` for `complextypes/` and
     `index.ts` (`fileType`).
-  - **Status:** a colored dot and the status.
+  - **Status:** a colored dot and the status (`duplicate identifiers` for the `duplicate` status).
 - **Sorting:** clicking a header sorts by that column, ascending; clicking it again flips to descending. Until
   then the table keeps the plan's order, grouped by folder. Names sort naturally ignoring case, types
-  alphabetically, and statuses as new, changed, unchanged, orphaned. Ties fall back to name order
+  alphabetically, and statuses as duplicate identifiers, new, changed, unchanged, orphaned. Ties fall back to name order
   (`sortFiles` in `components/shared/previewFiles.tsx`).
 - **Header tooltips** explain each column, every type and every status. They open on hover and on keyboard
   focus.
@@ -112,3 +140,19 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 - `components/cards/PreviewCard.tsx`: the card.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the
   header tooltips (`HEADER_HELP`), and the list and viewer widths with `clampListWidth`.
+
+## Duplicate identifiers
+
+Two choice (option set) labels can become the same enum member name once `makeCodeSafe` strips their non-word
+characters, for example "Open" and "Open!", or the same label used twice. The generated enum then declares that
+member twice, and TypeScript rejects the file.
+
+- **Detection:** `findDuplicateEnumMembers` in `core/generator.ts` lists each repeated name with its values, and
+  `generate` sets `duplicateIdentifiers` on the enum's file. The output itself stays as dataverse-gen writes it.
+- **Status:** `createWritePlan` gives such a file the `duplicate` status instead of new, changed or unchanged,
+  and keeps that underlying state in `writeStatus`, with the names in `duplicateIdentifiers`.
+- **Generate still writes it** when it's new or changed (`willWrite`), unless the **Skip Duplicated Identifier(s)**
+  setting (`skipDuplicateIdentifiers`, passed as the `skipDuplicates` prop and as `WriteOptions.skipDuplicates`) is
+  on. The Generate button label, the summary, the confirmation and the progress count follow the setting
+  (`writeCounts`).
+- **Fix:** rename one of the colliding labels in Dataverse and preview again.

@@ -7,6 +7,10 @@ Source: [`src/components/layout/Footer.tsx`](https://github.com/aidevme/PPTB-Too
 
 ## Layout
 
+The footer stays at the bottom of the window while the page scrolls: `App.tsx` wraps it in a sticky container
+(`stickyFooter` in `App.styles.ts`), which also holds the gap above it. Its height is published as
+`--app-footer-height` for `scroll-padding-bottom`, like the [Header](./header.md)'s.
+
 The footer uses the header's soft brand gradient, mirrored, with a top border and shadow. From left to
 right:
 

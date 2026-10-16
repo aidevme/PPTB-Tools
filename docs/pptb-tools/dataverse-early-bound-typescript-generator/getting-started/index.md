@@ -93,9 +93,14 @@ with your output folder. Nothing is written yet.
 - A sentence sums up what Generate would do, and the **New**, **Changed**, **Unchanged** and **Orphaned**
   tiles show the counts. Click a tile to list only those files.
 - The table shows what needs attention: new, changed and orphaned files. Turn on **Show unchanged** to see
-  every file, or search by name.
+  every file, or type at least three characters in the search box to list the files whose name starts with them.
 - Select a file to see it on the right. For a **changed** file, the **Changes** tab shows exactly which lines
   would change. Use **↑**/**↓** to move between files.
+
+**Duplicate identifiers** appears when two choice labels turn into the same name in the generated code, for
+example "Open" and "Open!". That file won't compile. Select it to see which names collide, rename one of the
+labels in Dataverse, and preview again. To keep Generate from writing such files, turn on **Skip duplicated
+identifier(s)** next to the Generate button (or in Settings); otherwise Generate still writes the file in the meantime.
 
 **Orphaned** files are in your output folder but no longer generated, for example after you deselect a table.
 By default they're only reported. Turn on **Delete orphaned files** next to the Generate button (or in

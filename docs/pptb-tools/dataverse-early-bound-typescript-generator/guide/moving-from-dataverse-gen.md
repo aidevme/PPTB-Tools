@@ -25,6 +25,8 @@ The output differs only where dataverse-gen emits code that doesn't compile:
 - Action and function parameters that are collections of enums or complex types get the right element type
   instead of `undefined[]`.
 - An option label made only of symbols falls back to `_<value>` instead of an empty member name.
+- With **Rename duplicated identifier(s)** on (off by default), a later enum member whose name repeats an earlier one
+  gets its value appended (`InProgress_700970000`) instead of a second `InProgress` that doesn't compile.
 
 If you switch back and forth, you may see these as one-time changes.
 
@@ -41,6 +43,8 @@ If you switch back and forth, you may see these as one-time changes.
 
 ## What isn't implemented
 
-- **Custom (ejected) EJS templates.** The CLI can use `_templates` files; this tool ignores `templateRoot` and
-  always uses its built-in templates. (EJS can't run in PPTB, whose iframe blocks `new Function`.)
+- **Custom (ejected) EJS templates.** The tool writes dataverse-gen 2.0.17's templates to `templateRoot`
+  (`_templates` by default) on every Generate, like `npx dataverse-gen eject`, so the CLI finds them there. It
+  doesn't read them itself: EJS can't run in PPTB, whose iframe blocks `new Function`. Edits to them only affect
+  the CLI, and the next Generate overwrites them with the originals.
 - **The Node CLI and the headless "regenerate" mode** from the original plan.

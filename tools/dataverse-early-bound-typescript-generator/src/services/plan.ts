@@ -8,14 +8,17 @@
  * - Files that are unchanged are not rewritten (line endings are ignored when comparing, so a CRLF
  *   checkout does not churn).
  *
+ * Generated files that declare a name more than once (duplicate enum members from colliding option labels) get
+ * the `duplicate` status. They're only reported: Generate still writes them when they're new or changed.
+ *
  * Orphans (files in the generated folders that this run would not produce) are only reported, unless the
  * user turns on Delete orphaned files: then Generate deletes them after a confirmation. PPTB's file system API
  * has no delete, so that goes through a PPTB terminal (see `PptbFileSink.deleteFiles`).
  */
 import { OUTPUT_FOLDERS, type GeneratedFile, type ResolvedConfig } from '../core';
 import type { DirectoryEntry, FileSink } from './fileSink';
-import { joinPath } from './paths';
-import type { FileStatus, PlannedFile, WritePlan, WriteResult } from '../types';
+import { dirname, joinPath } from './paths';
+import type { FileStatus, PlannedFile, WritePlan, WriteResult, WriteStatus } from '../types';
 
 function normalizeNewlines(text: string): string {
     return text.replace(/\r\n?/g, '\n');
@@ -28,14 +31,68 @@ function splitRelative(relativePath: string): { dir: string; name: string } {
 
 const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
-/** One sentence saying what Generate would do with a plan; `deleteOrphans` when Delete orphaned files is on. */
-export function summarizePlan(counts: WritePlan['counts'], deleteOrphans = false): string {
+/** What Generate does with a file, including `duplicate` files, which are written like any other. */
+export function writeStatusOf(file: PlannedFile): WriteStatus | undefined {
+    if (file.status === 'duplicate') return file.writeStatus;
+    return file.status === 'orphaned' ? undefined : file.status;
+}
+
+/** How Generate treats files: `skipDuplicates` leaves files with duplicate identifiers unwritten. */
+export interface WriteOptions {
+    skipDuplicates?: boolean;
+}
+
+/**
+ * Whether Generate writes the file: it's new or changed, whatever its status, unless it has duplicate identifiers
+ * and `skipDuplicates` is on.
+ */
+export function willWrite(file: PlannedFile, options: WriteOptions = {}): boolean {
+    if (options.skipDuplicates && file.status === 'duplicate') return false;
+    const write = writeStatusOf(file);
+    return (write === 'new' || write === 'changed') && file.content !== undefined;
+}
+
+/** How many files Generate would create and overwrite, counting `duplicate` files by their write status. */
+export function writeCounts(plan: Pick<WritePlan, 'files'>, options: WriteOptions = {}): { created: number; overwritten: number } {
+    let created = 0;
+    let overwritten = 0;
+    for (const file of plan.files) {
+        if (!willWrite(file, options)) continue;
+        if (writeStatusOf(file) === 'new') created++;
+        else overwritten++;
+    }
+    return { created, overwritten };
+}
+
+/** The number of files with each status. */
+export function countStatuses(files: PlannedFile[]): Record<FileStatus, number> {
+    const counts: Record<FileStatus, number> = { new: 0, changed: 0, unchanged: 0, orphaned: 0, duplicate: 0 };
+    for (const file of files) counts[file.status]++;
+    return counts;
+}
+
+/**
+ * One sentence saying what Generate would do with a plan; `deleteOrphans` when Delete orphaned files is on.
+ * `writes` defaults to the new and changed counts; pass {@link writeCounts} so `duplicate` files are included.
+ * `skipDuplicates` when Skip Duplicated Identifier(s) is on.
+ */
+export function summarizePlan(
+    counts: WritePlan['counts'],
+    deleteOrphans = false,
+    writes: { created: number; overwritten: number } = { created: counts.new, overwritten: counts.changed },
+    skipDuplicates = false,
+): string {
     const parts: string[] = [];
-    if (counts.new) parts.push(`${plural(counts.new, 'new file', 'new files')} will be created`);
-    if (counts.changed) parts.push(`${plural(counts.changed, 'file', 'files')} will be updated`);
-    const writes = parts.length ? parts.join(' and ') : 'Everything is up to date; nothing will be written';
+    if (writes.created) parts.push(`${plural(writes.created, 'new file', 'new files')} will be created`);
+    if (writes.overwritten) parts.push(`${plural(writes.overwritten, 'file', 'files')} will be updated`);
+    const written = parts.length ? parts.join(' and ') : 'Everything is up to date; nothing will be written';
     const orphans = counts.orphaned ? `, and ${plural(counts.orphaned, 'orphaned file', 'orphaned files')} will be ${deleteOrphans ? 'deleted' : 'left untouched'}` : '';
-    return `${writes}${orphans}.`;
+    const duplicates = !counts.duplicate
+        ? ''
+        : skipDuplicates
+          ? ` ${plural(counts.duplicate, 'file declares', 'files declare')} duplicate identifiers and won't be written.`
+          : ` ${plural(counts.duplicate, 'file declares', 'files declare')} duplicate identifiers and won't compile until the option labels are fixed in Dataverse.`;
+    return `${written}${orphans}.${duplicates}`;
 }
 
 /**
@@ -43,9 +100,10 @@ export function summarizePlan(counts: WritePlan['counts'], deleteOrphans = false
  * .dataverse-gen.json saved`. With `deleted` (the run deleted orphans), orphans read `9 deleted` and any left over
  * `1 orphaned`.
  */
-export function summarizeGeneration(written: number, counts: WritePlan['counts'], deleted?: number): string {
+export function summarizeGeneration(written: number, counts: WritePlan['counts'], deleted?: number, skipDuplicates = false): string {
     const orphans = deleted === undefined ? [`${counts.orphaned} orphaned`] : [`${deleted} deleted`, ...(counts.orphaned > deleted ? [`${counts.orphaned - deleted} orphaned`] : [])];
-    return [`${plural(written, 'file', 'files')} written`, `${counts.unchanged} unchanged`, ...orphans, '.dataverse-gen.json saved'].join(' · ');
+    const duplicates = counts.duplicate ? [`${counts.duplicate} with duplicate identifiers${skipDuplicates ? ' skipped' : ''}`] : [];
+    return [`${plural(written, 'file', 'files')} written`, `${counts.unchanged} unchanged`, ...duplicates, ...orphans, '.dataverse-gen.json saved'].join(' · ');
 }
 
 /** Absolute output root for a project (`output.outputRoot` is relative to the project folder). */
@@ -53,11 +111,16 @@ export function resolveOutputRoot(projectRoot: string, config: ResolvedConfig): 
     return joinPath(projectRoot, config.output.outputRoot);
 }
 
+/**
+ * Compares the generated files (paths relative to the output folder) and `projectFiles` (paths relative to the project
+ * folder: dataverse-gen's templates) with what's on disk, and finds the orphans in the output folders.
+ */
 export async function createWritePlan(
     sink: FileSink,
     projectRoot: string,
     config: ResolvedConfig,
     generated: GeneratedFile[],
+    projectFiles: GeneratedFile[] = [],
 ): Promise<WritePlan> {
     const outputRoot = resolveOutputRoot(projectRoot, config);
     const listingCache = new Map<string, Promise<DirectoryEntry[]>>();
@@ -99,20 +162,31 @@ export async function createWritePlan(
             for (const rename of specifierRenames) content = content.split(rename.from).join(rename.to);
         }
 
-        let status: FileStatus = 'new';
+        let writeStatus: WriteStatus = 'new';
         let existingContent: string | null = null;
         if (existing) {
             existingContent = await sink.read(absolutePath);
-            status = existingContent !== null && normalizeNewlines(existingContent) === normalizeNewlines(content) ? 'unchanged' : 'changed';
+            writeStatus = existingContent !== null && normalizeNewlines(existingContent) === normalizeNewlines(content) ? 'unchanged' : 'changed';
         }
+        const duplicateIdentifiers = file.duplicateIdentifiers?.length ? file.duplicateIdentifiers : undefined;
         files.push({
             relativePath,
             absolutePath,
-            status,
+            status: duplicateIdentifiers ? 'duplicate' : writeStatus,
             content,
             existingContent,
             generatedName: existing && existing.name !== generatedName ? generatedName : undefined,
+            ...(duplicateIdentifiers && { writeStatus, duplicateIdentifiers }),
         });
+    }
+
+    // Files relative to the project folder (the templates). They're outside the output folders, so they're never orphans.
+    for (const file of projectFiles) {
+        const absolutePath = joinPath(projectRoot, file.path);
+        const existingContent = await sink.read(absolutePath);
+        const status: WriteStatus =
+            existingContent === null ? 'new' : normalizeNewlines(existingContent) === normalizeNewlines(file.content) ? 'unchanged' : 'changed';
+        files.push({ relativePath: file.path, absolutePath, status, content: file.content, existingContent, inProjectFolder: true });
     }
 
     // Orphans: generated-looking files in the known folders (and the two root files) this run would not write.
@@ -132,23 +206,23 @@ export async function createWritePlan(
         }
     }
 
-    const counts: Record<FileStatus, number> = { new: 0, changed: 0, unchanged: 0, orphaned: 0 };
-    for (const file of files) counts[file.status]++;
-    return { projectRoot, outputRoot, files, counts };
+    return { projectRoot, outputRoot, files, counts: countStatuses(files) };
 }
 
-/** Write the new and changed files of a plan, creating folders as needed. */
+/**
+ * Write the new and changed files of a plan (including `duplicate` files that are new or changed, unless
+ * `options.skipDuplicates`), creating folders as needed.
+ */
 export async function applyWritePlan(
     sink: FileSink,
     plan: WritePlan,
     onProgress?: (completed: number, total: number, file: PlannedFile) => void,
+    options: WriteOptions = {},
 ): Promise<WriteResult> {
-    const toWrite = plan.files.filter((f) => (f.status === 'new' || f.status === 'changed') && f.content !== undefined);
+    const toWrite = plan.files.filter((f) => willWrite(f, options));
+    // Each file's own folder: most are in the output folder, the templates in the project folder.
     const directories = new Set<string>();
-    for (const file of toWrite) {
-        const { dir } = splitRelative(file.relativePath);
-        directories.add(dir ? joinPath(plan.outputRoot, dir) : plan.outputRoot);
-    }
+    for (const file of toWrite) directories.add(dirname(file.absolutePath));
     for (const dir of directories) await sink.createDirectory(dir);
 
     let completed = 0;

@@ -5,6 +5,13 @@ body {
     min-height: 100vh;
 }
 
+/* The header and footer are sticky (App.styles.ts); useStickyBarHeights sets their heights, so content scrolled
+   into view (the workflow steps jump to their card) stops below the header and above the footer. */
+html {
+    scroll-padding-top: var(--app-header-height, 0px);
+    scroll-padding-bottom: var(--app-footer-height, 0px);
+}
+
 #root {
     min-height: 100vh;
 }

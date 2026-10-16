@@ -51,7 +51,7 @@ generation time without being listed (see [What gets generated](./what-gets-gene
 | --- | --- | --- | --- |
 | `output.outputRoot` | string | `./src/dataverse-gen` | Folder the files go to, relative to the project folder |
 | `output.fileSuffix` | string | `.ts` | File extension of generated files |
-| `output.templateRoot` | string | `./_templates` | Folder of ejected EJS templates. **Ignored by this tool** |
+| `output.templateRoot` | string | `./_templates` | Folder, relative to the project, that Generate writes dataverse-gen's EJS templates to (for the CLI) |
 | `output.useCache` | boolean | `false` | Caches the metadata document on disk. **CLI only; ignored by this tool** |
 
 ## Referenced types
@@ -70,8 +70,9 @@ partial override keeps the other defaults.
 
 ## Options the tool ignores
 
-- **`output.templateRoot`:** custom (ejected) EJS templates aren't supported. The tool always uses its built-in
-  templates; the CLI still honors yours. See [Moving from dataverse-gen](./moving-from-dataverse-gen.md).
+- **`output.templateRoot`:** Generate writes dataverse-gen 2.0.17's seven EJS templates here, overwriting what's
+  there, like `npx dataverse-gen eject`. The CLI uses them; this tool doesn't read them and always uses its built-in
+  templates. See [Moving from dataverse-gen](./moving-from-dataverse-gen.md).
 - **`output.useCache`:** a CLI-only setting.
 
 ## Settings that overwrite project options

@@ -14,6 +14,9 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
 
 ## Behavior
 
+- **Always visible:** `App.tsx` wraps the header in a sticky container (`stickyHeader` in `App.styles.ts`), so it
+  stays at the top while the page scrolls. `useStickyBarHeights` publishes its height as `--app-header-height`,
+  which `index.css` uses as `scroll-padding-top`, so jumping to a step card stops below the header.
 - **Background:** a soft gradient from the brand color into the page background, with a light shadow
   underneath.
 - **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient.

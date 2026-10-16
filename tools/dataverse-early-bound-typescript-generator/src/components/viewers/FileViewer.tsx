@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Badge, Button, MessageBar, MessageBarBody, Tab, TabList, Text, Tooltip } from '@fluentui/react-components';
 import { CopyRegular, DocumentSearchRegular } from '@fluentui/react-icons';
+import type { DuplicateIdentifier } from '../../core';
 import type { PlannedFile } from '../../types';
+import { writeStatusOf } from '../../services';
 import { useFileViewerStyles } from '../../styles';
 import { STATUS_META, fileName, fileType } from '../shared/generatedFiles';
 import { CodeViewer } from './CodeViewer';
@@ -14,6 +16,24 @@ export interface IFileViewerProps {
     file: PlannedFile | null;
     /** Copies text to the clipboard; `label` names it in the confirmation. */
     onCopyText: (text: string, label: string) => void;
+    /** Whether Generate leaves files with duplicate identifiers unwritten (Skip Duplicated Identifier(s)). */
+    skipDuplicates?: boolean;
+}
+
+/**
+ * The lines of a generated file that declare one of its duplicated identifiers (`Name = value` enum members),
+ * 1-based, each with a note naming the identifier and all its values.
+ */
+export function duplicateLineNotes(content: string | undefined, duplicates: DuplicateIdentifier[] | undefined): Map<number, string> {
+    const notes = new Map<number, string>();
+    if (!content || !duplicates?.length) return notes;
+    const byName = new Map(duplicates.map((d) => [d.name, d]));
+    content.split(/\r?\n/).forEach((line, index) => {
+        const name = /^\s*([A-Za-z_$][\w$]*)\s*=/.exec(line)?.[1];
+        const duplicate = name !== undefined ? byName.get(name) : undefined;
+        if (duplicate) notes.set(index + 1, `Duplicate identifier ${duplicate.name} (values ${duplicate.values.join(', ')})`);
+    });
+    return notes;
 }
 
 const lineCount = (text: string) => text.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n').length;
@@ -22,9 +42,9 @@ const lineCount = (text: string) => text.replace(/\r\n?/g, '\n').replace(/\n$/, 
  * The right side of the Preview card: a header with the file's name, type, status, path and line count and a
  * Copy button, then either the changes Generate would make (changed files) or the generated content.
  */
-export function FileViewer({ file, onCopyText }: IFileViewerProps) {
+export function FileViewer({ file, onCopyText, skipDuplicates = false }: IFileViewerProps) {
     const styles = useFileViewerStyles();
-    const canDiff = file?.status === 'changed' && typeof file.existingContent === 'string' && file.content !== undefined;
+    const canDiff = !!file && writeStatusOf(file) === 'changed' && typeof file.existingContent === 'string' && file.content !== undefined;
     const [tab, setTab] = useState<ViewerTab>('changes');
 
     // A changed file opens on its changes; switching files resets the tab.
@@ -45,6 +65,7 @@ export function FileViewer({ file, onCopyText }: IFileViewerProps) {
 
     const meta = STATUS_META[file.status];
     const content = file.content;
+    const lineNotes = duplicateLineNotes(content, file.duplicateIdentifiers);
     return (
         <div className={styles.root}>
             <div className={styles.header}>
@@ -77,6 +98,23 @@ export function FileViewer({ file, onCopyText }: IFileViewerProps) {
                     <Tab value="content">Generated content</Tab>
                 </TabList>
             )}
+            {file.duplicateIdentifiers && file.duplicateIdentifiers.length > 0 && (
+                <MessageBar intent="warning" className={styles.notice}>
+                    <MessageBarBody>
+                        This file declares the same name more than once, so TypeScript won't compile it:{' '}
+                        {file.duplicateIdentifiers.map((d, i) => (
+                            <span key={d.name}>
+                                {i > 0 && ', '}
+                                <code>{d.name}</code> (values {d.values.join(', ')})
+                            </span>
+                        ))}
+                        . The lines are highlighted below. Two choice labels become the same enum member name. Rename one of the labels in Dataverse, then preview again.{' '}
+                        {skipDuplicates
+                            ? "Skip Duplicated Identifier(s) is on, so Generate doesn't write it."
+                            : `Generate still writes this file${writeStatusOf(file) === 'unchanged' ? ' when it changes' : ''}.`}
+                    </MessageBarBody>
+                </MessageBar>
+            )}
             <div className={styles.content} role="region" aria-label={`${fileName(file.relativePath)} preview`}>
                 {content === undefined ? (
                     <MessageBar intent="warning" className={styles.notice}>
@@ -86,9 +124,9 @@ export function FileViewer({ file, onCopyText }: IFileViewerProps) {
                         </MessageBarBody>
                     </MessageBar>
                 ) : canDiff && tab === 'changes' ? (
-                    <DiffViewer oldText={file.existingContent as string} newText={content} path={file.relativePath} />
+                    <DiffViewer oldText={file.existingContent as string} newText={content} path={file.relativePath} lineNotes={lineNotes} />
                 ) : (
-                    <CodeViewer code={content} path={file.relativePath} />
+                    <CodeViewer code={content} path={file.relativePath} lineNotes={lineNotes} />
                 )}
             </div>
         </div>

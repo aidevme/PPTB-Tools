@@ -68,6 +68,7 @@ export default defineConfig({
                                     { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/selection-card" },
                                     { text: "OptionsCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/options-card" },
                                     { text: "PreviewCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/preview-card" },
+                                    { text: "FileSearchBox", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/file-search-box" },
                                     { text: "FileViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/file-viewer" },
                                     { text: "CodeViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/code-viewer" },
                                     { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/footer" },

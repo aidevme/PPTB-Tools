@@ -1,6 +1,6 @@
 # What gets generated
 
-<!-- cspell:ignore customapi customapirequestparameters customapiresponseproperties complextypes -->
+<!-- cspell:ignore customapi customapirequestparameters customapiresponseproperties complextypes complextype -->
 
 This page is a reference for the files the tool writes and what you can select to generate them. To run a
 generation, see [Getting started](../getting-started/).
@@ -18,6 +18,17 @@ Everything goes under the output folder (default `./src/dataverse-gen`, set on t
 | `complextypes/` | Interfaces for complex types used by selected operations |
 | `metadata.ts` | `metadataCache` to pass to `setMetadataCache(...)` |
 | `index.ts` | Barrel file re-exporting everything (optional) |
+
+In the **project folder**, not the output folder:
+
+| Folder / file | Contents |
+| --- | --- |
+| `_templates/*.ejs` | dataverse-gen's seven EJS templates, written to `templateRoot` for the dataverse-gen CLI (see below) |
+
+dataverse-gen's EJS templates (`action.ejs`, `complextype.ejs`, `entity.ejs`, `enum.ejs`, `function.ejs`,
+`index.ejs`, `metadata.ejs`, from dataverse-gen 2.0.17) are written to the project folder's `templateRoot`
+(`_templates` by default) on every Generate, like `npx dataverse-gen eject`. The dataverse-gen CLI then uses them in
+place of its built-in templates. This tool doesn't read them, since EJS can't run in PPTB.
 
 Files are written in this order: entities, enums, actions, functions, complex types and `metadata.ts`. `index.ts`
 re-exports them in the same order.

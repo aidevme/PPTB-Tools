@@ -11,13 +11,15 @@ export interface IDiffViewerProps {
     newText: string;
     /** File path, for highlighting when falling back to the full content. */
     path: string;
+    /** Lines of the new text to highlight (1-based), each with the note shown when hovering over it. */
+    lineNotes?: ReadonlyMap<number, string>;
 }
 
 /**
  * The lines Generate would change in a file: removed lines in red, added lines in green, both line numbers in
  * the gutter, and long unchanged stretches collapsed. Very large rewrites fall back to the full new content.
  */
-export function DiffViewer({ oldText, newText, path }: IDiffViewerProps) {
+export function DiffViewer({ oldText, newText, path, lineNotes }: IDiffViewerProps) {
     const styles = useFileViewerStyles();
     const result = useMemo(() => diffLines(oldText, newText), [oldText, newText]);
 
@@ -27,7 +29,7 @@ export function DiffViewer({ oldText, newText, path }: IDiffViewerProps) {
                 <MessageBar intent="info" className={styles.notice}>
                     <MessageBarBody>Too many changes to compare line by line; showing the new content.</MessageBarBody>
                 </MessageBar>
-                <CodeViewer code={newText} path={path} />
+                <CodeViewer code={newText} path={path} lineNotes={lineNotes} />
             </>
         );
     }
@@ -51,13 +53,17 @@ export function DiffViewer({ oldText, newText, path }: IDiffViewerProps) {
                 ) : (
                     <Fragment key={b}>
                         {block.lines.map((line, i) => {
-                            const tint = line.kind === 'add' ? styles.diffAdd : line.kind === 'remove' ? styles.diffRemove : undefined;
+                            const note = line.newNumber !== undefined ? lineNotes?.get(line.newNumber) : undefined;
+                            const tint = mergeClasses(
+                                line.kind === 'add' ? styles.diffAdd : line.kind === 'remove' ? styles.diffRemove : undefined,
+                                note !== undefined && styles.diffFlagged,
+                            );
                             return (
-                                <div key={i} role="row" className={styles.diffRow}>
+                                <div key={i} role="row" className={styles.diffRow} title={note} data-flagged={note !== undefined || undefined}>
                                     <span className={mergeClasses(styles.gutter, tint)} role="cell">
                                         {line.oldNumber ?? ''}
                                     </span>
-                                    <span className={mergeClasses(styles.gutter, tint)} role="cell">
+                                    <span className={mergeClasses(styles.gutter, tint, note !== undefined && styles.diffFlaggedNumber)} role="cell">
                                         {line.newNumber ?? ''}
                                     </span>
                                     <span
@@ -67,7 +73,7 @@ export function DiffViewer({ oldText, newText, path }: IDiffViewerProps) {
                                     >
                                         {line.kind === 'add' ? '+' : line.kind === 'remove' ? '−' : ' '}
                                     </span>
-                                    <span className={mergeClasses(styles.code, tint)} role="cell">
+                                    <span className={mergeClasses(styles.code, tint)} role="cell" title={note}>
                                         {line.text}
                                     </span>
                                 </div>

@@ -9,6 +9,8 @@
     },
     "deleteOrphanedFiles": false,
     "confirmBeforeGenerate": true,
+    "skipDuplicateIdentifiers": false,
+    "renameDuplicateIdentifiers": false,
     "projectDefaults": {
         "outputRoot": "./src/generated/dataverse",
         "generateEntityTypes": true,

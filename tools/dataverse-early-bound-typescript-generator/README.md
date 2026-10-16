@@ -71,7 +71,8 @@ GPL-licensed software as long as its notice is kept.
   read from the environment's `$metadata` (CSDL) document.
 - Options for output folder, entity interfaces, form context helpers and the `index.ts` barrel.
 - Preview that diffs the generated files against the output folder (new / changed / unchanged / orphaned) with a
-  file viewer.
+  file viewer, and flags files with duplicate identifiers (choice labels that become the same enum member name),
+  which won't compile until the labels are fixed in Dataverse.
 - Generate writes only new and changed files, then saves `.dataverse-gen.json`.
 
 ## Commands (run from `tools/dataverse-early-bound-typescript-generator/`)
@@ -155,9 +156,10 @@ into its own package when the CLI is built.
   passes files with status `orphaned`, no `..` segment, and a path equal to the output root joined with the
   relative path. Leftover files are reported as an error; the writes still count as done.
 - **Tool settings.** Besides `deleteOrphanedFiles`, the Settings panel saves `general` (three notification
-  switches, `recentProjectCount` 0 to 10, `selectionRowLimit` 100 to 2000) and `confirmBeforeGenerate`. With the
-  latter on, Generate asks first, naming the output folder and the created and overwritten counts; when orphans
-  are deleted, that confirmation covers the writes. See [`src/config/README.md`](./src/config/README.md).
+  switches, `recentProjectCount` 0 to 10, `selectionRowLimit` 100 to 2000), `confirmBeforeGenerate` and
+  `skipDuplicateIdentifiers`. With `confirmBeforeGenerate` on, Generate asks first, naming the output folder and
+  the created and overwritten counts; when orphans are deleted, that confirmation covers the writes. With
+  `skipDuplicateIdentifiers` on, Generate doesn't write files with duplicate identifiers. See [`src/config/README.md`](./src/config/README.md).
 - **Line endings.** Generated files use LF. Comparison ignores CRLF vs LF, so a CRLF checkout shows as unchanged.
 
 ### Deliberate deviations from dataverse-gen output
@@ -170,10 +172,14 @@ These only affect cases where dataverse-gen emits code that does not compile:
 - Action/function parameters that are collections of enums or complex types get the right element type instead of
   `undefined[]`.
 - An option label made only of symbols falls back to `_<value>` instead of an empty member name.
+- With **Rename duplicated identifier(s)** on (off by default), a later enum member whose name repeats an earlier one
+  gets its value appended (`InProgress_700970000`) instead of a second `InProgress` that doesn't compile.
 
 ## Not implemented
 
-- Custom (ejected) templates. The CLI can still use `_templates` EJS files; this tool ignores `templateRoot`.
+- Reading custom (ejected) templates. Generate writes dataverse-gen 2.0.17's EJS templates to `templateRoot`
+  (`_templates` by default, overwriting) for the CLI, like `dataverse-gen eject`, but the tool itself always uses its
+  built-in templates (`core/templates.ts`), since EJS can't run in PPTB.
 - The optional Node CLI and the MCP/headless "regenerate" mode from the guide's later build steps.
 
 ## Known limitations

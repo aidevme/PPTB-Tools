@@ -26,6 +26,7 @@ import {
     AlertRegular,
     ArrowResetRegular,
     CodeRegular,
+    CodeTextRegular,
     DeleteRegular,
     DismissRegular,
     DocumentCheckmarkRegular,
@@ -33,8 +34,10 @@ import {
     ListRegular,
     OptionsRegular,
     SettingsRegular,
+    WarningRegular,
     WrenchRegular,
 } from '@fluentui/react-icons';
+import { DELETE_ORPHANS_INFO, RENAME_DUPLICATES_INFO, SKIP_DUPLICATES_INFO } from '../shared/settingsInfo';
 import {
     RECENT_PROJECT_COUNT_RANGE,
     SELECTION_ROW_LIMIT_RANGE,
@@ -46,14 +49,16 @@ import {
 } from '../../config';
 import { useSettingsPanelStyles } from '../../styles';
 import { reportError } from '../../services';
-import { OutputPreview, SettingRow, SettingsSection, type SectionBadge } from './SettingsParts';
+import { version } from '../../../package.json';
+import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
 
-type SettingsTab = 'general' | 'options' | 'files';
+type SettingsTab = 'general' | 'options' | 'files' | 'templates';
 
 const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; icon: ReactElement }> = [
     { value: 'general', label: 'General', subtitle: 'Notifications and lists', icon: <OptionsRegular /> },
     { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: <WrenchRegular /> },
     { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: <CodeRegular /> },
+    { value: 'templates', label: 'Templates', subtitle: 'EJS templates', icon: <CodeTextRegular /> },
 ];
 
 /** One-line explanation at the top of each tab. */
@@ -61,6 +66,7 @@ const TAB_INTROS: Record<SettingsTab, string> = {
     general: 'How the tool itself behaves.',
     options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
     files: 'How Generate treats files in the output folders, for every project.',
+    templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
 };
 
 const SCOPE_INSTALLATION: SectionBadge = { label: 'This PPTB installation' };
@@ -103,6 +109,8 @@ function withDefaults(config: ToolConfig): ToolConfig {
         general: { ...toolConfig.general },
         deleteOrphanedFiles: toolConfig.deleteOrphanedFiles,
         confirmBeforeGenerate: toolConfig.confirmBeforeGenerate,
+        skipDuplicateIdentifiers: toolConfig.skipDuplicateIdentifiers,
+        renameDuplicateIdentifiers: toolConfig.renameDuplicateIdentifiers,
         projectDefaults: { ...toolConfig.projectDefaults },
     };
 }
@@ -403,6 +411,58 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
             ],
         },
         {
+            id: 'duplicates',
+            tab: 'files',
+            title: 'Duplicate identifiers',
+            icon: <WarningRegular />,
+            badges: [SCOPE_ALL_PROJECTS],
+            settings: [
+                {
+                    id: 'renameDuplicateIdentifiers',
+                    title: 'Rename Duplicated Identifier(s)',
+                    description: 'Give later duplicate enum members their value as a suffix, so the files compile.',
+                    info: RENAME_DUPLICATES_INFO,
+                    keywords: 'duplicate duplicated identifier identifiers enum label rename suffix compile',
+                    changed: draft.renameDuplicateIdentifiers !== settings.renameDuplicateIdentifiers,
+                    control: ({ labelledBy, describedBy }) => (
+                        <Switch
+                            checked={draft.renameDuplicateIdentifiers}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => update({ renameDuplicateIdentifiers: data.checked })}
+                        />
+                    ),
+                },
+                {
+                    id: 'skipDuplicateIdentifiers',
+                    title: 'Skip Duplicated Identifier(s)',
+                    description: "Don't write generated files that declare the same name more than once.",
+                    info: SKIP_DUPLICATES_INFO,
+                    keywords: 'duplicate duplicated identifier identifiers enum label skip compile',
+                    changed: draft.skipDuplicateIdentifiers !== settings.skipDuplicateIdentifiers,
+                    control: ({ labelledBy, describedBy }) => (
+                        <Switch
+                            checked={draft.skipDuplicateIdentifiers}
+                            aria-labelledby={labelledBy}
+                            aria-describedby={describedBy}
+                            onChange={(_, data) => update({ skipDuplicateIdentifiers: data.checked })}
+                        />
+                    ),
+                },
+            ],
+        },
+        {
+            id: 'templates',
+            tab: 'templates',
+            title: 'dataverse-early-bound-typescript-generator templates',
+            icon: <CodeTextRegular />,
+            // The tool's own version, as in the header.
+            badges: [{ label: `Version ${version}` }, { label: 'Read-only' }],
+            // Nothing to set: the card only shows the templates.
+            settings: [],
+            extra: <TemplatesViewer />,
+        },
+        {
             id: 'orphans',
             tab: 'files',
             title: 'Orphaned files',
@@ -414,13 +474,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     id: 'deleteOrphanedFiles',
                     title: 'Delete Orphaned Files',
                     description: 'Delete generated files the selection no longer produces.',
-                    info: (
-                        <>
-                            Orphaned files are files in the output folders that the current selection no longer generates. When on,
-                            Generate deletes them permanently after you confirm the list; when off, they're only reported. Also
-                            available as a switch in Preview and generate. Saved as <code>deleteOrphanedFiles</code>.
-                        </>
-                    ),
+                    info: DELETE_ORPHANS_INFO,
                     keywords: 'orphan orphaned delete remove cleanup',
                     changed: draft.deleteOrphanedFiles !== settings.deleteOrphanedFiles,
                     control: ({ labelledBy, describedBy }) => (

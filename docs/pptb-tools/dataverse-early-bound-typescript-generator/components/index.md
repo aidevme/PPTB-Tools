@@ -23,6 +23,7 @@ callbacks down as props. Everything is exported from the folder's `index.ts` bar
 | 2 | [SelectionCard](./selection-card.md) | Choose tables, actions and functions |
 | 3 | [OptionsCard](./options-card.md) | Output folder and which files to generate |
 | 4 | [PreviewCard](./preview-card.md) | Compare generated files with disk, then write them |
+| — | [FileSearchBox](./file-search-box.md) | The search box above PreviewCard's file table |
 | — | [FileViewer](./file-viewer.md) | The selected file's header, changes and content, inside PreviewCard |
 | — | [CodeViewer](./code-viewer.md) | Syntax-highlighted file view inside PreviewCard |
 | — | [StepCard](./step-card.md) | Shared frame for the four step cards: step header, status badge, active-step accent |

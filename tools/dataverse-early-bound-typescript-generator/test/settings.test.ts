@@ -9,6 +9,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyProjectDefaults, mergeToolConfig, toolConfig, toolConfigEquals, type ProjectEntry, type ToolConfig } from '../src/config';
 import { createDefaultConfig } from '../src/core';
 import { loadToolConfig, saveToolConfig } from '../src/services/settings';
+import { DATAVERSE_GEN_TEMPLATES } from '../src/services/dataverseGenTemplates';
+import { version as toolVersion } from '../package.json';
 import { SettingsPanel } from '../src/components/panels/SettingsPanel';
 import { NewProjectDialog } from '../src/components/dialogs/NewProjectDialog';
 import { LoadProjectDialog } from '../src/components/dialogs/LoadProjectDialog';
@@ -53,6 +55,8 @@ describe('tool config', () => {
             },
             deleteOrphanedFiles: false,
             confirmBeforeGenerate: false,
+            skipDuplicateIdentifiers: false,
+            renameDuplicateIdentifiers: false,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
             projects: [],
         });
@@ -79,6 +83,16 @@ describe('tool config', () => {
     it('reads confirmBeforeGenerate only when it is a boolean', () => {
         expect(mergeToolConfig({ confirmBeforeGenerate: true }).confirmBeforeGenerate).toBe(true);
         expect(mergeToolConfig({ confirmBeforeGenerate: 'yes' }).confirmBeforeGenerate).toBe(false);
+    });
+
+    it('reads renameDuplicateIdentifiers only when it is a boolean', () => {
+        expect(mergeToolConfig({ renameDuplicateIdentifiers: true }).renameDuplicateIdentifiers).toBe(true);
+        expect(mergeToolConfig({ renameDuplicateIdentifiers: 'yes' }).renameDuplicateIdentifiers).toBe(false);
+    });
+
+    it('reads skipDuplicateIdentifiers only when it is a boolean', () => {
+        expect(mergeToolConfig({ skipDuplicateIdentifiers: true }).skipDuplicateIdentifiers).toBe(true);
+        expect(mergeToolConfig({ skipDuplicateIdentifiers: 'yes' }).skipDuplicateIdentifiers).toBe(false);
     });
 
     it('merges project defaults key by key, ignoring mistyped values and a blank output folder', () => {
@@ -251,6 +265,51 @@ describe('settings panel', () => {
         await click(control('Ask before generating'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ confirmBeforeGenerate: true }));
+    });
+
+    it('shows the dataverse-gen templates, read-only, on the Templates tab', async () => {
+        await render(toolConfig, vi.fn(async () => {}));
+        await openTab('Templates');
+        // Fluent repeats an unselected tab's label as hidden spacing text, so tabs are matched by value.
+        const templateTabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="Templates"] [role="tab"]')).map((t) => t.getAttribute('value'));
+        expect(templateTabs).toEqual(DATAVERSE_GEN_TEMPLATES.map((t) => t.name));
+        const region = () => document.querySelector('[role="region"][aria-label$=" template"]') as HTMLElement;
+        expect(region().getAttribute('aria-label')).toBe('action.ejs template');
+        expect(document.body.textContent).toContain("Generate writes them to your project's templateRoot");
+        expect(document.body.textContent).toContain('dataverse-early-bound-typescript-generator templates');
+        expect(document.body.textContent).toContain(`Version ${toolVersion}`);
+        expect(document.querySelector('[role="tabpanel"]')?.textContent).not.toContain('dataverse-gen ');
+
+        const enumTab = document.querySelector('[role="tab"][value="enum.ejs"]') as HTMLElement;
+        await click(enumTab);
+        expect(region().textContent).toContain('// Enum <%- locals.Name %>');
+        // CodeViewer: one numbered row per line, highlighted as TypeScript, with the CRLF line endings shown as plain breaks.
+        const enumTemplate = DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content;
+        const rows = Array.from(region().querySelectorAll('pre > div')) as HTMLElement[];
+        expect(rows).toHaveLength(enumTemplate.replace(/\r\n$/, '').split('\r\n').length);
+        expect(rows[0].firstElementChild?.textContent).toBe('1');
+        expect(rows[2].querySelectorAll('span span').length).toBeGreaterThan(1);
+        expect(region().textContent).not.toContain('\r');
+        // Nothing to change: Save stays disabled.
+        expect(button('Save').disabled).toBe(true);
+    });
+
+    it('offers Rename Duplicated Identifier(s) on the Generate & files tab', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        await click(control('Rename Duplicated Identifier(s)'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ renameDuplicateIdentifiers: true }));
+    });
+
+    it('offers Skip Duplicated Identifier(s) on the Generate & files tab', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        await click(control('Skip Duplicated Identifier(s)'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
 
     it('searches across all tabs', async () => {

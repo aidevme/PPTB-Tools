@@ -4,13 +4,15 @@ import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
 import { ConfirmationDialog, Footer, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { buildSchemaModel, createDefaultConfig, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../../core';
 import { DEFAULT_PROJECT_VERSION, applyProjectDefaults, mergeToolConfig, recordGeneration, toolConfig, type ProjectDefaults, type ProjectEntry, type ToolConfig } from '../../config';
-import { useConnection } from '../../hooks';
+import { useConnection, useStickyBarHeights } from '../../hooks';
 import {
     PptbFileSink,
     PptbMetadataProvider,
     applyWritePlan,
     connectionKey,
+    countStatuses,
     createWritePlan,
+    dataverseGenTemplateFiles,
     deleteOrphanedFiles,
     getRememberedProjectFolder,
     getSolutionEntityIds,
@@ -29,6 +31,9 @@ import {
     saveToolConfig,
     summarizeGeneration,
     technicalMessage,
+    willWrite,
+    writeCounts,
+    writeStatusOf,
     type ProjectConfigState,
 } from '../../services';
 import { useAppStyles } from '../../styles';
@@ -46,6 +51,9 @@ const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions
  */
 export default function App() {
     const styles = useAppStyles();
+    const headerRef = useRef<HTMLDivElement>(null);
+    const footerRef = useRef<HTMLDivElement>(null);
+    useStickyBarHeights(headerRef, footerRef);
     const { connection, isLoading: connectionLoading } = useConnection();
     const inPptb = typeof window !== 'undefined' && !!window.toolboxAPI && !!window.dataverseAPI;
     const connKey = connectionKey(connection);
@@ -197,12 +205,17 @@ export default function App() {
     }, [metadataFallback]);
 
     /** Saves the Settings-panel values; the panel stays open and shows the error if saving fails. */
-    const saveToolSettings = useCallback(async (draft: ToolConfig) => {
-        // Same normalization as on load, so e.g. a blank output folder saves as the default, not as "".
-        const next = mergeToolConfig(draft);
-        await saveToolConfig(next);
-        setToolSettings(next);
-    }, []);
+    const saveToolSettings = useCallback(
+        async (draft: ToolConfig) => {
+            // Same normalization as on load, so e.g. a blank output folder saves as the default, not as "".
+            const next = mergeToolConfig(draft);
+            await saveToolConfig(next);
+            setToolSettings(next);
+            // Renaming duplicates changes the generated files, so the current preview no longer matches.
+            if (next.renameDuplicateIdentifiers !== toolSettings.renameDuplicateIdentifiers) setPlanStale(true);
+        },
+        [toolSettings.renameDuplicateIdentifiers],
+    );
 
     /**
      * Adds a project from the New Project dialog to `projects`, saves the config, and opens the project, which
@@ -429,14 +442,15 @@ export default function App() {
             const byName = new Map<string, EntityMetadataInput>(loaded.map((e) => [e.LogicalName, e]));
             setProgress({ message: 'Generating files…', completed: 0, total: 1 });
             const model = buildSchemaModel(schema, resolved, (name) => byName.get(name));
-            const files = generate(model, resolved);
+            const files = generate(model, resolved, { renameDuplicateIdentifiers: toolSettings.renameDuplicateIdentifiers });
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
-            const nextPlan = await createWritePlan(sink, projectRoot, resolved, files);
+            // dataverse-gen's templates go into the project's templateRoot on every Generate, like `dataverse-gen eject`.
+            const nextPlan = await createWritePlan(sink, projectRoot, resolved, files, dataverseGenTemplateFiles(resolved));
             setPlan(nextPlan);
             setPreviewedAt(new Date().toISOString());
             setLastResult(null);
             setPlanStale(false);
-            if (toolSettings.general.showPreviewReadyNotification) void notifyPreviewReady(nextPlan, toolSettings.deleteOrphanedFiles);
+            if (toolSettings.general.showPreviewReadyNotification) void notifyPreviewReady(nextPlan, toolSettings.deleteOrphanedFiles, toolSettings.skipDuplicateIdentifiers);
             return nextPlan;
         } catch (e) {
             setError(reportError('Preview failed', e, { projectRoot }));
@@ -444,7 +458,16 @@ export default function App() {
         } finally {
             setProgress(null);
         }
-    }, [projectRoot, config, provider, sink, toolSettings.deleteOrphanedFiles, toolSettings.general.showPreviewReadyNotification]);
+    }, [
+        projectRoot,
+        config,
+        provider,
+        sink,
+        toolSettings.deleteOrphanedFiles,
+        toolSettings.skipDuplicateIdentifiers,
+        toolSettings.renameDuplicateIdentifiers,
+        toolSettings.general.showPreviewReadyNotification,
+    ]);
 
     /**
      * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
@@ -459,7 +482,7 @@ export default function App() {
                 toolSettings.projects[index],
                 {
                     files: applied.files.filter((f) => f.status !== 'orphaned').map((f) => f.relativePath),
-                    newFiles: applied.files.filter((f) => f.status === 'new').map((f) => f.relativePath),
+                    newFiles: applied.files.filter((f) => writeStatusOf(f) === 'new').map((f) => f.relativePath),
                 },
                 new Date().toISOString(),
             );
@@ -484,9 +507,14 @@ export default function App() {
             if (!projectRoot) return;
             setError(null);
             try {
-                setProgress({ message: 'Writing files…', completed: 0, total: planToApply.counts.new + planToApply.counts.changed });
-                const result = await applyWritePlan(sink, planToApply, (completed, total, file) =>
-                    setProgress({ message: `Wrote ${file.relativePath}`, completed, total }),
+                const writeOptions = { skipDuplicates: toolSettings.skipDuplicateIdentifiers };
+                const writes = writeCounts(planToApply, writeOptions);
+                setProgress({ message: 'Writing files…', completed: 0, total: writes.created + writes.overwritten });
+                const result = await applyWritePlan(
+                    sink,
+                    planToApply,
+                    (completed, total, file) => setProgress({ message: `Wrote ${file.relativePath}`, completed, total }),
+                    writeOptions,
                 );
                 const configPath = await saveProjectConfig(sink, projectRoot, config);
                 setConfigState((state) => ({ ...state, exists: true, path: configPath }));
@@ -511,23 +539,20 @@ export default function App() {
                     }
                 }
 
-                // Everything written is now unchanged, and deleted orphans are gone.
+                // Everything written is now unchanged (files with duplicate identifiers keep that status), and deleted
+                // orphans are gone.
                 const remainingFiles = planToApply.files
                     .filter((f) => !(f.status === 'orphaned' && deleted?.has(f.relativePath)))
-                    .map((f) => (f.status === 'new' || f.status === 'changed' ? { ...f, status: 'unchanged' as const, existingContent: f.content } : f));
-                setPlan({
-                    ...planToApply,
-                    files: remainingFiles,
-                    counts: {
-                        new: 0,
-                        changed: 0,
-                        unchanged: planToApply.counts.unchanged + result.written,
-                        orphaned: planToApply.counts.orphaned - (deleted?.size ?? 0),
-                    },
-                });
-                setLastResult(summarizeGeneration(result.written, planToApply.counts, deleted?.size));
+                    .map((f) => {
+                        if (!willWrite(f, writeOptions)) return f;
+                        return f.status === 'duplicate'
+                            ? { ...f, writeStatus: 'unchanged' as const, existingContent: f.content }
+                            : { ...f, status: 'unchanged' as const, existingContent: f.content };
+                    });
+                setPlan({ ...planToApply, files: remainingFiles, counts: countStatuses(remainingFiles) });
+                setLastResult(summarizeGeneration(result.written, planToApply.counts, deleted?.size, writeOptions.skipDuplicates));
                 // Not awaited, and it never throws: a failed notification mustn't report a successful write as "Generation failed".
-                if (toolSettings.general.showGenerationCompleteNotification) void notifyGenerationComplete(result.written, planToApply.counts, deleted?.size);
+                if (toolSettings.general.showGenerationCompleteNotification) void notifyGenerationComplete(result.written, planToApply.counts, deleted?.size, writeOptions.skipDuplicates);
             } catch (e) {
                 setError(reportError(`Generation failed`, e));
             } finally {
@@ -544,7 +569,7 @@ export default function App() {
     const startGenerate = () => {
         if (!plan) return;
         if (toolSettings.deleteOrphanedFiles && plan.counts.orphaned > 0) setConfirmDeleteOpen(true);
-        else if (toolSettings.confirmBeforeGenerate && plan.counts.new + plan.counts.changed > 0) setConfirmGenerateOpen(true);
+        else if (toolSettings.confirmBeforeGenerate && pendingWrites(plan, skipDuplicates) > 0) setConfirmGenerateOpen(true);
         else void runGenerate(plan, false);
     };
 
@@ -557,7 +582,27 @@ export default function App() {
         }
     };
 
+    /** The Skip duplicated identifier(s) switch: saves `skipDuplicateIdentifiers` in the tool config, like the Settings panel. */
+    const changeSkipDuplicates = async (checked: boolean) => {
+        try {
+            await saveToolSettings({ ...toolSettings, skipDuplicateIdentifiers: checked });
+        } catch (e) {
+            setError(reportError('Could not save the setting', e));
+        }
+    };
+
+    /** The Rename duplicated identifier(s) switch: saves `renameDuplicateIdentifiers`, like the Settings panel. */
+    const changeRenameDuplicates = async (checked: boolean) => {
+        try {
+            await saveToolSettings({ ...toolSettings, renameDuplicateIdentifiers: checked });
+        } catch (e) {
+            setError(reportError('Could not save the setting', e));
+        }
+    };
+
     // ----- derived --------------------------------------------------------------------------------
+
+    const skipDuplicates = toolSettings.skipDuplicateIdentifiers;
 
     const selected = useMemo<Record<SelectionKind, string[]>>(
         () => (config ? { entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] } : EMPTY_SELECTION),
@@ -582,7 +627,7 @@ export default function App() {
     const steps = computeWorkflowSteps({
         hasProject: !!projectRoot,
         selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
-        plan: plan ? { pending: plan.counts.new + plan.counts.changed + (toolSettings.deleteOrphanedFiles ? plan.counts.orphaned : 0), stale: planStale } : null,
+        plan: plan ? { pending: pendingWrites(plan, skipDuplicates) + (toolSettings.deleteOrphanedFiles ? plan.counts.orphaned : 0), stale: planStale } : null,
     });
 
     /** Opens a project from the Project card's recent list; errors show in the page, a cancelled picker does nothing. */
@@ -592,7 +637,9 @@ export default function App() {
 
     return (
         <div className={styles.page}>
-            <Header connection={connection} onOpenSettings={() => setSettingsOpen(true)} />
+            <div ref={headerRef} className={styles.stickyHeader}>
+                <Header connection={connection} onOpenSettings={() => setSettingsOpen(true)} />
+            </div>
             <SettingsPanel
                 open={settingsOpen}
                 onOpenChange={setSettingsOpen}
@@ -710,6 +757,10 @@ export default function App() {
                     lastResult={plan ? lastResult : null}
                     onPreview={() => void runPreview()}
                     deleteOrphans={toolSettings.deleteOrphanedFiles}
+                    skipDuplicates={skipDuplicates}
+                    onSkipDuplicatesChange={(checked) => void changeSkipDuplicates(checked)}
+                    renameDuplicates={toolSettings.renameDuplicateIdentifiers}
+                    onRenameDuplicatesChange={(checked) => void changeRenameDuplicates(checked)}
                     onDeleteOrphansChange={(checked) => void changeDeleteOrphans(checked)}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
@@ -720,7 +771,7 @@ export default function App() {
                 title="Delete orphaned files?"
                 message={plan && <OrphanList plan={plan} />}
                 confirmLabel={
-                    plan && plan.counts.new + plan.counts.changed > 0
+                    plan && pendingWrites(plan, skipDuplicates) > 0
                         ? `Generate and delete ${plan.counts.orphaned}`
                         : `Delete ${plan?.counts.orphaned ?? 0} ${plan?.counts.orphaned === 1 ? 'file' : 'files'}`
                 }
@@ -734,8 +785,8 @@ export default function App() {
             <ConfirmationDialog
                 open={confirmGenerateOpen && !!plan}
                 title="Generate files?"
-                message={plan && <GenerateSummary plan={plan} />}
-                confirmLabel={`Generate ${plan ? plan.counts.new + plan.counts.changed : 0} ${plan && plan.counts.new + plan.counts.changed === 1 ? 'file' : 'files'}`}
+                message={plan && <GenerateSummary plan={plan} skipDuplicates={skipDuplicates} />}
+                confirmLabel={`Generate ${plan ? pendingWrites(plan, skipDuplicates) : 0} ${plan && pendingWrites(plan, skipDuplicates) === 1 ? 'file' : 'files'}`}
                 confirmIcon={<SaveRegular />}
                 onConfirm={() => {
                     setConfirmGenerateOpen(false);
@@ -743,9 +794,17 @@ export default function App() {
                 }}
                 onCancel={() => setConfirmGenerateOpen(false)}
             />
-            <Footer />
+            <div ref={footerRef} className={styles.stickyFooter}>
+                <Footer />
+            </div>
         </div>
     );
+}
+
+/** How many files Generate writes: new and changed, including files with duplicate identifiers unless they're skipped. */
+function pendingWrites(plan: WritePlan, skipDuplicates: boolean): number {
+    const { created, overwritten } = writeCounts(plan, { skipDuplicates });
+    return created + overwritten;
 }
 
 /** How many orphans the confirmation names before summarizing the rest. */
@@ -774,8 +833,9 @@ function OrphanList({ plan }: { plan: WritePlan }) {
 }
 
 /** The "Ask before generating" confirmation's message: where files go, what's created and overwritten, and that it can't be undone. */
-function GenerateSummary({ plan }: { plan: WritePlan }) {
-    const { new: created, changed } = plan.counts;
+function GenerateSummary({ plan, skipDuplicates }: { plan: WritePlan; skipDuplicates: boolean }) {
+    const { created, overwritten: changed } = writeCounts(plan, { skipDuplicates });
+    const duplicates = plan.counts.duplicate;
     const files = (n: number) => `${n} ${n === 1 ? 'file' : 'files'}`;
     return (
         <>
@@ -786,6 +846,12 @@ function GenerateSummary({ plan }: { plan: WritePlan }) {
                 {created > 0 && <li>{files(created)} will be created</li>}
                 {changed > 0 && <li>{files(changed)} will be overwritten</li>}
             </ul>
+            {duplicates > 0 && (
+                <Text block>
+                    {files(duplicates)} {duplicates === 1 ? 'declares' : 'declare'} duplicate identifiers and{' '}
+                    {skipDuplicates ? "won't be written." : "won't compile until the option labels are fixed in Dataverse."}
+                </Text>
+            )}
             <Text block>Overwritten files can't be restored by the tool; use source control to undo changes.</Text>
         </>
     );
