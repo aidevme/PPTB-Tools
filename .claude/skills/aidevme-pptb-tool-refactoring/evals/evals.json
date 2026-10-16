@@ -22,20 +22,21 @@
         "Covers structure, code quality (duplication, complexity, typing gaps, dead code, naming, error handling), dependencies, UI/UX consistency, performance and maintainability, and test coverage, citing file paths",
         "Lists steps with IDs (S1, S2, ...), rationale, expected benefit, files, effort S/M/L and risk Low/Medium/High, in execution order",
         "Gives mitigation and rollback for every Medium or High step and names breaking changes, treating a change to the byte-for-byte dataverse-gen output as breaking",
-        "Asks the user to choose Accept all, Accept selected steps only, Request changes to the plan, or Reject, and doesn't start executing"
+        "Asks the user to choose Accept all, Accept selected steps only, Save as TODO only, or Reject (Request changes through the free-text answer), and doesn't start executing or write a TODO file before the answer"
       ]
     },
     {
       "id": 3,
       "prompt": "Looks good, go ahead with S1 and S3 only.",
-      "expected_output": "Only S1 and S3 are executed, in order, each verified with npm run build and npm test and committed separately; then the report is given and docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md is written without asking.",
+      "expected_output": "Before any code change, docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md is written with the analysis and a TODO checklist; then only S1 and S3 are executed, in order, each verified with npm run build and npm test and committed separately; then the report is given and the same TODO file is updated without asking.",
       "files": [],
       "expectations": [
-        "Checks that the working tree is clean and creates a branch if on main before the first step",
+        "Writes docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md before touching any other file, with the header (tool, date, skill, 'Accepted selected steps: S1, S3', status Planned), a TODO checklist of every step marking S1 and S3 approved, and the full analysis",
+        "Checks that the working tree is clean apart from that TODO file, and creates a branch if on main, before the first step",
         "Executes S1 and S3 only, flagging any dependency on an unselected step before starting",
         "Runs npm run build and npm test in the tool folder after each step and records exit codes and test counts",
-        "Commits each step separately with a Conventional Commits message such as refactor(<tool-name>): ..., and doesn't push",
-        "Writes docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md without asking, with the header (tool, date, skill, 'Accepted selected steps: S1, S3'), the full analysis, the execution report and a Follow-up TODOs checklist listing the skipped steps",
+        "Commits each step separately with a Conventional Commits message such as refactor(<tool-name>): ..., without staging the TODO file, and doesn't push",
+        "Updates the same TODO file without asking: status Executed, S1 and S3 ticked with their commit SHAs, the other steps left open, an Execution report and a Follow-up TODOs checklist",
         "Ends by stating the saved file path"
       ]
     },
@@ -46,7 +47,7 @@
       "files": [],
       "expectations": [
         "Checks whether the target file exists before writing",
-        "Saves the new report as refactoring-dataverse-early-bound-typescript-generator-2026-10-16-02.md (or the next free suffix)",
+        "Saves the new TODO file (in Phase 4, before any change) as refactoring-dataverse-early-bound-typescript-generator-2026-10-16-02.md (or the next free suffix), and later updates only that new file",
         "Leaves the existing file and every other file in docs/todos unchanged"
       ]
     },
@@ -71,6 +72,18 @@
         "Makes no file change and no commit",
         "Doesn't write a refactoring report to docs/todos",
         "Confirms that nothing was changed"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Save it as a TODO, don't change anything yet.",
+      "expected_output": "The proposal is saved as docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md with every step as an open TODO; no other file is changed, nothing is committed, and the skill ends.",
+      "files": [],
+      "expectations": [
+        "Writes only the new TODO file in docs/todos, never overwriting an existing one",
+        "The file has the header with decision 'Saved as TODO only' and status 'Saved as TODO, no changes made', a TODO checklist with every step open, and the full analysis",
+        "Makes no change to tool code, config, docs or other files and makes no commit",
+        "Doesn't start execution, and ends by stating the saved file path and that nothing else changed"
       ]
     }
   ]

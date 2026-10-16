@@ -1,6 +1,9 @@
-# Report and saved file template (Phase 5 and 6)
+# TODO file template (Phases 4, 6 and 7)
 
 <!-- cspell:ignore toplevel -->
+
+Phase 4 creates the file before any change. Phase 7 edits the same file after execution; nothing else in
+`docs/todos/` is touched.
 
 ## File name
 
@@ -16,7 +19,7 @@ while (Test-Path $path) { $path = Join-Path $dir ('{0}-{1:00}.md' -f $base, $n);
 # or New-Item -ItemType File without -Force followed by Set-Content).
 ```
 
-## Content
+## Content written in Phase 4
 
 ```markdown
 # Refactoring: <tool-name> (<YYYY-MM-DD>)
@@ -28,15 +31,33 @@ while (Test-Path $path) { $path = Join-Path $dir ('{0}-{1:00}.md' -f $base, $n);
 | Tool | `tools/<tool-name>` (<displayName>, <version>) |
 | Date | <YYYY-MM-DD> |
 | Skill | `aidevme-pptb-tool-refactoring` |
-| Approval decision | Accepted all / Accepted selected steps: S1, S3 |
-| Proposal version | v<n> |
-| Branch and commits | `<branch>`, <first SHA>..<last SHA> |
+| Decision | Accepted all / Accepted selected steps: S1, S3 / Saved as TODO only |
+| Status | Planned / Saved as TODO, no changes made |
+| Proposal version | v<n>, reviewed at commit <short SHA> on `<branch>` |
+
+## TODO
+
+- [ ] S1: <change> (files: `...`; effort S; risk Low). Approved
+- [ ] S2: <change> (files: `...`; effort M; risk Medium). Not approved
+- [ ] S3: <change> (files: `...`; effort S; risk Low). Approved
 
 ## Analysis
 
 <the full Phase 2 proposal: a) current state, b) refactoring plan, c) risk analysis, d) summary — headings one level
 lower than in the proposal>
+```
 
+After "Save as TODO only", leave every step without an approval note: they're all open work for later.
+
+## Changes made in Phase 7
+
+1. Header: `Status` becomes `Executed` or `Partially executed`; add a row `Branch and commits` with
+   `` `<branch>`, <first SHA>..<last SHA> ``.
+2. `## TODO`: tick completed steps and add the commit, for example `- [x] S1: ... Done in abc1234`; leave skipped and
+   failed steps open with the reason (`Not approved`, `Failed: build error ..., reverted`).
+3. Append at the end:
+
+```markdown
 ## Execution report
 
 ### Steps
@@ -62,10 +83,8 @@ Not verified: <for example live PPTB host, dark theme>
 
 ## Follow-up TODOs
 
-- [ ] S2: <skipped step, why, what it would take>
-- [ ] S3: <failed step, cause, suggested fix>
 - [ ] <recommended next action, for example "Test Generate in PPTB, light and dark theme">
 ```
 
-Every skipped and failed step gets a TODO; recommended next actions follow. If nothing remains, write one item:
-`- [ ] Re-run the analysis after the next feature change`.
+Skipped and failed steps stay open in `## TODO`; `## Follow-up TODOs` holds the other next actions. If nothing
+remains, write one item: `- [ ] Re-run the analysis after the next feature change`.

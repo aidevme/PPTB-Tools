@@ -65,9 +65,11 @@ Breaking changes: <list, or "none">
 Ask with AskUserQuestion, one question per decision:
 
 1. "How do you want to proceed with the <tool-name> proposal?": **Accept all proposed changes**, **Accept selected
-   steps only**, **Request changes to the plan**, **Reject**.
+   steps only**, **Save as TODO only (no changes)**, **Reject**. AskUserQuestion allows four options; "Request
+   changes to the plan" is the free-text "Other" answer, so say so in the question.
 2. For "Accept selected steps only": a multi-select of the step IDs and titles (several questions if more than four
    steps), then name any dependency on an unselected step and ask again if needed.
 3. If an accepted step is breaking, a separate confirmation naming the step and what breaks.
 
-Record the answer verbatim for the saved report: `Accepted all` or `Accepted selected steps: S1, S3`.
+Record the answer verbatim for the TODO file: `Accepted all`, `Accepted selected steps: S1, S3` or
+`Saved as TODO only`.

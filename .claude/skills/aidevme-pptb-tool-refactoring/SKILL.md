@@ -3,15 +3,17 @@ name: aidevme-pptb-tool-refactoring
 layer: orchestration
 scope: project
 description: |
-  Analyze and refactor one or more PPTB tools under tools/ in two stages: a read-only analysis that produces a
-  refactoring proposal (current state, plan, risks, summary), then execution of only the steps the user approves,
-  with a build and test check after each step, a report, and a saved record in docs/todos/. Use when:
+  Analyze and refactor one or more PPTB tools under tools/ in stages: a read-only analysis that produces a
+  refactoring proposal (current state, plan, risks, summary), a TODO file in docs/todos/ written before any change,
+  then execution of only the steps the user approves, with a build and test check after each step and the report
+  added to the same TODO file. The user can also save the plan as a TODO file only, without any code change. Use when:
   (1) User says "refactor <tool>", "analyze <tool> for refactoring", "propose a refactoring plan", "clean up the tools"
   (2) User wants a code-quality, dependency, UI consistency or test-coverage review of a tool that ends in a plan
-  (3) An approved refactoring proposal should be executed step by step
+  (3) User wants a refactoring plan saved as a TODO list to do later
+  (4) An approved refactoring proposal should be executed step by step
   Does NOT modify any file before explicit approval, touch tools the user didn't select, make breaking changes
-  without approval, or overwrite files in docs/todos/. Does NOT do marketplace policy reviews (intake-policy-review)
-  or Verified badge reviews (tool-verification).
+  without approval, or overwrite existing files in docs/todos/. Does NOT do marketplace policy reviews
+  (intake-policy-review) or Verified badge reviews (tool-verification).
 allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion
 argument-hint: "[tool-name ... | all]"
 ---
@@ -20,9 +22,10 @@ argument-hint: "[tool-name ... | all]"
 
 <!-- cspell:ignore lockfiles toplevel -->
 
-Six phases. Phases 1–3 change nothing. Phase 4 runs only after explicit approval. Phase 6 runs automatically after
-Phase 4. Templates: [`references/proposal-template.md`](references/proposal-template.md) (Phase 2 and 3) and
-[`references/report-template.md`](references/report-template.md) (Phase 5 and 6).
+Seven phases. Phases 1–3 change nothing. Phase 4 writes the TODO file and nothing else; it runs after an "accept" or
+"Save as TODO only" answer. Phase 5 runs only after an "accept" answer, and Phases 6 and 7 follow it automatically.
+Templates: [`references/proposal-template.md`](references/proposal-template.md) (Phases 2 and 3) and
+[`references/todo-template.md`](references/todo-template.md) (Phases 4, 6 and 7).
 
 ## Phase 1 — Selection
 
@@ -73,17 +76,40 @@ Present the proposal(s), then ask (AskUserQuestion) for one of:
 
 - **Accept all proposed changes**
 - **Accept selected steps only:** ask which step IDs, per tool; note any step that depends on an unselected one.
-- **Request changes to the plan:** revise, re-present, ask again.
-- **Reject:** end. Nothing is modified and Phase 6 doesn't run.
+- **Save as TODO only (no changes):** Phase 4 writes the TODO file, then the skill ends. No code, config or docs
+  file is changed and nothing is committed.
+- **Reject:** end. Nothing is written, not even a TODO file.
 
-**Never start Phase 4 without one of the two "accept" answers.** Breaking changes need their own explicit approval:
+**Request changes to the plan** comes through the question's free-text "Other" answer: revise, re-present, ask again.
+
+**Never start Phase 5 without one of the two "accept" answers.** Breaking changes need their own explicit approval:
 a step flagged as breaking is only executed if the user accepted it knowing that. Silence, "looks good" about the
-analysis, or approval of a different plan version isn't approval.
+analysis, "Save as TODO only", or approval of a different plan version isn't approval to execute.
 
-## Phase 4 — Execution
+## Phase 4 — TODO file (before any change)
 
-1. **Before the first step:** confirm the working tree is clean (`git status`); if it isn't, stop and ask. If on the
-   default branch (`main`), create a branch first (`refactor/<tool-name>`).
+Runs right after an "accept" or "Save as TODO only" answer, before any other file is touched. It's the only write
+allowed before execution.
+
+1. Folder: `docs/todos/` at the repository root (`git rev-parse --show-toplevel`; here
+   `C:\aidevme\PPTB-Tools\docs\todos`). Create it if it doesn't exist.
+2. One file per selected tool: `refactoring-<tool-name>-<YYYY-MM-DD>.md` (today's date). **Never overwrite an
+   existing file:** if the name exists, use `-02`, `-03`, … (`refactoring-<tool-name>-<YYYY-MM-DD>-02.md`). Check
+   with `Test-Path` before writing, and write with a create-only operation.
+3. Content: [`references/todo-template.md`](references/todo-template.md) with status `Planned` (an "accept" answer)
+   or `Saved as TODO, no changes made` ("Save as TODO only"): header (tool, date, skill, decision, proposal
+   version), the full Phase 2 analysis, and a `## TODO` checklist with one `- [ ]` item per step (ID, change, files,
+   effort, risk), marking which steps were approved.
+4. Validate it with `aidevme-docs-maintenance` (Validate-Markdown on that file); fix markdownlint findings in the
+   file and add one-off words to a `<!-- cspell:ignore … -->` comment after the H1.
+5. Don't modify other files in `docs/todos/` (no index updates) and don't commit the file unless asked.
+6. Tell the user the saved path(s). After "Save as TODO only", end here and say plainly that nothing else changed.
+
+## Phase 5 — Execution
+
+1. **Before the first step:** confirm the working tree is clean (`git status`) apart from the TODO file Phase 4
+   just wrote; if it isn't, stop and ask. If on the default branch (`main`), create a branch first
+   (`refactor/<tool-name>`).
 2. **One tool at a time, one approved step at a time, in the agreed order.** Execute only approved steps; don't widen
    a step's scope or fix unrelated issues you notice (record them as follow-ups).
 3. **After each step, verify** from the tool's folder: `npm run build` and, when defined, `npm test` (also
@@ -93,38 +119,34 @@ analysis, or approval of a different plan version isn't approval.
    forward, revert the step (`git restore` / `git revert` of that step's commit), skip it, or stop.
 5. **Commit each step** after it verifies, in Conventional Commits format (`CONTRIBUTING.md`):
    `refactor(<tool-name>): <subject>` (or `fix`, `test`, `chore(deps)` as fits), body with the step ID and the
-   verification result. The user's approval of the plan is the approval for these commits; don't push.
+   verification result. Stage only the step's files, never the TODO file. The user's approval of the plan is the
+   approval for these commits; don't push.
 6. **Docs move with code:** update the tool's README, docs pages and TSDoc in the same step when behavior or
    structure they describe changes. Run `aidevme-docs-maintenance` (Validate-Markdown) on changed Markdown.
 
-## Phase 5 — Report
+## Phase 6 — Report
 
 Per tool: steps completed, skipped and failed (with reasons), files changed (`git diff --stat` over the steps'
 commits), verification results per step, commit SHAs, and recommended follow-ups. Say plainly what wasn't verified,
 for example behavior that needs a live PPTB host or the dark theme.
 
-## Phase 6 — Documentation (automatic)
+## Phase 7 — Update the TODO file (automatic)
 
-Runs right after Phase 5 when at least one step was approved, without asking.
+Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wrote in this run:
 
-1. Folder: `docs/todos/` at the repository root (`git rev-parse --show-toplevel`; here
-   `C:\aidevme\PPTB-Tools\docs\todos`). Create it if it doesn't exist.
-2. One file per tool that went through Phase 4: `refactoring-<tool-name>-<YYYY-MM-DD>.md` (today's date).
-   **Never overwrite:** if the name exists, use `-02`, `-03`, … (`refactoring-<tool-name>-<YYYY-MM-DD>-02.md`). Check
-   with `Test-Path` before writing, and write with a create-only operation.
-3. Content: [`references/report-template.md`](references/report-template.md): header (tool, date, skill, approval
-   decision), the full Phase 2 analysis, the Phase 5 report, and a `## Follow-up TODOs` checklist (`- [ ] …`) covering
-   skipped steps, failed steps and recommended next actions.
-4. Validate it with `aidevme-docs-maintenance` (Validate-Markdown on that file); fix markdownlint findings in the
-   file and add one-off words to a `<!-- cspell:ignore … -->` comment after the H1.
-5. Don't modify other files in `docs/todos/` (no index updates) and don't commit the report unless asked.
-6. End by listing the saved file path(s).
+1. Set the status to `Executed` (or `Partially executed` when a step failed or was stopped) and add the branch and
+   commit range.
+2. Tick the completed steps (`- [x]`, with the commit SHA); leave skipped and failed steps open with the reason.
+3. Append the Phase 5 report as `## Execution report`, then a `## Follow-up TODOs` checklist (`- [ ] …`) with the
+   recommended next actions.
+4. Re-run Validate-Markdown on the file, don't commit it unless asked, and end by listing the saved file path(s).
 
 ## Rules
 
-- **Read-only until approved.** Phases 1–3 modify nothing.
+- **Read-only until approved.** Phases 1–3 modify nothing; Phase 4 writes only the new TODO file.
 - **Only selected tools, only approved steps.** Preserve behavior and public interfaces unless a breaking change was
   explicitly approved.
+- **Never overwrite an existing file in `docs/todos/`.** Only the file created in this run may be edited later.
 - **Stop on surprises** and ask; no workaround scripts.
 - **Report what actually ran.** Quote exit codes and test counts; never call a check passed that wasn't run.
 
@@ -133,3 +155,4 @@ Runs right after Phase 5 when at least one step was approved, without asking.
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-16 | aidevme | Created: selection, read-only analysis, approval gate, verified step-by-step execution, report, and the automatic `docs/todos/` record. |
+| 2026-10-16 | aidevme | The TODO file is written before any change; new "Save as TODO only" answer; the execution report updates the same file. |
