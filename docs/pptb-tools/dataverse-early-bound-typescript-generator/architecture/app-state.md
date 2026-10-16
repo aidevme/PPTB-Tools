@@ -13,7 +13,7 @@
 | `selectedSolutionId`, `solutionEntityIds`, `solutionComponentIds` | The solution filter and the ids in that solution. Results are cached per solution in refs. |
 | `plan`, `planStale` | The last preview, and whether the selection or options changed since. |
 | `previewedAt`, `lastResult` | When the plan was computed, and the summary of the last Generate run, for the Preview card. Set by `runPreview` and `runGenerate`. |
-| `progress`, `error`, `notice` | The progress bar and the error and success message bars. |
+| `progress`, `error` | The progress bar and the error message bar. |
 | `steps` (derived, not state) | `computeWorkflowSteps` from the open project, the selection count and the plan; passed to `WorkflowProgress` and each card. |
 | `settingsOpen` | Whether the [SettingsPanel](../components/settings-panel.md) drawer is open. |
 | `toolSettings` | Tool config: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves on load. `saveToolSettings` and `addProject` save and update it. |

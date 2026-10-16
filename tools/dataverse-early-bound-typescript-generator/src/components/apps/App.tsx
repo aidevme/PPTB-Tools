@@ -42,8 +42,6 @@ import type { EntitySummary, OperationSummary, Progress, SolutionSummary, WriteP
 /** How long the "$metadata is too large" warning stays visible. */
 const METADATA_FALLBACK_WARNING_MS = 5000;
 
-const EMPTY_SELECTION: Record<SelectionKind, string[]> = { entities: [], actions: [], functions: [] };
-
 /**
  * Top-level state and orchestration. Holds the project folder and its `.dataverse-gen.json`, the
  * environment's table / operation / solution lists, and the current write plan; the cards below are
@@ -97,7 +95,6 @@ export default function App() {
     const [planStale, setPlanStale] = useState(false);
     const [progress, setProgress] = useState<Progress | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [notice, setNotice] = useState<string | null>(null);
     const solutionCache = useRef(new Map<string, Set<string>>());
     /** Component ids (custom APIs, process actions) of the selected solution; `null` when not filtering. */
     const [solutionComponentIds, setSolutionComponentIds] = useState<Set<string> | null>(null);
@@ -139,7 +136,6 @@ export default function App() {
     const loadProject = useCallback(
         async (folder: string) => {
             setError(null);
-            setNotice(null);
             try {
                 await openProjectFolder(folder);
             } catch (e) {
@@ -159,7 +155,6 @@ export default function App() {
         async (project: ProjectOpenTarget) => {
             if (!window.toolboxAPI) throw new Error('Projects can only be opened inside Power Platform ToolBox.');
             setError(null);
-            setNotice(null);
             try {
                 // Listing the folder fails outright without access; a missing .dataverse-gen.json alone would
                 // otherwise just look like a new project.
@@ -382,7 +377,6 @@ export default function App() {
     const updateConfig = useCallback((update: Partial<DataverseGenConfig>) => {
         setConfigState((state) => ({ ...state, config: { ...state.config, ...update } }));
         setPlanStale(true);
-        setNotice(null);
     }, []);
 
     /**
@@ -427,7 +421,6 @@ export default function App() {
     const runPreview = useCallback(async (): Promise<WritePlan | null> => {
         if (!projectRoot) return null;
         setError(null);
-        setNotice(null);
         try {
             const resolved = resolveConfig(config);
             setProgress({ message: 'Loading the $metadata document…', completed: 0, total: 1 });
@@ -559,7 +552,7 @@ export default function App() {
                 setProgress(null);
             }
         },
-        [projectRoot, config, sink, recordProjectGeneration, toolSettings.general.showGenerationCompleteNotification],
+        [projectRoot, config, sink, recordProjectGeneration, toolSettings.skipDuplicateIdentifiers, toolSettings.general.showGenerationCompleteNotification],
     );
 
     /**
@@ -605,7 +598,7 @@ export default function App() {
     const skipDuplicates = toolSettings.skipDuplicateIdentifiers;
 
     const selected = useMemo<Record<SelectionKind, string[]>>(
-        () => (config ? { entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] } : EMPTY_SELECTION),
+        () => ({ entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] }),
         [config],
     );
     const missing = useMemo<Record<SelectionKind, string[]>>(() => {
@@ -623,7 +616,6 @@ export default function App() {
     /** Lists can be browsed and selected once connected; preview and generate also need a project folder. */
     const connected = inPptb && !!connection;
     const canSelect = connected && hasProject;
-    const ready = canSelect;
     const steps = computeWorkflowSteps({
         hasProject: !!projectRoot,
         selectedCount: selected.entities.length + selected.actions.length + selected.functions.length,
@@ -695,11 +687,6 @@ export default function App() {
                         </MessageBarBody>
                     </MessageBar>
                 )}
-                {notice && (
-                    <MessageBar intent="success">
-                        <MessageBarBody>{notice}</MessageBarBody>
-                    </MessageBar>
-                )}
                 {progress && (
                     <div className={styles.progress}>
                         <Text size={200}>{progress.message}</Text>
@@ -750,7 +737,7 @@ export default function App() {
                     step={steps[3]}
                     plan={plan}
                     stale={planStale}
-                    canPreview={ready && hasSelection}
+                    canPreview={canSelect && hasSelection}
                     needsProject={connected && !projectRoot}
                     busy={busy}
                     previewedAt={plan ? previewedAt : null}
