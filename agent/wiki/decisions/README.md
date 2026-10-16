@@ -11,4 +11,4 @@ updated: 2026-09-10
 
 Immutable, numbered `NNNN-title.md` decision history. Context / Options / Decision / Consequences. A
 superseded decision flips `status: superseded` and points forward via `supersedes:`; never rewrite a
-past decision. Scaffold new ones with `hso-wiki-write-decision`.
+past decision. Scaffold new ones with `aidevme-wiki-write-decision`.

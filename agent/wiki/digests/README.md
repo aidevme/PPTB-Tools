@@ -11,4 +11,4 @@ updated: 2026-09-10
 
 One digest per ingested source. Each MUST cite its source(s) in `sources:` pointing to `raw/`. A
 digest inherits the **fidelity ceiling** of its source — no verbatim quotes from a `summary-only`
-capture. Written by the ingest skills; scaffolded by `hso-wiki-process-inbox`.
+capture. Written by the ingest skills; scaffolded by `aidevme-wiki-process-inbox`.

@@ -1,0 +1,63 @@
+{
+  "skill_name": "aidevme-diagram-drawio",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Draw an ERD of the Account, Contact and Case tables for the analysis document and render it so I can embed it.",
+      "expected_output": "An HSO-branded .drawio ERD built from the erd.drawio template and rendered to SVG, verified visually, with both source and SVG kept.",
+      "files": [],
+      "expectations": [
+        "Copies templates/erd.drawio into the working directory instead of editing the template in place",
+        "Renders with scripts/Render-DrawioDiagram.ps1 -InputPath <file>.drawio -Format svg",
+        "Rasterizes or views the rendered output to check for edges crossing labels before embedding (mandatory verify step)",
+        "Embeds with a markdown image reference and commits both the .drawio source and the .svg"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Make an architecture diagram with five layers and connect every box to the ones it talks to, including some in the same layer and a few skipping a layer.",
+      "expected_output": "Applies the edge routing rules: only vertical edges between adjacent layers with pinned anchors, and pushes back on same-layer and skip-layer arrows.",
+      "files": [],
+      "expectations": [
+        "States the orthogonal router does not avoid intermediate shapes so edges can render over boxes",
+        "Draws edges only between vertically aligned boxes in adjacent layers and pins exitX/exitY and entryX/entryY anchors",
+        "Conveys same-layer relationships through grouping, colour or a legend note rather than arrows",
+        "Suggests splitting into multiple diagrams or repositioning for skip-layer relationships"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Style the diagram with our own purple and orange colour scheme, it looks nicer.",
+      "expected_output": "Refuses colours outside the HSO palette.",
+      "files": [],
+      "expectations": [
+        "States all diagrams must use the HSO canonical palette (#00395F primary, #079FC3 accent, #00B294 success, #F1554B warning, #F2B949 caution, #ECEFF3 backdrop)",
+        "Does not introduce colours outside that palette",
+        "Points to references/hso-drawio-styles.md for the style= strings"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Quick napkin sketch of our workshop ideas for the whiteboard session, hand-drawn look please.",
+      "expected_output": "Routes to the Excalidraw skill since the request is a sketch.",
+      "files": [],
+      "expectations": [
+        "Recognises a workshop or napkin sketch belongs to hso-diagram-excalidraw",
+        "Applies the rule of thumb formal goes to drawio and sketchy goes to excalidraw",
+        "Does not author a drawio file for this request"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I ran Render-DrawioDiagram.ps1 and it said success but there is no SVG file anywhere.",
+      "expected_output": "Diagnoses the silent draw.io desktop CLI failure on headless Windows and applies the GraphViewer fallback with its gotchas.",
+      "files": [],
+      "expectations": [
+        "Explains the draw.io desktop export can fail silently with exit code 0 and no file on managed or headless Windows",
+        "Proposes rendering the XML with the draw.io GraphViewer in headless Chromium via Playwright and calling GraphViewer.processElements()",
+        "Warns that soft line breaks must be replaced with a space rather than br tags, or the graph is truncated",
+        "Notes GraphViewer SVGs use foreignObject and must be inlined in reveal.js slides rather than referenced via img src"
+      ]
+    }
+  ]
+}
