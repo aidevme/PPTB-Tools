@@ -1,6 +1,6 @@
 # FileViewer
 
-The right side of the [PreviewCard](./preview-card.md). It shows the selected file: what Generate would
+The right side of the [PreviewCard](../cards/preview-card.md). It shows the selected file: what Generate would
 change for a changed file, or the generated content otherwise.
 
 Sources:

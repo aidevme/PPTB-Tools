@@ -1,7 +1,7 @@
 # PreviewCard
 
 Steps 4 and 5 of the workflow: preview what Generate would do, then write the files. Status tiles summarize
-and filter the files, and the table lists them beside a [FileViewer](./file-viewer.md) that shows each
+and filter the files, and the table lists them beside a [FileViewer](../viewers/file-viewer.md) that shows each
 file's content or changes.
 
 Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx)
@@ -10,7 +10,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
+| `step` | `StepState` | This step's state for the [StepCard](../shared/step-card.md) header. |
 | `plan` | `WritePlan \| null` | The last preview: every file with its status and content. `null` before the first preview. |
 | `stale` | `boolean` | The selection or options changed since the plan was computed. |
 | `canPreview` | `boolean` | Enables the Preview buttons. |
@@ -43,7 +43,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Delete orphaned files** (`Switch`), right after Generate. Its label is an info label (ⓘ, the shared `infoLabel`
   helper) with the same explanation as the Settings panel (`DELETE_ORPHANS_INFO` in
   `components/shared/settingsInfo.tsx`). It reads and saves
-  the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](./settings-panel.md) switch, so they stay
+  the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](../panels/settings-panel.md) switch, so they stay
   in sync. It's disabled until a preview exists, since only a preview tells which files are orphaned; its
   info label then adds "Available after Preview". It also stays disabled while the last preview found no
   orphaned files, and the info label says so. When on:
@@ -51,7 +51,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
     description changes.
   - Generate is enabled even when only deletions are pending, and reads **Delete N orphaned files** in that
     case. The workflow step counts orphans as pending.
-  - Clicking Generate with orphans present opens a [ConfirmationDialog](./confirmation-dialog.md), "Delete
+  - Clicking Generate with orphans present opens a [ConfirmationDialog](../dialogs/confirmation-dialog.md), "Delete
     orphaned files?". It lists up to 10 orphan paths (then "…and N more") and the output folder, and warns
     that deletion is permanent, not to the Recycle Bin or Trash. Its confirm button reads **Generate and
     delete N** or **Delete N files**.
@@ -60,7 +60,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
     lists them (notification and page error bar); if the terminal fails entirely, "Could not delete the
     orphaned files". The writes still count as done, and the Orphaned tile shows what's left.
   - Without orphans to delete, when the **Ask before generating** setting (`confirmBeforeGenerate`) is on and
-    at least one file is new or changed, Generate opens a [ConfirmationDialog](./confirmation-dialog.md),
+    at least one file is new or changed, Generate opens a [ConfirmationDialog](../dialogs/confirmation-dialog.md),
     "Generate files?". It shows the output folder, how many files will be created and overwritten, and that
     source control is the way to undo. Its confirm button reads **Generate N files**. The delete confirmation
     above covers the writes too, so only one dialog appears.
@@ -104,7 +104,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
   table suggests turning on **Show unchanged**. The switch has an info label (ⓘ) explaining what the default list
   hides, that it only changes the list (it isn't saved and doesn't affect Generate), and that it's disabled while a
   status tile filters the list or a search is active.
-- **Search:** a [FileSearchBox](./file-search-box.md) (a Fluent UI `SearchBox`, placeholder "Search files"). From three characters, the
+- **Search:** a [FileSearchBox](../shared/file-search-box.md) (a Fluent UI `SearchBox`, placeholder "Search files"). From three characters, the
   table lists only the files whose name, or path, starts with the typed text, ignoring case; fewer characters
   don't filter (`isSearchActive` and `matchesSearch` in `components/shared/previewFiles.tsx`). While searching,
   unchanged files are included, so a search finds every file; a selected status tile still narrows the results,
@@ -128,7 +128,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 
 ## Layout
 
-The table and the [FileViewer](./file-viewer.md) sit side by side in matching rounded panels. The divider
+The table and the [FileViewer](../viewers/file-viewer.md) sit side by side in matching rounded panels. The divider
 between them can be dragged to resize the table, or focused and moved with **←** and **→** (32 px a step).
 The table is at least 280 px wide and the viewer at least 320 px. It's a `separator` with its current width
 in `aria-valuenow`.

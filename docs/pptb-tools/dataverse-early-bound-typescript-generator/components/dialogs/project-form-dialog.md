@@ -1,7 +1,7 @@
 # ProjectFormDialog
 
 A modal dialog for creating a new project. It opens from the **New Project** button on the
-[ProjectCard](./project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s **Edit** button reuses it,
+[ProjectCard](../cards/project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s **Edit** button reuses it,
 titled **Edit project**, to edit a saved project.
 
 Source: [`src/components/dialogs/ProjectFormDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx);
@@ -53,7 +53,7 @@ added, or a previously generated file is no longer produced (an orphan), the ver
 - **Cancel**, the Escape key, or a click outside the dialog closes it without saving.
 - **Where projects are saved:** `App.tsx` appends the project to `projects` in the tool config and saves it in
   PPTB's per-tool settings (`toolboxAPI.settings`, key `toolConfig`), the same place as the
-  [SettingsPanel](./settings-panel.md) values. `projects` defaults to `[]` in
+  [SettingsPanel](../panels/settings-panel.md) values. `projects` defaults to `[]` in
   `src/config/dataverse-early-bound-typescript-generator-config.json`. The tool can't write that file at
   runtime.
 - Creating a project doesn't open it or create any files yet.

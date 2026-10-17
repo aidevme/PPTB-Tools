@@ -9,7 +9,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
+| `step` | `StepState` | This step's state for the [StepCard](../shared/step-card.md) header. |
 | `entities` | `EntitySummary[]` | Tables in the connected environment. |
 | `operations` | `OperationSummary[] \| null` | Actions and functions; `null` until the `$metadata` document has been loaded. |
 | `solutions` | `SolutionSummary[]` | Solutions offered in the solution filter. |

@@ -1,8 +1,8 @@
 # StepCard
 
-The frame shared by the four workflow cards ([ProjectCard](./project-card.md),
-[SelectionCard](./selection-card.md), [OptionsCard](./options-card.md) and
-[PreviewCard](./preview-card.md)). It gives every step the same header and highlights the step to work on
+The frame shared by the four workflow cards ([ProjectCard](../cards/project-card.md),
+[SelectionCard](../cards/selection-card.md), [OptionsCard](../cards/options-card.md) and
+[PreviewCard](../cards/preview-card.md)). It gives every step the same header and highlights the step to work on
 next.
 
 Source: [`src/components/shared/StepCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/StepCard.tsx)

@@ -1,6 +1,6 @@
 # FileSearchBox
 
-The search box above the [PreviewCard](./preview-card.md)'s file table. It's a Fluent UI `SearchBox` with the
+The search box above the [PreviewCard](../cards/preview-card.md)'s file table. It's a Fluent UI `SearchBox` with the
 placeholder "Search files", the clear button `SearchBox` brings, and a minimum width that fits a file
 name.
 

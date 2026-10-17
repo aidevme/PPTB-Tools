@@ -10,7 +10,7 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
 | Prop | Type | Description |
 | --- | --- | --- |
 | `connection` | `ToolBoxAPI.Connection \| null` | Active PPTB connection, or `null` when there's none. |
-| `onOpenSettings` | `() => void` | Opens the [SettingsPanel](./settings-panel.md). |
+| `onOpenSettings` | `() => void` | Opens the [SettingsPanel](../panels/settings-panel.md). |
 
 ## Behavior
 
@@ -30,7 +30,7 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
 - **Settings** is an icon button with a tooltip. It's always enabled, even without a connection.
 
 There's no Regenerate button any more. Use **Preview** and then **Generate** on the
-[PreviewCard](./preview-card.md).
+[PreviewCard](../cards/preview-card.md).
 
 Styles are in `src/styles/Header.styles.ts`. All colors come from Fluent theme tokens, so the header follows
 PPTB's light and dark themes.

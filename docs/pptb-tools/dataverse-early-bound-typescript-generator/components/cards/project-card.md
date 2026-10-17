@@ -9,14 +9,14 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `step` | `StepState` | This step's state for the [StepCard](./step-card.md) header. |
+| `step` | `StepState` | This step's state for the [StepCard](../shared/step-card.md) header. |
 | `projectRoot` | `string \| null` | The open project folder. |
 | `rememberedFolder` | `string \| null` | Folder used last time with this connection; offered first among the recent projects. |
 | `configState` | `ProjectConfigState \| null` | The loaded `.dataverse-gen.json`, its path, and whether it exists. |
 | `projects` | `ProjectEntry[]` | Saved projects: the open project's name and version, and the recent projects. |
 | `busy` | `boolean` | Disables every action while another operation runs. |
-| `onNewProject` | `() => void` | Opens the [ProjectFormDialog](./new-project-dialog.md). |
-| `onLoadExistingProject` | `() => void` | Opens the [LoadProjectDialog](./load-project-dialog.md). |
+| `onNewProject` | `() => void` | Opens the [ProjectFormDialog](../dialogs/project-form-dialog.md). |
+| `onLoadExistingProject` | `() => void` | Opens the [LoadProjectDialog](../dialogs/load-project-dialog.md). |
 | `onOpenRecent` | `(target: ProjectOpenTarget) => void` | Opens a recent project directly. `ProjectOpenTarget` is `{ name, location }`. |
 | `onReload` | `() => void` | Re-reads `.dataverse-gen.json` from disk. |
 | `outputFolder` | `string \| null` | Absolute output folder (`output.outputRoot` resolved against the project). |

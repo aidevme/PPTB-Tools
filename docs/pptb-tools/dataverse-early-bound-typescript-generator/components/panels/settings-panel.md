@@ -3,7 +3,7 @@
 <!-- cspell:ignore complextype -->
 
 Tool settings, shown in a Fluent UI `OverlayDrawer` that slides in from the right edge. It opens from the
-Settings button in the [Header](./header.md).
+Settings button in the [Header](../layout/header.md).
 
 Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx)
 (the panel and the list of settings) and
@@ -50,8 +50,8 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
 | Tab | Section (scope badges) | Setting | Control | Key |
 | --- | --- | --- | --- | --- |
 | General | Notifications (This PPTB installation) | Project loaded, Preview ready, Generation complete | Switch each, on by default | `general.showProjectLoadedNotification`, `general.showPreviewReadyNotification`, `general.showGenerationCompleteNotification` |
-| General | Lists & startup (This PPTB installation) | Recent projects | `SpinButton` 0–10 with a "projects" unit; 0 hides the list on the [ProjectCard](./project-card.md) | `general.recentProjectCount` |
-| General | Lists & startup | Rows in the Select tables | `SpinButton` 100–2000, step 100, with a "rows" unit; the row limit of the [SelectionCard](./selection-card.md) | `general.selectionRowLimit` |
+| General | Lists & startup (This PPTB installation) | Recent projects | `SpinButton` 0–10 with a "projects" unit; 0 hides the list on the [ProjectCard](../cards/project-card.md) | `general.recentProjectCount` |
+| General | Lists & startup | Rows in the Select tables | `SpinButton` 100–2000, step 100, with a "rows" unit; the row limit of the [SelectionCard](../cards/selection-card.md) | `general.selectionRowLimit` |
 | Options | Output (Default for every project, .dataverse-gen.json) | Output folder | Text box | `projectDefaults.outputRoot` |
 | Options | Generated files (same badges) | Early-bound entity interfaces, Form context helpers, index.ts barrel file | Switch each | `projectDefaults.generateEntityTypes`, `generateFormContext`, `generateIndex` |
 | Generate & files | Before generating (All projects) | Ask before generating | Switch, off by default | `confirmBeforeGenerate` |
@@ -63,7 +63,7 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
 - **Numbers:** out-of-range or fractional values are rounded and clamped to the range when saved
   (`mergeToolConfig`).
 - **Options:** applied whenever a project is opened, also over the values in its `.dataverse-gen.json`, and to the
-  open project when different ones are saved. The [OptionsCard](./options-card.md) can still change them for a
+  open project when different ones are saved. The [OptionsCard](../cards/options-card.md) can still change them for a
   project; Generate saves them to its `.dataverse-gen.json`. A blank output folder saves as the default
   (`./src/dataverse-gen`).
 - **Output preview:** under the Generated files card, `OutputPreview` shows the folder tree a project with these
@@ -79,7 +79,7 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
 - **Delete orphaned files:** its card has a red accent stripe and a red **Permanent** badge, and while the switch is
   on, a warning says files are deleted permanently, not moved to the Recycle Bin or Trash. When on, Generate
   deletes orphaned files after you confirm the list; when off, they're only reported. It's the same setting as the
-  **Delete orphaned files** switch in the [PreviewCard](./preview-card.md), so the two stay in sync. Skip
+  **Delete orphaned files** switch in the [PreviewCard](../cards/preview-card.md), so the two stay in sync. Skip
   Duplicated Identifier(s) is likewise the same setting as the Preview card's **Skip duplicated identifier(s)** switch.
 
 ## Templates tab
@@ -92,7 +92,7 @@ as in the header, and **Read-only**), with no settings. `TemplatesViewer` in `Se
   change its output;
 - a tab per template (`action.ejs`, `complextype.ejs`, `entity.ejs`, `enum.ejs`, `function.ejs`, `index.ejs`,
   `metadata.ejs`), with the path and line count;
-- the selected template, read-only, in a [CodeViewer](./code-viewer.md) with line numbers and TypeScript highlighting,
+- the selected template, read-only, in a [CodeViewer](../viewers/code-viewer.md) with line numbers and TypeScript highlighting,
   scrolling inside a 420px box.
 
 The content comes from `DATAVERSE_GEN_TEMPLATES` in `services/dataverseGenTemplates.ts`, so it's exactly what
