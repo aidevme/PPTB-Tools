@@ -112,6 +112,16 @@ export default defineConfig({
                                     ],
                                 },
                                 {
+                                    text: "Tables",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "FileTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/file-table" },
+                                        { text: "ProjectsTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/projects-table" },
+                                        { text: "SelectionTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/selection-table" },
+                                        { text: "SortableHeaderCell", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/sortable-header-cell" },
+                                    ],
+                                },
+                                {
                                     text: "Viewers",
                                     collapsed: true,
                                     items: [
