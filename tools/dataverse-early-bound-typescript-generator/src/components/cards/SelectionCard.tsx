@@ -19,19 +19,15 @@ import type { EntitySummary, OperationSummary, SolutionSummary } from '../../typ
 import { useSelectionCardStyles } from '../../styles';
 import { nextSort, sortSelectionRows, type SortState } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
-import { SelectionTable, type SelectionRow } from '../tables/SelectionTable';
-import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from '../tables/selectionColumns';
+import { SelectionTable } from '../tables/SelectionTable';
+import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS } from '../tables/selectionColumns';
+import { buildEntityRows, buildOperationRows } from './selectionRows';
 import type { StepState } from '../shared/workflowSteps';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
-
-function operationType(o: OperationSummary): string {
-    if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
-    return o.isProcessAction ? 'Custom action' : 'Built-in';
-}
 
 export interface SelectionCardProps {
     step: StepState;
@@ -81,85 +77,25 @@ export function SelectionCard(props: SelectionCardProps) {
     const selectedSet = useMemo(() => new Set(props.selected[tab]), [props.selected, tab]);
     const term = search.trim().toLowerCase();
 
-    const rows = useMemo(() => {
-        const matches = (...values: Array<string | undefined>) => !term || values.some((v) => v?.toLowerCase().includes(term));
-        if (tab === 'entities') {
-            return props.entities
-                .filter((e) => !props.solutionEntityIds || props.solutionEntityIds.has(e.metadataId.toLowerCase()))
-                .filter((e) => !selectedOnly || selectedSet.has(e.logicalName))
-                .filter((e) => matches(e.logicalName, e.displayName, e.schemaName))
-                .map(
-                    (e): SelectionRow => ({
-                        key: e.logicalName,
-                        label: e.displayName,
-                        cells: [
-                            e.displayName,
-                            <span className={styles.mono}>{e.logicalName}</span>,
-                            <span className={styles.mono}>{e.schemaName}</span>,
-                            e.description ? (
-                                <Tooltip content={e.description} relationship="description" withArrow>
-                                    <span>{e.description}</span>
-                                </Tooltip>
-                            ) : (
-                                <span className={styles.muted}>—</span>
-                            ),
-                            <Badge appearance="outline" size="small" color={TABLE_TYPE_COLORS[e.tableType]}>
-                                {e.tableType}
-                            </Badge>,
-                        ],
-                        sortValues: [e.displayName, e.logicalName, e.schemaName, e.description || undefined, e.tableType],
-                    }),
-                );
-        }
-        const kind = tab === 'actions' ? 'action' : 'function';
-        return (props.operations ?? [])
-            .filter((o) => o.kind === kind)
-            .filter((o) => !customApisOnly || o.isCustomApi || o.isProcessAction)
-            .filter((o) => !props.selectedSolutionId || (!!props.solutionComponentIds && !!o.componentId && props.solutionComponentIds.has(o.componentId.toLowerCase())))
-            .filter((o) => !selectedOnly || selectedSet.has(o.name))
-            .filter((o) => matches(o.name, o.boundTo, o.displayName))
-            // Custom APIs first, then case-insensitive by name (a plain sort puts lowercase publisher
-            // prefixes after hundreds of built-in PascalCase messages, past the row limit).
-            .sort((a, b) => Number(b.isCustomApi || b.isProcessAction) - Number(a.isCustomApi || a.isProcessAction) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
-            .map((o): SelectionRow => {
-                const hasDisplayName = !!o.displayName && o.displayName !== o.name;
-                return {
-                    key: o.name,
-                    label: o.name,
-                    cells: [
-                        hasDisplayName ? (
-                            <span className={styles.stacked}>
-                                <span>{o.displayName}</span>
-                                <span className={styles.secondary}>{o.name}</span>
-                            </span>
-                        ) : (
-                            o.name
-                        ),
-                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
-                        o.inMetadata ? (
-                            String(o.parameterCount)
-                        ) : (
-                            <Tooltip content="Not in $metadata; types are built from the custom API definition" relationship="description" withArrow>
-                                <span className={styles.secondary}>From definition</span>
-                            </Tooltip>
-                        ),
-                        o.isCustomApi || o.isProcessAction ? (
-                            <Badge appearance="outline" size="small">
-                                {operationType(o)}
-                            </Badge>
-                        ) : (
-                            operationType(o)
-                        ),
-                    ],
-                    sortValues: [
-                        hasDisplayName ? o.displayName : o.name,
-                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
-                        o.inMetadata ? o.parameterCount : undefined,
-                        operationType(o),
-                    ],
-                };
-            });
-    }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles]);
+    const rows = useMemo(
+        () =>
+            tab === 'entities'
+                ? buildEntityRows(props.entities, { term, selectedOnly, selectedSet, solutionEntityIds: props.solutionEntityIds }, styles)
+                : buildOperationRows(
+                      props.operations,
+                      {
+                          kind: tab === 'actions' ? 'action' : 'function',
+                          term,
+                          selectedOnly,
+                          selectedSet,
+                          customApisOnly,
+                          selectedSolutionId: props.selectedSolutionId,
+                          solutionComponentIds: props.solutionComponentIds,
+                      },
+                      styles,
+                  ),
+        [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles],
+    );
 
     const onTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
         const next = data.value as SelectionKind;
