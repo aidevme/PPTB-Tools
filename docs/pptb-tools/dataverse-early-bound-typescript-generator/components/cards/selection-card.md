@@ -34,7 +34,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 ## Behavior
 
 - **Tabs:** Tables, Actions and Functions, each with an icon and a tooltip describing what it lists.
-- **Filters:** a search box, a solution dropdown, **Selected only**, and on the Actions and Functions tabs
+- **Filters:** a search box, a solution dropdown (named "Filter by solution" for screen readers), **Selected only**, and on the Actions and Functions tabs
   **Custom only** (custom APIs and custom process actions).
 - **Sorting:** actions and functions list custom APIs first, then sort by name ignoring case.
 - **Row limit:** the list shows at most `rowLimit` rows (500 by default); the footer says "Showing the first

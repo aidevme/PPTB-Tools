@@ -149,6 +149,7 @@ export function SelectionCard(props: SelectionCardProps) {
                         onChange={(_, data) => setSearch(data.value)}
                     />
                     <Dropdown
+                        aria-label="Filter by solution"
                         placeholder="All solutions"
                         clearable
                         selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}

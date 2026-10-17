@@ -130,6 +130,7 @@ describe('selection tables', () => {
 
     it('enables the controls once a project is open', async () => {
         await render();
+        expect(document.querySelector('[role="combobox"]')?.getAttribute('aria-label')).toBe('Filter by solution');
         for (const t of Array.from(document.querySelectorAll('[role="tab"]'))) expect((t as HTMLButtonElement).disabled).toBe(false);
         expect((document.querySelector('input[type="search"]') as HTMLInputElement).disabled).toBe(false);
         for (const input of Array.from(document.querySelectorAll('input[role="switch"]'))) expect((input as HTMLInputElement).disabled).toBe(false);

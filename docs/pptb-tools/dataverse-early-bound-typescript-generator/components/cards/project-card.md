@@ -29,7 +29,8 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
   actions. **Load Existing Project** is the primary button and **New Project** the secondary one. There's no
   Reload button until a project is open.
 - **Recent projects:** up to three by default (`recentProjectCount`), as clickable tiles with an icon, the name and a second line. The full
-  path shows in a tooltip, and clicking a tile opens that project directly.
+  path shows in a tooltip, and clicking a tile opens that project directly. Each tile is a button named
+  "Open *name* (*second line*)", with Fluent UI's focus ring (`colorStrokeFocus2`) when reached with the keyboard.
 
 ## Project open
 
