@@ -227,12 +227,14 @@ export default function App() {
                     previewedAt={plan ? previewedAt : null}
                     lastResult={plan ? lastResult : null}
                     onPreview={() => void runPreview()}
-                    deleteOrphans={toolSettings.deleteOrphanedFiles}
-                    skipDuplicates={skipDuplicates}
-                    onSkipDuplicatesChange={(checked) => void changeSetting('skipDuplicateIdentifiers', checked)}
-                    renameDuplicates={toolSettings.renameDuplicateIdentifiers}
-                    onRenameDuplicatesChange={(checked) => void changeSetting('renameDuplicateIdentifiers', checked)}
-                    onDeleteOrphansChange={(checked) => void changeSetting('deleteOrphanedFiles', checked)}
+                    generateOptions={{
+                        deleteOrphans: toolSettings.deleteOrphanedFiles,
+                        onDeleteOrphansChange: (checked) => void changeSetting('deleteOrphanedFiles', checked),
+                        skipDuplicates,
+                        onSkipDuplicatesChange: (checked) => void changeSetting('skipDuplicateIdentifiers', checked),
+                        renameDuplicates: toolSettings.renameDuplicateIdentifiers,
+                        onRenameDuplicatesChange: (checked) => void changeSetting('renameDuplicateIdentifiers', checked),
+                    }}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
                 />

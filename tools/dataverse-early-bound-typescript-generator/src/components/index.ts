@@ -34,7 +34,7 @@ export type { IProjectFormDialogProps, INewProjectDialogProps, NewProject } from
 export { OptionsCard } from './cards/OptionsCard';
 export type { IOptionsCardProps, OptionsCardProps } from './cards/OptionsCard';
 export { PreviewCard } from './cards/PreviewCard';
-export type { IPreviewCardProps, PreviewCardProps } from './cards/PreviewCard';
+export type { IPreviewCardProps, IPreviewGenerateOptions, PreviewCardProps } from './cards/PreviewCard';
 export { ProjectCard } from './cards/ProjectCard';
 export type { IProjectCardProps, ProjectCardProps } from './cards/ProjectCard';
 export { SelectionCard } from './cards/SelectionCard';

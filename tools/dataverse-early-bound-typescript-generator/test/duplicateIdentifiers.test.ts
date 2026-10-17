@@ -8,7 +8,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findDuplicateEnumMembers, generate, renameDuplicateEnumMembers, resolveConfig, type EnumModel } from '../src/core';
-import { PreviewCard, type IPreviewCardProps } from '../src/components/cards/PreviewCard';
+import { PreviewCard, type IPreviewCardProps, type IPreviewGenerateOptions } from '../src/components/cards/PreviewCard';
 import { FileViewer, duplicateLineNotes } from '../src/components/viewers/FileViewer';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import { InMemoryFileSink } from '../src/services/fileSink';
@@ -191,7 +191,7 @@ const DUPLICATE: PlannedFile = {
 };
 
 describe('PreviewCard', () => {
-    const props = (files: PlannedFile[], duplicate: number): IPreviewCardProps => ({
+    const props = (files: PlannedFile[], duplicate: number, generateOptions: Partial<IPreviewGenerateOptions> = {}): IPreviewCardProps => ({
         step: computeWorkflowSteps({ hasProject: true, selectedCount: 1, plan: { pending: 1, stale: false } })[3],
         plan: { projectRoot: 'C:/repo', outputRoot: 'C:/repo/gen', files, counts: { new: 0, changed: 0, unchanged: files.length - duplicate, orphaned: 0, duplicate } },
         stale: false,
@@ -200,8 +200,7 @@ describe('PreviewCard', () => {
         busy: false,
         previewedAt: null,
         lastResult: null,
-        deleteOrphans: false,
-        onDeleteOrphansChange: vi.fn(),
+        generateOptions: { deleteOrphans: false, onDeleteOrphansChange: vi.fn(), ...generateOptions },
         onPreview: vi.fn(),
         onGenerate: vi.fn(),
         onCopyText: vi.fn(),
@@ -224,7 +223,7 @@ describe('PreviewCard', () => {
 
     it('offers Skip duplicated identifier(s) next to Generate, which changes what Generate counts', async () => {
         const onSkipDuplicatesChange = vi.fn();
-        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1), onSkipDuplicatesChange }));
+        await mount(createElement(PreviewCard, props([DUPLICATE], 1, { onSkipDuplicatesChange })));
         const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === 'Skip duplicated identifier(s)');
         const input = document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement;
         expect(input.checked).toBe(false);
@@ -233,19 +232,19 @@ describe('PreviewCard', () => {
 
         act(() => root?.unmount());
         container?.remove();
-        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1), onSkipDuplicatesChange, skipDuplicates: true }));
+        await mount(createElement(PreviewCard, props([DUPLICATE], 1, { onSkipDuplicatesChange, skipDuplicates: true })));
         expect(Array.from(document.querySelectorAll('button')).some((b) => b.textContent === 'Nothing to write')).toBe(true);
         expect(document.body.textContent).toContain("1 file declares duplicate identifiers and won't be written.");
     });
 
     it('enables the switch only after a preview', async () => {
-        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1), plan: null, onSkipDuplicatesChange: vi.fn() }));
+        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1, { onSkipDuplicatesChange: vi.fn() }), plan: null }));
         const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === 'Skip duplicated identifier(s)');
         expect((document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement).disabled).toBe(true);
     });
 
     it("explains the switch in an info label with the Settings panel's text", async () => {
-        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1), onSkipDuplicatesChange: vi.fn() }));
+        await mount(createElement(PreviewCard, props([DUPLICATE], 1, { onSkipDuplicatesChange: vi.fn() })));
         const info = document.querySelector('button[aria-label="About Skip duplicated identifier(s)"]') as HTMLButtonElement;
         await act(async () => info.click());
         expect(document.body.textContent).toContain('Generate leaves them unwritten');
@@ -254,7 +253,7 @@ describe('PreviewCard', () => {
 
     it('disables the switch when the preview found no duplicates', async () => {
         const plain: PlannedFile = { ...DUPLICATE, status: 'new', writeStatus: undefined, duplicateIdentifiers: undefined };
-        await mount(createElement(PreviewCard, { ...props([plain], 0), onSkipDuplicatesChange: vi.fn() }));
+        await mount(createElement(PreviewCard, props([plain], 0, { onSkipDuplicatesChange: vi.fn() })));
         const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === 'Skip duplicated identifier(s)');
         expect((document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement).disabled).toBe(true);
         const info = document.querySelector('button[aria-label="About Skip duplicated identifier(s)"]') as HTMLButtonElement;
@@ -264,7 +263,7 @@ describe('PreviewCard', () => {
 
     it('offers Rename duplicated identifier(s), and keeps it usable once on so it can be turned off', async () => {
         const onRenameDuplicatesChange = vi.fn();
-        await mount(createElement(PreviewCard, { ...props([DUPLICATE], 1), onRenameDuplicatesChange }));
+        await mount(createElement(PreviewCard, props([DUPLICATE], 1, { onRenameDuplicatesChange })));
         const renameInput = () => {
             const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === 'Rename duplicated identifier(s)');
             return document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement;
@@ -276,7 +275,7 @@ describe('PreviewCard', () => {
         act(() => root?.unmount());
         container?.remove();
         const plain: PlannedFile = { ...DUPLICATE, status: 'new', writeStatus: undefined, duplicateIdentifiers: undefined };
-        await mount(createElement(PreviewCard, { ...props([plain], 0), onRenameDuplicatesChange, renameDuplicates: true }));
+        await mount(createElement(PreviewCard, props([plain], 0, { onRenameDuplicatesChange, renameDuplicates: true })));
         expect(renameInput().checked).toBe(true);
         expect(renameInput().disabled).toBe(false);
     });

@@ -27,6 +27,21 @@ const SHOW_UNCHANGED_INFO = (
     </>
 );
 
+/** The Generate settings the Preview card shows as switches; each saves a tool-config key. */
+export interface IPreviewGenerateOptions {
+    /** Whether Generate leaves files with duplicate identifiers unwritten (the tool config's `skipDuplicateIdentifiers`). */
+    skipDuplicates?: boolean;
+    /** The Skip duplicated identifier(s) switch; saves `skipDuplicateIdentifiers`. The switch is hidden without it. */
+    onSkipDuplicatesChange?: (checked: boolean) => void;
+    /** Whether later duplicate enum members are renamed (the tool config's `renameDuplicateIdentifiers`). */
+    renameDuplicates?: boolean;
+    /** The Rename duplicated identifier(s) switch; saves `renameDuplicateIdentifiers`. The switch is hidden without it. */
+    onRenameDuplicatesChange?: (checked: boolean) => void;
+    /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
+    deleteOrphans: boolean;
+    onDeleteOrphansChange: (checked: boolean) => void;
+}
+
 export interface IPreviewCardProps {
     step: StepState;
     plan: WritePlan | null;
@@ -40,17 +55,8 @@ export interface IPreviewCardProps {
     previewedAt: string | null;
     /** Summary of the last Generate run, shown as a success message until the next preview. */
     lastResult: string | null;
-    /** Whether Generate leaves files with duplicate identifiers unwritten (the tool config's `skipDuplicateIdentifiers`). */
-    skipDuplicates?: boolean;
-    /** The Skip duplicated identifier(s) switch; saves `skipDuplicateIdentifiers`. The switch is hidden without it. */
-    onSkipDuplicatesChange?: (checked: boolean) => void;
-    /** Whether later duplicate enum members are renamed (the tool config's `renameDuplicateIdentifiers`). */
-    renameDuplicates?: boolean;
-    /** The Rename duplicated identifier(s) switch; saves `renameDuplicateIdentifiers`. The switch is hidden without it. */
-    onRenameDuplicatesChange?: (checked: boolean) => void;
-    /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
-    deleteOrphans: boolean;
-    onDeleteOrphansChange: (checked: boolean) => void;
+    /** The Generate settings shown as switches in the action bar. */
+    generateOptions: IPreviewGenerateOptions;
     onPreview: () => void;
     onGenerate: () => void;
     /** Copies text (a file's content or a path) to the clipboard; `label` names it in the confirmation. */
@@ -65,8 +71,9 @@ export interface IPreviewCardProps {
  * action bar, tiles and table are in `PreviewParts.tsx`.
  */
 export function PreviewCard(props: IPreviewCardProps) {
-    const { step, plan, stale, canPreview, busy, lastResult, deleteOrphans, onPreview, onCopyText } = props;
-    const skipDuplicates = props.skipDuplicates ?? false;
+    const { step, plan, stale, canPreview, busy, lastResult, generateOptions, onPreview, onCopyText } = props;
+    const { deleteOrphans } = generateOptions;
+    const skipDuplicates = generateOptions.skipDuplicates ?? false;
     const styles = usePreviewCardStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
@@ -115,12 +122,8 @@ export function PreviewCard(props: IPreviewCardProps) {
                     busy={busy}
                     previewedAt={props.previewedAt}
                     writable={writes.created + writes.overwritten}
-                    deleteOrphans={deleteOrphans}
-                    onDeleteOrphansChange={props.onDeleteOrphansChange}
+                    {...generateOptions}
                     skipDuplicates={skipDuplicates}
-                    onSkipDuplicatesChange={props.onSkipDuplicatesChange}
-                    renameDuplicates={props.renameDuplicates}
-                    onRenameDuplicatesChange={props.onRenameDuplicatesChange}
                     onPreview={onPreview}
                     onGenerate={props.onGenerate}
                     now={props.now}
