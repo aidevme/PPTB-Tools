@@ -39,6 +39,10 @@ Reviewed: <YYYY-MM-DD>, commit <short SHA>, branch <branch>
 #### Test coverage
 <what's tested, what isn't, coverage numbers only if measured>
 
+#### Microsoft Learn references
+<the Learn pages found through the Microsoft Learn MCP Server that findings or steps rely on, one line each:
+URL, and which finding or step uses it; or "Microsoft Learn not checked" with the reason>
+
 ### b) Refactoring plan
 
 | ID | Change | Rationale | Expected benefit | Files | Effort | Risk | Breaking? |
