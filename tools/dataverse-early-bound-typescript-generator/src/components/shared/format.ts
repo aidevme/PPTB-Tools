@@ -7,6 +7,12 @@ const UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
     ['minute', 60],
 ];
 
+/** A date and time in the user's locale, short style (for example `10/17/26, 2:05 PM`); `iso` unchanged when it isn't a date. */
+export function formatDateTime(iso: string): string {
+    const date = new Date(iso);
+    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+}
+
 /**
  * "just now", "5 minutes ago", "yesterday", "3 weeks ago" … in the user's locale. Returns `iso` unchanged
  * when it isn't a date. `now` is a parameter so callers and tests get stable results.

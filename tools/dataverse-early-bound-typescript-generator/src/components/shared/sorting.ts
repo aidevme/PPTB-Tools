@@ -18,10 +18,15 @@ export interface SortState {
     direction: SortDirection;
 }
 
+/** Case-insensitive text order with numbers compared by value (`item2` before `item10`). */
+export function compareText(a: string, b: string): number {
+    return a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
+}
+
 /** Compares two sort values in `direction`; `undefined` (no value) sorts last in both directions. */
 export function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
     if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
-    const result = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
+    const result = typeof a === 'number' && typeof b === 'number' ? a - b : compareText(String(a), String(b));
     return direction === 'ascending' ? result : -result;
 }
 

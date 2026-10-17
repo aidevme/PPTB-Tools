@@ -35,6 +35,7 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | `generator.test.ts` | CSDL parsing, selection expansion, and generated output compared file by file with the real dataverse-gen CLI's output |
 | `dataverseGenTemplates.test.ts` | dataverse-gen's seven EJS templates: byte for byte, written under the `templateRoot` on Generate, and never counted as orphans |
 | `duplicateIdentifiers.test.ts` | Duplicate enum member names: finding and renaming them, the `duplicate` status in the write plan, Skip duplicated identifier(s), the summaries, and how the Preview card and FileViewer show them |
+| `projectColumns.test.ts` | The saved-project table's order: versions by number, dates by time, ties by name, plus `formatDateTime` and `compareText` |
 | `loadProjectDialog.test.ts` | The Load Existing Project dialog: editing a saved project from its row, name validation, and the full description in a tooltip |
 | `confirmationDialog.test.ts` | The reusable confirmation dialog: alert role, Confirm and Cancel, Escape, and the busy state |
 | `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions; an unreadable `customapi` table fails Preview and isn't cached |

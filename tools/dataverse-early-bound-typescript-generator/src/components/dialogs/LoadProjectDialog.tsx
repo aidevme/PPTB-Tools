@@ -20,15 +20,16 @@ import {
     TableSelectionCell,
     Text,
     Tooltip,
-    type SortDirection,
 } from '@fluentui/react-components';
 import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles';
 import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import { formatDateTime } from '../shared/format';
 import { nextSort } from '../shared/sorting';
 import { activateRowOnKey } from '../shared/tableRows';
 import { ConfirmationDialog } from './ConfirmationDialog';
+import { DEFAULT_PROJECT_SORT, PROJECT_COLUMNS, sortProjects, type ProjectColumnKey } from './projectColumns';
 import { NewProjectDialog, type NewProject } from './NewProjectDialog';
 import { reportError } from '../../services';
 
@@ -56,41 +57,6 @@ export interface ILoadProjectDialogProps {
     onBrowseLocation: (current: string) => Promise<string | null>;
 }
 
-function formatDateTime(iso: string): string {
-    const date = new Date(iso);
-    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' });
-}
-
-type ColumnKey = 'name' | 'description' | 'version' | 'location' | 'createdOn' | 'modifiedOn';
-
-const textCompare = (a: string, b: string) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
-
-/** `1.0.10` sorts after `1.0.9`; anything that isn't dotted numbers falls back to text order. */
-function compareVersions(a: string, b: string): number {
-    const parse = (v: string) => (/^\d+(\.\d+)*$/.test(v.trim()) ? v.trim().split('.').map(Number) : undefined);
-    const pa = parse(a);
-    const pb = parse(b);
-    if (!pa || !pb) return textCompare(a, b);
-    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
-        const diff = (pa[i] ?? 0) - (pb[i] ?? 0);
-        if (diff !== 0) return diff;
-    }
-    return 0;
-}
-
-const compareDates = (a: string, b: string) => (Date.parse(a) || 0) - (Date.parse(b) || 0);
-
-const COLUMNS: Array<{ key: ColumnKey; label: string; compare: (a: ProjectEntry, b: ProjectEntry) => number }> = [
-    { key: 'name', label: 'Name', compare: (a, b) => textCompare(a.name, b.name) },
-    { key: 'description', label: 'Description', compare: (a, b) => textCompare(a.description, b.description) },
-    { key: 'version', label: 'Version', compare: (a, b) => compareVersions(a.version, b.version) },
-    { key: 'location', label: 'Location', compare: (a, b) => textCompare(a.location, b.location) },
-    { key: 'createdOn', label: 'Created On', compare: (a, b) => compareDates(a.createdOn, b.createdOn) },
-    { key: 'modifiedOn', label: 'Modified On', compare: (a, b) => compareDates(a.modifiedOn, b.modifiedOn) },
-];
-
-const DEFAULT_SORT: { column: ColumnKey; direction: SortDirection } = { column: 'name', direction: 'ascending' };
-
 /**
  * Modal dialog listing the saved projects in a table with single-row selection. Load opens the selected
  * project; clicking a project's name opens it directly. Each row can be edited or deleted.
@@ -106,16 +72,11 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
     const [deleting, setDeleting] = useState(false);
     /** The project open in the edit dialog. */
     const [editing, setEditing] = useState<ProjectEntry | null>(null);
-    const [sort, setSort] = useState(DEFAULT_SORT);
+    const [sort, setSort] = useState(DEFAULT_PROJECT_SORT);
 
-    const sorted = useMemo(() => {
-        const column = COLUMNS.find((c) => c.key === sort.column) ?? COLUMNS[0];
-        const sign = sort.direction === 'ascending' ? 1 : -1;
-        // Ties keep name order, so equal versions or dates still list predictably.
-        return [...projects].sort((a, b) => sign * column.compare(a, b) || textCompare(a.name, b.name));
-    }, [projects, sort]);
+    const sorted = useMemo(() => sortProjects(projects, sort), [projects, sort]);
 
-    const toggleSort = (column: ColumnKey) => setSort((current) => nextSort(current, column));
+    const toggleSort = (column: ProjectColumnKey) => setSort((current) => nextSort(current, column));
     const selected = projects.find((p) => p.id === selectedId);
 
     // Start every visit with nothing selected.
@@ -123,7 +84,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
         if (open) {
             setSelectedId('');
             setLoadError(null);
-            setSort(DEFAULT_SORT);
+            setSort(DEFAULT_PROJECT_SORT);
             setPendingDelete(null);
             setEditing(null);
         }
@@ -181,7 +142,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                         <TableHeader>
                                             <TableRow>
                                                 <TableSelectionCell type="radio" invisible />
-                                                {COLUMNS.map((column) => (
+                                                {PROJECT_COLUMNS.map((column) => (
                                                     <SortableHeaderCell
                                                         key={column.key}
                                                         sortDirection={sort.column === column.key ? sort.direction : undefined}
