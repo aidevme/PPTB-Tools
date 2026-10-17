@@ -1,10 +1,10 @@
 import type { ReactNode } from 'react';
 import { Table, TableBody, TableCell, TableCellLayout, TableHeader, TableRow, TableSelectionCell } from '@fluentui/react-components';
 import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
-import type { SelectionColumn } from '../cards/selectionColumns';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import type { SelectionColumn } from './selectionColumns';
+import { SortableHeaderCell } from './SortableHeaderCell';
 import type { SortState, SortValue } from '../shared/sorting';
-import { activateRowOnKey } from '../shared/tableRows';
+import { activateRowOnKey } from './tableRows';
 
 /**
  * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort

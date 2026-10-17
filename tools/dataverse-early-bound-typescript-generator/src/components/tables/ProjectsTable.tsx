@@ -3,10 +3,10 @@ import { Button, Link, Table, TableBody, TableCell, TableCellLayout, TableHeader
 import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import { SortableHeaderCell } from './SortableHeaderCell';
 import { formatDateTime } from '../shared/format';
-import { activateRowOnKey } from '../shared/tableRows';
-import { PROJECT_COLUMNS, type ProjectColumnKey, type ProjectSort } from '../dialogs/projectColumns';
+import { activateRowOnKey } from './tableRows';
+import { PROJECT_COLUMNS, type ProjectColumnKey, type ProjectSort } from './projectColumns';
 
 export interface IProjectsTableProps {
     /** The saved projects, already sorted. */

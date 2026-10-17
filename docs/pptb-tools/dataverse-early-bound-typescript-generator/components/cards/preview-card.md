@@ -143,8 +143,8 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 - `components/shared/useResizableSplit.ts`: the divider between the file list and the viewer.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the
   header tooltips (`HEADER_HELP`), and the list and viewer widths with `clampListWidth`.
-- `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
-  `components/shared/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
+- `components/tables/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
+  `components/tables/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
   sortable tables (Select card, Preview card, Load Existing Project dialog), styled by `useSortableTableStyles`.
 
 ## Duplicate identifiers

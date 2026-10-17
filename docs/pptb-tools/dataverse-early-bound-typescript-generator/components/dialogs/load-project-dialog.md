@@ -7,7 +7,7 @@ Source: [`src/components/dialogs/LoadProjectDialog.tsx`](https://github.com/aide
 the table is
 [`ProjectsTable.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx),
 and the columns and their sort order are in
-[`projectColumns.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/projectColumns.ts).
+[`projectColumns.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/projectColumns.ts).
 
 ## Props (`ILoadProjectDialogProps`)
 

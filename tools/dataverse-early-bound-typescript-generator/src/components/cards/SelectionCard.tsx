@@ -20,7 +20,7 @@ import { useSelectionCardStyles } from '../../styles';
 import { nextSort, sortSelectionRows, type SortState } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
 import { SelectionTable, type SelectionRow } from '../tables/SelectionTable';
-import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from './selectionColumns';
+import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from '../tables/selectionColumns';
 import type { StepState } from '../shared/workflowSteps';
 
 export type SelectionKind = 'entities' | 'actions' | 'functions';

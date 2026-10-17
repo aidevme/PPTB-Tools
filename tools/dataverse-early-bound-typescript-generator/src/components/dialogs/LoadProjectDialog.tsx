@@ -6,7 +6,7 @@ import { useAsyncAction } from '../../hooks';
 import { useLoadProjectDialogStyles } from '../../styles';
 import { nextSort } from '../shared/sorting';
 import { ConfirmationDialog } from './ConfirmationDialog';
-import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from './projectColumns';
+import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from '../tables/projectColumns';
 import { ProjectsTable } from '../tables/ProjectsTable';
 import { ProjectFormDialog, type NewProject } from './ProjectFormDialog';
 

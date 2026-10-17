@@ -59,10 +59,10 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 - `components/cards/SelectionCard.tsx`: the card: tabs, filters, solution filter, and the rows for each tab.
 - `components/tables/SelectionTable.tsx`: the table (a checkbox per row, sortable columns) and the `SelectionRow`
   type.
-- `components/cards/selectionColumns.tsx`: the column definitions per tab (`ENTITY_COLUMNS`, `ACTION_COLUMNS`,
+- `components/tables/selectionColumns.tsx`: the column definitions per tab (`ENTITY_COLUMNS`, `ACTION_COLUMNS`,
   `FUNCTION_COLUMNS`) with their header tooltips, and the badge colour per table type (`TABLE_TYPE_COLORS`).
 - `components/shared/sorting.ts`: `sortSelectionRows`, which sorts the rows by the chosen column, listing rows
   without a value last.
-- `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
-  `components/shared/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
+- `components/tables/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
+  `components/tables/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
   sortable tables (Select card, Preview card, Load Existing Project dialog), styled by `useSortableTableStyles`.

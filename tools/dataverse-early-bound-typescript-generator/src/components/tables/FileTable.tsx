@@ -6,8 +6,8 @@ import type { FileStatus, PlannedFile } from '../../types';
 import { usePreviewCardStyles, useSortableTableStyles } from '../../styles';
 import { STATUS_META, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
 import { HEADER_HELP, type FileSortColumn } from '../shared/previewFiles';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
-import { activateRowOnKey } from '../shared/tableRows';
+import { SortableHeaderCell } from './SortableHeaderCell';
+import { activateRowOnKey } from './tableRows';
 
 type PreviewCardStyles = ReturnType<typeof usePreviewCardStyles>;
 

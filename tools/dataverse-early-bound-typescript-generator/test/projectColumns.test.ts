@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from 'vitest';
 import type { ProjectEntry } from '../src/config';
-import { compareDates, compareVersions, sortProjects } from '../src/components/dialogs/projectColumns';
+import { compareDates, compareVersions, sortProjects } from '../src/components/tables/projectColumns';
 import { formatDateTime } from '../src/components/shared/format';
 import { compareText } from '../src/components/shared/sorting';
 
