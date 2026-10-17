@@ -6,7 +6,8 @@ description: |
   Analyze and refactor one or more PPTB tools under tools/ in stages: a read-only analysis that produces a
   refactoring proposal (current state, plan, risks, summary), a TODO file in docs/todos/ written before any change,
   then execution of only the steps the user approves, with a build and test check after each step and the report
-  added to the same TODO file. The user can also save the plan as a TODO file only, without any code change. Use when:
+  added to the same TODO file. The user can also save the plan as a TODO file only, without any code change. Findings
+  about Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server. Use when:
   (1) User says "refactor <tool>", "analyze <tool> for refactoring", "propose a refactoring plan", "clean up the tools"
   (2) User wants a code-quality, dependency, UI consistency or test-coverage review of a tool that ends in a plan
   (3) User wants a refactoring plan saved as a TODO list to do later
@@ -14,7 +15,7 @@ description: |
   Does NOT modify any file before explicit approval, touch tools the user didn't select, make breaking changes
   without approval, or overwrite existing files in docs/todos/. Does NOT do marketplace policy reviews
   (intake-policy-review) or Verified badge reviews (tool-verification).
-allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion
+allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion, mcp__microsoft-learn__microsoft_docs_search, mcp__microsoft-learn__microsoft_docs_fetch, mcp__microsoft-learn__microsoft_code_sample_search
 argument-hint: "[tool-name ... | all]"
 ---
 
@@ -26,6 +27,45 @@ Seven phases. Phases 1–3 change nothing. Phase 4 writes the TODO file and noth
 "Save as TODO only" answer. Phase 5 runs only after an "accept" answer, and Phases 6 and 7 follow it automatically.
 Templates: [`references/proposal-template.md`](references/proposal-template.md) (Phases 2 and 3) and
 [`references/todo-template.md`](references/todo-template.md) (Phases 4, 6 and 7).
+
+## Microsoft Learn MCP Server
+
+Findings and recommendations about Microsoft platforms (Dataverse Web API and metadata, Power Platform, Power Apps
+code components, Fluent UI React v9 tokens and theming, TypeScript in Microsoft guidance) are checked against
+Microsoft's documentation through the
+[Microsoft Learn MCP Server](https://learn.microsoft.com/en-us/training/support/mcp), never from memory. It's a
+public, remote MCP server (streamable HTTP, no authentication) at `https://learn.microsoft.com/api/mcp`, with three
+tools:
+
+| Tool | Use it for |
+| --- | --- |
+| `microsoft_docs_search` | Finding the relevant Learn content first, for example "Dataverse Web API paging" or "Fluent UI v9 tokens" |
+| `microsoft_docs_fetch` | Reading a whole page that search found, when an excerpt isn't enough |
+| `microsoft_code_sample_search` | Official code samples, for example a documented Web API query or a `makeStyles` pattern |
+
+Each client prefixes the tool names with the server's configured name (in Claude Code, for example,
+`mcp__microsoft-learn__microsoft_docs_search`); use whichever server in the session exposes these three tools. If
+none does, tell the user how to add it, and don't add it yourself:
+
+- **Claude Code:** `claude mcp add --transport http microsoft-learn https://learn.microsoft.com/api/mcp`
+- **VS Code / GitHub Copilot** (`.vscode/mcp.json`, under `servers`):
+  `"microsoft.docs.mcp": { "type": "http", "url": "https://learn.microsoft.com/api/mcp" }`
+
+**How the skill uses it:**
+
+- **Phase 2:** before a finding or step relies on how a Microsoft API or library behaves (a query option, a
+  metadata property, a retry or throttling rule, a theming token), search Learn, fetch the page when needed, and
+  cite the URL in the evidence column. A finding that contradicts Learn guidance is worth a step; one Learn
+  doesn't cover stays a finding with its code evidence.
+- **Phase 5:** when a step fails on a Microsoft API or library, look the error up before proposing a fix, and cite
+  the page in the report.
+- **Phase 6 and 7:** list the Learn pages the analysis and the fixes relied on.
+- **Read-only:** the tools only read public documentation; they never touch the workspace, and they don't widen a
+  step's scope.
+- **When the server isn't available,** say so, mark the affected findings "Microsoft Learn not checked", and carry
+  on; never present unverified API details as fact.
+- **Out of scope for Learn:** PPTB's own APIs (`toolboxAPI`, `dataverseAPI` wrapper, manifest; use `pptb-tool-dev`)
+  and the output of third-party tools such as dataverse-gen, whose reference tests stay the source of truth.
 
 ## Phase 1 — Selection
 
@@ -66,8 +106,8 @@ For each selected tool, produce the proposal in [`references/proposal-template.m
   - mitigation and rollback for every Medium or High step.
 - **d) Summary:** an overall recommendation and a short overview of all proposed changes.
 
-Ground every finding in a file path and line, a command result or a measurement; say "not checked" rather than
-guess. Respect the repository's invariants in `AGENTS.md` (for example the generator's byte-for-byte output, the
+Ground every finding in a file path and line, a command result, a measurement, or a Microsoft Learn page found
+through the Microsoft Learn MCP Server (see above); say "not checked" rather than guess. Respect the repository's invariants in `AGENTS.md` (for example the generator's byte-for-byte output, the
 IIFE build in `vite.config.ts`, LF reference files): a step that would break one is a breaking change.
 
 ## Phase 3 — Approval
@@ -115,7 +155,8 @@ allowed before execution.
 3. **After each step, verify** from the tool's folder: `npm run build` and, when defined, `npm test` (also
    `npm run validate` when the step touches the manifest). Record the command, exit code and test counts.
 4. **On failure or an unexpected issue** (build or test failure, a changed snapshot or reference output, a step that
-   turns out bigger or riskier than planned): stop, report what happened and the likely cause, and ask whether to fix
+   turns out bigger or riskier than planned): stop, report what happened and the likely cause (for an error from a
+   Microsoft API or library, check it with the Microsoft Learn MCP Server and cite the page), and ask whether to fix
    forward, revert the step (`git restore` / `git revert` of that step's commit), skip it, or stop.
 5. **Commit each step** after it verifies, in Conventional Commits format (`CONTRIBUTING.md`):
    `refactor(<tool-name>): <subject>` (or `fix`, `test`, `chore(deps)` as fits), body with the step ID and the
@@ -127,8 +168,9 @@ allowed before execution.
 ## Phase 6 — Report
 
 Per tool: steps completed, skipped and failed (with reasons), files changed (`git diff --stat` over the steps'
-commits), verification results per step, commit SHAs, and recommended follow-ups. Say plainly what wasn't verified,
-for example behavior that needs a live PPTB host or the dark theme.
+commits), verification results per step, commit SHAs, the Microsoft Learn pages the analysis and fixes relied on, and
+recommended follow-ups. Say plainly what wasn't verified, for example behavior that needs a live PPTB host or the
+dark theme.
 
 ## Phase 7 — Update the TODO file (automatic)
 
@@ -149,6 +191,8 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 - **Never overwrite an existing file in `docs/todos/`.** Only the file created in this run may be edited later.
 - **Stop on surprises** and ask; no workaround scripts.
 - **Report what actually ran.** Quote exit codes and test counts; never call a check passed that wasn't run.
+- **Check Microsoft platform behavior in Microsoft Learn** through its MCP Server and cite it; never invent API
+  details.
 
 ## Changelog
 
@@ -156,3 +200,4 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 | --- | --- | --- |
 | 2026-10-16 | aidevme | Created: selection, read-only analysis, approval gate, verified step-by-step execution, report, and the automatic `docs/todos/` record. |
 | 2026-10-16 | aidevme | The TODO file is written before any change; new "Save as TODO only" answer; the execution report updates the same file. |
+| 2026-10-17 | aidevme | Findings, failures and fixes that depend on Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server and cited; the report lists the pages used. |
