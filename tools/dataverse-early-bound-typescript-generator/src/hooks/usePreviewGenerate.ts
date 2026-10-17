@@ -199,6 +199,17 @@ export function usePreviewGenerate({
         else void runGenerate(plan, false);
     };
 
+    /** The Delete orphaned files confirmation's Confirm: closes it and runs Generate with the deletion. */
+    const confirmDelete = () => {
+        setConfirmDeleteOpen(false);
+        if (plan) void runGenerate(plan, true);
+    };
+    /** The "Ask before generating" confirmation's Confirm: closes it and runs Generate. */
+    const confirmGenerate = () => {
+        setConfirmGenerateOpen(false);
+        if (plan) void runGenerate(plan, false);
+    };
+
     return {
         progress,
         busy: progress !== null,
@@ -206,8 +217,10 @@ export function usePreviewGenerate({
         runGenerate,
         startGenerate,
         confirmDeleteOpen,
-        setConfirmDeleteOpen,
+        confirmDelete,
+        cancelDelete: () => setConfirmDeleteOpen(false),
         confirmGenerateOpen,
-        setConfirmGenerateOpen,
+        confirmGenerate,
+        cancelGenerate: () => setConfirmGenerateOpen(false),
     };
 }

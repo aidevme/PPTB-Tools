@@ -1,6 +1,8 @@
 import { Text } from '@fluentui/react-components';
-import { writeCounts } from '../../services';
+import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
+import { pendingWriteCount, plural, writeCounts } from '../../services';
 import type { WritePlan } from '../../types';
+import { ConfirmationDialog } from './ConfirmationDialog';
 
 /** How many orphans the confirmation names before summarizing the rest. */
 const ORPHANS_LISTED = 10;
@@ -31,7 +33,7 @@ export function OrphanList({ plan }: { plan: WritePlan }) {
 export function GenerateSummary({ plan, skipDuplicates }: { plan: WritePlan; skipDuplicates: boolean }) {
     const { created, overwritten: changed } = writeCounts(plan, { skipDuplicates });
     const duplicates = plan.counts.duplicate;
-    const files = (n: number) => `${n} ${n === 1 ? 'file' : 'files'}`;
+    const files = (n: number) => plural(n, 'file', 'files');
     return (
         <>
             <Text block>
@@ -48,6 +50,56 @@ export function GenerateSummary({ plan, skipDuplicates }: { plan: WritePlan; ski
                 </Text>
             )}
             <Text block>Overwritten files can't be restored by the tool; use source control to undo changes.</Text>
+        </>
+    );
+}
+
+export interface IGenerateConfirmationDialogsProps {
+    plan: WritePlan | null;
+    skipDuplicates: boolean;
+    /** The Delete orphaned files confirmation is open. */
+    deleteOpen: boolean;
+    onConfirmDelete: () => void;
+    onCancelDelete: () => void;
+    /** The "Ask before generating" confirmation is open. */
+    generateOpen: boolean;
+    onConfirmGenerate: () => void;
+    onCancelGenerate: () => void;
+}
+
+/** Generate's two confirmations: deleting orphaned files (which also covers the writes), and "Ask before generating". */
+export function GenerateConfirmationDialogs({
+    plan,
+    skipDuplicates,
+    deleteOpen,
+    onConfirmDelete,
+    onCancelDelete,
+    generateOpen,
+    onConfirmGenerate,
+    onCancelGenerate,
+}: IGenerateConfirmationDialogsProps) {
+    const pending = plan ? pendingWriteCount(plan, { skipDuplicates }) : 0;
+    const orphaned = plan?.counts.orphaned ?? 0;
+    return (
+        <>
+            <ConfirmationDialog
+                open={deleteOpen && !!plan}
+                title="Delete orphaned files?"
+                message={plan && <OrphanList plan={plan} />}
+                confirmLabel={pending > 0 ? `Generate and delete ${orphaned}` : `Delete ${plural(orphaned, 'file', 'files')}`}
+                confirmIcon={<DeleteRegular />}
+                onConfirm={onConfirmDelete}
+                onCancel={onCancelDelete}
+            />
+            <ConfirmationDialog
+                open={generateOpen && !!plan}
+                title="Generate files?"
+                message={plan && <GenerateSummary plan={plan} skipDuplicates={skipDuplicates} />}
+                confirmLabel={`Generate ${plural(pending, 'file', 'files')}`}
+                confirmIcon={<SaveRegular />}
+                onConfirm={onConfirmGenerate}
+                onCancel={onCancelGenerate}
+            />
         </>
     );
 }

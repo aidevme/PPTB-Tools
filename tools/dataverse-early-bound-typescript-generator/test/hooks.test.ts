@@ -389,5 +389,28 @@ describe('usePreviewGenerate', () => {
         act(() => result.current.planState.setPlan(plan));
         act(() => result.current.preview.startGenerate());
         expect(result.current.preview.confirmDeleteOpen).toBe(true);
+
+        // Confirming closes the dialog, writes the new file and deletes the orphan.
+        await act(async () => result.current.preview.confirmDelete());
+        await flush();
+        expect(result.current.preview.confirmDeleteOpen).toBe(false);
+        expect(sink.files.has('/src/contoso/src/dataverse-gen/entities/Account.ts')).toBe(true);
+    });
+
+    it('closes a confirmation without generating on Cancel, and generates on Confirm', async () => {
+        const sink = new InMemoryFileSink();
+        const plan = await planFor(sink);
+        const { result } = renderPreview(sink, settings({ confirmBeforeGenerate: true }));
+        act(() => result.current.planState.setPlan(plan));
+        act(() => result.current.preview.startGenerate());
+        act(() => result.current.preview.cancelGenerate());
+        expect(result.current.preview.confirmGenerateOpen).toBe(false);
+        expect(sink.files.size).toBe(0);
+
+        act(() => result.current.preview.startGenerate());
+        await act(async () => result.current.preview.confirmGenerate());
+        await flush();
+        expect(result.current.preview.confirmGenerateOpen).toBe(false);
+        expect(sink.files.has('/src/contoso/src/dataverse-gen/entities/Account.ts')).toBe(true);
     });
 });

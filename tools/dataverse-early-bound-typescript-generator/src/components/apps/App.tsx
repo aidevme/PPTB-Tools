@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
-import { DeleteRegular, SaveRegular } from '@fluentui/react-icons';
-import { ConfirmationDialog, Footer, GenerateSummary, Header, LoadProjectDialog, OrphanList, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
+import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { resolveConfig } from '../../core';
 import { useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError, resolveOutputRoot } from '../../services';
@@ -68,7 +67,7 @@ export default function App() {
         changeSolution,
         missing,
     } = useEnvironmentMetadata({ provider, inPptb, connection, hasProject, selected, setError, clearPlan });
-    const { progress, busy, runPreview, runGenerate, startGenerate, confirmDeleteOpen, setConfirmDeleteOpen, confirmGenerateOpen, setConfirmGenerateOpen } = usePreviewGenerate({
+    const { progress, busy, runPreview, startGenerate, confirmDeleteOpen, confirmDelete, cancelDelete, confirmGenerateOpen, confirmGenerate, cancelGenerate } = usePreviewGenerate({
         planState,
         projectRoot,
         config,
@@ -247,33 +246,15 @@ export default function App() {
                     onCopyText={(text, label) => void copyPath(text, label)}
                 />
             </main>
-            <ConfirmationDialog
-                open={confirmDeleteOpen && !!plan}
-                title="Delete orphaned files?"
-                message={plan && <OrphanList plan={plan} />}
-                confirmLabel={
-                    plan && pendingWriteCount(plan, { skipDuplicates }) > 0
-                        ? `Generate and delete ${plan.counts.orphaned}`
-                        : `Delete ${plan?.counts.orphaned ?? 0} ${plan?.counts.orphaned === 1 ? 'file' : 'files'}`
-                }
-                confirmIcon={<DeleteRegular />}
-                onConfirm={() => {
-                    setConfirmDeleteOpen(false);
-                    if (plan) void runGenerate(plan, true);
-                }}
-                onCancel={() => setConfirmDeleteOpen(false)}
-            />
-            <ConfirmationDialog
-                open={confirmGenerateOpen && !!plan}
-                title="Generate files?"
-                message={plan && <GenerateSummary plan={plan} skipDuplicates={skipDuplicates} />}
-                confirmLabel={`Generate ${plan ? pendingWriteCount(plan, { skipDuplicates }) : 0} ${plan && pendingWriteCount(plan, { skipDuplicates }) === 1 ? 'file' : 'files'}`}
-                confirmIcon={<SaveRegular />}
-                onConfirm={() => {
-                    setConfirmGenerateOpen(false);
-                    if (plan) void runGenerate(plan, false);
-                }}
-                onCancel={() => setConfirmGenerateOpen(false)}
+            <GenerateConfirmationDialogs
+                plan={plan}
+                skipDuplicates={skipDuplicates}
+                deleteOpen={confirmDeleteOpen}
+                onConfirmDelete={confirmDelete}
+                onCancelDelete={cancelDelete}
+                generateOpen={confirmGenerateOpen}
+                onConfirmGenerate={confirmGenerate}
+                onCancelGenerate={cancelGenerate}
             />
             <div ref={footerRef} className={styles.stickyFooter}>
                 <Footer />
