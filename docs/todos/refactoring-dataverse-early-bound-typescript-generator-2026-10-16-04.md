@@ -8,8 +8,9 @@
 | Date | 2026-10-16 |
 | Skill | `aidevme-pptb-tool-refactoring` |
 | Decision | Accepted selected steps: S6, S7, S8, S9, S10, S11, S13 |
-| Status | Planned |
+| Status | Executed |
 | Proposal version | v3 (v1 without S1–S5), reviewed at commit `5e076e6` on `features/dataverse-early-bound-typescript-generator` |
+| Branch and commits | `features/dataverse-early-bound-typescript-generator`, b948df6..9d0ebef (with two of your own commits in between: 0988e06, 287a4a3) |
 
 Follows [refactoring-dataverse-early-bound-typescript-generator-2026-10-16-03.md](./refactoring-dataverse-early-bound-typescript-generator-2026-10-16-03.md),
 which completed S2–S5 (S1 was completed in -02). The analysis below is from v1 (`adcc2d6`); since then only S1–S5
@@ -35,31 +36,31 @@ needs S7.
 - [x] S5: remove the six unused exports and drop internal-only constants from the barrels (files:
   `services/paths.ts`, `services/dataverseGenTemplates.ts`, `services/index.ts`, `types/index.ts`,
   `components/index.ts`; effort S; risk Low). Done earlier in 5e076e6
-- [ ] S6: typed Web API row reader (`str`/`num`/`bool`) to replace the `row.x as string` casts and the two `!`
+- [x] S6: typed Web API row reader (`str`/`num`/`bool`) to replace the `row.x as string` casts and the two `!`
   assertions (files: `services/metadataProvider.ts`, `services/solutions.ts`, a new helper; effort M; risk
-  Low). Approved
-- [ ] S7: split `App.tsx` into `useToolSettings`, `useProject`, `useEnvironmentMetadata`, `usePreviewGenerate`
+  Low). Approved. Done in b948df6
+- [x] S7: split `App.tsx` into `useToolSettings`, `useProject`, `useEnvironmentMetadata`, `usePreviewGenerate`
   plus a shared `invalidatePlan()`; move `OrphanList`/`GenerateSummary` to `dialogs/`; move `pendingWrites` into
   a `plan.ts` helper (files: `App.tsx`, `hooks/*`, `dialogs/*`, `services/plan.ts`, the app-state docs page;
-  effort L; risk Medium). Approved
-- [ ] S8: shared table helpers: sortable header cell, `useSortState`, selectable-row keyboard handler, shared
+  effort L; risk Medium). Approved. Done in fdd8087, 9e5853e, b370641, 49e67e1, 4ea255d
+- [x] S8: shared table helpers: sortable header cell, `useSortState`, selectable-row keyboard handler, shared
   header and row styles (files: `PreviewCard`, `SelectionCard`, `LoadProjectDialog` and their styles,
-  `components/shared/*`; effort M; risk Low). Approved
-- [ ] S9: SettingsPanel switch helper, `useSettingsDraft`, setting titles shared in `settingsInfo.tsx` (makes the
+  `components/shared/*`; effort M; risk Low). Approved. Done in e602ff7
+- [x] S9: SettingsPanel switch helper, `useSettingsDraft`, setting titles shared in `settingsInfo.tsx` (makes the
   label casing consistent) (files: `SettingsPanel.tsx`, `shared/settingsInfo.tsx`, `PreviewCard.tsx`; effort M;
-  risk Low). Approved
-- [ ] S10: split PreviewCard into `StatusTiles`, `FileTable`, `PreviewActionBar` and `useResizableSplit`; make the
+  risk Low). Approved. Done in 50f0efe
+- [x] S10: split PreviewCard into `StatusTiles`, `FileTable`, `PreviewActionBar` and `useResizableSplit`; make the
   color and dot maps module-level constants (files: `PreviewCard.tsx`, its styles, `components/index.ts`; effort M;
-  risk Low). Approved
-- [ ] S11: tests for the S7 hooks, `services/solutions.ts` and the remembered-folder settings functions (files:
-  `test/*`; effort M; risk Low). Approved
+  risk Low). Approved. Done in 06cd6ca
+- [x] S11: tests for the S7 hooks, `services/solutions.ts` and the remembered-folder settings functions (files:
+  `test/*`; effort M; risk Low). Approved. Done in 47fd149
 - [ ] S12: `engines.node` to `>=22.12.0`, a `.gitattributes` LF rule for `test/reference/**` and
   `test/fixtures/**`, remove `manualChunks: undefined`; run `npm run validate` (files: `package.json`,
   `package-lock.json`, `/.gitattributes`, `vite.config.ts`; effort S; risk Low). Not approved
-- [ ] S13: docs: add `src/config` to the architecture layers, the three missing test files to the testing table,
+- [x] S13: docs: add `src/config` to the architecture layers, the three missing test files to the testing table,
   orphan deletion and `_templates` to the Generate flow; fix `src/config/README.md:17`; add `src/config/` to the
   AGENTS.md tree and re-sync (files: the tool's architecture and build-and-testing docs pages,
-  `src/config/README.md`, `AGENTS.md`; effort S; risk Low). Approved
+  `src/config/README.md`, `AGENTS.md`; effort S; risk Low). Approved. Done in 9d0ebef
 
 ## Analysis
 
@@ -180,3 +181,52 @@ The tool is in good shape: strict TypeScript, clean layering, 203 passing tests 
 loss of custom APIs) and S2 (a dependency list that would break during a refactor) are the real defects and are
 worth doing first. S7 is the main structural gain. S3–S6 and S8–S10 are low-risk cleanups, and S11–S13 add test
 coverage and fix build and docs drift. A smaller first pass is S1–S6, S12 and S13.
+
+## Execution report
+
+### Steps
+
+| ID | Step | Result | Commit | Notes |
+| --- | --- | --- | --- | --- |
+| S6 | Typed Web API row reader | Completed | b948df6 | `textOf(row, column)` in `services/webApiRow.ts`; the `!` assertions became `optionSetCast(attribute)`. The `as unknown as …Input[]` casts at the core boundary stay |
+| S7 | Split `App.tsx` into hooks | Completed | fdd8087, 9e5853e, b370641, 49e67e1, 4ea255d | One commit per part. The planned `invalidatePlan()` became `usePlanState` (`clearPlan`, `resetPlan`, `markPlanStale`), called first because the other hooks need it. `App.tsx`: 858 lines before S2, 283 now |
+| S8 | Shared table helpers | Completed | e602ff7 | `SortableHeaderCell`, `nextSort`, `activateRowOnKey`, `useSortableTableStyles` |
+| S9 | SettingsPanel helper, draft hook, shared titles | Completed | 50f0efe | Scope widened with approval: sentence case everywhere ("Rename duplicated identifier(s)", "Skip duplicated identifier(s)", "Delete orphaned files"), including FileViewer, the status tooltip, docs and test lookups. One test now finds the switch by its label instead of the phrase anywhere |
+| S10 | Split PreviewCard | Completed | 06cd6ca | `PreviewParts.tsx`; `useResizableSplit` lives in `components/shared/` (it needs `previewFiles`). `PreviewCard.tsx`: 473 → 195 lines |
+| S11 | Tests for hooks, solutions, remembered folder | Completed | 47fd149 | 27 new tests in 3 files. `renderHook` fails after 200 renders instead of exhausting memory |
+| S12 | Build hygiene | Skipped (not approved) | | |
+| S13 | Docs drift | Completed | 9d0ebef | Also the README MD040 finding and `dataverseApi()` in `services.md`; `AGENTS.md` re-synced |
+
+### Files changed
+
+```text
+  54 files changed, 2164 insertions(+), 1234 deletions(-)
+```
+
+(`git diff --stat 5e076e6 HEAD`, without `docs/todos/` and `_templates/`, which came from your own commits 0988e06 and 287a4a3.)
+
+### Verification
+
+| Step | Command | Exit code | Result |
+| --- | --- | --- | --- |
+| S6 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S7 (each of a–e) | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S8 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S9 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files (after updating the label lookups) |
+| S10 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S11 | `npm run build` / `npm test` | 0 / 0 | OK / 233 passed in 20 files |
+| S13 | Validate-Markdown on every changed file; `verify-parity.ps1` | 0 | Passed; zero drift |
+| S13 | `npm run docs:build` | 1 | Fails on two files this run didn't touch: `docs/decisions/_TEMPLATE.md`, `docs/review-logs/part4-pipelines-03-convergence.md` |
+| Final | `npm run build` / `npm test` at 9d0ebef | 0 / 0 | OK / 233 passed in 20 files |
+
+Not verified: a live PPTB host, light and dark themes, and the docs site build (broken by the two files above).
+
+## Follow-up TODOs
+
+- [ ] Test in PPTB, light and dark theme: open a saved and a new project, select tables, Preview, Generate (with
+  and without Ask before generating), Delete orphaned files, change a setting and check the preview goes stale,
+  the solution filter, the Settings panel (Save, Cancel, Reset to defaults), and resizing the file list.
+- [ ] Decide on S12 (engines, `.gitattributes` LF rule, `manualChunks`).
+- [ ] Fix the two files that break `npm run docs:build`, then run it.
+- [ ] Not proposed and still open: major dependency upgrades, a theme-change listener, the double error display
+  (toast and banner), bulk option-set error handling, and memoizing the large tables.

@@ -992,6 +992,14 @@
       "ported": true,
       "source": "authored",
       "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
+    },
+    {
+      "name": "aidevme-pptb-tool-developer",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "authored",
+      "note": "Extract inline Fluent UI makeStyles hooks from PPTB tool components into src/styles/<ComponentName>.styles.ts (use<ComponentName>Styles) with the styles barrel; read-only analysis and approval first."
     }
   ]
 }
