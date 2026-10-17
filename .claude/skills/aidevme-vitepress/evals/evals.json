@@ -1,0 +1,64 @@
+{
+  "skill_name": "aidevme-vitepress",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Group the component pages in the docs sidebar by folder: Components > Cards, Dialogs, Layout, etc.",
+      "expected_output": "The VitePress sidebar shape is checked with the Vue Docs MCP server, the config gets nested groups under Components with valid links, the build runs, and the user is asked to look at the result in the dev server.",
+      "files": [],
+      "expectations": [
+        "Finds the config through the docs scripts in package.json (.vitepress/config.mts)",
+        "Enables VitePress with set_framework_preferences(vitepress=true) and checks the sidebar group shape with vitepress_docs_search or vitepress_api_lookup, citing the docs page",
+        "Writes nested { text, collapsed, items } groups whose links are root-relative and point to existing pages",
+        "Runs npm run docs:build and reports the exit code",
+        "Suggests npm run docs:dev to see the sidebar, since the build doesn't show how it renders"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "docs:build fails with 'Element is missing end tag' in docs/decisions/_TEMPLATE.md and 'Error parsing JavaScript expression' in a review log.",
+      "expected_output": "The errors are explained as Markdown compiled as a Vue template (angle-bracket placeholders and a {{ }} expression), options are offered (escape, v-pre, fenced code, or srcExclude for files that aren't pages), and the chosen fix is verified with a build.",
+      "files": [],
+      "expectations": [
+        "Explains that VitePress compiles Markdown as a Vue template, so <placeholder> text is read as a tag and {{ … }} as an interpolation",
+        "Offers escaping, v-pre, fenced code or srcExclude, and asks which to use when the files aren't site pages",
+        "Runs npm run docs:build after the fix and reports the exit code",
+        "Checks srcExclude or v-pre behavior in the VitePress docs through the Vue Docs MCP server, or says it wasn't checked"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Set up the Vue Docs MCP server for me in Claude Code and for my team in VS Code.",
+      "expected_output": "The Claude Code command and the .vscode/mcp.json content are given from the vue-mcp.org guides, with verification steps; the repository file is created only if the user agrees.",
+      "files": [],
+      "expectations": [
+        "Gives claude mcp add --scope user vue-docs --transport streamable-http https://mcp.vue-mcp.org/mcp and claude mcp list to verify, noting --transport http as the fallback",
+        "Gives .vscode/mcp.json with servers.vue-docs { type: http, url: https://mcp.vue-mcp.org/mcp } and notes VS Code uses servers, not mcpServers",
+        "Asks before creating or changing .vscode/mcp.json in the repository, and doesn't run claude mcp add without the user's go-ahead"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Move the component docs pages into subfolders matching src/components.",
+      "expected_output": "Pages are moved with git mv, every relative link into and out of the moved pages and every sidebar link is updated, links are verified, and the user is told the old URLs stop working.",
+      "files": [],
+      "expectations": [
+        "Moves the pages with git mv into the matching folders",
+        "Rewrites relative .md links in the moved pages and in pages that link to them, and updates the sidebar links",
+        "Verifies the links with npm run docs:build, or with a relative-link check when the build is blocked by unrelated files, and says which was used",
+        "Tells the user that old page URLs return 404 unless redirects are added"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "What does cleanUrls do in VitePress? (No Vue Docs MCP server is configured in this session.)",
+      "expected_output": "The user is told the Vue Docs MCP server isn't available, with the setup steps, and the answer is marked as not checked against the docs rather than presented as fact.",
+      "files": [],
+      "expectations": [
+        "Says the Vue Docs MCP server isn't available and shows how to add it for Claude Code and VS Code",
+        "Marks any answer as \"VitePress docs not checked\" instead of stating option details as fact",
+        "Doesn't change any MCP configuration on its own"
+      ]
+    }
+  ]
+}

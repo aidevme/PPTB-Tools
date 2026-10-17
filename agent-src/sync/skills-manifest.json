@@ -1002,6 +1002,14 @@
       "note": "Commit changes one file at a time with Conventional Commits 1.0.0 messages: safety check, per-file diffs, coupled-file grouping, plan and confirmation; never push or bypass hooks unless asked."
     },
     {
+      "name": "aidevme-vitepress",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "VitePress site changes (pages, sidebar, nav, config, build errors, dead links), grounded in the official VitePress docs through the Vue Docs MCP server (vue-mcp.org), with setup for Claude Code and VS Code Copilot."
+    },
+    {
       "name": "aidevme-pptb-tool-developer",
       "scope": "project",
       "group": "pptb",
