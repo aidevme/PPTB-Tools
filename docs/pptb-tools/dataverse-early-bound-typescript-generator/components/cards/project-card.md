@@ -50,7 +50,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 
 ## Which projects are recent
 
-`recentProjects(projects, projectRoot, rememberedFolder, now, max)` returns up to `max` entries (default 3, the
+`recentProjects(projects, projectRoot, rememberedFolder, now, max)` in `src/components/cards/recentProjects.ts` returns up to `max` entries (default 3, the
 `recentProjectCount` setting; 0 returns none):
 
 1. The folder last used with this connection, labelled "Last used". It shows under its saved project name
@@ -66,5 +66,7 @@ The open project and duplicates (the same folder, compared with `isSamePath`) ar
 - The **History** menu (copy the project folder, `.dataverse-gen.json` or output folder path, and **Clear
   selection**) is hidden; set `SHOW_HISTORY_MENU` to `true` in `ProjectCard.tsx` to show it again. The
   summary's copy button covers the project folder path.
+- The recent projects list is `RecentProjectsList` (`src/components/cards/RecentProjectsList.tsx`, styled by
+  `src/styles/RecentProjectsList.styles.ts`); the card passes it the heading, the entries and `onOpenRecent`.
 - Styles are in `src/styles/ProjectCard.styles.ts`. Relative times and shortened paths come from
   `src/components/shared/format.ts`.

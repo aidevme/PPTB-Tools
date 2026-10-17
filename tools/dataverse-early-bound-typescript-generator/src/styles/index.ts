@@ -12,6 +12,7 @@ export { usePreviewCardStyles } from './PreviewCard.styles';
 export { useProjectCardStyles } from './ProjectCard.styles';
 export { useProjectFormDialogStyles } from './ProjectFormDialog.styles';
 export { useProjectsTableStyles } from './ProjectsTable.styles';
+export { useRecentProjectsListStyles } from './RecentProjectsList.styles';
 export { useSelectionCardStyles } from './SelectionCard.styles';
 export { useSelectionTableStyles } from './SelectionTable.styles';
 export { useSettingsPanelStyles } from './SettingsPanel.styles';

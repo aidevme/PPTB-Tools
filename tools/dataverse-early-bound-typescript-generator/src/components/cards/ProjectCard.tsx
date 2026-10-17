@@ -23,7 +23,6 @@ import {
     FolderListRegular,
     FolderOpenRegular,
     FolderRegular,
-    HistoryRegular,
 } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { basename, isSamePath, type ProjectConfigState } from '../../services';
@@ -31,59 +30,11 @@ import { useProjectCardStyles } from '../../styles';
 import { formatRelativeTime, shortenPath } from '../shared/format';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
+import { RecentProjectsList } from './RecentProjectsList';
+import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './recentProjects';
 
 /** Temporarily hidden; set to `true` to show the History menu (copy paths, clear selection) again. */
 const SHOW_HISTORY_MENU = false;
-
-/** How many recent projects the card offers. */
-const MAX_RECENT = 3;
-
-/** A project folder to open, by name (for display) and location. */
-export interface ProjectOpenTarget {
-    name: string;
-    location: string;
-}
-
-/** One entry in the card's recent-projects list. */
-export interface RecentProject extends ProjectOpenTarget {
-    key: string;
-    /** Secondary line: "Last used" or "Modified 2 days ago". */
-    meta: string;
-    isLastUsed: boolean;
-}
-
-/**
- * Up to `max` projects to offer for reopening, excluding the open one: the folder last used with this
- * connection first, then saved projects by most recently modified. The last-used folder is shown under its
- * saved name when it's a saved project, and under its folder name otherwise.
- */
-export function recentProjects(
-    projects: ProjectEntry[],
-    projectRoot: string | null,
-    rememberedFolder: string | null,
-    now: number,
-    max = MAX_RECENT,
-): RecentProject[] {
-    const isOpen = (location: string) => !!projectRoot && isSamePath(location, projectRoot);
-    const result: RecentProject[] = [];
-    if (rememberedFolder && !isOpen(rememberedFolder)) {
-        const saved = projects.find((p) => isSamePath(p.location, rememberedFolder));
-        result.push({
-            key: saved?.id ?? `last:${rememberedFolder}`,
-            name: saved?.name ?? (basename(rememberedFolder) || rememberedFolder),
-            location: saved?.location ?? rememberedFolder,
-            meta: 'Last used',
-            isLastUsed: true,
-        });
-    }
-    const byModified = [...projects].sort((a, b) => (Date.parse(b.modifiedOn) || 0) - (Date.parse(a.modifiedOn) || 0));
-    for (const p of byModified) {
-        if (result.length >= max) break;
-        if (isOpen(p.location) || result.some((r) => isSamePath(r.location, p.location))) continue;
-        result.push({ key: p.id, name: p.name, location: p.location, meta: `Modified ${formatRelativeTime(p.modifiedOn, now)}`, isLastUsed: false });
-    }
-    return result.slice(0, max);
-}
 
 export interface ProjectCardProps {
     step: StepState;
@@ -123,35 +74,6 @@ export function ProjectCard(props: ProjectCardProps) {
     const now = props.now ?? Date.now();
     const recent = recentProjects(projects, projectRoot, props.rememberedFolder, now, props.recentProjectCount ?? MAX_RECENT);
 
-    const recentList = recent.length > 0 && (
-        <div className={styles.body}>
-            <Text size={200} className={styles.recentHeading}>
-                {projectRoot ? 'Switch to a recent project' : 'Recent projects'}
-            </Text>
-            <ul className={styles.recentList}>
-                {recent.map((item) => (
-                    <li key={item.key}>
-                        <Tooltip content={item.location} relationship="description" withArrow>
-                            <button
-                                type="button"
-                                className={styles.recentItem}
-                                disabled={busy}
-                                aria-label={`Open ${item.name} (${item.meta})`}
-                                onClick={() => onOpenRecent({ name: item.name, location: item.location })}
-                            >
-                                {item.isLastUsed ? <HistoryRegular className={styles.recentIcon} /> : <FolderRegular className={styles.recentIcon} />}
-                                <span className={styles.recentText}>
-                                    <span className={styles.recentName}>{item.name}</span>
-                                    <span className={styles.recentMeta}>{item.meta}</span>
-                                </span>
-                            </button>
-                        </Tooltip>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-
     return (
         <StepCard step={step} description="The folder that contains (or will contain) .dataverse-gen.json, usually your package.json folder.">
             <div className={styles.body}>
@@ -178,7 +100,7 @@ export function ProjectCard(props: ProjectCardProps) {
                         </div>
                     </div>
                 )}
-                {recentList}
+                <RecentProjectsList heading={projectRoot ? 'Switch to a recent project' : 'Recent projects'} items={recent} busy={busy} onOpen={onOpenRecent} />
                 {SHOW_HISTORY_MENU && <HistoryMenu {...props} />}
             </div>
         </StepCard>
