@@ -3,13 +3,13 @@ import { useRef, type KeyboardEvent } from 'react';
 import { Table, TableBody, TableCell, TableCellLayout, TableHeader, TableRow, Tooltip, mergeClasses, type SortDirection } from '@fluentui/react-components';
 import { CodeTextRegular, DatabaseRegular, DocumentRegular, FlashRegular, MathFormulaRegular, TableRegular, TextBulletListLtrRegular } from '@fluentui/react-icons';
 import type { FileStatus, PlannedFile } from '../../types';
-import { usePreviewCardStyles, useSortableTableStyles } from '../../styles';
+import { useFileTableStyles, useSortableTableStyles } from '../../styles';
 import { STATUS_META, fileName, fileType, type GeneratedFileType } from '../shared/generatedFiles';
 import { HEADER_HELP, type FileSortColumn } from '../shared/previewFiles';
 import { SortableHeaderCell } from './SortableHeaderCell';
 import { activateRowOnKey } from './tableRows';
 
-type PreviewCardStyles = ReturnType<typeof usePreviewCardStyles>;
+type FileTableStyles = ReturnType<typeof useFileTableStyles>;
 
 const TYPE_ICONS: Record<GeneratedFileType, JSX.Element> = {
     entities: <TableRegular />,
@@ -22,7 +22,7 @@ const TYPE_ICONS: Record<GeneratedFileType, JSX.Element> = {
 };
 
 /** The file table's status dot class, per status. */
-const STATUS_DOT: Record<FileStatus, keyof PreviewCardStyles> = {
+const STATUS_DOT: Record<FileStatus, keyof FileTableStyles> = {
     new: 'dotNew',
     changed: 'dotChanged',
     unchanged: 'dotUnchanged',
@@ -42,7 +42,7 @@ export interface IFileTableProps {
 
 /** The sortable file table: name (with type icon), type and status; a row selects its file for the viewer. */
 export function FileTable({ files, selectedPath, onSelect, sortDirection, onToggleSort }: IFileTableProps) {
-    const styles = usePreviewCardStyles();
+    const styles = useFileTableStyles();
     const tableStyles = useSortableTableStyles();
     const tableRef = useRef<HTMLTableElement>(null);
 

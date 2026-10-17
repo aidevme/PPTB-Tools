@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Table, TableBody, TableCell, TableCellLayout, TableHeader, TableRow, TableSelectionCell } from '@fluentui/react-components';
-import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
+import { useSelectionTableStyles, useSortableTableStyles } from '../../styles';
 import type { SelectionColumn } from './selectionColumns';
 import { SortableHeaderCell } from './SortableHeaderCell';
 import type { SortState, SortValue } from '../shared/sorting';
@@ -35,7 +35,7 @@ export interface ISelectionTableProps {
 
 /** The Select card's table: a checkbox per row, sortable columns with help tooltips. */
 export function SelectionTable({ ariaLabel, columns, rows, sort, onToggleSort, selectedKeys, disabled, onToggleRow }: ISelectionTableProps) {
-    const styles = useSelectionCardStyles();
+    const styles = useSelectionTableStyles();
     const tableStyles = useSortableTableStyles();
     return (
         <Table aria-label={ariaLabel} size="small" sortable>

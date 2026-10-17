@@ -2,7 +2,7 @@ import type { MouseEvent, ReactElement } from 'react';
 import { Button, Link, Table, TableBody, TableCell, TableCellLayout, TableHeader, TableHeaderCell, TableRow, TableSelectionCell, Tooltip } from '@fluentui/react-components';
 import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
-import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles';
+import { useProjectsTableStyles, useSortableTableStyles } from '../../styles';
 import { SortableHeaderCell } from './SortableHeaderCell';
 import { formatDateTime } from '../shared/format';
 import { activateRowOnKey } from './tableRows';
@@ -47,7 +47,7 @@ function RowActionButton({ tooltip, label, icon, disabled, onClick }: { tooltip:
 
 /** The Load Existing Project dialog's table: one selectable row per saved project, sortable by every column. */
 export function ProjectsTable({ projects, sort, onToggleSort, selectedId, onSelect, onLoad, onEdit, onDelete, loading, busy }: IProjectsTableProps) {
-    const styles = useLoadProjectDialogStyles();
+    const styles = useProjectsTableStyles();
     const tableStyles = useSortableTableStyles();
     return (
         <Table aria-label="Saved projects" size="small" sortable>

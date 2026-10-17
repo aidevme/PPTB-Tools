@@ -11,7 +11,6 @@ export const useSelectionCardStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: tokens.borderRadiusMedium,
     },
-    rowDisabled: { cursor: 'default' },
     stacked: { display: 'flex', flexDirection: 'column', minWidth: 0 },
     mono: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
     secondary: { color: tokens.colorNeutralForeground3, fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
