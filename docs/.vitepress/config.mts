@@ -57,64 +57,64 @@ export default defineConfig({
                             link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/",
                             collapsed: true,
                             items: [
-                                    {
-                                        text: "apps",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "App", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/apps/app" },
-                                        ],
-                                    },
-                                    {
-                                        text: "cards",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "ProjectCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/project-card" },
-                                            { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/selection-card" },
-                                            { text: "OptionsCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/options-card" },
-                                            { text: "PreviewCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/preview-card" },
-                                        ],
-                                    },
-                                    {
-                                        text: "dialogs",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "ProjectFormDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/project-form-dialog" },
-                                            { text: "LoadProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/load-project-dialog" },
-                                            { text: "ConfirmationDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/confirmation-dialog" },
-                                        ],
-                                    },
-                                    {
-                                        text: "layout",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/header" },
-                                            { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/footer" },
-                                        ],
-                                    },
-                                    {
-                                        text: "panels",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "SettingsPanel", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/panels/settings-panel" },
-                                        ],
-                                    },
-                                    {
-                                        text: "shared",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "WorkflowProgress", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/workflow-progress" },
-                                            { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/step-card" },
-                                            { text: "FileSearchBox", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/file-search-box" },
-                                        ],
-                                    },
-                                    {
-                                        text: "viewers",
-                                        collapsed: true,
-                                        items: [
-                                            { text: "FileViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/viewers/file-viewer" },
-                                            { text: "CodeViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/viewers/code-viewer" },
-                                        ],
-                                    },
+                                {
+                                    text: "Apps",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "App", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/apps/app" },
+                                    ],
+                                },
+                                {
+                                    text: "Cards",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "ProjectCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/project-card" },
+                                        { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/selection-card" },
+                                        { text: "OptionsCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/options-card" },
+                                        { text: "PreviewCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/cards/preview-card" },
+                                    ],
+                                },
+                                {
+                                    text: "Dialogs",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "ProjectFormDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/project-form-dialog" },
+                                        { text: "LoadProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/load-project-dialog" },
+                                        { text: "ConfirmationDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/dialogs/confirmation-dialog" },
+                                    ],
+                                },
+                                {
+                                    text: "Layout",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/header" },
+                                        { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/footer" },
+                                    ],
+                                },
+                                {
+                                    text: "Panels",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "SettingsPanel", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/panels/settings-panel" },
+                                    ],
+                                },
+                                {
+                                    text: "Shared",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "WorkflowProgress", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/workflow-progress" },
+                                        { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/step-card" },
+                                        { text: "FileSearchBox", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/file-search-box" },
+                                    ],
+                                },
+                                {
+                                    text: "Viewers",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "FileViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/viewers/file-viewer" },
+                                        { text: "CodeViewer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/viewers/code-viewer" },
+                                    ],
+                                },
                             ],
                         },
                         { text: "Testing", link: "/pptb-tools/dataverse-early-bound-typescript-generator/contributing/testing" },
