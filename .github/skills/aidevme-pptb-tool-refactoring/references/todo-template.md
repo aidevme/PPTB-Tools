@@ -81,6 +81,8 @@ After "Save as TODO only", leave every step without an approval note: they're al
 
 Not verified: <for example live PPTB host, dark theme>
 
+Microsoft Learn pages used: <URLs the fixes relied on, found through the Microsoft Learn MCP Server; or "none">
+
 ## Follow-up TODOs
 
 - [ ] <recommended next action, for example "Test Generate in PPTB, light and dark theme">
