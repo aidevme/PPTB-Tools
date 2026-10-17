@@ -95,7 +95,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Tiles as filters:** clicking a tile shows only that status, and the tile is highlighted (`aria-pressed`).
   Clicking it again goes back to the default view.
 - **Output folder:** shown as a chip, shortened in the middle, with the full path in a tooltip and a copy
-  button.
+  button ([PathChip](../shared/path-chip.md)).
 
 ## File table
 

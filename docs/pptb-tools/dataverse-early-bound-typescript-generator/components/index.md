@@ -32,6 +32,7 @@ These pages are grouped in the same folders as the source: `apps/`, `cards/`, `d
 | — | [ProjectsTable](./tables/projects-table.md) | LoadProjectDialog's table of saved projects |
 | — | [SortableHeaderCell](./tables/sortable-header-cell.md) | The sortable header cell the three tables share |
 | — | [FileSearchBox](./shared/file-search-box.md) | The search box above PreviewCard's file table |
+| — | [PathChip](./shared/path-chip.md) | A shortened path with a tooltip and a copy button, in ProjectCard and PreviewCard |
 | — | [FileViewer](./viewers/file-viewer.md) | The selected file's header, changes and content, inside PreviewCard |
 | — | [CodeViewer](./viewers/code-viewer.md) | Syntax-highlighted file view inside PreviewCard |
 | — | [StepCard](./shared/step-card.md) | Shared frame for the four step cards: step header, status badge, active-step accent |

@@ -40,7 +40,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
   - the project's **name** as the title, with a **version** badge (`v1.0.2`). A folder that isn't a saved
     project shows its folder name and no version.
   - the **path**, shortened in the middle (`C:\…\Client\clientjs`), with the full path in a tooltip and a
-    copy button.
+    copy button ([PathChip](../shared/path-chip.md)).
   - **chips** for the config status (".dataverse-gen.json found" or "New project: created on generate") and
     the table, action and function counts.
   - "Modified *3 hours ago*" for saved projects.

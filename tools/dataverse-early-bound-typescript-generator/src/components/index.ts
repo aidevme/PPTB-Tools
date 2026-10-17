@@ -17,6 +17,8 @@ export { FileSearchBox } from './shared/FileSearchBox';
 export type { IFileSearchBoxProps } from './shared/FileSearchBox';
 export { SortableHeaderCell } from './tables/SortableHeaderCell';
 export type { ISortableHeaderCellProps } from './tables/SortableHeaderCell';
+export { PathChip } from './shared/PathChip';
+export type { IPathChipProps } from './shared/PathChip';
 export { StepCard, StepIndicator } from './shared/StepCard';
 export type { IStepCardProps } from './shared/StepCard';
 export { WorkflowProgress } from './shared/WorkflowProgress';

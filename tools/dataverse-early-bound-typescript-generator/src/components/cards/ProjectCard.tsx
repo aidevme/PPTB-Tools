@@ -27,7 +27,8 @@ import {
 import type { ProjectEntry } from '../../config';
 import { basename, isSamePath, type ProjectConfigState } from '../../services';
 import { useProjectCardStyles } from '../../styles';
-import { formatRelativeTime, shortenPath } from '../shared/format';
+import { formatRelativeTime } from '../shared/format';
+import { PathChip } from '../shared/PathChip';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 import { RecentProjectsList } from './RecentProjectsList';
@@ -132,12 +133,7 @@ export function ProjectCard(props: ProjectCardProps) {
                         )}
                     </div>
                     <div className={styles.pathRow}>
-                        <Tooltip content={root} relationship="description" withArrow>
-                            <span className={styles.path}>{shortenPath(root)}</span>
-                        </Tooltip>
-                        <Tooltip content="Copy project folder path" relationship="label" withArrow>
-                            <Button appearance="subtle" size="small" icon={<CopyRegular />} onClick={() => onCopyPath(root, 'Project folder path')} />
-                        </Tooltip>
+                        <PathChip path={root} label="Project folder path" onCopy={onCopyPath} />
                     </div>
                     <div className={styles.row}>
                         {configState &&

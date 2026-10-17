@@ -46,13 +46,6 @@ export const usePreviewCardStyles = makeStyles({
 
     // Output folder
     outputRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, minWidth: 0, flexWrap: 'wrap' },
-    pathChip: {
-        fontFamily: tokens.fontFamilyMonospace,
-        fontSize: tokens.fontSizeBase200,
-        padding: `${tokens.spacingVerticalXXS} ${tokens.spacingHorizontalS}`,
-        borderRadius: tokens.borderRadiusMedium,
-        backgroundColor: tokens.colorNeutralBackground3,
-    },
 
     // Table filters
     filterBar: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexWrap: 'wrap' },

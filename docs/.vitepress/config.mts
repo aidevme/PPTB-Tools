@@ -109,6 +109,7 @@ export default defineConfig({
                                         { text: "WorkflowProgress", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/workflow-progress" },
                                         { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/step-card" },
                                         { text: "FileSearchBox", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/file-search-box" },
+                                        { text: "PathChip", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/path-chip" },
                                     ],
                                 },
                                 {

@@ -8,6 +8,7 @@ export { useFooterStyles } from './Footer.styles';
 export { useHeaderStyles } from './Header.styles';
 export { useLoadProjectDialogStyles } from './LoadProjectDialog.styles';
 export { useOptionsCardStyles } from './OptionsCard.styles';
+export { usePathChipStyles } from './PathChip.styles';
 export { usePreviewCardStyles } from './PreviewCard.styles';
 export { useProjectCardStyles } from './ProjectCard.styles';
 export { useProjectFormDialogStyles } from './ProjectFormDialog.styles';
