@@ -6,7 +6,7 @@ import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles
 import { SortableHeaderCell } from '../shared/SortableHeaderCell';
 import { formatDateTime } from '../shared/format';
 import { activateRowOnKey } from '../shared/tableRows';
-import { PROJECT_COLUMNS, type ProjectColumnKey, type ProjectSort } from './projectColumns';
+import { PROJECT_COLUMNS, type ProjectColumnKey, type ProjectSort } from '../dialogs/projectColumns';
 
 export interface IProjectsTableProps {
     /** The saved projects, already sorted. */

@@ -36,3 +36,5 @@ export { SelectionCard } from './cards/SelectionCard';
 export type { SelectionCardProps, SelectionKind } from './cards/SelectionCard';
 export { SettingsPanel } from './panels/SettingsPanel';
 export type { SettingsPanelProps } from './panels/SettingsPanel';
+export { ProjectsTable } from './tables/ProjectsTable';
+export type { IProjectsTableProps } from './tables/ProjectsTable';
