@@ -17,7 +17,7 @@ passes data and callbacks down as props. Everything is exported from the folder'
 | — | [WorkflowProgress](./workflow-progress.md) | The four steps across the top of the page; click one to scroll to its card |
 | — | [SettingsPanel](./settings-panel.md) | Drawer opened from the header's Settings button |
 | 1 | [ProjectCard](./project-card.md) | Pick the project folder and load `.dataverse-gen.json` |
-| — | [NewProjectDialog](./new-project-dialog.md) | Dialog opened from ProjectCard's New Project button |
+| — | [ProjectFormDialog](./new-project-dialog.md) | Dialog opened from ProjectCard's New Project button |
 | — | [LoadProjectDialog](./load-project-dialog.md) | Dialog opened from ProjectCard's Load Existing Project button |
 | — | [ConfirmationDialog](./confirmation-dialog.md) | Reusable confirm/cancel dialog, used before deleting a saved project |
 | 2 | [SelectionCard](./selection-card.md) | Choose tables, actions and functions |

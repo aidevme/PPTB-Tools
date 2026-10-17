@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
-import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, NewProjectDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
+import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
 import { resolveConfig } from '../../core';
 import { useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError, resolveOutputRoot } from '../../services';
@@ -131,7 +131,7 @@ export default function App() {
                 settings={toolSettings}
                 onSave={saveToolSettings}
             />
-            <NewProjectDialog
+            <ProjectFormDialog
                 open={newProjectOpen}
                 onOpenChange={setNewProjectOpen}
                 existingNames={toolSettings.projects.map((p) => p.name)}

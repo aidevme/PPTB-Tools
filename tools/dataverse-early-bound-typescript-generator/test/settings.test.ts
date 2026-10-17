@@ -12,7 +12,7 @@ import { loadToolConfig, saveToolConfig } from '../src/services/settings';
 import { DATAVERSE_GEN_TEMPLATES } from '../src/services/dataverseGenTemplates';
 import { version as toolVersion } from '../package.json';
 import { SettingsPanel } from '../src/components/panels/SettingsPanel';
-import { NewProjectDialog } from '../src/components/dialogs/NewProjectDialog';
+import { ProjectFormDialog } from '../src/components/dialogs/ProjectFormDialog';
 import { LoadProjectDialog } from '../src/components/dialogs/LoadProjectDialog';
 
 const PROJECT: ProjectEntry = { id: 'p1', name: 'Contoso', description: 'Sales app', location: '/src/contoso', version: '1.2.0', createdOn: '2026-10-12T00:00:00.000Z', modifiedOn: '2026-10-13T00:00:00.000Z' };
@@ -373,7 +373,7 @@ describe('new project dialog', () => {
         root = undefined;
     });
 
-    async function render(props: Partial<Parameters<typeof NewProjectDialog>[0]> = {}) {
+    async function render(props: Partial<Parameters<typeof ProjectFormDialog>[0]> = {}) {
         const all = {
             open: true,
             onOpenChange: vi.fn(),
@@ -385,7 +385,7 @@ describe('new project dialog', () => {
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
-            root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(NewProjectDialog, all)));
+            root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(ProjectFormDialog, all)));
         });
         return all;
     }
@@ -407,7 +407,7 @@ describe('new project dialog', () => {
         const props = await render();
         const rerender = (change: Partial<typeof props> & { project?: ProjectEntry }) =>
             act(async () => {
-                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(NewProjectDialog, { ...props, ...change })));
+                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(ProjectFormDialog, { ...props, ...change })));
             });
         await type(field('Project name'), 'Draft');
         await rerender({ open: false });

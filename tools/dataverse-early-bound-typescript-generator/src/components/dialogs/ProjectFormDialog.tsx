@@ -16,13 +16,13 @@ import {
 import { FolderOpenRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useAsyncAction } from '../../hooks';
-import { useNewProjectDialogStyles } from '../../styles';
+import { useProjectFormDialogStyles } from '../../styles';
 import { reportError } from '../../services';
 
 /** The values the dialog collects; the id and creation time are added when saving. */
 export type NewProject = Pick<ProjectEntry, 'name' | 'description' | 'location'>;
 
-export interface INewProjectDialogProps {
+export interface IProjectFormDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     /** Names of the other saved projects; the project can't reuse one (case-insensitive). */
@@ -39,8 +39,8 @@ export interface INewProjectDialogProps {
  * Modal dialog for a project's name, description and location, saved with Save. Creates a new project, or edits
  * `project` when one is given.
  */
-export function NewProjectDialog({ open, onOpenChange, existingNames, project, onBrowseLocation, onSave }: INewProjectDialogProps) {
-    const styles = useNewProjectDialogStyles();
+export function ProjectFormDialog({ open, onOpenChange, existingNames, project, onBrowseLocation, onSave }: IProjectFormDialogProps) {
+    const styles = useProjectFormDialogStyles();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
@@ -129,3 +129,8 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, project, o
         </Dialog>
     );
 }
+
+/** @deprecated Renamed to `ProjectFormDialog` (it also edits projects); kept so existing imports keep working. */
+export const NewProjectDialog = ProjectFormDialog;
+/** @deprecated Renamed to `IProjectFormDialogProps`. */
+export type INewProjectDialogProps = IProjectFormDialogProps;

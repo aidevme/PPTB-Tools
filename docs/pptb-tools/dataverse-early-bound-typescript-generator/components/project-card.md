@@ -15,7 +15,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 | `configState` | `ProjectConfigState \| null` | The loaded `.dataverse-gen.json`, its path, and whether it exists. |
 | `projects` | `ProjectEntry[]` | Saved projects: the open project's name and version, and the recent projects. |
 | `busy` | `boolean` | Disables every action while another operation runs. |
-| `onNewProject` | `() => void` | Opens the [NewProjectDialog](./new-project-dialog.md). |
+| `onNewProject` | `() => void` | Opens the [ProjectFormDialog](./new-project-dialog.md). |
 | `onLoadExistingProject` | `() => void` | Opens the [LoadProjectDialog](./load-project-dialog.md). |
 | `onOpenRecent` | `(target: ProjectOpenTarget) => void` | Opens a recent project directly. `ProjectOpenTarget` is `{ name, location }`. |
 | `onReload` | `() => void` | Re-reads `.dataverse-gen.json` from disk. |

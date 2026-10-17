@@ -1,12 +1,14 @@
-# NewProjectDialog
+# ProjectFormDialog
 
 A modal dialog for creating a new project. It opens from the **New Project** button on the
 [ProjectCard](./project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s **Edit** button reuses it,
 titled **Edit project**, to edit a saved project.
 
-Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/NewProjectDialog.tsx)
+Source: [`src/components/dialogs/ProjectFormDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx);
+styles in `src/styles/ProjectFormDialog.styles.ts`. It was called `NewProjectDialog`; that name (and
+`INewProjectDialogProps`) is still exported as a deprecated alias.
 
-## Props (`INewProjectDialogProps`)
+## Props (`IProjectFormDialogProps`)
 
 | Prop | Type | Description |
 | --- | --- | --- |

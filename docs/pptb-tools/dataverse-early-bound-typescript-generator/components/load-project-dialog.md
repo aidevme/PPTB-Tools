@@ -1,6 +1,6 @@
 # LoadProjectDialog
 
-A modal dialog listing the projects saved with the [NewProjectDialog](./new-project-dialog.md). It opens from the
+A modal dialog listing the projects saved with the [ProjectFormDialog](./new-project-dialog.md). It opens from the
 **Load Existing Project** button on the [ProjectCard](./project-card.md).
 
 Source: [`src/components/dialogs/LoadProjectDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/LoadProjectDialog.tsx);
@@ -37,7 +37,7 @@ and the columns and their sort order are in
 - **Load** opens the selected project and is enabled once a row is selected.
 - **Edit:** each row ends with two subtle Fluent UI `Button`s. The first has a pencil icon (`EditRegular`) and an
   "Edit project" `Tooltip`. Clicking it doesn't select the row; it opens the
-  [NewProjectDialog](./new-project-dialog.md) titled **Edit project**, filled with the project's name, description
+  [ProjectFormDialog](./new-project-dialog.md) titled **Edit project**, filled with the project's name, description
   and location. The name can't match another saved project's. **Save** stores the changes (`App.tsx`'s
   `editProject` saves the updated list); the version and dates aren't changed, and a project that's open stays
   open at its current folder.

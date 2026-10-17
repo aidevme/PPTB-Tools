@@ -8,7 +8,7 @@ import { nextSort } from '../shared/sorting';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from './projectColumns';
 import { ProjectsTable } from './ProjectsTable';
-import { NewProjectDialog, type NewProject } from './NewProjectDialog';
+import { ProjectFormDialog, type NewProject } from './ProjectFormDialog';
 
 export interface ILoadProjectDialogProps {
     open: boolean;
@@ -149,7 +149,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                 onConfirm={() => void confirmDelete()}
                 onCancel={() => setPendingDelete(null)}
             />
-            <NewProjectDialog
+            <ProjectFormDialog
                 open={editing !== null}
                 onOpenChange={(isOpen) => !isOpen && setEditing(null)}
                 project={editing ?? undefined}

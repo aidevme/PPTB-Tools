@@ -357,7 +357,7 @@ All writes go through `saveToolConfig(next)`, which replaces the whole stored `t
 | Tool loads | `App.tsx` effect → `loadToolConfig()` | `toolSettings` starts as `toolConfig`, then becomes `mergeToolConfig(stored)` |
 | Settings → Save | `SettingsPanel` → `saveToolSettings` | The whole draft, normalized with `mergeToolConfig` (so a blank output folder saves as the default), including the `projects` it was opened with |
 | Open a folder | `openProjectFolder` | Nothing saved; the open project's config gets `projectDefaults` |
-| New Project → Save | `NewProjectDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
+| New Project → Save | `ProjectFormDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
 | Load Existing Project → Delete | `LoadProjectDialog` → `deleteProject` | Removes the project by `id` |
 | Generate | `runGenerate` → `recordProjectGeneration` | The project whose `location` matches the open folder, if `recordGeneration` returns a change |
 

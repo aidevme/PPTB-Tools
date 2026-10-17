@@ -62,7 +62,7 @@ export default defineConfig({
                                     { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/step-card" },
                                     { text: "SettingsPanel", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/settings-panel" },
                                     { text: "ProjectCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/project-card" },
-                                    { text: "NewProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/new-project-dialog" },
+                                    { text: "ProjectFormDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/new-project-dialog" },
                                     { text: "LoadProjectDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/load-project-dialog" },
                                     { text: "ConfirmationDialog", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/confirmation-dialog" },
                                     { text: "SelectionCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/selection-card" },
