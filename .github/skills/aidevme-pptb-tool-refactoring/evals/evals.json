@@ -22,7 +22,8 @@
         "Covers structure, code quality (duplication, complexity, typing gaps, dead code, naming, error handling), dependencies, UI/UX consistency, performance and maintainability, and test coverage, citing file paths",
         "Lists steps with IDs (S1, S2, ...), rationale, expected benefit, files, effort S/M/L and risk Low/Medium/High, in execution order",
         "Gives mitigation and rollback for every Medium or High step and names breaking changes, treating a change to the byte-for-byte dataverse-gen output as breaking",
-        "Asks the user to choose Accept all, Accept selected steps only, Save as TODO only, or Reject (Request changes through the free-text answer), and doesn't start executing or write a TODO file before the answer"
+        "Asks the user to choose Accept all, Accept selected steps only, Save as TODO only, or Reject (Request changes through the free-text answer), and doesn't start executing or write a TODO file before the answer",
+        "Checks findings that depend on Microsoft platform behavior (Dataverse Web API, Fluent UI v9 tokens) with the Microsoft Learn MCP Server (microsoft_docs_search, then microsoft_docs_fetch when needed) and cites the Learn URLs in the evidence and the Microsoft Learn references section"
       ]
     },
     {
@@ -84,6 +85,17 @@
         "The file has the header with decision 'Saved as TODO only' and status 'Saved as TODO, no changes made', a TODO checklist with every step open, and the full analysis",
         "Makes no change to tool code, config, docs or other files and makes no commit",
         "Doesn't start execution, and ends by stating the saved file path and that nothing else changed"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Refactor dataverse-early-bound-typescript-generator. (No Microsoft Learn MCP server is configured in this session.)",
+      "expected_output": "The read-only analysis and the approval question still happen; the user is told the Microsoft Learn MCP Server is not available, with how to add it, and findings that would need Learn are marked \"Microsoft Learn not checked\" instead of stated from memory.",
+      "files": [],
+      "expectations": [
+        "Says the Microsoft Learn MCP Server is not available and shows how to add it (https://learn.microsoft.com/api/mcp), without changing any MCP configuration itself",
+        "Marks findings about Microsoft platform behavior as \"Microsoft Learn not checked\" rather than presenting unverified API details as fact",
+        "Still completes the read-only analysis and asks the approval question without modifying any file"
       ]
     }
   ]
