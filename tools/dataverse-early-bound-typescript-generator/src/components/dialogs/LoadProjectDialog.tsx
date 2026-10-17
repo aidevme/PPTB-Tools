@@ -2,13 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, MessageBar, MessageBarBody, Text } from '@fluentui/react-components';
 import { DeleteRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
+import { useAsyncAction } from '../../hooks';
 import { useLoadProjectDialogStyles } from '../../styles';
 import { nextSort } from '../shared/sorting';
 import { ConfirmationDialog } from './ConfirmationDialog';
 import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from './projectColumns';
 import { ProjectsTable } from './ProjectsTable';
 import { NewProjectDialog, type NewProject } from './NewProjectDialog';
-import { reportError } from '../../services';
 
 export interface ILoadProjectDialogProps {
     open: boolean;
@@ -41,11 +41,13 @@ export interface ILoadProjectDialogProps {
 export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onBrowseLocation }: ILoadProjectDialogProps) {
     const styles = useLoadProjectDialogStyles();
     const [selectedId, setSelectedId] = useState<string>('');
-    const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const opening = useAsyncAction(setLoadError);
+    const deletion = useAsyncAction(setLoadError);
+    const loading = opening.busy;
+    const deleting = deletion.busy;
     /** The project waiting for the user to confirm its deletion. */
     const [pendingDelete, setPendingDelete] = useState<ProjectEntry | null>(null);
-    const [deleting, setDeleting] = useState(false);
     /** The project open in the edit dialog. */
     const [editing, setEditing] = useState<ProjectEntry | null>(null);
     const [sort, setSort] = useState(DEFAULT_PROJECT_SORT);
@@ -68,31 +70,19 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
 
     const load = async (project: ProjectEntry) => {
         setSelectedId(project.id);
-        setLoading(true);
-        setLoadError(null);
-        try {
+        await opening.run(`Could not open ${project.name}`, async () => {
             if (await onLoad(project)) onOpenChange(false);
-        } catch (error) {
-            setLoadError(reportError(`Could not open ${project.name}`, error, undefined, { notify: false }));
-        } finally {
-            setLoading(false);
-        }
+        });
     };
 
     const confirmDelete = async () => {
         if (!pendingDelete) return;
         const project = pendingDelete;
-        setDeleting(true);
-        setLoadError(null);
-        try {
+        await deletion.run(`Could not delete ${project.name}`, async () => {
             await onDelete(project);
             if (selectedId === project.id) setSelectedId('');
-        } catch (error) {
-            setLoadError(reportError(`Could not delete ${project.name}`, error, undefined, { notify: false }));
-        } finally {
-            setDeleting(false);
-            setPendingDelete(null);
-        }
+        });
+        setPendingDelete(null);
     };
 
     const busy = loading || deleting;

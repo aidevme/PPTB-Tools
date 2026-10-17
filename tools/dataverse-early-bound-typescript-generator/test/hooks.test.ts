@@ -7,7 +7,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
 import { resolveConfig, type DataverseGenConfig } from '../src/core';
-import { useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
+import { useAsyncAction, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
 import { InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
 import type { EntitySummary, OperationSummary } from '../src/types';
 
@@ -59,6 +59,39 @@ afterEach(() => {
 });
 
 const PROJECT: ProjectEntry = { id: 'p1', name: 'Contoso', description: '', location: '/src/contoso', version: '1.0.0', createdOn: '2026-10-01T00:00:00.000Z', modifiedOn: '2026-10-01T00:00:00.000Z' };
+
+describe('useAsyncAction', () => {
+    it('is busy while the action runs, clears the error first, and returns the result', async () => {
+        const setError = vi.fn();
+        let finish: (value: string) => void = () => {};
+        const { result } = renderHook(() => useAsyncAction(setError));
+        let outcome: Promise<string | undefined> = Promise.resolve(undefined);
+        act(() => {
+            outcome = result.current.run('Could not save', () => new Promise<string>((resolve) => (finish = resolve)));
+        });
+        expect(result.current.busy).toBe(true);
+        expect(setError).toHaveBeenCalledWith(null);
+        await act(async () => finish('saved'));
+        expect(await outcome).toBe('saved');
+        expect(result.current.busy).toBe(false);
+    });
+
+    it('shows the friendly error and stops being busy when the action fails', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => {});
+        const setError = vi.fn();
+        const { result } = renderHook(() => useAsyncAction(setError));
+        let outcome: string | undefined = 'unset';
+        await act(async () => {
+            outcome = await result.current.run<string>('Could not save the project', async () => {
+                throw new Error('disk full');
+            });
+        });
+        expect(outcome).toBeUndefined();
+        expect(setError).toHaveBeenLastCalledWith(expect.stringContaining('Could not save the project'));
+        expect(result.current.busy).toBe(false);
+        vi.restoreAllMocks();
+    });
+});
 
 describe('usePlanState', () => {
     it('clears the plan, resets it with its stale flag, or marks it stale', () => {

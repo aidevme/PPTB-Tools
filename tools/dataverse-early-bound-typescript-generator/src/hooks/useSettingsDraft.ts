@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { toolConfig, toolConfigEquals, type GeneralSettings, type ProjectDefaults, type ToolConfig } from '../config';
-import { reportError } from '../services';
+import { useAsyncAction } from './useAsyncAction';
 
 /** The settings with every value Reset puts back to the bundled default; saved projects are kept. */
 function withDefaults(config: ToolConfig): ToolConfig {
@@ -31,8 +31,9 @@ export interface UseSettingsDraftOptions {
  */
 export function useSettingsDraft({ open, settings, onSave, onOpenChange }: UseSettingsDraftOptions) {
     const [draft, setDraft] = useState<ToolConfig>(settings);
-    const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const saveAction = useAsyncAction(setSaveError);
+    const saving = saveAction.busy;
 
     // Start every visit from the saved values.
     useEffect(() => {
@@ -51,18 +52,11 @@ export function useSettingsDraft({ open, settings, onSave, onOpenChange }: UseSe
     /** Reset to defaults: the bundled defaults, keeping the saved projects. */
     const resetToDefaults = () => setDraft(withDefaults);
 
-    const save = async () => {
-        setSaving(true);
-        setSaveError(null);
-        try {
+    const save = () =>
+        saveAction.run(`Could not save the settings`, async () => {
             await onSave(draft);
             onOpenChange(false);
-        } catch (error) {
-            setSaveError(reportError(`Could not save the settings`, error, undefined, { notify: false }));
-        } finally {
-            setSaving(false);
-        }
-    };
+        });
 
     return { draft, dirty, atDefaults, saving, saveError, update, updateProjectDefaults, updateGeneral, resetToDefaults, save };
 }

@@ -15,6 +15,7 @@ import {
 } from '@fluentui/react-components';
 import { FolderOpenRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
+import { useAsyncAction } from '../../hooks';
 import { useNewProjectDialogStyles } from '../../styles';
 import { reportError } from '../../services';
 
@@ -43,8 +44,9 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, project, o
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [location, setLocation] = useState('');
-    const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState<string | null>(null);
+    const saveAction = useAsyncAction(setSaveError);
+    const saving = saveAction.busy;
 
     // Start every visit with an empty form, or with the edited project's values.
     useEffect(() => {
@@ -69,18 +71,11 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, project, o
         }
     };
 
-    const save = async () => {
-        setSaving(true);
-        setSaveError(null);
-        try {
+    const save = () =>
+        saveAction.run(`Could not save the project`, async () => {
             await onSave({ name: trimmedName, description: description.trim(), location: location.trim() });
             onOpenChange(false);
-        } catch (error) {
-            setSaveError(reportError(`Could not save the project`, error, undefined, { notify: false }));
-        } finally {
-            setSaving(false);
-        }
-    };
+        });
 
     return (
         <Dialog open={open} onOpenChange={(_, data) => !saving && onOpenChange(data.open)}>

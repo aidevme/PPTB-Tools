@@ -18,6 +18,10 @@ The tool's state lives in custom hooks in `src/hooks/`; there's no state managem
 | `useEnvironmentMetadata` | `entities`, `operations` and `solutions`, the solution filter (`selectedSolutionId`, `solutionEntityIds`, `solutionComponentIds`, cached per solution in refs), the selected names the environment lacks (`missing`), and the `$metadata` fallback warning. |
 | `usePreviewGenerate` | `progress`, Preview and Generate, and whether the two Generate confirmation dialogs are open. |
 
+Two smaller hooks serve the dialogs and the Settings panel: `useSettingsDraft` (the panel's draft, Save and Reset to
+defaults) and `useAsyncAction(setError)`, which runs a button's async action (save, open, delete) with a `busy` flag,
+clearing the caller's error when it starts and setting it through `reportError` when it fails.
+
 `App.tsx` itself keeps only `error`, `settingsOpen`, `newProjectOpen` and `loadProjectOpen`, plus `steps`
 (derived, not state): `computeWorkflowSteps` from the open project, the selection count and the plan, passed to
 `WorkflowProgress` and each card.
