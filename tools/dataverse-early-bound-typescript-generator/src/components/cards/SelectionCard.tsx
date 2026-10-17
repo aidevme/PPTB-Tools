@@ -29,19 +29,31 @@ export type SelectionKind = 'entities' | 'actions' | 'functions';
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
 
+/** The solution dropdown and what the chosen solution contains. */
+export interface ISelectionSolutionFilter {
+    solutions: SolutionSummary[];
+    /** The chosen solution, or `null` for all solutions. */
+    selectedId: string | null;
+    /** Entity `MetadataId`s in the chosen solution, or `null` when no solution filter is active. */
+    entityIds: Set<string> | null;
+    /** Ids of custom API / process-action records in the chosen solution, or `null` when not filtering. */
+    componentIds: Set<string> | null;
+}
+
+/** Which lists are still loading. */
+export interface ISelectionLoading {
+    entities: boolean;
+    operations: boolean;
+    /** The chosen solution's components. */
+    solution: boolean;
+}
+
 export interface ISelectionCardProps {
     step: StepState;
     entities: EntitySummary[];
     operations: OperationSummary[] | null;
-    solutions: SolutionSummary[];
-    /** Entity `MetadataId`s in the chosen solution, or `null` when no solution filter is active. */
-    solutionEntityIds: Set<string> | null;
-    /** Ids of custom API / process-action records in the chosen solution, or `null` when not filtering. */
-    solutionComponentIds: Set<string> | null;
-    selectedSolutionId: string | null;
-    loadingEntities: boolean;
-    loadingOperations: boolean;
-    loadingSolution: boolean;
+    solutionFilter: ISelectionSolutionFilter;
+    loading: ISelectionLoading;
     selected: Record<SelectionKind, string[]>;
     /** Names in the config that the connected environment does not have. */
     missing: Record<SelectionKind, string[]>;
@@ -62,7 +74,7 @@ export interface ISelectionCardProps {
 
 /** Step 2: pick tables, actions and functions. Selection is stored directly in the config. */
 export function SelectionCard(props: ISelectionCardProps) {
-    const { step } = props;
+    const { step, solutionFilter } = props;
     const styles = useSelectionCardStyles();
     /** Nothing to browse until a project is open, so every control is disabled. */
     const noProject = !!props.needsProject;
@@ -80,7 +92,7 @@ export function SelectionCard(props: ISelectionCardProps) {
     const rows = useMemo(
         () =>
             tab === 'entities'
-                ? buildEntityRows(props.entities, { term, selectedOnly, selectedSet, solutionEntityIds: props.solutionEntityIds }, styles)
+                ? buildEntityRows(props.entities, { term, selectedOnly, selectedSet, solutionEntityIds: solutionFilter.entityIds }, styles)
                 : buildOperationRows(
                       props.operations,
                       {
@@ -89,12 +101,12 @@ export function SelectionCard(props: ISelectionCardProps) {
                           selectedOnly,
                           selectedSet,
                           customApisOnly,
-                          selectedSolutionId: props.selectedSolutionId,
-                          solutionComponentIds: props.solutionComponentIds,
+                          selectedSolutionId: solutionFilter.selectedId,
+                          solutionComponentIds: solutionFilter.componentIds,
                       },
                       styles,
                   ),
-        [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles],
+        [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, solutionFilter.entityIds, solutionFilter.componentIds, solutionFilter.selectedId, styles],
     );
 
     const onTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
@@ -103,7 +115,7 @@ export function SelectionCard(props: ISelectionCardProps) {
         if (next !== 'entities') props.onEnsureOperations();
     };
 
-    const loading = tab === 'entities' ? props.loadingEntities : props.loadingOperations;
+    const loading = tab === 'entities' ? props.loading.entities : props.loading.operations;
     const missing = props.missing[tab];
     // Sorted before the row limit, so the first rows shown are the first of all matches.
     const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
@@ -152,18 +164,18 @@ export function SelectionCard(props: ISelectionCardProps) {
                         aria-label="Filter by solution"
                         placeholder="All solutions"
                         clearable
-                        selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}
-                        value={props.solutions.find((s) => s.id === props.selectedSolutionId)?.friendlyName ?? ''}
+                        selectedOptions={solutionFilter.selectedId ? [solutionFilter.selectedId] : []}
+                        value={solutionFilter.solutions.find((s) => s.id === solutionFilter.selectedId)?.friendlyName ?? ''}
                         onOptionSelect={(_, data) => props.onSolutionChange(data.optionValue ?? null)}
-                        disabled={noProject || props.solutions.length === 0}
+                        disabled={noProject || solutionFilter.solutions.length === 0}
                     >
-                        {props.solutions.map((s) => (
+                        {solutionFilter.solutions.map((s) => (
                             <Option key={s.id} value={s.id} text={s.friendlyName}>
                                 {`${s.friendlyName} (${s.uniqueName})`}
                             </Option>
                         ))}
                     </Dropdown>
-                    {props.loadingSolution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
+                    {props.loading.solution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
                     {tab !== 'entities' && (
                         <Switch label="Custom only" checked={customApisOnly} disabled={noProject} onChange={(_, data) => setCustomApisOnly(data.checked)} />
                     )}

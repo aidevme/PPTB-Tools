@@ -38,7 +38,7 @@ export type { IPreviewCardProps, PreviewCardProps } from './cards/PreviewCard';
 export { ProjectCard } from './cards/ProjectCard';
 export type { IProjectCardProps, ProjectCardProps } from './cards/ProjectCard';
 export { SelectionCard } from './cards/SelectionCard';
-export type { ISelectionCardProps, SelectionCardProps, SelectionKind } from './cards/SelectionCard';
+export type { ISelectionCardProps, ISelectionLoading, ISelectionSolutionFilter, SelectionCardProps, SelectionKind } from './cards/SelectionCard';
 export { SettingsPanel } from './panels/SettingsPanel';
 export type { SettingsPanelProps } from './panels/SettingsPanel';
 export { ProjectsTable } from './tables/ProjectsTable';

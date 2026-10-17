@@ -14,13 +14,8 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 | `step` | `StepState` | This step's state for the [StepCard](../shared/step-card.md) header. |
 | `entities` | `EntitySummary[]` | Tables in the connected environment. |
 | `operations` | `OperationSummary[] \| null` | Actions and functions; `null` until the `$metadata` document has been loaded. |
-| `solutions` | `SolutionSummary[]` | Solutions offered in the solution filter. |
-| `solutionEntityIds` | `Set<string> \| null` | Table `MetadataId`s in the chosen solution; `null` when no solution filter is active. |
-| `solutionComponentIds` | `Set<string> \| null` | Custom API and custom process action ids in the chosen solution; `null` when not filtering. |
-| `selectedSolutionId` | `string \| null` | The solution chosen in the filter. |
-| `loadingEntities` | `boolean` | Shows a spinner on the Tables tab. |
-| `loadingOperations` | `boolean` | Shows a spinner on the Actions and Functions tabs. |
-| `loadingSolution` | `boolean` | Shows a spinner while the solution's components load. |
+| `solutionFilter` | `ISelectionSolutionFilter` | The solution filter: `solutions` offered in the dropdown, the chosen `selectedId` (`null` for all), and what it contains: `entityIds` (table `MetadataId`s) and `componentIds` (custom API and custom process action ids), each `null` when no solution filter is active. |
+| `loading` | `ISelectionLoading` | Spinners: `entities` on the Tables tab, `operations` on the Actions and Functions tabs, `solution` while the chosen solution's components load. |
 | `selected` | `Record<SelectionKind, string[]>` | Selected names per tab. |
 | `missing` | `Record<SelectionKind, string[]>` | Names in the config that the connected environment doesn't have. |
 | `disabled` | `boolean` | Disables the checkboxes and Clear button. |

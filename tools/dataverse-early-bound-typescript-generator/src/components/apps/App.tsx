@@ -204,13 +204,8 @@ export default function App() {
                     step={steps[1]}
                     entities={entities}
                     operations={operations}
-                    solutions={solutions}
-                    solutionEntityIds={solutionEntityIds}
-                    solutionComponentIds={solutionComponentIds}
-                    selectedSolutionId={selectedSolutionId}
-                    loadingEntities={loadingEntities}
-                    loadingOperations={loadingOperations}
-                    loadingSolution={loadingSolution}
+                    solutionFilter={{ solutions, selectedId: selectedSolutionId, entityIds: solutionEntityIds, componentIds: solutionComponentIds }}
+                    loading={{ entities: loadingEntities, operations: loadingOperations, solution: loadingSolution }}
                     selected={selected}
                     missing={missing}
                     disabled={!canSelect || busy}
