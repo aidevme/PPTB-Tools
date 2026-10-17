@@ -158,6 +158,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/`) |
 | `aidevme-pptb-tool-developer` | Moving inline `makeStyles` hooks out of a tool's components into `src/styles/<ComponentName>.styles.ts` (`use<ComponentName>Styles`) |
 | `aidevme-github` | Committing when asked: one commit per file, each with its own Conventional Commits message |
+| `aidevme-vitepress` | Changing the VitePress docs site (pages, sidebar, config, build errors), checked against the VitePress docs through the Vue Docs MCP server |
 | `playwright-cli` | Driving a browser: testing, screenshots, scraping |
 | `aidevme-dataverse-sdk-reference` | Dataverse SDK / Web API / metadata reference |
 | `aidevme-fetchxml-queries` | Writing or optimizing FetchXML |
