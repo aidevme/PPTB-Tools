@@ -999,7 +999,7 @@
       "group": "delivery",
       "ported": true,
       "source": "authored",
-      "note": "Commit changes one file at a time with Conventional Commits 1.0.0 messages: safety check, per-file diffs, coupled-file grouping, plan and confirmation; never push or bypass hooks unless asked."
+      "note": "Git and GitHub workflow router: one commit per file with Conventional Commits, branch names, issues, pull requests, review comments, CI and security through the GitHub MCP server; references loaded on demand; never push or bypass hooks unless asked."
     },
     {
       "name": "aidevme-vitepress",
