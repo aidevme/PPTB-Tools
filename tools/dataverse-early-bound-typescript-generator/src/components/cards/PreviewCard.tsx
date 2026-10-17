@@ -13,7 +13,8 @@ import { useResizableSplit } from '../shared/useResizableSplit';
 import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
-import { FileTable, PreviewActionBar, StatusTiles } from './PreviewParts';
+import { FileTable } from '../tables/FileTable';
+import { PreviewActionBar, StatusTiles } from './PreviewParts';
 
 /** Explanation in the Show unchanged switch's info label. */
 const SHOW_UNCHANGED_INFO = (

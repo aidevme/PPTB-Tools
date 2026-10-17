@@ -38,3 +38,5 @@ export { SettingsPanel } from './panels/SettingsPanel';
 export type { SettingsPanelProps } from './panels/SettingsPanel';
 export { ProjectsTable } from './tables/ProjectsTable';
 export type { IProjectsTableProps } from './tables/ProjectsTable';
+export { FileTable } from './tables/FileTable';
+export type { IFileTableProps } from './tables/FileTable';
