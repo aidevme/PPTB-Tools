@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2026-04-15T00:00:00.000Z" agent="hso-diagram-drawio" version="24.0.0">
+  <diagram id="arch" name="Architecture">
+    <mxGraphModel dx="1600" dy="900" grid="1" gridSize="20" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="HSO Sample Architecture — Dataverse Platform" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=16;fontStyle=1;fontFamily=Segoe UI;align=left;spacingLeft=12;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="600" height="36" as="geometry" />
+        </mxCell>
+
+        <!-- Presentation Layer -->
+        <mxCell id="layer_pres" value="Presentation" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="1440" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_mda" value="Model-driven App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_pres">
+          <mxGeometry x="40" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_canvas" value="Canvas App" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_pres">
+          <mxGeometry x="280" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_portal" value="Power Pages Portal" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_pres">
+          <mxGeometry x="520" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_pcf" value="PCF Controls" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_pres">
+          <mxGeometry x="760" y="40" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Business Logic Layer -->
+        <mxCell id="layer_biz" value="Business Logic" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="280" width="1440" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_plugins" value="Plugins&#10;(C# / IPlugin)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_biz">
+          <mxGeometry x="40" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_flows" value="Power Automate&#10;Cloud Flows" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_biz">
+          <mxGeometry x="280" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_customapi" value="Custom APIs" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_biz">
+          <mxGeometry x="520" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_functions" value="Azure Functions" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_biz">
+          <mxGeometry x="760" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_copilot" value="Copilot Studio&#10;Agents" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00B294;strokeColor=#00B294;fontColor=#FFFFFF;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_biz">
+          <mxGeometry x="1000" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Data Layer -->
+        <mxCell id="layer_data" value="Data" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="460" width="1440" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_dv" value="Dataverse&#10;Tables" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00395F;strokeColor=#00395F;fontColor=#FFFFFF;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_data">
+          <mxGeometry x="40" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_storage" value="Azure Blob&#10;Storage" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_data">
+          <mxGeometry x="280" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_synapse" value="Synapse Link&#10;(Fabric)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_data">
+          <mxGeometry x="520" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_powerbi" value="Power BI" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_data">
+          <mxGeometry x="760" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Integration Layer -->
+        <mxCell id="layer_int" value="Integration &amp; External" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ECEFF3;strokeColor=#7F9CAF;fontColor=#00395F;fontSize=13;fontStyle=1;fontFamily=Segoe UI;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;container=1;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="640" width="1440" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_entra" value="Entra ID" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_int">
+          <mxGeometry x="40" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_apim" value="API Management" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#00395F;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_int">
+          <mxGeometry x="280" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_erp" value="ERP / Finance&#10;(external)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2B949;strokeColor=#F2B949;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_int">
+          <mxGeometry x="520" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cmp_payments" value="Payments Gateway&#10;(external)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2B949;strokeColor=#F2B949;fontColor=#00395F;fontSize=12;fontStyle=1;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="layer_int">
+          <mxGeometry x="760" y="50" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!--
+          Edge routing rule: only draw edges between VERTICALLY ALIGNED boxes in
+          ADJACENT layers. drawio's orthogonal router does not avoid intermediate
+          shapes, so diagonal or same-layer edges will slice through other boxes.
+          Long-distance / cross-layer / same-layer relationships are communicated
+          through positional adjacency and the legend, NOT through arrows.
+          Use exitX/entryX=0.5;exitY=1;entryY=0 to force bottom→top straight lines.
+        -->
+
+        <!-- Presentation → Business Logic (column-aligned, x = 40, 280, 520, 760) -->
+        <mxCell id="edge_mda_plugins" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_mda" target="cmp_plugins">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_canvas_flows" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_canvas" target="cmp_flows">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_portal_customapi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_portal" target="cmp_customapi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_pcf_functions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_pcf" target="cmp_functions">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Business Logic → Data (column-aligned, x = 40, 280, 520, 760) -->
+        <mxCell id="edge_plugins_dv" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_plugins" target="cmp_dv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_flows_storage" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_flows" target="cmp_storage">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_customapi_synapse" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_customapi" target="cmp_synapse">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_functions_powerbi" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#00395F;endArrow=classic;endFill=1;" edge="1" parent="1" source="cmp_functions" target="cmp_powerbi">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Data → Integration (column-aligned, x = 40, 280, 520, 760) -->
+        <mxCell id="edge_dv_entra" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#7F9CAF;dashed=1;endArrow=open;" edge="1" parent="1" source="cmp_dv" target="cmp_entra">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_storage_apim" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#7F9CAF;dashed=1;endArrow=open;" edge="1" parent="1" source="cmp_storage" target="cmp_apim">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_synapse_erp" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#7F9CAF;dashed=1;endArrow=open;" edge="1" parent="1" source="cmp_synapse" target="cmp_erp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_powerbi_payments" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeColor=#7F9CAF;dashed=1;endArrow=open;" edge="1" parent="1" source="cmp_powerbi" target="cmp_payments">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Legend -->
+        <mxCell id="legend_primary" value="HSO components" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#079FC3;strokeColor=#079FC3;fontColor=#FFFFFF;fontSize=10;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="820" width="140" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_external" value="External / third-party" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F2B949;strokeColor=#F2B949;fontColor=#00395F;fontSize=10;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="200" y="820" width="160" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_ai" value="AI / Copilot" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#00B294;strokeColor=#00B294;fontColor=#FFFFFF;fontSize=10;fontFamily=Segoe UI;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="380" y="820" width="120" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="legend_dashed" value="— — — async / external call" style="text;html=1;strokeColor=none;fillColor=none;fontColor=#505050;fontSize=10;fontFamily=Segoe UI;" vertex="1" parent="1">
+          <mxGeometry x="520" y="820" width="220" height="26" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

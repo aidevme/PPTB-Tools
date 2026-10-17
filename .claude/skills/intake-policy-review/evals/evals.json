@@ -1,0 +1,78 @@
+{
+  "skill_name": "intake-policy-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review tools/dataverse-early-bound-typescript-generator for marketplace intake readiness.",
+      "expected_output": "An evidence-based review against the live marketplace and AI-assisted development policies: the tool's write paths are verified in code, the Area/Status/Finding table covers every required area, material findings are numbered with snippets, and the report ends with Recommended pre-submission changes and a Final verdict with the blockers below it.",
+      "files": [],
+      "expectations": [
+        "Fetches the live policy pages docs.powerplatformtoolbox.com/policies/marketplace and /policies/ai-assisted-development before making compliance claims",
+        "Inspects README.md, package.json, the source and the file write and delete paths, not the README alone",
+        "Identifies the tool as state-changing (it writes and can delete files) and checks the preview, the confirmation and the README's ## What this tool changes section",
+        "Produces an | Area | Status | Finding | table covering marketplace name, publisher attribution, icon, read/write behavior, API usage, privacy/CSP, screenshots, real-environment testing, AI disclosure, dependencies and validation/theme testing",
+        "Uses only the severity levels ❌ Blocker, ⚠️ Needs attention, ✅ Pass and ✅ / verify",
+        "Ends with a prioritized Recommended pre-submission changes list and a Final verdict (🟢, 🟡, 🟠 or 🔴) with the specific blockers stated immediately below it"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Is this PPTB tool ready for the marketplace? It only reads metadata and shows it in a grid.",
+      "expected_output": "The read-only claim is verified against the code; if confirmed, the tool isn't penalized for lacking backup, rollback or confirmation controls.",
+      "files": [],
+      "expectations": [
+        "Verifies in the source that the tool makes no create, update, delete or file-write calls",
+        "States explicitly that the tool is read-only",
+        "Doesn't require backup, undo, confirmation dialogs or a What this tool changes section for a genuinely read-only tool",
+        "Still checks marketplace name, icon, privacy/CSP, screenshots, testing and dependencies"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review my tool for intake. Its package.json has displayName \"Contoso - Solution Explorer\" and the icon is our company logo.",
+      "expected_output": "The publisher prefix in displayName and the company-logo icon are flagged against the marketplace policy, with an exact replacement displayName snippet and publisher attribution moved to author or the README.",
+      "files": [],
+      "expectations": [
+        "Flags the Contoso prefix in displayName as a marketplace-name finding",
+        "Gives an exact replacement, for example \"displayName\": \"Solution Explorer\"",
+        "Says publisher attribution belongs in author, contributors, the README or the npm scope",
+        "Flags the company-logo icon and recommends a functional, tool-oriented icon"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review this tool. I don't know how much of it was written with AI.",
+      "expected_output": "AI disclosure is phrased conditionally (required if substantially AI-assisted), not as a confirmed failure, while the other AI-assisted development checks still apply.",
+      "files": [],
+      "expectations": [
+        "Words the AI disclosure row as 'required if substantially AI-assisted'",
+        "Doesn't mark missing AI disclosure as a ❌ Blocker when the extent of AI assistance is unknown",
+        "Still applies the AI-assisted development checks (real-environment testing, API validity, bounded loops, unsafe patterns)"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Run an intake review. The README says the bulk delete feature is UNVERIFIED against a live environment, and there are only unit tests.",
+      "expected_output": "The unverified consequential feature is treated as a material pre-submission issue, unit tests aren't accepted as real-environment testing, and no command is claimed to pass unless it was run.",
+      "files": [],
+      "expectations": [
+        "Treats the UNVERIFIED bulk delete as a material issue (⚠️ Needs attention or ❌ Blocker) and asks for live PPTB testing",
+        "States that unit or mocked tests don't satisfy real-environment testing",
+        "Checks the delete path for a preview, a confirmation naming the target and scope, bounded batching and surfaced failures",
+        "Only reports npm audit, npm run validate or build results as passed if it actually ran them or the repository shows the evidence"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Review https://github.com/<owner>/<repo>/tree/main/tools/<tool-name> for marketplace readiness.",
+      "expected_output": "The monorepo subfolder is treated as the review scope, with shared code inspected where it affects the tool, and the review follows the required output structure.",
+      "files": [],
+      "expectations": [
+        "Uses the tools/<tool-name> folder as the scope instead of the whole repository",
+        "Checks shared code or root configuration only where it materially affects the tool",
+        "Checks cspExceptions and any external network calls against the README's privacy statements",
+        "Highlights good safety patterns as well as defects"
+      ]
+    }
+  ]
+}

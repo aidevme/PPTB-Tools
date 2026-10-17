@@ -64,6 +64,17 @@ export const useSettingsPanelStyles = makeStyles({
     sectionTitle: { flexGrow: 1 },
     sectionBadges: { display: 'flex', gap: tokens.spacingHorizontalXS, flexWrap: 'wrap' },
     sectionExtra: { padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL} ${tokens.spacingVerticalM}` },
+    // Templates tab: the read-only template viewer.
+    templates: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS, minWidth: 0 },
+    templateMeta: { color: tokens.colorNeutralForeground3 },
+    templateCode: {
+        maxHeight: '420px',
+        overflow: 'auto',
+        padding: tokens.spacingHorizontalS,
+        backgroundColor: tokens.colorNeutralBackground2,
+        border: `1px solid ${tokens.colorNeutralStroke2}`,
+        borderRadius: tokens.borderRadiusMedium,
+    },
 
     row: {
         display: 'flex',

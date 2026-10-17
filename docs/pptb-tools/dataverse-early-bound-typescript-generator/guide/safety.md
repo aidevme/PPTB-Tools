@@ -17,6 +17,9 @@ The tool writes only when you click **Generate**, and only inside the project fo
 - **Ask before generating:** turn on **Settings → Generate & files → Ask before generating** to confirm each run,
   with the output folder and the number of files to create and overwrite.
 - **`.dataverse-gen.json`:** saved in the project folder on every Generate, with the selection and options.
+- **dataverse-gen templates:** Generate also writes dataverse-gen's seven EJS templates to the project's
+  `templateRoot` folder (`_templates` by default), overwriting changed copies. Edits you made to those templates
+  are lost unless they're in source control. Preview lists them, with their changes.
 
 ## Orphaned files
 

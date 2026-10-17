@@ -1,5 +1,5 @@
 /**
- * A saved project's version and Modified On change when a Generate run adds files or stops producing files
+ * A saved project's version and Modified on change when a Generate run adds files or stops producing files
  * the previous run did.
  */
 import { describe, expect, it } from 'vitest';

@@ -11,6 +11,8 @@ copyright notice are reproduced as its licence requires.
 - **Used in this tool:**
   - The generator logic and the output templates are a TypeScript port of dataverse-gen (`src/core/`); they're
     compiled into the tool's `dist/` bundle.
+  - dataverse-gen's seven EJS templates (`_templates/*.ejs`) are included unchanged in
+    `src/assets/dataverse-gen-templates/`, bundled into `dist/`, and written into users' projects by Generate.
   - The test fixtures in `test/fixtures/` are trimmed from dataverse-gen's test data, and `test/reference/` holds
     output produced by the dataverse-gen CLI.
 

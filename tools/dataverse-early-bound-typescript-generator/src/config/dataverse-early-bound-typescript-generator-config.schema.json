@@ -22,6 +22,16 @@
             "type": "boolean",
             "default": false
         },
+        "skipDuplicateIdentifiers": {
+            "description": "Don't write generated files that declare a name more than once (two choice labels that become the same enum member name), since TypeScript won't compile them. When false, they're written and only reported. Shown on the Settings panel's Generate & files tab.",
+            "type": "boolean",
+            "default": false
+        },
+        "renameDuplicateIdentifiers": {
+            "description": "Rename later duplicate enum members (two choice labels that become the same name) to <Name>_<Value>, for example InProgress_700970000, so the generated files compile. When false, the output matches dataverse-gen and the files are reported as having duplicate identifiers. Shown on the Settings panel's Generate & files tab and as a switch in Preview and generate.",
+            "type": "boolean",
+            "default": false
+        },
         "projectDefaults": {
             "$ref": "#/definitions/projectDefaults"
         },

@@ -402,7 +402,8 @@ function mapParameter(ctx: MappingContext, parameter: EdmxParameter): ParameterM
     };
 }
 
-function labelText(label: { UserLocalizedLabel?: { Label?: string | null } | null } | null | undefined): string {
+/** A metadata label's user-localized text, or an empty string. */
+export function labelText(label: { UserLocalizedLabel?: { Label?: string | null } | null } | null | undefined): string {
     return label?.UserLocalizedLabel?.Label ?? '';
 }
 

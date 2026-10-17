@@ -1,5 +1,24 @@
 {
-  "enabledPlugins": {
-    "dataverse@claude-plugins-official": true
-  }
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Read(//**)",
+      "Bash(pwsh -File agent-src/sync/sync.ps1*)",
+      "Bash(pwsh -File agent-src/sync/verify-parity.ps1*)",
+      "Bash(pwsh -File agent-src/sync/check-shared.ps1*)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(dotnet build*)",
+      "Bash(npm ci*)",
+      "Bash(npm run build*)",
+      "Bash(pac solution export*)"
+    ],
+    "deny": [
+      "Bash(pac solution import*)",
+      "Bash(pac pcf push*)"
+    ]
+  },
+  "_note": "Generated-file safety: .claude/skills and .github/skills are OUTPUTS of agent-src/sync/sync.ps1 — do not hand-edit. The deny list keeps deploy/push actions (which must target Dev via a verified connection) from running unattended; approve them per-action. Extend allow[] per project."
 }

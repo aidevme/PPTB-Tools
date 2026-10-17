@@ -2,14 +2,10 @@
  * Solution list and solution → table membership, for the Select step's solution filter.
  */
 import type { SolutionSummary } from '../types';
-import { withRetries } from './errors';
+import { dataverseApi as api } from './errors';
+import { textOf } from './webApiRow';
 
 const ENTITY_COMPONENT_TYPE = 1;
-
-function api(): typeof window.dataverseAPI {
-    if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
-    return withRetries(window.dataverseAPI);
-}
 
 /** Visible unmanaged solutions, sorted by friendly name. */
 export async function listSolutions(): Promise<SolutionSummary[]> {
@@ -17,10 +13,10 @@ export async function listSolutions(): Promise<SolutionSummary[]> {
     return result.value
         .filter((s) => s.isvisible !== false && s.ismanaged !== true)
         .map((s) => ({
-            id: s.solutionid as string,
-            uniqueName: s.uniquename as string,
-            friendlyName: (s.friendlyname as string) || (s.uniquename as string),
-            version: (s.version as string) ?? '',
+            id: textOf(s, 'solutionid') ?? '',
+            uniqueName: textOf(s, 'uniquename') ?? '',
+            friendlyName: textOf(s, 'friendlyname') || (textOf(s, 'uniquename') ?? ''),
+            version: textOf(s, 'version') ?? '',
             isManaged: s.ismanaged === true,
         }))
         .sort((a, b) => a.friendlyName.localeCompare(b.friendlyName));

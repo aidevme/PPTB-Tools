@@ -1,7 +1,22 @@
-import { useId, type ReactElement, type ReactNode } from 'react';
-import { Badge, Caption1, Card, InfoLabel, Subtitle2, Text, mergeClasses, type BadgeProps } from '@fluentui/react-components';
+import { useId, useState, type ReactElement, type ReactNode } from 'react';
+import {
+    Badge,
+    Caption1,
+    Card,
+    InfoLabel,
+    MessageBar,
+    MessageBarBody,
+    Subtitle2,
+    Tab,
+    TabList,
+    Text,
+    mergeClasses,
+    type BadgeProps,
+} from '@fluentui/react-components';
 import type { ProjectDefaults } from '../../config';
+import { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
+import { CodeViewer } from '../viewers/CodeViewer';
 
 /** A badge on a section header, e.g. where its values are saved. */
 export interface SectionBadge {
@@ -118,5 +133,41 @@ export function OutputPreview({ defaults }: { defaults: ProjectDefaults }) {
             </pre>
             <Caption1 className={styles.previewNote}>Preview for a project with an account table; updates as you change the options.</Caption1>
         </>
+    );
+}
+
+const lineCount = (text: string) => text.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n').length;
+
+/**
+ * The Templates tab: the EJS templates Generate writes to each project, read-only, one tab per file. The tool
+ * generates with built-in copies (EJS can't run in PPTB), so editing the written files doesn't change its output.
+ */
+export function TemplatesViewer() {
+    const styles = useSettingsPanelStyles();
+    const [selected, setSelected] = useState(DATAVERSE_GEN_TEMPLATES[0].name);
+    const template = DATAVERSE_GEN_TEMPLATES.find((t) => t.name === selected) ?? DATAVERSE_GEN_TEMPLATES[0];
+    return (
+        <div className={styles.templates}>
+            <MessageBar intent="info">
+                <MessageBarBody>
+                    The templates behind the generated files. Generate writes them to your project's <code>templateRoot</code> (
+                    <code>{DEFAULT_TEMPLATE_ROOT}</code> by default), overwriting edited copies. The tool generates with built-in copies
+                    of the same templates, so editing the written files doesn't change its output.
+                </MessageBarBody>
+            </MessageBar>
+            <TabList size="small" selectedValue={selected} onTabSelect={(_, data) => setSelected(data.value as string)} aria-label="Templates">
+                {DATAVERSE_GEN_TEMPLATES.map((t) => (
+                    <Tab key={t.name} value={t.name}>
+                        {t.name}
+                    </Tab>
+                ))}
+            </TabList>
+            <Caption1 className={styles.templateMeta}>
+                {DEFAULT_TEMPLATE_ROOT.replace(/^\.\//, '')}/{template.name} · {lineCount(template.content)} lines · read-only
+            </Caption1>
+            <div className={styles.templateCode} role="region" aria-label={`${template.name} template`}>
+                <CodeViewer code={template.content} path={template.name} />
+            </div>
+        </div>
     );
 }

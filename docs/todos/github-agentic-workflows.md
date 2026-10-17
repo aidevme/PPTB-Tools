@@ -21,7 +21,7 @@ For gh-aw in general (installing the CLI, how compiling works, monitoring runs, 
 | Review procedure | `.github/skills/intake-policy-review/SKILL.md` |
 | Engine | Claude (`engine: claude`), secret `ANTHROPIC_API_KEY` |
 | Trigger | Manual only (`workflow_dispatch`) |
-| Output | One GitHub issue, labelled `marketplace-intake` |
+| Output | One GitHub issue in the Agentic Workflow template's layout, labelled `agentic-workflows` and `marketplace-intake` |
 | Compiled with | `gh aw` v0.91.12, `--strict --validate`: 0 errors, 0 warnings |
 
 ## Contents
@@ -296,8 +296,8 @@ Plain GitHub Actions steps that run in the agent job **before** the agent. See
 ```yaml
 safe-outputs:
   create-issue:
-    title-prefix: "[intake review] "
-    labels: [marketplace-intake]
+    title-prefix: "[Agentic Workflow]: "
+    labels: [agentic-workflows, marketplace-intake]
     max: 1
     close-older-issues: true
 ```
@@ -305,8 +305,8 @@ safe-outputs:
 | Option | Effect |
 | --- | --- |
 | `create-issue` | The only write the agent can request. |
-| `title-prefix` | Every issue title starts with `[intake review]` and a space. |
-| `labels` | Every issue gets the `marketplace-intake` label. |
+| `title-prefix` | Every issue title starts with `[Agentic Workflow]:` and a space, like issues filed with the Agentic Workflow template. |
+| `labels` | Every issue gets `agentic-workflows` (the template's label) and `marketplace-intake` (to filter intake reviews). |
 | `max: 1` | At most one issue per run. |
 | `close-older-issues: true` | Once the new issue is created, older open issues from this workflow are closed. It only runs if the new issue was created. |
 
@@ -400,12 +400,31 @@ and workflow reviews stay the same.
 
 ## The issue it creates
 
-**Title:** `[intake review] <tool display name>: <verdict>`, for example
-`[intake review] Dataverse Early-Bound TypeScript Generator: 🟡 Very close / minor changes`.
+**Title:** `[Agentic Workflow]: Intake review of <tool display name>: <verdict>`, for example
+`[Agentic Workflow]: Intake review of Dataverse Early-Bound TypeScript Generator: 🟡 Very close / minor changes`.
 
-**Label:** `marketplace-intake`.
+**Labels:** `agentic-workflows` and `marketplace-intake`.
 
-**Body**, in the skill's required structure:
+**Layout.** Issues created through the API can't use an issue form, so the prompt makes the body look like a
+submitted [Agentic Workflow issue template](https://github.com/aidevme/PPTB-Tools/blob/main/.github/ISSUE_TEMPLATE/agentic_workflow.yml): one `### <field label>` section per field, `_No response_`
+for an empty one. The Checks section is left out, because its confirmations are for people.
+
+| Section | Content |
+| --- | --- |
+| Request type | `Report from a workflow run` (an option added to the template for this) |
+| Existing workflow | `pptb-intake-review.md` |
+| What should the agent do? | The review task, with the tool folder |
+| Run link and errors | The run URL, then every command that failed and every policy page that couldn't be fetched, or `None` |
+| When should it run? | `Manually (workflow_dispatch)` |
+| Inputs | `tool: <folder>` |
+| What may it write? | Only **Create an issue** ticked |
+| External access | The two PPTB domains, and why |
+| How do we know it works? | The verdict, and a person reviewing the findings |
+| Review | The review itself (below) |
+
+If you rename a field or label in the template, update the **Output** section of the workflow's prompt to match.
+
+**The Review section**, in the skill's required structure:
 
 1. A short overall assessment.
 2. A `| Area | Status | Finding |` table covering at least: marketplace name, publisher attribution, icon,
@@ -415,7 +434,7 @@ and workflow reviews stay the same.
 3. Numbered findings, with replacement snippets where the fix is clear.
 4. **Recommended pre-submission changes**, in priority order.
 5. **Final verdict**, with the blockers listed under it.
-6. A link to the workflow run.
+6. *(The run link is in the Run link and errors section.)*
 
 | Status | Meaning |
 | --- | --- |

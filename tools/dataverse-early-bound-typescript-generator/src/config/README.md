@@ -13,8 +13,8 @@ in `src/core/config.ts`.
 | [`dataverse-early-bound-typescript-generator-config.schema.json`](./dataverse-early-bound-typescript-generator-config.schema.json) | JSON Schema (draft-07) for the two files above | No |
 | [`index.ts`](./index.ts) | Types, defaults, normalization, comparison, and project versioning | Yes |
 
-The module is framework-free: `index.ts` imports nothing but the default JSON, uses no React or browser
-APIs, and never touches PPTB. Reading and writing the stored values is done by `src/services/settings.ts`.
+The module is framework-free: `index.ts` imports only the default JSON and the `DataverseGenConfig` type from
+`../core`, uses no React or browser APIs, and never touches PPTB. Reading and writing the stored values is done by `src/services/settings.ts`.
 
 ## Contents
 
@@ -75,6 +75,8 @@ remember the last project folder per connection. They aren't part of `ToolConfig
     },
     "deleteOrphanedFiles": false,
     "confirmBeforeGenerate": false,
+    "skipDuplicateIdentifiers": false,
+    "renameDuplicateIdentifiers": false,
     "projectDefaults": {
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,
@@ -96,6 +98,12 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 - **`confirmBeforeGenerate`:** `false`. Shown as the **Ask before generating** switch on the Generate & files
   tab. When on, Generate asks for confirmation before writing, naming the output folder and how many files will
   be created and overwritten. When orphans are deleted too, the delete confirmation covers the writes as well.
+- **`renameDuplicateIdentifiers`:** `false`. Shown as the **Rename duplicated identifier(s)** switch on the Generate &
+  files tab and in Preview and generate. When on, `generate` renames later duplicate enum members to
+  `<Name>_<Value>`, so the files compile; when off, the output matches dataverse-gen.
+- **`skipDuplicateIdentifiers`:** `false`. Shown as the **Skip duplicated identifier(s)** switch on the Generate &
+  files tab. When on, Generate doesn't write files with duplicate identifiers (two choice labels that become the
+  same enum member name, so the file won't compile); when off, they're written and only reported.
 - **`deleteOrphanedFiles`:** `false`. Shown as a switch on the Settings panel's Generate & files tab and
   as the **Delete orphaned files** switch in Preview and generate; both save the same setting. When on,
   Generate deletes orphaned files after the user confirms the list.
@@ -141,6 +149,8 @@ root (object, additionalProperties: false)
 ├── general              #/definitions/general
 ├── deleteOrphanedFiles  boolean, default false
 ├── confirmBeforeGenerate  boolean, default false
+├── skipDuplicateIdentifiers  boolean, default false
+├── renameDuplicateIdentifiers  boolean, default false
 ├── projectDefaults      #/definitions/projectDefaults
 └── projects             array of #/definitions/project, default []
 
@@ -252,6 +262,8 @@ interface ToolConfig {
     general: GeneralSettings;
     deleteOrphanedFiles: boolean;
     confirmBeforeGenerate: boolean;
+    skipDuplicateIdentifiers: boolean;
+    renameDuplicateIdentifiers: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -284,7 +296,8 @@ Builds a complete `ToolConfig` from stored data, falling back to `toolConfig` ke
   boolean; numbers only if finite numbers, then rounded and clamped to their range (`clampInteger`); anything
   else, including strings, falls back to the default. A `general` that isn't an object gives the defaults, so
   settings saved before it existed load unchanged.
-- `deleteOrphanedFiles` and `confirmBeforeGenerate` are taken only if they're booleans.
+- `deleteOrphanedFiles`, `confirmBeforeGenerate`, `skipDuplicateIdentifiers` and `renameDuplicateIdentifiers` are taken
+  only if they're booleans.
 - `projectDefaults` is merged key by key over `toolConfig.projectDefaults`: booleans only if boolean,
   `outputRoot` only if a non-blank string (stored trimmed).
 - `projects` is taken only if it's an array, then normalized. The result is a new array; a stored array is never
@@ -344,7 +357,7 @@ All writes go through `saveToolConfig(next)`, which replaces the whole stored `t
 | Tool loads | `App.tsx` effect → `loadToolConfig()` | `toolSettings` starts as `toolConfig`, then becomes `mergeToolConfig(stored)` |
 | Settings → Save | `SettingsPanel` → `saveToolSettings` | The whole draft, normalized with `mergeToolConfig` (so a blank output folder saves as the default), including the `projects` it was opened with |
 | Open a folder | `openProjectFolder` | Nothing saved; the open project's config gets `projectDefaults` |
-| New Project → Save | `NewProjectDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
+| New Project → Save | `ProjectFormDialog` → `addProject` | Appends `{ id, version: '1.0.0', createdOn, modifiedOn }` plus the form values |
 | Load Existing Project → Delete | `LoadProjectDialog` → `deleteProject` | Removes the project by `id` |
 | Generate | `runGenerate` → `recordProjectGeneration` | The project whose `location` matches the open folder, if `recordGeneration` returns a change |
 

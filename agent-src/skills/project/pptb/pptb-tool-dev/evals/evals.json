@@ -1,0 +1,83 @@
+{
+  "skill_name": "pptb-tool-dev",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build me a PPTB tool in React that lists all solutions in the connected Dataverse environment.",
+      "expected_output": "The tool is scaffolded with the official yo pptb generator (React), @pptb/types is installed, solutions are read through window.dataverseAPI with errors surfaced via toolboxAPI.utils.showNotification, the package.json manifest follows references/manifest.md, and pptb-validate is run before the debug instructions are given.",
+      "files": [],
+      "expectations": [
+        "Scaffolds with yo pptb (or npx --package yo --package generator-pptb -- yo pptb <name>) instead of hand-writing the Vite project",
+        "Installs @pptb/types as a dev dependency",
+        "Reads the solutions through window.dataverseAPI, not a hand-built fetch with a bearer token",
+        "Wraps the API calls in try/catch and reports failures with toolboxAPI.utils.showNotification rather than alert() or console only",
+        "Writes the manifest with the nested configurations.repository and configurations.readmeUrl fields described in references/manifest.md",
+        "Runs npx pptb-validate (for example with --skip-url-checks) and fixes every error before moving on",
+        "Explains the debug loop: npm run dev-watch, Show Debug Menu, Load Local Tool pointed at the project root (not dist/), reload the tab after each rebuild"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "My PPTB tool shows a blank tab when I load it in ToolBox, but npm run dev works fine in the browser.",
+      "expected_output": "The existing tool's vite.config.ts and built dist/index.html are inspected before any re-scaffolding; the cause is traced to module/ESM output or code-splitting, and the fix is an IIFE single-bundle build without type=\"module\" script tags, following references/build-and-csp.md.",
+      "files": [],
+      "expectations": [
+        "Reads the existing project (vite.config.ts, package.json, dist/index.html) before suggesting a fix, and doesn't re-scaffold the tool",
+        "Identifies <script type=\"module\">, crossorigin attributes or code-split chunks as the likely cause of the blank tab inside PPTB",
+        "Proposes forcing the Rollup output to iife with inlineDynamicImports: true and stripping type=\"module\" from the built HTML",
+        "Explains that npm run dev working in a browser tab doesn't prove the build loads inside PPTB",
+        "Asks the user to rebuild and reload the tool tab in PPTB to confirm, instead of claiming it's fixed"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "My tool needs to call https://api.github.com to show release notes. What do I need to change?",
+      "expected_output": "A least-privilege cspExceptions entry for api.github.com is added to the manifest with the reason documented, following references/build-and-csp.md, and pptb-validate is re-run.",
+      "files": [],
+      "expectations": [
+        "Adds a cspExceptions entry for the specific origin https://api.github.com under the connect-src directive",
+        "Doesn't use wildcards such as \"*\" or bare https:",
+        "Documents why the domain is needed (for example in the README's privacy or network section)",
+        "Re-runs pptb-validate after the manifest change"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Everything validates now. Publish version 1.0.0 of my tool to npm.",
+      "expected_output": "The publish sequence (build, pptb-validate clean, finalize-package, npm publish --access public, Tool Submission Form) is laid out, and explicit confirmation is requested before npm publish runs, because a published version can't be unpublished after 72 hours.",
+      "files": [],
+      "expectations": [
+        "Runs or lists npm run build, pptb-validate and npm run finalize-package before publishing",
+        "Stops and asks for explicit confirmation, naming the package and version, before running npm publish",
+        "Says the step is irreversible (npm versions can't be unpublished after 72 hours)",
+        "Uses npm publish --access public for a scoped package",
+        "Mentions submitting the tool through the Tool Submission Form after publishing"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "I get 'toolboxAPI is undefined' when I open my tool. How do I fix it?",
+      "expected_output": "It's explained that window.toolboxAPI only exists inside PPTB, so the tool is being run in a standalone browser tab, or the editor is missing the @pptb/types reference; the tool should be loaded through PPTB's Debug menu to test host APIs.",
+      "files": [],
+      "expectations": [
+        "Explains that window.toolboxAPI is only defined when the tool runs inside PPTB, not in a normal browser tab",
+        "Mentions the /// <reference types=\"@pptb/types\" /> directive (or @pptb/types) for editor typing errors",
+        "Suggests loading the tool through the Debug menu in PPTB to test host APIs",
+        "Doesn't suggest mocking or polyfilling toolboxAPI as a production fix"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Make my existing entity-picker tool launchable from other PPTB tools so they can get the selected table back.",
+      "expected_output": "The existing tool isn't re-scaffolded; references/invocation.md is used to add the pptb.config.json invocation contract (capabilities, prefill, returnTopic) and the toolboxAPI.invocation getLaunchContext/returnData runtime calls.",
+      "files": [],
+      "expectations": [
+        "Reads the existing tool first and doesn't run yo pptb again",
+        "Reads references/invocation.md and adds an invocation block to pptb.config.json with capabilities, prefill and returnTopic",
+        "Uses toolboxAPI.invocation.getLaunchContext to read prefill data and returnData to send the selected table back",
+        "Doesn't add MCP or agent integration (references/agent-integration.md) unless asked",
+        "Notes that the feature may depend on the installed PPTB version and should be checked against it"
+      ]
+    }
+  ]
+}

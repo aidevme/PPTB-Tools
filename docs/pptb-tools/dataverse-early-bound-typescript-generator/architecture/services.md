@@ -15,10 +15,11 @@ and turn the results into the inputs the core needs. Like the core, they don't i
 | `projectConfig.ts` | Reads and writes `.dataverse-gen.json` through a `FileSink`. |
 | `settings.ts` | PPTB's per-tool settings: the project folder used with each connection, and the tool config: Settings-panel values and saved projects (`loadToolConfig` / `saveToolConfig`, applied over the defaults in `src/config/`). |
 | `paths.ts` | Absolute host path helpers. PPTB's file API only accepts absolute paths in the host OS's format. |
-| `errors.ts` | Error handling per PPTB's guide: `errorStatus` reads the HTTP status from PPTB's error messages and known Dataverse codes; `friendlyError` maps it to a user message; `reportError` logs with context, shows a persistent error notification and returns the error bar text; `withRetry` / `withRetries` retry 429, 502, 503 and 504 failures with growing delays. |
+| `errors.ts` | Error handling per PPTB's guide: `errorStatus` reads the HTTP status from PPTB's error messages and known Dataverse codes; `friendlyError` maps it to a user message; `reportError` logs with context, shows a persistent error notification and returns the error bar text; `withRetry` / `withRetries` retry 429, 502, 503 and 504 failures with growing delays; `dataverseApi()` is PPTB's Dataverse API wrapped that way, for the metadata provider and the solutions service. |
 | `notifications.ts` | PPTB notifications. `NOTIFICATION_TYPES` defines the four presets (success 3 s, info 5 s, warning and error persistent), and `notificationOptions(kind, body, title?)` builds `showNotification` options from one. It also shows `notifyProjectLoaded` (info) after a saved project opens, `notifyPreviewReady` (info) after a preview succeeds, and `notifyGenerationComplete` (success) after Generate. Best effort: failures are only logged. |
 | `concurrency.ts` | `mapWithConcurrency` runs async work with a cap on how many run at once. |
 | `paging.ts` | `queryAllPages` reads every row of a `queryData` query, one page of 5,000 at a time, by key (see [Paging](#paging)). |
+| `webApiRow.ts` | `textOf(row, column)` reads a Web API row column as a string (or `undefined`), in place of `as string` casts. |
 
 ## Metadata provider
 
@@ -36,7 +37,10 @@ and turn the results into the inputs the core needs. Like the core, they don't i
   turns into navigation properties. Built-in actions and functions and custom process actions aren't available
   in this mode; custom APIs still are. Any other error still fails as before.
 - **Private custom APIs** aren't in `$metadata`. `getSchemaForSelection` builds their definitions from the
-  `customapi` record and its `customapirequestparameters`, mapped to the EDM types `$metadata` would use.
+  `customapi` record and its `customapirequestparameters`, mapped to the EDM types `$metadata` would use. The
+  `customapi` records are cached per connection, but a failed read isn't, so the next call retries.
+  `getSchemaForSelection` throws when the records can't be read, naming the selected operations; `listOperations`
+  carries on without the custom-API flags.
 
 ## Paging
 

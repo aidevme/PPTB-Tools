@@ -5,11 +5,12 @@
  * Everything is cached per instance; the app creates a new instance whenever the active connection
  * changes. Metadata calls for many entities are throttled with {@link mapWithConcurrency}.
  */
-import { createMetadataSchema, parseCsdl, type AttributeMetadataInput, type EdmxComplexType, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
+import { createMetadataSchema, labelText, parseCsdl, type AttributeMetadataInput, type EdmxComplexType, type EdmxOperation, type EdmxParameter, type EdmxSchema, type EntityMetadataInput, type ManyToManyRelationshipInput, type OneToManyRelationshipInput, type OptionSetInput } from '../core';
 import type { EntitySummary, OperationSummary, TableType } from '../types';
 import { mapWithConcurrency } from './concurrency';
 import { queryAllPages } from './paging';
-import { withRetries } from './errors';
+import { textOf } from './webApiRow';
+import { dataverseApi as api, technicalMessage } from './errors';
 
 /** Attribute types whose option set must be fetched separately, with their Web API cast type. */
 const OPTION_SET_CASTS: Record<string, string> = {
@@ -19,20 +20,18 @@ const OPTION_SET_CASTS: Record<string, string> = {
     StatusType: 'Microsoft.Dynamics.CRM.StatusAttributeMetadata',
 };
 
+/** The derived attribute type whose navigation properties hold the option set; `undefined` for non-choice attributes. */
+function optionSetCast(attribute: AttributeMetadataInput): string | undefined {
+    const typeName = attribute.AttributeTypeName?.Value;
+    return typeName ? OPTION_SET_CASTS[typeName] : undefined;
+}
+
 export const METADATA_CONCURRENCY = 4;
 
 type RawRecord = Record<string, unknown>;
 
-function label(value: unknown): string {
-    const l = value as { UserLocalizedLabel?: { Label?: string } | null } | null | undefined;
-    return l?.UserLocalizedLabel?.Label ?? '';
-}
-
-/** PPTB's Dataverse API, with throttling and temporary-unavailability errors retried (see `withRetries`). */
-function api(): typeof window.dataverseAPI {
-    if (!window.dataverseAPI) throw new Error('The PPTB Dataverse API is not available (not running inside Power Platform ToolBox?)');
-    return withRetries(window.dataverseAPI);
-}
+/** A metadata label's user-localized text, via core's `labelText`. */
+const label = (value: unknown): string => labelText(value as Parameters<typeof labelText>[0]);
 
 /**
  * PPTB's `getCSDLDocument` caps the `$metadata` response at 16 MiB (its batch response limit), and large
@@ -40,7 +39,7 @@ function api(): typeof window.dataverseAPI {
  * create a Buffer larger than … bytes"). Those environments fall back to {@link createMetadataSchema}.
  */
 function isCsdlSizeLimitError(error: unknown): boolean {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = technicalMessage(error);
     return /larger than \d+ bytes|exceeds the maximum size/i.test(message);
 }
 
@@ -79,10 +78,10 @@ export class PptbMetadataProvider {
                     result.value
                         .map((e) => ({
                             logicalName: e.LogicalName,
-                            schemaName: (e.SchemaName as string) ?? e.LogicalName,
+                            schemaName: textOf(e, 'SchemaName') ?? e.LogicalName,
                             displayName: label(e.DisplayName) || e.LogicalName,
                             description: label(e.Description),
-                            entitySetName: (e.EntitySetName as string | null) ?? undefined,
+                            entitySetName: textOf(e, 'EntitySetName'),
                             metadataId: e.MetadataId,
                             isCustom: e.IsCustomEntity === true,
                             isManaged: e.IsManaged === true,
@@ -144,7 +143,12 @@ export class PptbMetadataProvider {
 
     /** Actions and functions from the CSDL, for the Select step. */
     async listOperations(): Promise<OperationSummary[]> {
-        const [schema, customApis, processActions] = await Promise.all([this.getSchema(), this.getCustomApis(), listProcessActions()]);
+        // Without read access to `customapi` the CSDL list still works; the custom-API flags are just missing.
+        const customApisOrNone = this.getCustomApis().catch((error: unknown): CustomApiRecord[] => {
+            console.warn('Could not list custom APIs', error);
+            return [];
+        });
+        const [schema, customApis, processActions] = await Promise.all([this.getSchema(), customApisOrNone, listProcessActions()]);
         const customByName = new Map(customApis.map((c) => [c.uniqueName, c]));
         const processByName = new Map(processActions.map((p) => [p.uniqueName, p]));
         const summarize = (kind: 'action' | 'function') => (op: EdmxSchema['actions'][number]): OperationSummary => {
@@ -189,9 +193,14 @@ export class PptbMetadataProvider {
         return operations;
     }
 
-    /** Custom API records, fetched once per connection. */
+    /** Custom API records, fetched once per connection. A failed fetch isn't cached, so the next call retries. */
     getCustomApis(): Promise<CustomApiRecord[]> {
-        if (!this.customApis) this.customApis = listCustomApis();
+        if (!this.customApis) {
+            this.customApis = listCustomApis().catch((error: unknown) => {
+                this.customApis = undefined;
+                throw error;
+            });
+        }
         return this.customApis;
     }
 
@@ -199,6 +208,10 @@ export class PptbMetadataProvider {
      * The CSDL schema plus definitions for any selected custom API that `$metadata` does not contain
      * (private custom APIs, or ones created after the environment's metadata cache was built). Those are
      * built from the `customapi` record and its request parameters.
+     *
+     * Throws when the custom API records can't be read, rather than generating without the selected
+     * operations. A selected name that isn't a custom API in the environment (for example one deleted since
+     * it was selected) is skipped with a console warning.
      */
     async getSchemaForSelection(actions: readonly string[], functions: readonly string[]): Promise<EdmxSchema> {
         const schema = await this.getSchema();
@@ -206,14 +219,22 @@ export class PptbMetadataProvider {
         const wanted = [...actions, ...functions].filter((name) => !known.has(name));
         if (wanted.length === 0) return schema;
 
-        const customApis = await this.getCustomApis();
+        let customApis: CustomApiRecord[];
+        try {
+            customApis = await this.getCustomApis();
+        } catch (error) {
+            throw new Error(`Could not read the custom API definitions for ${wanted.join(', ')}: ${technicalMessage(error)}`, { cause: error });
+        }
         const extraActions: EdmxOperation[] = [];
         const extraFunctions: EdmxOperation[] = [];
         const extraComplexTypes: EdmxComplexType[] = [];
         const knownComplex = new Set(schema.complexTypes.map((c) => c.Name));
         for (const name of wanted) {
             const custom = customApis.find((c) => c.uniqueName === name);
-            if (!custom) continue;
+            if (!custom) {
+                console.warn(`Selected operation ${name} is neither in $metadata nor a custom API in this environment; skipped.`);
+                continue;
+            }
             const { operation, response } = await buildCustomApiOperation(custom);
             (custom.isFunction ? extraFunctions : extraActions).push(operation);
             if (response && !knownComplex.has(response.Name)) {
@@ -277,9 +298,9 @@ export class PptbMetadataProvider {
         await this.attachOptionSets(logicalName, attributeList);
         return {
             LogicalName: entity.LogicalName,
-            SchemaName: entity.SchemaName as string,
-            EntitySetName: entity.EntitySetName as string,
-            PrimaryIdAttribute: (entity.PrimaryIdAttribute as string | undefined) ?? undefined,
+            SchemaName: textOf(entity, 'SchemaName') ?? '',
+            EntitySetName: textOf(entity, 'EntitySetName') ?? '',
+            PrimaryIdAttribute: textOf(entity, 'PrimaryIdAttribute'),
             Attributes: attributeList,
             ...relationships,
         };
@@ -307,18 +328,18 @@ export class PptbMetadataProvider {
      * the host does not accept that URL shape, fall back to one request per attribute.
      */
     private async attachOptionSets(logicalName: string, attributes: AttributeMetadataInput[]): Promise<void> {
-        const needing = attributes.filter((a) => a.AttributeTypeName?.Value && OPTION_SET_CASTS[a.AttributeTypeName.Value]);
+        const needing = attributes.filter((a) => optionSetCast(a) !== undefined);
         if (needing.length === 0) return;
 
         if (this.bulkOptionSetsSupported !== false) {
             try {
                 const byLogicalName = new Map(needing.map((a) => [a.LogicalName, a]));
-                const casts = new Set(needing.map((a) => OPTION_SET_CASTS[a.AttributeTypeName!.Value]));
+                const casts = new Set(needing.map(optionSetCast).filter((cast): cast is string => cast !== undefined));
                 for (const cast of casts) {
                     const query = `EntityDefinitions(LogicalName='${logicalName}')/Attributes/${cast}?$select=LogicalName&$expand=OptionSet,GlobalOptionSet`;
                     const result = await api().queryData(query);
                     for (const row of result.value) {
-                        const attribute = byLogicalName.get(row.LogicalName as string);
+                        const attribute = byLogicalName.get(textOf(row, 'LogicalName') ?? '');
                         if (attribute) attribute.OptionSet = pickOptionSet(row);
                     }
                 }
@@ -339,7 +360,8 @@ export class PptbMetadataProvider {
 
     private async fetchSingleOptionSet(logicalName: string, attribute: AttributeMetadataInput): Promise<OptionSetInput> {
         const dataverse = api();
-        const cast = OPTION_SET_CASTS[attribute.AttributeTypeName!.Value];
+        const cast = optionSetCast(attribute);
+        if (!cast) throw new Error(`${logicalName}.${attribute.LogicalName} is not a choice attribute`);
         const paths: Array<`Attributes(${string})/${string}`> = [
             `Attributes(LogicalName='${attribute.LogicalName}')/OptionSet`,
             `Attributes(LogicalName='${attribute.LogicalName}')/${cast}/OptionSet`,
@@ -355,7 +377,7 @@ export class PptbMetadataProvider {
             }
         }
         throw new Error(
-            `Could not load the option set for ${logicalName}.${attribute.LogicalName}: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+            `Could not load the option set for ${logicalName}.${attribute.LogicalName}: ${technicalMessage(lastError)}`,
         );
     }
 }
@@ -373,30 +395,25 @@ interface CustomApiRecord {
 
 /**
  * Custom API records, used to flag operations as custom and to surface private ones that `$metadata`
- * leaves out. Failure (e.g. no read privilege on `customapi`) is not fatal: the CSDL list still works.
+ * leaves out. Throws on failure (e.g. no read privilege on `customapi`); callers decide whether that's fatal.
  */
 async function listCustomApis(): Promise<CustomApiRecord[]> {
-    try {
-        // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
-        const rows = await queryAllPages((query) => api().queryData(query), {
-            entitySet: 'customapis',
-            select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
-            idField: 'customapiid',
-        });
-        return rows.map((row) => ({
-            id: row.customapiid as string,
-            uniqueName: row.uniquename as string,
-            displayName: (row.displayname as string | null) || undefined,
-            isFunction: row.isfunction === true,
-            isPrivate: row.isprivate === true,
-            bindingType: typeof row.bindingtype === 'number' ? row.bindingtype : 0,
-            // bindingtype: 0 = Global, 1 = Entity, 2 = EntityCollection
-            boundEntity: row.bindingtype === 0 ? undefined : ((row.boundentitylogicalname as string | null) ?? undefined),
-        }));
-    } catch (error) {
-        console.warn('Could not list custom APIs', error);
-        return [];
-    }
+    // All of them, page by page: an environment can have more than one page (5,000) of custom APIs.
+    const rows = await queryAllPages((query) => api().queryData(query), {
+        entitySet: 'customapis',
+        select: ['customapiid', 'uniquename', 'displayname', 'isfunction', 'isprivate', 'bindingtype', 'boundentitylogicalname'],
+        idField: 'customapiid',
+    });
+    return rows.map((row) => ({
+        id: textOf(row, 'customapiid') ?? '',
+        uniqueName: textOf(row, 'uniquename') ?? '',
+        displayName: textOf(row, 'displayname') || undefined,
+        isFunction: row.isfunction === true,
+        isPrivate: row.isprivate === true,
+        bindingType: typeof row.bindingtype === 'number' ? row.bindingtype : 0,
+        // bindingtype: 0 = Global, 1 = Entity, 2 = EntityCollection
+        boundEntity: row.bindingtype === 0 ? undefined : textOf(row, 'boundentitylogicalname'),
+    }));
 }
 
 /**
@@ -456,8 +473,8 @@ async function buildCustomApiOperation(custom: CustomApiRecord): Promise<{ opera
     }
     const requestParameters = requestResult.value
         .map((row) => ({
-            Name: row.uniquename as string,
-            Type: customApiParameterType(Number(row.type), row.logicalentityname as string | null),
+            Name: textOf(row, 'uniquename') ?? '',
+            Type: customApiParameterType(Number(row.type), textOf(row, 'logicalentityname')),
             Nullable: row.isoptional === true,
         }))
         .sort((a, b) => a.Name.localeCompare(b.Name));
@@ -470,8 +487,8 @@ async function buildCustomApiOperation(custom: CustomApiRecord): Promise<{ opera
         // Sorted like the CSDL parser's `readProperties`.
         Properties: responseResult.value
             .map((row) => ({
-                Name: row.uniquename as string,
-                Type: customApiParameterType(Number(row.type), row.logicalentityname as string | null),
+                Name: textOf(row, 'uniquename') ?? '',
+                Type: customApiParameterType(Number(row.type), textOf(row, 'logicalentityname')),
                 Nullable: true,
             }))
             .sort((a, b) => (a.Name > b.Name ? 1 : -1)),
@@ -504,9 +521,9 @@ async function listProcessActions(): Promise<ProcessActionRecord[]> {
         return rows
             .filter((row) => typeof row.uniquename === 'string' && row.uniquename)
             .map((row) => ({
-                id: row.workflowid as string,
-                uniqueName: row.uniquename as string,
-                displayName: (row.name as string | null) || undefined,
+                id: textOf(row, 'workflowid') ?? '',
+                uniqueName: textOf(row, 'uniquename') ?? '',
+                displayName: textOf(row, 'name') || undefined,
             }));
     } catch (error) {
         console.warn('Could not list custom process actions', error);

@@ -1,8 +1,13 @@
 /**
- * Sorting helpers for the tool's sortable tables. Started with the Select card's rows; the Preview card and the Load
- * Existing Project dialog are to move here too (refactoring plan, row 9).
+ * Sorting helpers for the tool's sortable tables: the Select card, the Preview card and the Load Existing Project
+ * dialog all toggle their sort with `nextSort`; the Select card's rows are also ordered here.
  */
 import type { SortDirection } from '@fluentui/react-components';
+
+/** First click on a column sorts ascending; clicking the sorted column again flips the direction. */
+export function nextSort<C>(current: { column: C; direction: SortDirection } | null, column: C): { column: C; direction: SortDirection } {
+    return current?.column === column && current.direction === 'ascending' ? { column, direction: 'descending' } : { column, direction: 'ascending' };
+}
 
 /** A value to sort a column by; `undefined` (no value) is always listed last. */
 export type SortValue = string | number | undefined;
@@ -13,10 +18,15 @@ export interface SortState {
     direction: SortDirection;
 }
 
+/** Case-insensitive text order with numbers compared by value (`item2` before `item10`). */
+export function compareText(a: string, b: string): number {
+    return a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
+}
+
 /** Compares two sort values in `direction`; `undefined` (no value) sorts last in both directions. */
 export function compareSortValues(a: SortValue, b: SortValue, direction: SortDirection): number {
     if (a === undefined || b === undefined) return a === b ? 0 : a === undefined ? 1 : -1;
-    const result = typeof a === 'number' && typeof b === 'number' ? a - b : String(a).localeCompare(String(b), undefined, { sensitivity: 'base', numeric: true });
+    const result = typeof a === 'number' && typeof b === 'number' ? a - b : compareText(String(a), String(b));
     return direction === 'ascending' ? result : -result;
 }
 

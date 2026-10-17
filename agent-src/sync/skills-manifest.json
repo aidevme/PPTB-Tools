@@ -1,0 +1,1013 @@
+{
+  "$schema": "./skills-manifest.schema.json",
+  "version": 1,
+  "description": "Registry + classification for every skill the template knows about. 'ported' skills physically exist under agent-src/skills/<scope>/<group>/<name>/ and are fanned out by sync.ps1. 'catalogued' skills are classified here so a later sync can pull them from their source repo; they have no local folder yet. 'drop' entries are recorded so the decision is not silently re-litigated.",
+  "sourceRoots": {
+    "core": "agent-src/skills/core",
+    "project": "agent-src/skills/project"
+  },
+  "targets": {
+    "claude": ".claude/skills",
+    "copilot": ".github/skills"
+  },
+  "roundTripToShared": {
+    "core": true,
+    "project": false,
+    "comment": "Only core skills round-trip to the shared product tier (shared/dv). Project skills never sync upstream."
+  },
+  "defaultTargets": [
+    "claude",
+    "copilot"
+  ],
+  "skills": [
+    {
+      "name": "hso-template-architecture",
+      "scope": "drop",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Master template spine; read before any dev work."
+    },
+    {
+      "name": "hso-architecture-map",
+      "scope": "drop",
+      "group": "foundation",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: TOPO living component topology; bidirectional dependency invariant."
+    },
+    {
+      "name": "hso-agent-help",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT",
+      "note": "Onboarding / skill discovery."
+    },
+    {
+      "name": "hso-init-project",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT",
+      "note": "Project bootstrap / init token engine driver."
+    },
+    {
+      "name": "hso-provision-environment",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-init-repo",
+      "scope": "core",
+      "group": "foundation",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "aidevme-shared-scripts",
+      "scope": "core",
+      "group": "foundation",
+      "ported": true,
+      "source": "ForgeUSA+shared",
+      "note": "Library skill dot-sourced by Dataverse/ADO skills (Invoke-DataverseApi + auth + ProjectConfig). Ported Forge body neutralised to ADR-0003; governance modules (Wiki-Tiers, Resolve-GovernanceContext) deferred to review-later."
+    },
+    {
+      "name": "hso-atlassian-auth",
+      "scope": "drop",
+      "group": "foundation",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Library skill: Atlassian Cloud Basic-auth headers + settings for the hso-atlassian-* skills. Separate from aidevme-shared-scripts (not an Entra provider)."
+    },
+    {
+      "name": "aidevme-skill-creator",
+      "scope": "core",
+      "group": "meta",
+      "ported": true,
+      "source": "HINT",
+      "note": "Adds required --scope core|project selector."
+    },
+    {
+      "name": "aidevme-skills-sync",
+      "scope": "core",
+      "group": "meta",
+      "ported": true,
+      "source": "HINT",
+      "note": "Parity backstop, rewritten for the inverted source-is-committed model; double-nesting bug fixed."
+    },
+    {
+      "name": "skill-creator",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "upstream",
+      "note": "Anthropic upstream base scaffolder. Reclassified meta->delivery to match its on-disk placement (delivery batch). aidevme-skill-creator wraps it and remains in meta."
+    },
+    {
+      "name": "hso-skill-review",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-skill-path-migration",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-skill-update-shared-skill",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-template-audit",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-template-impact-analysis",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-template-improve",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-project-upgrade",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT",
+      "note": "Diff live project against template; apply safe updates."
+    },
+    {
+      "name": "hso-generated-file-review",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT",
+      "note": "Detect hand-edits to generated files."
+    },
+    {
+      "name": "hso-repo-hygiene",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-project-state-assessment",
+      "scope": "core",
+      "group": "meta",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-dataverse-data-modeling",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Tables/columns/relationships/choices/solutions via Web API."
+    },
+    {
+      "name": "hso-dataverse-architect",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Orchestration: analysis + design for Dataverse extensions."
+    },
+    {
+      "name": "aidevme-dataverse-data",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "aidevme-dataverse-customapi",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "HINT",
+      "note": "aka hso-create-custom-api."
+    },
+    {
+      "name": "hso-dataverse-ui-config",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: aka hso-dataverse-form-config."
+    },
+    {
+      "name": "hso-dataverse-securityrole",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "HINT",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-dataverse-naming-conventions",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "HINT",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-dataverse-bpf",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-dataverse-dashboards",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-dataverse-flow-docs",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "HINT",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-dataverse-deployment-settings",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-dataverse-pipelines",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "aidevme-fetchxml-queries",
+      "scope": "core",
+      "group": "dataverse",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-semantic-data-modeling",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-plugin-development",
+      "scope": "drop",
+      "group": "server",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: 4-layer plugin architecture + tests + deploy."
+    },
+    {
+      "name": "hso-plugin-code-review",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-server-framework",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-functions-development",
+      "scope": "core",
+      "group": "server",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-powerautomate-writer",
+      "scope": "drop",
+      "group": "server",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-formscript-development",
+      "scope": "drop",
+      "group": "client",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Upgrade-safe form-script web resources (documented Client API only)."
+    },
+    {
+      "name": "hso-pcf-control-development",
+      "scope": "drop",
+      "group": "client",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: PCF controls from spec; pac pcf push."
+    },
+    {
+      "name": "hso-client-ruleengine",
+      "scope": "core",
+      "group": "client",
+      "ported": false,
+      "source": "HINT",
+      "note": "JSON-driven form RuleEngine."
+    },
+    {
+      "name": "hso-canvasapp-development",
+      "scope": "drop",
+      "group": "client",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-claude-design-handoff",
+      "scope": "drop",
+      "group": "client",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-pipeline-generation",
+      "scope": "drop",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Generate ADO pipeline YAML from config blueprints."
+    },
+    {
+      "name": "hso-pipeline-architecture",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-pipeline-diagnostics",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-update-pipeline-config",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-deployment-parameters",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-ado-deploymenthistory",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Reclassified pipelines->delivery to match on-disk placement. Forge newer body (settings-resolved auth). Dot-source path fixed to flat runtime form."
+    },
+    {
+      "name": "hso-alm-architect",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-production-readiness",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-analyze-dataverse-solution-changes",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (GENERAL-ADOPT, matrix A1); license header dropped, scope added, (project) tags stripped, underscore skill-path fixed to hyphen. Reclassified pipelines->dataverse to match matrix A1 + on-disk placement."
+    },
+    {
+      "name": "hso-architecture-validation",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-solution-design-review",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-repository-decision",
+      "scope": "core",
+      "group": "pipelines",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "aidevme-wiki-lint",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Aggressive self-committing wiki linter; regenerates index.md."
+    },
+    {
+      "name": "aidevme-wiki-process-inbox",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Routes _inbox/ into raw/ + wiki/work stubs."
+    },
+    {
+      "name": "aidevme-wiki-capture",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "Scaffolds an external-source capture with correct frontmatter."
+    },
+    {
+      "name": "aidevme-wiki-write-decision",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared",
+      "note": "ADR scaffolder into wiki/decisions/."
+    },
+    {
+      "name": "worklog",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development (never present on disk). Was: Per-session gitignored work log; neutralised ticket-key regex."
+    },
+    {
+      "name": "hso-wiki-ingest-transcript",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-wiki-ingest-discovery-artifact",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "aidevme-wiki-update-topic",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "aidevme-wiki-query",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-scaffold-client",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "aidevme-wiki-scaffold-project",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-wiki-ingest-screenshots",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Registered in Wave 0 so it is not a parity orphan; content ported in a later wave."
+    },
+    {
+      "name": "hso-ado-work-items",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-task-creator",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Retired — renamed/superseded by hso-requirements-author (classification-matrix §G2). Do not port."
+    },
+    {
+      "name": "hso-work-planner",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "HINT"
+    },
+    {
+      "name": "hso-solution-documentation",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Retired — deprecated tombstone superseded by hso-engagement-deliverables (classification-matrix §G2, §D). Do not port."
+    },
+    {
+      "name": "hso-update-solution-docs",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (GENERAL-ADOPT, matrix A1); license header dropped, scope added, (project) tags stripped, underscore skill-path fixed to hyphen."
+    },
+    {
+      "name": "hso-engagement-deliverables",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-jira-business-summary",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Reusable pattern; Jira account/project specifics stay in config."
+    },
+    {
+      "name": "hso-timesheet-builder",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Customer-agnostic; reads a config-driven customer map."
+    },
+    {
+      "name": "timesheet-report",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "status",
+      "scope": "core",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-diagram-drawio",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-diagram-excalidraw",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-diagram-plotly",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-diagram-reference-architecture",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-revealjs-presentation",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-presales-demo-architect",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "aidevme-dataverse-sdk-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "HINT+shared"
+    },
+    {
+      "name": "hso-dataverse-ui-reference",
+      "scope": "core",
+      "group": "reference",
+      "ported": false,
+      "source": "shared"
+    },
+    {
+      "name": "hso-ce-apps-sdk-reference",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-fieldservice-reference",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-d365-guidance-reference",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-fasttrack-reference",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "hso-msaccess-extractor",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development."
+    },
+    {
+      "name": "playwright-cli",
+      "scope": "core",
+      "group": "reference",
+      "ported": true,
+      "source": "shared"
+    },
+    {
+      "name": "hso-grill-architect",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Reclassified project->core/delivery in the skill-merge (matrix A3; 0 client-estate refs, both source analyses agree). Ported from ForgeUSA."
+    },
+    {
+      "name": "hso-ingest-transcript",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Superseded by hso-wiki-ingest-transcript."
+    },
+    {
+      "name": "hso-ingest-discovery-artifact",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Superseded by hso-wiki-ingest-discovery-artifact."
+    },
+    {
+      "name": "hso-dataverse-bpf.zip",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Stray build artifact, not a skill."
+    },
+    {
+      "name": "hso-pcf-control-development.zip",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "shared",
+      "note": "Stray build artifact, not a skill."
+    },
+    {
+      "name": "aidevme-skills-sync/aidevme-skills-sync",
+      "scope": "drop",
+      "group": null,
+      "ported": false,
+      "source": "HINT",
+      "note": "Double-nesting bug artifact; the inverted sync model cannot reproduce it."
+    },
+    {
+      "name": "hso-ado-pull-requests",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-ai-leverage-review",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-analyze-system-review",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-confluence-pages",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-d365-licensing",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-adversarial-review",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-document-templates",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-sample-data",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-solution-map",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-spec-conformance-review",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-dataverse-test-execution",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-excel-analyzer",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-jira-work-items",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-learning-pack",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-md-to-docx",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-power-pages-authoring",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-power-pages-config",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-requirements-author",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-rfp-requirements-matrix",
+      "scope": "drop",
+      "group": "delivery",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-salesforce-extractor",
+      "scope": "drop",
+      "group": "reference",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "hso-solution-security-scan",
+      "scope": "drop",
+      "group": "dataverse",
+      "ported": false,
+      "source": "ForgeUSA",
+      "note": "Removed 2026-10-15: not relevant to PPTB tool development. Was: Ported in the skill-merge (Wave 1 GENERAL-ADOPT); license header dropped, scope added, neutralised. See docs/skill-merge batch report."
+    },
+    {
+      "name": "pptb-tool-dev",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "aidevme",
+      "note": "Build, debug, validate and publish PPTB tools."
+    },
+    {
+      "name": "intake-policy-review",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "aidevme",
+      "note": "PPTB marketplace intake review; read by .github/workflows/pptb-intake-review.md."
+    },
+    {
+      "name": "tool-verification",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "aidevme",
+      "note": "PPTB Verified-badge readiness review."
+    },
+    {
+      "name": "aidevme-diagram-drawio",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "aidevme",
+      "note": "draw.io diagrams for the docs site."
+    },
+    {
+      "name": "aidevme-docs-maintenance",
+      "scope": "project",
+      "group": "repo",
+      "ported": true,
+      "source": "authored",
+      "note": "Validate Markdown, sync cspell.json and sync the docs/ entries in .github/CODEOWNERS; scripts moved from the repository scripts/ folder."
+    },
+    {
+      "name": "aidevme-pptb-tool-refactoring",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "authored",
+      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
+    },
+    {
+      "name": "aidevme-github",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Commit changes one file at a time with Conventional Commits 1.0.0 messages: safety check, per-file diffs, coupled-file grouping, plan and confirmation; never push or bypass hooks unless asked."
+    },
+    {
+      "name": "aidevme-pptb-tool-developer",
+      "scope": "project",
+      "group": "pptb",
+      "ported": true,
+      "source": "authored",
+      "note": "Extract inline Fluent UI makeStyles hooks from PPTB tool components into src/styles/<ComponentName>.styles.ts (use<ComponentName>Styles) with the styles barrel; read-only analysis and approval first."
+    }
+  ]
+}

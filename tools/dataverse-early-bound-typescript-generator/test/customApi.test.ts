@@ -18,11 +18,17 @@ const loadEntity = (name: string) =>
 
 const CUSTOM_API_ID = '11111111-2222-3333-4444-555555555555';
 
-function installDataverseStub() {
+/** `failCustomApis`: how many `customapis` queries fail (with a non-retried 403) before they succeed. */
+function installDataverseStub({ failCustomApis = 0 } = {}) {
+    let customApiFailures = failCustomApis;
     (window as unknown as { dataverseAPI: unknown }).dataverseAPI = {
         getCSDLDocument: async () => edmxXml,
         queryData: async (query: string) => {
             if (query.startsWith('customapis?')) {
+                if (customApiFailures > 0) {
+                    customApiFailures--;
+                    throw new Error('403 Forbidden: no read privilege on customapi');
+                }
                 return {
                     value: [
                         {
@@ -108,5 +114,30 @@ describe('custom APIs missing from $metadata', () => {
         const provider = new PptbMetadataProvider();
         const schema = await provider.getSchemaForSelection(['WinOpportunity'], []);
         expect(schema).toBe(await provider.getSchema());
+    });
+});
+
+describe('custom API records that cannot be read', () => {
+    it('fail the selection schema with the selected names instead of dropping them', async () => {
+        installDataverseStub({ failCustomApis: 1 });
+        const provider = new PptbMetadataProvider();
+        await expect(provider.getSchemaForSelection(['contoso_EscalateQueueItem'], [])).rejects.toThrow(
+            /Could not read the custom API definitions for contoso_EscalateQueueItem: 403 Forbidden/,
+        );
+    });
+
+    it('are not cached, so the next call retries and succeeds', async () => {
+        installDataverseStub({ failCustomApis: 1 });
+        const provider = new PptbMetadataProvider();
+        await expect(provider.getSchemaForSelection(['contoso_EscalateQueueItem'], [])).rejects.toThrow();
+        const schema = await provider.getSchemaForSelection(['contoso_EscalateQueueItem'], []);
+        expect(schema.actions.map((a) => a.Name)).toContain('contoso_EscalateQueueItem');
+    });
+
+    it('leave the operation list working, without custom API flags', async () => {
+        installDataverseStub({ failCustomApis: 1 });
+        const operations = await new PptbMetadataProvider().listOperations();
+        expect(operations.find((o) => o.name === 'WinOpportunity')).toMatchObject({ isCustomApi: false, inMetadata: true });
+        expect(operations.some((o) => o.name === 'contoso_EscalateQueueItem')).toBe(false);
     });
 });

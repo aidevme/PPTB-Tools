@@ -63,6 +63,13 @@ export const useFileViewerStyles = makeStyles({
     diffRow: { display: 'contents' },
     diffAdd: { backgroundColor: tokens.colorPaletteGreenBackground1 },
     diffRemove: { backgroundColor: tokens.colorPaletteRedBackground1 },
+    // A new line with a note (a duplicated identifier); wins over the added/unchanged tint.
+    diffFlagged: { backgroundColor: tokens.colorPaletteDarkOrangeBackground1 },
+    diffFlaggedNumber: {
+        color: tokens.colorPaletteDarkOrangeForeground1,
+        fontWeight: tokens.fontWeightSemibold,
+        boxShadow: `inset 3px 0 0 ${tokens.colorPaletteDarkOrangeBorder2}`,
+    },
     gutter: {
         paddingRight: tokens.spacingHorizontalS,
         paddingLeft: tokens.spacingHorizontalXS,

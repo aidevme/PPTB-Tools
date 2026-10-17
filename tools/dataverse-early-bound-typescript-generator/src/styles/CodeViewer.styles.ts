@@ -22,6 +22,13 @@ export const useCodeViewerStyles = makeStyles({
         userSelect: 'none',
     },
     lineContent: { display: 'table-cell' },
+    // A line with a note (a duplicated identifier): tinted row, accent edge on the line number.
+    flagged: { backgroundColor: tokens.colorPaletteDarkOrangeBackground1 },
+    flaggedNumber: {
+        color: tokens.colorPaletteDarkOrangeForeground1,
+        fontWeight: tokens.fontWeightSemibold,
+        boxShadow: `inset 3px 0 0 ${tokens.colorPaletteDarkOrangeBorder2}`,
+    },
     comment: { color: tokens.colorNeutralForeground3, fontStyle: 'italic' },
     keyword: { color: tokens.colorPaletteBlueForeground2 },
     string: { color: tokens.colorPaletteDarkOrangeForeground2 },

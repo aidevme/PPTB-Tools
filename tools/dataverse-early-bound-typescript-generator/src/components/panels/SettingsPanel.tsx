@@ -26,6 +26,7 @@ import {
     AlertRegular,
     ArrowResetRegular,
     CodeRegular,
+    CodeTextRegular,
     DeleteRegular,
     DismissRegular,
     DocumentCheckmarkRegular,
@@ -33,27 +34,30 @@ import {
     ListRegular,
     OptionsRegular,
     SettingsRegular,
+    WarningRegular,
     WrenchRegular,
 } from '@fluentui/react-icons';
 import {
-    RECENT_PROJECT_COUNT_RANGE,
-    SELECTION_ROW_LIMIT_RANGE,
-    toolConfig,
-    toolConfigEquals,
-    type GeneralSettings,
-    type ProjectDefaults,
-    type ToolConfig,
-} from '../../config';
+    DELETE_ORPHANS_INFO,
+    DELETE_ORPHANS_TITLE,
+    RENAME_DUPLICATES_INFO,
+    RENAME_DUPLICATES_TITLE,
+    SKIP_DUPLICATES_INFO,
+    SKIP_DUPLICATES_TITLE,
+} from '../shared/settingsInfo';
+import { RECENT_PROJECT_COUNT_RANGE, SELECTION_ROW_LIMIT_RANGE, type ToolConfig } from '../../config';
+import { useSettingsDraft } from '../../hooks';
 import { useSettingsPanelStyles } from '../../styles';
-import { reportError } from '../../services';
-import { OutputPreview, SettingRow, SettingsSection, type SectionBadge } from './SettingsParts';
+import { version } from '../../../package.json';
+import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
 
-type SettingsTab = 'general' | 'options' | 'files';
+type SettingsTab = 'general' | 'options' | 'files' | 'templates';
 
 const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; icon: ReactElement }> = [
     { value: 'general', label: 'General', subtitle: 'Notifications and lists', icon: <OptionsRegular /> },
     { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: <WrenchRegular /> },
     { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: <CodeRegular /> },
+    { value: 'templates', label: 'Templates', subtitle: 'EJS templates', icon: <CodeTextRegular /> },
 ];
 
 /** One-line explanation at the top of each tab. */
@@ -61,6 +65,7 @@ const TAB_INTROS: Record<SettingsTab, string> = {
     general: 'How the tool itself behaves.',
     options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
     files: 'How Generate treats files in the output folders, for every project.',
+    templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
 };
 
 const SCOPE_INSTALLATION: SectionBadge = { label: 'This PPTB installation' };
@@ -96,22 +101,21 @@ interface SectionDefinition {
     extra?: ReactNode;
 }
 
-/** The settings with every value Reset puts back to the bundled default; saved projects are kept. */
-function withDefaults(config: ToolConfig): ToolConfig {
-    return {
-        ...config,
-        general: { ...toolConfig.general },
-        deleteOrphanedFiles: toolConfig.deleteOrphanedFiles,
-        confirmBeforeGenerate: toolConfig.confirmBeforeGenerate,
-        projectDefaults: { ...toolConfig.projectDefaults },
-    };
-}
-
 /** Whether a setting matches every word of the search, case-insensitively. */
 function matchesSearch(setting: SettingDefinition, section: SectionDefinition, query: string): boolean {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);
     const haystack = [setting.title, setting.description, setting.keywords, section.title].join(' ').toLowerCase();
     return words.every((w) => haystack.includes(w));
+}
+
+/**
+ * A SpinButton's new value: the stepped value, or the typed text when the user typed one. Out-of-range or
+ * fractional values are clamped and rounded when the settings are saved (`mergeToolConfig`).
+ */
+function spinValue(data: { value?: number | null; displayValue?: string }, current: number): number {
+    if (typeof data.value === 'number') return data.value;
+    const typed = Number(data.displayValue);
+    return data.displayValue !== undefined && data.displayValue.trim() !== '' && Number.isFinite(typed) ? typed : current;
 }
 
 export interface SettingsPanelProps {
@@ -134,60 +138,28 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
     const styles = useSettingsPanelStyles();
     const [tab, setTab] = useState<SettingsTab>('general');
     const [query, setQuery] = useState('');
-    const [draft, setDraft] = useState<ToolConfig>(settings);
-    const [saving, setSaving] = useState(false);
-    const [saveError, setSaveError] = useState<string | null>(null);
+    const { draft, dirty, atDefaults, saving, saveError, update, updateProjectDefaults, updateGeneral, resetToDefaults, save } = useSettingsDraft({
+        open,
+        settings,
+        onSave,
+        onOpenChange,
+    });
 
-    // Start every visit from the saved values.
+    // Start every visit with an empty search.
     useEffect(() => {
-        if (open) {
-            setDraft(settings);
-            setSaveError(null);
-            setQuery('');
-        }
+        if (open) setQuery('');
     }, [open, settings]);
-
-    const dirty = !toolConfigEquals(draft, settings);
-    const atDefaults = toolConfigEquals(withDefaults(draft), draft);
-    const update = (change: Partial<ToolConfig>) => setDraft((current) => ({ ...current, ...change }));
-    const updateProjectDefaults = (change: Partial<ProjectDefaults>) =>
-        setDraft((current) => ({ ...current, projectDefaults: { ...current.projectDefaults, ...change } }));
-    const updateGeneral = (change: Partial<GeneralSettings>) => setDraft((current) => ({ ...current, general: { ...current.general, ...change } }));
-    /**
-     * A SpinButton's new value: the stepped value, or the typed text when the user typed one. Out-of-range or
-     * fractional values are clamped and rounded when the settings are saved (`mergeToolConfig`).
-     */
-    const spinValue = (data: { value?: number | null; displayValue?: string }, current: number) => {
-        if (typeof data.value === 'number') return data.value;
-        const typed = Number(data.displayValue);
-        return data.displayValue !== undefined && data.displayValue.trim() !== '' && Number.isFinite(typed) ? typed : current;
-    };
-
-    const save = async () => {
-        setSaving(true);
-        setSaveError(null);
-        try {
-            await onSave(draft);
-            onOpenChange(false);
-        } catch (error) {
-            setSaveError(reportError(`Could not save the settings`, error, undefined, { notify: false }));
-        } finally {
-            setSaving(false);
-        }
-    };
 
     const general = draft.general;
     const savedGeneral = settings.general;
-    const notificationSwitch =
-        (key: 'showProjectLoadedNotification' | 'showPreviewReadyNotification' | 'showGenerationCompleteNotification') =>
+    /** A setting row's Switch, labelled and described by the row's title and description. */
+    const switchControl =
+        (checked: boolean, onChange: (checked: boolean) => void) =>
         ({ labelledBy, describedBy }: ControlIds) => (
-            <Switch
-                checked={general[key]}
-                aria-labelledby={labelledBy}
-                aria-describedby={describedBy}
-                onChange={(_, data) => updateGeneral({ [key]: data.checked })}
-            />
+            <Switch checked={checked} aria-labelledby={labelledBy} aria-describedby={describedBy} onChange={(_, data) => onChange(data.checked)} />
         );
+    const notificationSwitch = (key: 'showProjectLoadedNotification' | 'showPreviewReadyNotification' | 'showGenerationCompleteNotification') =>
+        switchControl(general[key], (checked) => updateGeneral({ [key]: checked }));
 
     const sections: SectionDefinition[] = [
         {
@@ -360,14 +332,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     ),
                     keywords,
                     changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
-                    control: ({ labelledBy, describedBy }) => (
-                        <Switch
-                            checked={draft.projectDefaults[key]}
-                            aria-labelledby={labelledBy}
-                            aria-describedby={describedBy}
-                            onChange={(_, data) => updateProjectDefaults({ [key]: data.checked })}
-                        />
-                    ),
+                    control: switchControl(draft.projectDefaults[key], (checked) => updateProjectDefaults({ [key]: checked })),
                 }),
             ),
         },
@@ -391,16 +356,47 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     ),
                     keywords: 'confirm confirmation overwrite',
                     changed: draft.confirmBeforeGenerate !== settings.confirmBeforeGenerate,
-                    control: ({ labelledBy, describedBy }) => (
-                        <Switch
-                            checked={draft.confirmBeforeGenerate}
-                            aria-labelledby={labelledBy}
-                            aria-describedby={describedBy}
-                            onChange={(_, data) => update({ confirmBeforeGenerate: data.checked })}
-                        />
-                    ),
+                    control: switchControl(draft.confirmBeforeGenerate, (checked) => update({ confirmBeforeGenerate: checked })),
                 },
             ],
+        },
+        {
+            id: 'duplicates',
+            tab: 'files',
+            title: 'Duplicate identifiers',
+            icon: <WarningRegular />,
+            badges: [SCOPE_ALL_PROJECTS],
+            settings: [
+                {
+                    id: 'renameDuplicateIdentifiers',
+                    title: RENAME_DUPLICATES_TITLE,
+                    description: 'Give later duplicate enum members their value as a suffix, so the files compile.',
+                    info: RENAME_DUPLICATES_INFO,
+                    keywords: 'duplicate duplicated identifier identifiers enum label rename suffix compile',
+                    changed: draft.renameDuplicateIdentifiers !== settings.renameDuplicateIdentifiers,
+                    control: switchControl(draft.renameDuplicateIdentifiers, (checked) => update({ renameDuplicateIdentifiers: checked })),
+                },
+                {
+                    id: 'skipDuplicateIdentifiers',
+                    title: SKIP_DUPLICATES_TITLE,
+                    description: "Don't write generated files that declare the same name more than once.",
+                    info: SKIP_DUPLICATES_INFO,
+                    keywords: 'duplicate duplicated identifier identifiers enum label skip compile',
+                    changed: draft.skipDuplicateIdentifiers !== settings.skipDuplicateIdentifiers,
+                    control: switchControl(draft.skipDuplicateIdentifiers, (checked) => update({ skipDuplicateIdentifiers: checked })),
+                },
+            ],
+        },
+        {
+            id: 'templates',
+            tab: 'templates',
+            title: 'dataverse-early-bound-typescript-generator templates',
+            icon: <CodeTextRegular />,
+            // The tool's own version, as in the header.
+            badges: [{ label: `Version ${version}` }, { label: 'Read-only' }],
+            // Nothing to set: the card only shows the templates.
+            settings: [],
+            extra: <TemplatesViewer />,
         },
         {
             id: 'orphans',
@@ -412,25 +408,12 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
             settings: [
                 {
                     id: 'deleteOrphanedFiles',
-                    title: 'Delete Orphaned Files',
+                    title: DELETE_ORPHANS_TITLE,
                     description: 'Delete generated files the selection no longer produces.',
-                    info: (
-                        <>
-                            Orphaned files are files in the output folders that the current selection no longer generates. When on,
-                            Generate deletes them permanently after you confirm the list; when off, they're only reported. Also
-                            available as a switch in Preview and generate. Saved as <code>deleteOrphanedFiles</code>.
-                        </>
-                    ),
+                    info: DELETE_ORPHANS_INFO,
                     keywords: 'orphan orphaned delete remove cleanup',
                     changed: draft.deleteOrphanedFiles !== settings.deleteOrphanedFiles,
-                    control: ({ labelledBy, describedBy }) => (
-                        <Switch
-                            checked={draft.deleteOrphanedFiles}
-                            aria-labelledby={labelledBy}
-                            aria-describedby={describedBy}
-                            onChange={(_, data) => update({ deleteOrphanedFiles: data.checked })}
-                        />
-                    ),
+                    control: switchControl(draft.deleteOrphanedFiles, (checked) => update({ deleteOrphanedFiles: checked })),
                     note: draft.deleteOrphanedFiles ? (
                         <MessageBar intent="warning" className={styles.warning}>
                             <MessageBarBody>Files are deleted permanently, not moved to the Recycle Bin or Trash.</MessageBarBody>
@@ -551,7 +534,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     {dirty ? '● Unsaved changes' : 'No unsaved changes'}
                 </span>
                 <span className={styles.footerActions}>
-                    <Button appearance="subtle" icon={<ArrowResetRegular />} disabled={atDefaults || saving} onClick={() => setDraft(withDefaults)}>
+                    <Button appearance="subtle" icon={<ArrowResetRegular />} disabled={atDefaults || saving} onClick={resetToDefaults}>
                         Reset to defaults
                     </Button>
                     <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>

@@ -11,7 +11,6 @@ export const useFooterStyles = makeStyles({
         justifyContent: 'space-between',
         gap: `${tokens.spacingVerticalM} ${tokens.spacingHorizontalXL}`,
         flexWrap: 'wrap',
-        marginTop: tokens.spacingVerticalL,
         padding: `${tokens.spacingVerticalL} ${tokens.spacingHorizontalXL}`,
         backgroundImage: `linear-gradient(300deg, ${tokens.colorBrandBackground2} 0%, ${tokens.colorNeutralBackground1} 65%)`,
         borderTop: `1px solid ${tokens.colorNeutralStroke2}`,

@@ -69,8 +69,9 @@ as a deviation in the README.
 ## Code organization
 
 - `src/core/` is pure TypeScript: no PPTB, no I/O, no UI (`DOMParser` only for the CSDL). `src/services/` holds
-  the PPTB adapters and file planning. `src/components/apps/App.tsx` owns all top-level state; the other
-  component folders are presentational and receive data and callbacks as props.
+  the PPTB adapters and file planning. The state lives in hooks in `src/hooks/`, which
+  `src/components/apps/App.tsx` wires together; the other component folders are presentational and receive data and
+  callbacks as props.
 - Each folder has an `index.ts` barrel (`components`, `hooks`, `services`, `core`, `types`). Add new exports
   there. Inside `services/`, files import each other directly rather than through the barrel, to avoid cycles.
 

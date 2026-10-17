@@ -284,8 +284,17 @@ export interface SchemaModel {
 // Generator output
 // ---------------------------------------------------------------------------------------------------
 
+/** A name declared more than once in one generated file, which TypeScript rejects. */
+export interface DuplicateIdentifier {
+    name: string;
+    /** The values declared under that name, in declaration order (for enums, the option values). */
+    values: string[];
+}
+
 export interface GeneratedFile {
     /** Path relative to `output.outputRoot`, always forward-slash separated. */
     path: string;
     content: string;
+    /** Names the file declares more than once. Only set when there are some. */
+    duplicateIdentifiers?: DuplicateIdentifier[];
 }

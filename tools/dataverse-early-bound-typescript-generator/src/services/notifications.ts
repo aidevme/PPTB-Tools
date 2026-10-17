@@ -3,7 +3,7 @@
  * logged and never interrupts what the user was doing.
  */
 import type { WritePlan } from '../types';
-import { summarizeGeneration, summarizePlan } from './plan';
+import { plural, summarizeGeneration, summarizePlan, writeCounts } from './plan';
 import type { ProjectConfigState } from './projectConfig';
 
 /** The notification types PPTB supports. */
@@ -29,8 +29,6 @@ export function notificationOptions(kind: NotificationType, body: string, title?
     const preset = NOTIFICATION_TYPES[kind];
     return { title: title ?? preset.title, body, type: preset.type, duration: preset.duration };
 }
-
-const plural = (count: number, one: string, many: string) => `${count} ${count === 1 ? one : many}`;
 
 /** Title and body for the notification shown after a saved project is opened. */
 export function projectLoadedMessage(projectName: string, state: ProjectConfigState): { title: string; body: string } {
@@ -61,11 +59,12 @@ export async function notifyProjectLoaded(projectName: string, state: ProjectCon
 }
 
 /** Shows an info notification that a preview finished, with what Generate would do. */
-export async function notifyPreviewReady(plan: WritePlan, deleteOrphans = false): Promise<void> {
-    await show({ title: 'Preview ready', body: summarizePlan(plan.counts, deleteOrphans) }, 'info', 'preview ready');
+export async function notifyPreviewReady(plan: WritePlan, deleteOrphans = false, skipDuplicates = false): Promise<void> {
+    const body = summarizePlan(plan.counts, deleteOrphans, writeCounts(plan, { skipDuplicates }), skipDuplicates);
+    await show({ title: 'Preview ready', body }, 'info', 'preview ready');
 }
 
 /** Shows a success notification after Generate wrote the files and saved the config; `deleted` when it deleted orphans. */
-export async function notifyGenerationComplete(written: number, counts: WritePlan['counts'], deleted?: number): Promise<void> {
-    await show({ title: 'Generation complete', body: summarizeGeneration(written, counts, deleted) }, 'success', 'generation complete');
+export async function notifyGenerationComplete(written: number, counts: WritePlan['counts'], deleted?: number, skipDuplicates = false): Promise<void> {
+    await show({ title: 'Generation complete', body: summarizeGeneration(written, counts, deleted, skipDuplicates) }, 'success', 'generation complete');
 }

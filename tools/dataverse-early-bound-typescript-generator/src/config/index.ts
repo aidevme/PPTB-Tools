@@ -63,6 +63,10 @@ export interface ToolConfig {
     deleteOrphanedFiles: boolean;
     /** Ask for confirmation before Generate writes new and changed files. */
     confirmBeforeGenerate: boolean;
+    /** Don't write generated files that declare a name more than once (duplicate enum members). */
+    skipDuplicateIdentifiers: boolean;
+    /** Rename later duplicate enum members to `<Name>_<Value>` so the generated files compile. */
+    renameDuplicateIdentifiers: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -149,6 +153,8 @@ export const toolConfig: ToolConfig = {
     general: normalizeGeneralSettings(defaults.general, BUILT_IN_GENERAL_SETTINGS),
     deleteOrphanedFiles: defaults.deleteOrphanedFiles === true,
     confirmBeforeGenerate: defaults.confirmBeforeGenerate === true,
+    skipDuplicateIdentifiers: defaults.skipDuplicateIdentifiers === true,
+    renameDuplicateIdentifiers: defaults.renameDuplicateIdentifiers === true,
     projectDefaults: normalizeProjectDefaults(defaults.projectDefaults, BUILT_IN_PROJECT_DEFAULTS),
     projects: normalizeProjects(defaults.projects as unknown[]),
 };
@@ -161,6 +167,10 @@ export function mergeToolConfig(saved: unknown): ToolConfig {
         deleteOrphanedFiles: typeof values.deleteOrphanedFiles === 'boolean' ? values.deleteOrphanedFiles : toolConfig.deleteOrphanedFiles,
         confirmBeforeGenerate:
             typeof values.confirmBeforeGenerate === 'boolean' ? values.confirmBeforeGenerate : toolConfig.confirmBeforeGenerate,
+        skipDuplicateIdentifiers:
+            typeof values.skipDuplicateIdentifiers === 'boolean' ? values.skipDuplicateIdentifiers : toolConfig.skipDuplicateIdentifiers,
+        renameDuplicateIdentifiers:
+            typeof values.renameDuplicateIdentifiers === 'boolean' ? values.renameDuplicateIdentifiers : toolConfig.renameDuplicateIdentifiers,
         projectDefaults: normalizeProjectDefaults(values.projectDefaults, toolConfig.projectDefaults),
         projects: Array.isArray(values.projects) ? normalizeProjects(values.projects) : toolConfig.projects,
     };

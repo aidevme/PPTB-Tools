@@ -40,7 +40,7 @@ across the top shows the four steps you're about to go through. Click a step to 
 The first time, create a project:
 
 1. Click **New Project**.
-2. Enter a **Project Name** and an optional **Description**.
+2. Enter a **Project name** and an optional **Description**.
 3. For **Location**, click **Browse…** and pick your TypeScript project's folder: the one that has, or will
    have, `.dataverse-gen.json`.
 4. Click **Save**. The new project opens straight away.
@@ -93,9 +93,14 @@ with your output folder. Nothing is written yet.
 - A sentence sums up what Generate would do, and the **New**, **Changed**, **Unchanged** and **Orphaned**
   tiles show the counts. Click a tile to list only those files.
 - The table shows what needs attention: new, changed and orphaned files. Turn on **Show unchanged** to see
-  every file, or search by name.
+  every file, or type at least three characters in the search box to list the files whose name starts with them.
 - Select a file to see it on the right. For a **changed** file, the **Changes** tab shows exactly which lines
   would change. Use **↑**/**↓** to move between files.
+
+**Duplicate identifiers** appears when two choice labels turn into the same name in the generated code, for
+example "Open" and "Open!". That file won't compile. Select it to see which names collide, rename one of the
+labels in Dataverse, and preview again. To keep Generate from writing such files, turn on **Skip duplicated
+identifier(s)** next to the Generate button (or in Settings); otherwise Generate still writes the file in the meantime.
 
 **Orphaned** files are in your output folder but no longer generated, for example after you deselect a table.
 By default they're only reported. Turn on **Delete orphaned files** next to the Generate button (or in
@@ -133,7 +138,7 @@ helpers.
 ## Keeping types up to date
 
 When tables change in Dataverse, open the project, click **Preview** to see what changed, then **Generate**.
-If a run adds files or stops producing some, the project's version and **Modified On** are updated
+If a run adds files or stops producing some, the project's version and **Modified on** are updated
 automatically.
 
 ## If something goes wrong

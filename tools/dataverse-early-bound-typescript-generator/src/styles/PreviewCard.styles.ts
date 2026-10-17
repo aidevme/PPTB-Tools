@@ -42,6 +42,7 @@ export const usePreviewCardStyles = makeStyles({
     accentChanged: { borderLeftColor: tokens.colorPaletteMarigoldBorder2, color: tokens.colorPaletteMarigoldForeground1 },
     accentUnchanged: { borderLeftColor: tokens.colorNeutralStroke1, color: tokens.colorNeutralForeground3 },
     accentOrphaned: { borderLeftColor: tokens.colorPaletteRedBorder2, color: tokens.colorPaletteRedForeground1 },
+    accentDuplicate: { borderLeftColor: tokens.colorPaletteDarkOrangeBorder2, color: tokens.colorPaletteDarkOrangeForeground1 },
 
     // Output folder
     outputRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, minWidth: 0, flexWrap: 'wrap' },
@@ -55,7 +56,6 @@ export const usePreviewCardStyles = makeStyles({
 
     // Table filters
     filterBar: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexWrap: 'wrap' },
-    search: { minWidth: '240px' },
 
     // Table and viewer
     split: { display: 'flex', alignItems: 'stretch', minHeight: '360px', height: '540px' },
@@ -80,12 +80,6 @@ export const usePreviewCardStyles = makeStyles({
         ':hover::after': { backgroundColor: tokens.colorBrandStroke1 },
         ':focus-visible': { outline: `${tokens.strokeWidthThick} solid ${tokens.colorStrokeFocus2}`, borderRadius: tokens.borderRadiusMedium },
     },
-    row: { cursor: 'pointer' },
-    // Keeps the column headers visible while the file list scrolls.
-    headerRow: { position: 'sticky', top: 0, zIndex: 1, backgroundColor: tokens.colorNeutralBackground1 },
-    headerCell: { fontWeight: tokens.fontWeightSemibold },
-    // Wider than Fluent's default tooltip, for the per-value explanations.
-    headerTooltip: { maxWidth: '360px', '& ul': { margin: `${tokens.spacingVerticalXS} 0`, paddingLeft: tokens.spacingHorizontalL } },
     typeColumn: { width: '104px' },
     statusColumn: { width: '112px' },
     fileName: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
@@ -96,6 +90,7 @@ export const usePreviewCardStyles = makeStyles({
     dotChanged: { backgroundColor: tokens.colorPaletteMarigoldForeground1 },
     dotUnchanged: { backgroundColor: tokens.colorNeutralForeground4 },
     dotOrphaned: { backgroundColor: tokens.colorPaletteRedForeground1 },
+    dotDuplicate: { backgroundColor: tokens.colorPaletteDarkOrangeForeground1 },
     placeholder: { color: tokens.colorNeutralForeground3, padding: tokens.spacingVerticalXXL, textAlign: 'center' },
     skeleton: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS, padding: tokens.spacingHorizontalM },
 });

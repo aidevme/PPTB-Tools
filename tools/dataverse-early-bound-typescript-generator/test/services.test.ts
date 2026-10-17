@@ -78,7 +78,7 @@ describe('write plan', () => {
             'index.ts': 'new',
             'enums/stale_enum.ts': 'orphaned',
         });
-        expect(plan.counts).toEqual({ new: 2, changed: 1, unchanged: 1, orphaned: 1 });
+        expect(plan.counts).toEqual({ new: 2, changed: 1, unchanged: 1, orphaned: 1, duplicate: 0 });
         expect(plan.outputRoot).toBe('C:\\proj\\src\\dataverse-gen');
 
         const result = await applyWritePlan(sink, plan);
@@ -152,7 +152,7 @@ describe('deleting orphaned files', () => {
                 { relativePath: 'enums/old.ts', absolutePath: '/p/src/dataverse-gen/enums/old.ts', status: 'orphaned' as const },
                 { relativePath: 'enums/new.ts', absolutePath: '/p/src/dataverse-gen/enums/new.ts', status: 'new' as const, content: 'n' },
             ],
-            counts: { new: 1, changed: 0, unchanged: 0, orphaned: 3 },
+            counts: { new: 1, changed: 0, unchanged: 0, orphaned: 3, duplicate: 0 },
         };
         await deleteOrphanedFiles(sink, plan);
         expect(deleteFiles).toHaveBeenCalledWith(['/p/src/dataverse-gen/enums/old.ts']);
@@ -167,7 +167,7 @@ describe('deleting orphaned files', () => {
     });
 
     it('summarizes a run that deleted orphans', () => {
-        const counts = { new: 0, changed: 1, unchanged: 3, orphaned: 2 };
+        const counts = { new: 0, changed: 1, unchanged: 3, orphaned: 2, duplicate: 0 };
         expect(summarizeGeneration(1, counts, 2)).toBe('1 file written · 3 unchanged · 2 deleted · .dataverse-gen.json saved');
         expect(summarizeGeneration(1, counts, 1)).toBe('1 file written · 3 unchanged · 1 deleted · 1 orphaned · .dataverse-gen.json saved');
         expect(summarizeGeneration(1, counts)).toBe('1 file written · 3 unchanged · 2 orphaned · .dataverse-gen.json saved');

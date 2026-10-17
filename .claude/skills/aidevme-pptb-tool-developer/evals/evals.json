@@ -1,0 +1,89 @@
+{
+  "skill_name": "aidevme-pptb-tool-developer",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Move the inline useStyles hooks out of our PPTB tools' components.",
+      "expected_output": "The tools under tools/ with a package.json are listed and the user is asked which to process (one, several or all); nothing is scanned in depth or changed before the answer.",
+      "files": [],
+      "expectations": [
+        "Lists only tools/<name>/ folders that contain a package.json, and mentions folders without one without offering them",
+        "Asks with AskUserQuestion which tool(s) to process, allowing several tools or all tools",
+        "Creates or modifies no file"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Extract the styles in dataverse-early-bound-typescript-generator into src/styles.",
+      "expected_output": "A read-only analysis finds every makeStyles hook defined inside a .tsx file, proposes use<ComponentName>Styles in src/styles/<ComponentName>.styles.ts, lists components already following the convention as skipped, flags edge cases, and asks for approval without changing anything.",
+      "files": [],
+      "expectations": [
+        "Searches src/**/*.tsx for makeStyles( rather than only the name useStyles",
+        "Shows a table of component file, new hook name and new style file, and the dependencies that move with each style object",
+        "Lists components that already import a use<ComponentName>Styles hook from the styles barrel as skipped, with the reason",
+        "Notes the existing src/styles/index.ts export style (named exports) so new entries follow it",
+        "Asks Accept all, Accept selected components, or Cancel, and modifies no file before the answer",
+        "Looks up any Fluent UI styling question raised by an edge case with the Microsoft Learn MCP Server (microsoft_docs_search, then microsoft_docs_fetch when needed) and cites the Learn URL next to the proposed resolution"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Accept all. (App.tsx defines const useStyles = makeStyles({...}) using tokens and a local constant HEADER_HEIGHT.)",
+      "expected_output": "src/styles/App.styles.ts is created with useAppStyles, the local constant is handled as agreed, App.tsx imports useAppStyles from the barrel and drops unused imports, the barrel gets one entry in alphabetical order, and the build and tests run.",
+      "files": [],
+      "expectations": [
+        "Flags HEADER_HEIGHT as a value defined in the component file and agrees how it moves before writing",
+        "Creates src/styles/App.styles.ts exporting useAppStyles with the style values unchanged and imports makeStyles and tokens there",
+        "Removes the useStyles definition from App.tsx, replaces useStyles() with useAppStyles(), and imports it from the styles barrel with the correct relative path",
+        "Removes makeStyles and tokens from App.tsx's imports only if nothing else in the file uses them",
+        "Adds one barrel entry in alphabetical order without duplicating an existing one",
+        "Runs npm run build and npm test in the tool folder and reports the exit codes"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Go ahead with all of them. (src/styles/PreviewCard.styles.ts already exists, and PreviewCard.tsx also defines its own useStyles.)",
+      "expected_output": "The existing style file isn't overwritten; the user is asked how to resolve the collision (merge, a different name, or skip) and only that component waits for the answer.",
+      "files": [],
+      "expectations": [
+        "Detects that src/styles/PreviewCard.styles.ts already exists before writing",
+        "Asks for explicit confirmation or a resolution instead of overwriting it",
+        "Does not change the existing style file or its values without that confirmation"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Accept all. (After the extraction, npm run build fails in SettingsPanel.tsx with 'tokens is not defined'.)",
+      "expected_output": "Verification stops, the error is reported with the affected file and likely cause (an import removed that the component still uses), and the user is asked whether to fix forward, undo the change, or stop.",
+      "files": [],
+      "expectations": [
+        "Stops after the failing build and reports the exit code and the error with the file",
+        "Gives a hypothesis for the cause",
+        "Asks whether to fix forward, undo the component's change, or stop, without changing style values or tests to make it pass"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Extract the styles in dataverse-early-bound-typescript-generator. Is it fine to keep shorthands and hard-coded px values when the hooks move?",
+      "expected_output": "The answer about makeStyles, shorthands and tokens is taken from Microsoft Learn through the Learn MCP Server and cited; the refactor itself still moves the styles unchanged, and any improvement is listed as a follow-up only.",
+      "files": [],
+      "expectations": [
+        "Uses microsoft_docs_search (and microsoft_docs_fetch or microsoft_code_sample_search when needed) from the Microsoft Learn MCP Server instead of answering from memory",
+        "Cites the Learn URL(s) the answer is based on",
+        "Keeps every style value unchanged in the proposed refactor and lists Learn-based improvements as follow-ups, not as changes",
+        "Modifies no file before the approval question is answered"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Move the useStyles hooks out of the components in dataverse-early-bound-typescript-generator. (No Microsoft Learn MCP server is configured in this session.)",
+      "expected_output": "The analysis and the approval flow still run; the user is told the Microsoft Learn MCP Server is not available, with how to add it, and styling questions are marked \"Microsoft Learn not checked\" rather than answered from memory.",
+      "files": [],
+      "expectations": [
+        "Says the Microsoft Learn MCP Server is not available in the session and shows how to add it (https://learn.microsoft.com/api/mcp), without changing any MCP configuration itself",
+        "Marks styling questions that would need Learn as \"Microsoft Learn not checked\" instead of presenting unverified API details as fact",
+        "Still completes the read-only analysis and asks the approval question"
+      ]
+    }
+  ]
+}

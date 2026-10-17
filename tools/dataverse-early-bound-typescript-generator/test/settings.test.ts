@@ -9,8 +9,10 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyProjectDefaults, mergeToolConfig, toolConfig, toolConfigEquals, type ProjectEntry, type ToolConfig } from '../src/config';
 import { createDefaultConfig } from '../src/core';
 import { loadToolConfig, saveToolConfig } from '../src/services/settings';
+import { DATAVERSE_GEN_TEMPLATES } from '../src/services/dataverseGenTemplates';
+import { version as toolVersion } from '../package.json';
 import { SettingsPanel } from '../src/components/panels/SettingsPanel';
-import { NewProjectDialog } from '../src/components/dialogs/NewProjectDialog';
+import { ProjectFormDialog } from '../src/components/dialogs/ProjectFormDialog';
 import { LoadProjectDialog } from '../src/components/dialogs/LoadProjectDialog';
 
 const PROJECT: ProjectEntry = { id: 'p1', name: 'Contoso', description: 'Sales app', location: '/src/contoso', version: '1.2.0', createdOn: '2026-10-12T00:00:00.000Z', modifiedOn: '2026-10-13T00:00:00.000Z' };
@@ -53,6 +55,8 @@ describe('tool config', () => {
             },
             deleteOrphanedFiles: false,
             confirmBeforeGenerate: false,
+            skipDuplicateIdentifiers: false,
+            renameDuplicateIdentifiers: false,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
             projects: [],
         });
@@ -79,6 +83,16 @@ describe('tool config', () => {
     it('reads confirmBeforeGenerate only when it is a boolean', () => {
         expect(mergeToolConfig({ confirmBeforeGenerate: true }).confirmBeforeGenerate).toBe(true);
         expect(mergeToolConfig({ confirmBeforeGenerate: 'yes' }).confirmBeforeGenerate).toBe(false);
+    });
+
+    it('reads renameDuplicateIdentifiers only when it is a boolean', () => {
+        expect(mergeToolConfig({ renameDuplicateIdentifiers: true }).renameDuplicateIdentifiers).toBe(true);
+        expect(mergeToolConfig({ renameDuplicateIdentifiers: 'yes' }).renameDuplicateIdentifiers).toBe(false);
+    });
+
+    it('reads skipDuplicateIdentifiers only when it is a boolean', () => {
+        expect(mergeToolConfig({ skipDuplicateIdentifiers: true }).skipDuplicateIdentifiers).toBe(true);
+        expect(mergeToolConfig({ skipDuplicateIdentifiers: 'yes' }).skipDuplicateIdentifiers).toBe(false);
     });
 
     it('merges project defaults key by key, ignoring mistyped values and a blank output folder', () => {
@@ -171,15 +185,15 @@ describe('settings panel', () => {
         expect(document.body.textContent).toContain('No unsaved changes');
 
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(button('Save').disabled).toBe(false);
         expect(document.body.textContent).toContain('Unsaved changes');
 
         // Changing it back means nothing to save.
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(button('Save').disabled).toBe(true);
 
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ deleteOrphanedFiles: true }));
         expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -244,13 +258,58 @@ describe('settings panel', () => {
         expect(document.body.textContent).toContain('Permanent');
         const warning = 'Files are deleted permanently';
         expect(document.body.textContent).not.toContain(warning);
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         expect(document.body.textContent).toContain(warning);
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
 
         await click(control('Ask before generating'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ confirmBeforeGenerate: true }));
+    });
+
+    it('shows the dataverse-gen templates, read-only, on the Templates tab', async () => {
+        await render(toolConfig, vi.fn(async () => {}));
+        await openTab('Templates');
+        // Fluent repeats an unselected tab's label as hidden spacing text, so tabs are matched by value.
+        const templateTabs = Array.from(document.querySelectorAll('[role="tablist"][aria-label="Templates"] [role="tab"]')).map((t) => t.getAttribute('value'));
+        expect(templateTabs).toEqual(DATAVERSE_GEN_TEMPLATES.map((t) => t.name));
+        const region = () => document.querySelector('[role="region"][aria-label$=" template"]') as HTMLElement;
+        expect(region().getAttribute('aria-label')).toBe('action.ejs template');
+        expect(document.body.textContent).toContain("Generate writes them to your project's templateRoot");
+        expect(document.body.textContent).toContain('dataverse-early-bound-typescript-generator templates');
+        expect(document.body.textContent).toContain(`Version ${toolVersion}`);
+        expect(document.querySelector('[role="tabpanel"]')?.textContent).not.toContain('dataverse-gen ');
+
+        const enumTab = document.querySelector('[role="tab"][value="enum.ejs"]') as HTMLElement;
+        await click(enumTab);
+        expect(region().textContent).toContain('// Enum <%- locals.Name %>');
+        // CodeViewer: one numbered row per line, highlighted as TypeScript, with the CRLF line endings shown as plain breaks.
+        const enumTemplate = DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content;
+        const rows = Array.from(region().querySelectorAll('pre > div')) as HTMLElement[];
+        expect(rows).toHaveLength(enumTemplate.replace(/\r\n$/, '').split('\r\n').length);
+        expect(rows[0].firstElementChild?.textContent).toBe('1');
+        expect(rows[2].querySelectorAll('span span').length).toBeGreaterThan(1);
+        expect(region().textContent).not.toContain('\r');
+        // Nothing to change: Save stays disabled.
+        expect(button('Save').disabled).toBe(true);
+    });
+
+    it('offers Rename duplicated identifier(s) on the Generate & files tab', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        await click(control('Rename duplicated identifier(s)'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ renameDuplicateIdentifiers: true }));
+    });
+
+    it('offers Skip duplicated identifier(s) on the Generate & files tab', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        await click(control('Skip duplicated identifier(s)'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
 
     it('searches across all tabs', async () => {
@@ -258,7 +317,7 @@ describe('settings panel', () => {
         const search = document.querySelector('input[aria-label="Search settings"]') as HTMLInputElement;
         await typeInto(search, 'orphan');
         // The setting from the third tab shows while General is still the selected tab.
-        expect(control('Delete Orphaned Files')).toBeTruthy();
+        expect(control('Delete orphaned files')).toBeTruthy();
         expect(control('Project loaded')).toBeUndefined();
         expect(document.body.textContent).toContain('Orphaned files · Generate & files');
 
@@ -285,7 +344,7 @@ describe('settings panel', () => {
         const onSave = vi.fn(async () => {});
         const onOpenChange = await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Cancel'));
         expect(onSave).not.toHaveBeenCalled();
         expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -297,7 +356,7 @@ describe('settings panel', () => {
         });
         const onOpenChange = await render(toolConfig, onSave);
         await openTab('Generate & files');
-        await click(control('Delete Orphaned Files'));
+        await click(control('Delete orphaned files'));
         await click(button('Save'));
         expect(onOpenChange).not.toHaveBeenCalledWith(false);
         expect(document.body.textContent).toContain('Could not save the settings: disk full');
@@ -314,7 +373,7 @@ describe('new project dialog', () => {
         root = undefined;
     });
 
-    async function render(props: Partial<Parameters<typeof NewProjectDialog>[0]> = {}) {
+    async function render(props: Partial<Parameters<typeof ProjectFormDialog>[0]> = {}) {
         const all = {
             open: true,
             onOpenChange: vi.fn(),
@@ -326,7 +385,7 @@ describe('new project dialog', () => {
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
-            root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(NewProjectDialog, all)));
+            root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(ProjectFormDialog, all)));
         });
         return all;
     }
@@ -344,10 +403,26 @@ describe('new project dialog', () => {
             element.dispatchEvent(new Event('input', { bubbles: true }));
         });
 
+    it('starts every visit with an empty form, or with the edited project', async () => {
+        const props = await render();
+        const rerender = (change: Partial<typeof props> & { project?: ProjectEntry }) =>
+            act(async () => {
+                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(ProjectFormDialog, { ...props, ...change })));
+            });
+        await type(field('Project name'), 'Draft');
+        await rerender({ open: false });
+        await rerender({ open: true });
+        expect(field('Project name').value).toBe('');
+        await rerender({ open: false });
+        await rerender({ open: true, project: PROJECT });
+        expect(field('Project name').value).toBe(PROJECT.name);
+        expect(field('Location').value).toBe(PROJECT.location);
+    });
+
     it('enables Save once name and location are set, then saves trimmed values and closes', async () => {
         const props = await render();
         expect(button('Save').disabled).toBe(true);
-        await type(field('Project Name') as HTMLInputElement, '  Fabrikam  ');
+        await type(field('Project name') as HTMLInputElement, '  Fabrikam  ');
         expect(button('Save').disabled).toBe(true);
         await click(button('Browse…'));
         expect(props.onBrowseLocation).toHaveBeenCalledWith('');
@@ -362,7 +437,7 @@ describe('new project dialog', () => {
 
     it('rejects a name that is already used', async () => {
         await render();
-        await type(field('Project Name') as HTMLInputElement, 'contoso');
+        await type(field('Project name') as HTMLInputElement, 'contoso');
         await type(field('Location') as HTMLInputElement, '/projects/x');
         expect(button('Save').disabled).toBe(true);
         expect(document.body.textContent).toContain('A project with this name already exists.');
@@ -370,7 +445,7 @@ describe('new project dialog', () => {
 
     it('Cancel closes without saving, and a failed save keeps the dialog open', async () => {
         const failing = await render({ onSave: vi.fn(async () => Promise.reject(new Error('quota'))) });
-        await type(field('Project Name') as HTMLInputElement, 'Fabrikam');
+        await type(field('Project name') as HTMLInputElement, 'Fabrikam');
         await type(field('Location') as HTMLInputElement, '/projects/x');
         await click(button('Save'));
         expect(failing.onOpenChange).not.toHaveBeenCalledWith(false);
@@ -414,7 +489,7 @@ describe('load existing project dialog', () => {
         expect(text).toContain('/src/contoso');
         expect(text).toContain('1.2.0');
         const headers = Array.from(document.querySelectorAll('th')).map((th) => th.textContent).filter(Boolean);
-        expect(headers).toEqual(['Name', 'Description', 'Version', 'Location', 'Created On', 'Modified On']);
+        expect(headers).toEqual(['Name', 'Description', 'Version', 'Location', 'Created on', 'Modified on']);
         expect(button('Load').disabled).toBe(true);
 
         await click(radios()[1]);
@@ -435,6 +510,20 @@ describe('load existing project dialog', () => {
         await click(radios()[0]);
         await click(button('Load'));
         expect(document.body.textContent).toContain('Could not open Adventure Works: no access');
+    });
+
+    it('starts every visit with nothing selected', async () => {
+        const props = await render();
+        await click(radios()[0]);
+        expect(button('Load').disabled).toBe(false);
+        const rerender = (open: boolean) =>
+            act(async () => {
+                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(LoadProjectDialog, { ...props, open })));
+            });
+        await rerender(false);
+        await rerender(true);
+        expect(radios().some((r) => r.checked)).toBe(false);
+        expect(button('Load').disabled).toBe(true);
     });
 
     it('explains when there are no saved projects', async () => {
@@ -472,7 +561,7 @@ describe('load existing project dialog', () => {
         expect(names()).toEqual(['Alpha', 'Beta']);
         expect(header('Version').getAttribute('aria-sort')).toBe('descending');
 
-        await click(sortButton('Created On'));
+        await click(sortButton('Created on'));
         expect(names()).toEqual(['Alpha', 'Beta']);
     });
 

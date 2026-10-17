@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "@fluentui/svg-icons": "^1.1.333",
-    "@playwright/test": "^1.61.1",
-    "@types/node": "^26.1.1",
+    "@fluentui/svg-icons": "^1.1.344",
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^26.6.5",
     "gray-matter": "^4.0.3",
-    "jszip": "^3.10.1",
-    "markdownlint-cli2": "^0.23.1",
-    "simple-icons": "^16.27.0",
+    "jszip": "^3.10.2",
+    "markdownlint-cli2": "^0.23.3",
+    "simple-icons": "^16.35.0",
     "vitepress": "^2.0.0-alpha.18"
   },
   "scripts": {
@@ -19,6 +19,6 @@
     "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\""
   },
   "dependencies": {
-    "mermaid": "^11.16.0"
+    "mermaid": "^12.2.0"
   }
 }
