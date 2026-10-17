@@ -170,6 +170,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `tool-verification` | Checking a tool against the Verified badge requirements |
 | `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/`) |
 | `aidevme-pptb-tool-developer` | Moving inline `makeStyles` hooks out of a tool's components into `src/styles/<ComponentName>.styles.ts` (`use<ComponentName>Styles`) |
+| `aidevme-github` | Committing when asked: one commit per file, each with its own Conventional Commits message |
 | `playwright-cli` | Driving a browser: testing, screenshots, scraping |
 | `aidevme-dataverse-sdk-reference` | Dataverse SDK / Web API / metadata reference |
 | `aidevme-fetchxml-queries` | Writing or optimizing FetchXML |
