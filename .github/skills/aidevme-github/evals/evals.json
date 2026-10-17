@@ -1,0 +1,65 @@
+{
+  "skill_name": "aidevme-github",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Commit my changes. (Three files are modified: src/services/plan.ts, test/plan.test.ts and README.md; plan.test.ts tests a new function added in plan.ts.)",
+      "expected_output": "The repo state and recent log are read, each file's diff is read on its own, the source and test are offered as a coupled group, a plan table with one Conventional Commits message per commit is shown, and nothing is committed before the user confirms.",
+      "files": [],
+      "expectations": [
+        "Runs git status --porcelain and git log --oneline -15 before proposing messages",
+        "Reads git diff -- <file> separately for each of the three files",
+        "Names src/services/plan.ts and test/plan.test.ts as a coupled pair and asks once whether to keep them in one commit",
+        "Shows a table with file and message, each message specific to its file and following <type>(<scope>): <description> in lowercase imperative without a trailing period",
+        "Does not run git commit before the user confirms"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Just commit everything. (Changed: .env.local, dist/index.js, src/app.ts, docs/guide.md.)",
+      "expected_output": "The secret file and the build output are skipped with a warning and a .gitignore suggestion; src/app.ts and docs/guide.md are committed separately, source before docs, without asking for confirmation.",
+      "files": [],
+      "expectations": [
+        "Skips .env.local and says it may contain secrets",
+        "Skips dist/index.js as build output and suggests a .gitignore entry",
+        "Commits src/app.ts and docs/guide.md as two separate commits, source first, checking git diff --cached --name-only lists one file before each commit",
+        "Does not ask for confirmation, since the user said just commit",
+        "Ends with git log --oneline -n 2 and a summary that lists the skipped files and why"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Commit only what I staged. (README.md is staged; src/index.ts and src/util.ts are modified but not staged.)",
+      "expected_output": "Only README.md is committed, with a docs message; the unstaged files are left untouched.",
+      "files": [],
+      "expectations": [
+        "Processes only the staged README.md",
+        "Uses a docs type message describing the README change",
+        "Leaves src/index.ts and src/util.ts unstaged and uncommitted"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Commit and push. (The pre-commit hook fails on src/app.ts with a lint error.)",
+      "expected_output": "The commit stops at the failing file; the hook error is reported and the cause fixed or the user asked; the hook is not bypassed, the remaining files wait, and nothing is pushed until the commits succeed and the push is still wanted.",
+      "files": [],
+      "expectations": [
+        "Stops when the pre-commit hook fails and reports the error",
+        "Does not use --no-verify or any other way to bypass the hook",
+        "Does not continue with the remaining files until the failure is resolved",
+        "Does not push while a commit has failed"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Write the commit messages for these changes. (src/settings.ts now stores settings per connection, which breaks existing saved settings.)",
+      "expected_output": "A breaking-change message is proposed with ! after the type/scope and a BREAKING CHANGE footer explaining the migration; nothing is committed, since only messages were asked for.",
+      "files": [],
+      "expectations": [
+        "Proposes a message such as feat(settings)!: store settings per connection",
+        "Adds a footer starting with BREAKING CHANGE: that explains what breaks and how to migrate",
+        "Does not commit, because the user only asked for messages"
+      ]
+    }
+  ]
+}

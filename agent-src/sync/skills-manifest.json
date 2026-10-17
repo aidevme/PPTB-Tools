@@ -994,6 +994,14 @@
       "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
     },
     {
+      "name": "aidevme-github",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Commit changes one file at a time with Conventional Commits 1.0.0 messages: safety check, per-file diffs, coupled-file grouping, plan and confirmation; never push or bypass hooks unless asked."
+    },
+    {
       "name": "aidevme-pptb-tool-developer",
       "scope": "project",
       "group": "pptb",
