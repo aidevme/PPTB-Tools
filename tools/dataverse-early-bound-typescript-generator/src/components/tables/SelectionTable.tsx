@@ -1,0 +1,85 @@
+import type { ReactNode } from 'react';
+import { Table, TableBody, TableCell, TableCellLayout, TableHeader, TableRow, TableSelectionCell } from '@fluentui/react-components';
+import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
+import type { SelectionColumn } from '../cards/selectionColumns';
+import { SortableHeaderCell } from '../shared/SortableHeaderCell';
+import type { SortState, SortValue } from '../shared/sorting';
+import { activateRowOnKey } from '../shared/tableRows';
+
+/**
+ * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort
+ * value per cell.
+ */
+export interface SelectionRow {
+    key: string;
+    label: string;
+    cells: ReactNode[];
+    sortValues: SortValue[];
+}
+
+export interface ISelectionTableProps {
+    /** The table's accessible name, for example "Tables". */
+    ariaLabel: string;
+    columns: SelectionColumn[];
+    /** The rows to show, already filtered, sorted and limited. */
+    rows: SelectionRow[];
+    sort: SortState | null;
+    onToggleSort: (column: number) => void;
+    /** Keys of the selected rows. */
+    selectedKeys: ReadonlySet<string>;
+    /** Rows can't be toggled (not connected, or busy). */
+    disabled: boolean;
+    /** A row's checkbox, click, Enter or Space selects (`true`) or clears (`false`) it. */
+    onToggleRow: (key: string, checked: boolean) => void;
+}
+
+/** The Select card's table: a checkbox per row, sortable columns with help tooltips. */
+export function SelectionTable({ ariaLabel, columns, rows, sort, onToggleSort, selectedKeys, disabled, onToggleRow }: ISelectionTableProps) {
+    const styles = useSelectionCardStyles();
+    const tableStyles = useSortableTableStyles();
+    return (
+        <Table aria-label={ariaLabel} size="small" sortable>
+            <TableHeader>
+                <TableRow className={tableStyles.headerRow}>
+                    <TableSelectionCell type="checkbox" invisible />
+                    {columns.map((column, index) => (
+                        <SortableHeaderCell
+                            key={column.label}
+                            help={column.help}
+                            sortDirection={sort?.column === index ? sort.direction : undefined}
+                            onClick={() => onToggleSort(index)}
+                        >
+                            {column.label}
+                        </SortableHeaderCell>
+                    ))}
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {rows.map((row) => {
+                    const checked = selectedKeys.has(row.key);
+                    const toggleRow = () => {
+                        if (!disabled) onToggleRow(row.key, !checked);
+                    };
+                    return (
+                        <TableRow
+                            key={row.key}
+                            className={disabled ? styles.rowDisabled : tableStyles.row}
+                            aria-selected={checked}
+                            appearance={checked ? 'brand' : 'none'}
+                            tabIndex={0}
+                            onClick={toggleRow}
+                            onKeyDown={(e) => activateRowOnKey(e, toggleRow)}
+                        >
+                            <TableSelectionCell type="checkbox" checked={checked} checkboxIndicator={{ 'aria-label': `Select ${row.label}`, disabled }} />
+                            {row.cells.map((cell, index) => (
+                                <TableCell key={index}>
+                                    <TableCellLayout truncate>{cell}</TableCellLayout>
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    );
+                })}
+            </TableBody>
+        </Table>
+    );
+}

@@ -40,3 +40,5 @@ export { ProjectsTable } from './tables/ProjectsTable';
 export type { IProjectsTableProps } from './tables/ProjectsTable';
 export { FileTable } from './tables/FileTable';
 export type { IFileTableProps } from './tables/FileTable';
+export { SelectionTable } from './tables/SelectionTable';
+export type { ISelectionTableProps, SelectionRow } from './tables/SelectionTable';

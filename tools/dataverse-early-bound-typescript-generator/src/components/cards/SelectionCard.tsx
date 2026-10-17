@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import {
     Badge,
     Button,
@@ -9,13 +9,6 @@ import {
     Switch,
     Tab,
     TabList,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellLayout,
-    TableHeader,
-    TableRow,
-    TableSelectionCell,
     Text,
     Tooltip,
     type SelectTabData,
@@ -23,11 +16,10 @@ import {
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
 import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
-import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
-import { nextSort, sortSelectionRows, type SortState, type SortValue } from '../shared/sorting';
-import { activateRowOnKey } from '../shared/tableRows';
+import { useSelectionCardStyles } from '../../styles';
+import { nextSort, sortSelectionRows, type SortState } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
+import { SelectionTable, type SelectionRow } from '../tables/SelectionTable';
 import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from './selectionColumns';
 import type { StepState } from '../shared/workflowSteps';
 
@@ -35,17 +27,6 @@ export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
-
-/**
- * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort
- * value per cell.
- */
-interface SelectionRow {
-    key: string;
-    label: string;
-    cells: ReactNode[];
-    sortValues: SortValue[];
-}
 
 function operationType(o: OperationSummary): string {
     if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
@@ -87,7 +68,6 @@ export interface SelectionCardProps {
 export function SelectionCard(props: SelectionCardProps) {
     const { step } = props;
     const styles = useSelectionCardStyles();
-    const tableStyles = useSortableTableStyles();
     /** Nothing to browse until a project is open, so every control is disabled. */
     const noProject = !!props.needsProject;
     const [tab, setTab] = useState<SelectionKind>('entities');
@@ -270,53 +250,16 @@ export function SelectionCard(props: SelectionCardProps) {
                     ) : shown.length === 0 ? (
                         <div className={styles.empty}>{props.disabled ? 'Connect to an environment to list items.' : 'Nothing matches.'}</div>
                     ) : (
-                        <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small" sortable>
-                            <TableHeader>
-                                <TableRow className={tableStyles.headerRow}>
-                                    <TableSelectionCell type="checkbox" invisible />
-                                    {columns.map((column, index) => (
-                                        <SortableHeaderCell
-                                            key={column.label}
-                                            help={column.help}
-                                            sortDirection={sort?.column === index ? sort.direction : undefined}
-                                            onClick={() => toggleSort(index)}
-                                        >
-                                            {column.label}
-                                        </SortableHeaderCell>
-                                    ))}
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {shown.map((row) => {
-                                    const checked = selectedSet.has(row.key);
-                                    const toggleRow = () => {
-                                        if (!props.disabled) props.onToggle(tab, row.key, !checked);
-                                    };
-                                    return (
-                                        <TableRow
-                                            key={row.key}
-                                            className={props.disabled ? styles.rowDisabled : tableStyles.row}
-                                            aria-selected={checked}
-                                            appearance={checked ? 'brand' : 'none'}
-                                            tabIndex={0}
-                                            onClick={toggleRow}
-                                            onKeyDown={(e) => activateRowOnKey(e, toggleRow)}
-                                        >
-                                            <TableSelectionCell
-                                                type="checkbox"
-                                                checked={checked}
-                                                checkboxIndicator={{ 'aria-label': `Select ${row.label}`, disabled: props.disabled }}
-                                            />
-                                            {row.cells.map((cell, index) => (
-                                                <TableCell key={index}>
-                                                    <TableCellLayout truncate>{cell}</TableCellLayout>
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
+                        <SelectionTable
+                            ariaLabel={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'}
+                            columns={columns}
+                            rows={shown}
+                            sort={sort}
+                            onToggleSort={toggleSort}
+                            selectedKeys={selectedSet}
+                            disabled={!!props.disabled}
+                            onToggleRow={(key, checked) => props.onToggle(tab, key, checked)}
+                        />
                     )}
                 </div>
                 {!props.needsProject && (
