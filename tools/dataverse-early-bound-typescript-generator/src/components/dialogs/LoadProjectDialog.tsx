@@ -170,7 +170,6 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                                         <TableSelectionCell
                                                             type="radio"
                                                             checked={isSelected}
-                                                            checkboxIndicator={{ 'aria-label': `Select ${project.name}` }}
                                                             radioIndicator={{ 'aria-label': `Select ${project.name}` }}
                                                         />
                                                         <TableCell>
@@ -203,9 +202,9 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                                         </TableCell>
                                                         <TableCell>{project.version}</TableCell>
                                                         <TableCell>
-                                                            <span className={styles.path} title={project.location}>
-                                                                {project.location}
-                                                            </span>
+                                                            <Tooltip content={project.location} relationship="description" withArrow>
+                                                                <span className={styles.path}>{project.location}</span>
+                                                            </Tooltip>
                                                         </TableCell>
                                                         <TableCell>{formatDateTime(project.createdOn)}</TableCell>
                                                         <TableCell>{formatDateTime(project.modifiedOn)}</TableCell>
