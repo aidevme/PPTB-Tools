@@ -5,6 +5,10 @@ export default defineConfig({
     // Published as a GitHub Pages project site at https://aidevme.github.io/PPTB-Tools/.
     base: "/PPTB-Tools/",
     description: "Documentation for Power Platform ToolBox (PPTB) tools.",
+    // The agent template's decision records, review logs and onboarding guides stay in the repository but aren't part
+    // of the site: they're not in the navigation, use template placeholders and expressions Vue can't compile
+    // (`<title>`, `${{ … }}`), and link to folders that only exist in the template.
+    srcExclude: ["decisions/**", "review-logs/**", "onboarding/**"],
     themeConfig: {
         nav: [
             { text: "Home", link: "/" },
