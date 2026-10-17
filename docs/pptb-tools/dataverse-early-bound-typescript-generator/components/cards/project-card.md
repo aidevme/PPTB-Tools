@@ -5,7 +5,9 @@ and recent projects. With a project open, it shows a summary of that project.
 
 Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx)
 
-## Props (`ProjectCardProps`)
+## Props (`IProjectCardProps`)
+
+`ProjectCardProps` remains as a deprecated alias of `IProjectCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |

@@ -8,7 +8,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { findDuplicateEnumMembers, generate, renameDuplicateEnumMembers, resolveConfig, type EnumModel } from '../src/core';
-import { PreviewCard, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { PreviewCard, type IPreviewCardProps } from '../src/components/cards/PreviewCard';
 import { FileViewer, duplicateLineNotes } from '../src/components/viewers/FileViewer';
 import { computeWorkflowSteps } from '../src/components/shared/workflowSteps';
 import { InMemoryFileSink } from '../src/services/fileSink';
@@ -191,7 +191,7 @@ const DUPLICATE: PlannedFile = {
 };
 
 describe('PreviewCard', () => {
-    const props = (files: PlannedFile[], duplicate: number): PreviewCardProps => ({
+    const props = (files: PlannedFile[], duplicate: number): IPreviewCardProps => ({
         step: computeWorkflowSteps({ hasProject: true, selectedCount: 1, plan: { pending: 1, stale: false } })[3],
         plan: { projectRoot: 'C:/repo', outputRoot: 'C:/repo/gen', files, counts: { new: 0, changed: 0, unchanged: files.length - duplicate, orphaned: 0, duplicate } },
         stale: false,

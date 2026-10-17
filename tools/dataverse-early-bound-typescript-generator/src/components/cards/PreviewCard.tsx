@@ -27,7 +27,7 @@ const SHOW_UNCHANGED_INFO = (
     </>
 );
 
-export interface PreviewCardProps {
+export interface IPreviewCardProps {
     step: StepState;
     plan: WritePlan | null;
     /** Whether the plan is stale because the selection or options changed since it was computed. */
@@ -64,7 +64,7 @@ export interface PreviewCardProps {
  * the table lists them (changes only by default) beside a viewer showing each file's content or changes. The
  * action bar, tiles and table are in `PreviewParts.tsx`.
  */
-export function PreviewCard(props: PreviewCardProps) {
+export function PreviewCard(props: IPreviewCardProps) {
     const { step, plan, stale, canPreview, busy, lastResult, deleteOrphans, onPreview, onCopyText } = props;
     const skipDuplicates = props.skipDuplicates ?? false;
     const styles = usePreviewCardStyles();
@@ -189,3 +189,6 @@ export function PreviewCard(props: PreviewCardProps) {
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `IPreviewCardProps`. */
+export type PreviewCardProps = IPreviewCardProps;

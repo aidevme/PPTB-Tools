@@ -29,7 +29,7 @@ export type SelectionKind = 'entities' | 'actions' | 'functions';
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
 
-export interface SelectionCardProps {
+export interface ISelectionCardProps {
     step: StepState;
     entities: EntitySummary[];
     operations: OperationSummary[] | null;
@@ -61,7 +61,7 @@ export interface SelectionCardProps {
 }
 
 /** Step 2: pick tables, actions and functions. Selection is stored directly in the config. */
-export function SelectionCard(props: SelectionCardProps) {
+export function SelectionCard(props: ISelectionCardProps) {
     const { step } = props;
     const styles = useSelectionCardStyles();
     /** Nothing to browse until a project is open, so every control is disabled. */
@@ -208,3 +208,6 @@ export function SelectionCard(props: SelectionCardProps) {
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `ISelectionCardProps`. */
+export type SelectionCardProps = ISelectionCardProps;

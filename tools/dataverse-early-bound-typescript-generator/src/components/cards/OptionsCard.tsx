@@ -5,7 +5,7 @@ import { useOptionsCardStyles } from '../../styles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 
-export interface OptionsCardProps {
+export interface IOptionsCardProps {
     step: StepState;
     config: DataverseGenConfig;
     disabled: boolean;
@@ -13,7 +13,7 @@ export interface OptionsCardProps {
 }
 
 /** Step 3: output folder and which artefacts to emit (mirrors the dataverse-gen init prompts). */
-export function OptionsCard({ step, config, disabled, onChange }: OptionsCardProps) {
+export function OptionsCard({ step, config, disabled, onChange }: IOptionsCardProps) {
     const styles = useOptionsCardStyles();
     return (
         <StepCard step={step} description="Start from the Options in Settings; change them here for this project. Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
@@ -83,3 +83,6 @@ export function OptionsCard({ step, config, disabled, onChange }: OptionsCardPro
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `IOptionsCardProps`. */
+export type OptionsCardProps = IOptionsCardProps;

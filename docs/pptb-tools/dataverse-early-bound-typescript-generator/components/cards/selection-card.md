@@ -5,7 +5,9 @@ directly in the config, so it's saved to `.dataverse-gen.json`.
 
 Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx)
 
-## Props (`SelectionCardProps`)
+## Props (`ISelectionCardProps`)
+
+`SelectionCardProps` remains as a deprecated alias of `ISelectionCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |

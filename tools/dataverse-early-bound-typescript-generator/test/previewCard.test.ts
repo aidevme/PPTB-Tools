@@ -3,7 +3,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PreviewCard, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { PreviewCard, type IPreviewCardProps } from '../src/components/cards/PreviewCard';
 import { FileSearchBox } from '../src/components/shared/FileSearchBox';
 import { fileType } from '../src/components/shared/generatedFiles';
 import { clampListWidth, matchesSearch, sortFiles, visibleFiles } from '../src/components/shared/previewFiles';
@@ -56,7 +56,7 @@ afterEach(() => {
     disconnect() {}
 };
 
-async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged = true } = {}) {
+async function render(overrides: Partial<IPreviewCardProps> = {}, { showUnchanged = true } = {}) {
     container = document.body.appendChild(document.createElement('div'));
     root = createRoot(container);
     await act(async () =>
@@ -79,7 +79,7 @@ async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged
                     onGenerate: vi.fn(),
                     onCopyText: vi.fn(),
                     ...overrides,
-                } as PreviewCardProps),
+                } as IPreviewCardProps),
             ),
         ),
     );

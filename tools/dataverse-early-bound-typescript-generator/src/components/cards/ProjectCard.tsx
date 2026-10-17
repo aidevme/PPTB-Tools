@@ -19,7 +19,7 @@ import type { StepState } from '../shared/workflowSteps';
 import { RecentProjectsList } from './RecentProjectsList';
 import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './recentProjects';
 
-export interface ProjectCardProps {
+export interface IProjectCardProps {
     step: StepState;
     projectRoot: string | null;
     /** Folder used last time with this connection, offered first for reopening while no project is open. */
@@ -46,7 +46,7 @@ export interface ProjectCardProps {
  * Step 1: open a project. Without one, an empty state with the main actions and recent projects; with one, a
  * summary of the project (name, version, path, config status and selection counts).
  */
-export function ProjectCard(props: ProjectCardProps) {
+export function ProjectCard(props: IProjectCardProps) {
     const { step, projectRoot, configState, projects, busy, onNewProject, onLoadExistingProject, onOpenRecent, onReload, onCopyPath } = props;
     const styles = useProjectCardStyles();
     const now = props.now ?? Date.now();
@@ -149,3 +149,6 @@ export function ProjectCard(props: ProjectCardProps) {
         );
     }
 }
+
+/** @deprecated Renamed to `IProjectCardProps`. */
+export type ProjectCardProps = IProjectCardProps;

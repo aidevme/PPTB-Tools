@@ -6,7 +6,9 @@ settings.
 
 Source: [`src/components/cards/OptionsCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/OptionsCard.tsx)
 
-## Props (`OptionsCardProps`)
+## Props (`IOptionsCardProps`)
+
+`OptionsCardProps` remains as a deprecated alias of `IOptionsCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |

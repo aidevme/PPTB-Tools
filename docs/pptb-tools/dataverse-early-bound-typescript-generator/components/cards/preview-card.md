@@ -6,7 +6,9 @@ file's content or changes.
 
 Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx)
 
-## Props (`PreviewCardProps`)
+## Props (`IPreviewCardProps`)
+
+`PreviewCardProps` remains as a deprecated alias of `IPreviewCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |
