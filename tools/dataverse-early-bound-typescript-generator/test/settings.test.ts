@@ -403,6 +403,22 @@ describe('new project dialog', () => {
             element.dispatchEvent(new Event('input', { bubbles: true }));
         });
 
+    it('starts every visit with an empty form, or with the edited project', async () => {
+        const props = await render();
+        const rerender = (change: Partial<typeof props> & { project?: ProjectEntry }) =>
+            act(async () => {
+                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(NewProjectDialog, { ...props, ...change })));
+            });
+        await type(field('Project Name'), 'Draft');
+        await rerender({ open: false });
+        await rerender({ open: true });
+        expect(field('Project Name').value).toBe('');
+        await rerender({ open: false });
+        await rerender({ open: true, project: PROJECT });
+        expect(field('Project Name').value).toBe(PROJECT.name);
+        expect(field('Location').value).toBe(PROJECT.location);
+    });
+
     it('enables Save once name and location are set, then saves trimmed values and closes', async () => {
         const props = await render();
         expect(button('Save').disabled).toBe(true);
@@ -494,6 +510,20 @@ describe('load existing project dialog', () => {
         await click(radios()[0]);
         await click(button('Load'));
         expect(document.body.textContent).toContain('Could not open Adventure Works: no access');
+    });
+
+    it('starts every visit with nothing selected', async () => {
+        const props = await render();
+        await click(radios()[0]);
+        expect(button('Load').disabled).toBe(false);
+        const rerender = (open: boolean) =>
+            act(async () => {
+                root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(LoadProjectDialog, { ...props, open })));
+            });
+        await rerender(false);
+        await rerender(true);
+        expect(radios().some((r) => r.checked)).toBe(false);
+        expect(button('Load').disabled).toBe(true);
     });
 
     it('explains when there are no saved projects', async () => {

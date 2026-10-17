@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
     Button,
     Dialog,
@@ -48,15 +48,18 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, project, o
     const saveAction = useAsyncAction(setSaveError);
     const saving = saveAction.busy;
 
-    // Start every visit with an empty form, or with the edited project's values.
-    useEffect(() => {
+    // Start every visit with an empty form, or with the edited project's values. Reset while rendering, when `open`
+    // or `project` changes, so the first frame never shows the previous visit's values (no reset effect).
+    const [visit, setVisit] = useState<{ open: boolean; project: ProjectEntry | undefined } | null>(null);
+    if (!visit || visit.open !== open || visit.project !== project) {
+        setVisit({ open, project });
         if (open) {
             setName(project?.name ?? '');
             setDescription(project?.description ?? '');
             setLocation(project?.location ?? '');
             setSaveError(null);
         }
-    }, [open, project]);
+    }
 
     const trimmedName = name.trim();
     const duplicate = trimmedName !== '' && existingNames.some((n) => n.trim().toLowerCase() === trimmedName.toLowerCase());

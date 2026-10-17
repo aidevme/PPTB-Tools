@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, MessageBar, MessageBarBody, Text } from '@fluentui/react-components';
 import { DeleteRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
@@ -57,8 +57,11 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
     const toggleSort = (column: ProjectColumnKey) => setSort((current) => nextSort(current, column));
     const selected = projects.find((p) => p.id === selectedId);
 
-    // Start every visit with nothing selected.
-    useEffect(() => {
+    // Start every visit with nothing selected. Reset while rendering when `open` changes, so the first frame never
+    // shows the previous visit's selection (no reset effect).
+    const [wasOpen, setWasOpen] = useState(open);
+    if (open !== wasOpen) {
+        setWasOpen(open);
         if (open) {
             setSelectedId('');
             setLoadError(null);
@@ -66,7 +69,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
             setPendingDelete(null);
             setEditing(null);
         }
-    }, [open]);
+    }
 
     const load = async (project: ProjectEntry) => {
         setSelectedId(project.id);
