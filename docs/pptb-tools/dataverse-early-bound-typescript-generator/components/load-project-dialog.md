@@ -4,7 +4,9 @@ A modal dialog listing the projects saved with the [NewProjectDialog](./new-proj
 **Load Existing Project** button on the [ProjectCard](./project-card.md).
 
 Source: [`src/components/dialogs/LoadProjectDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/LoadProjectDialog.tsx);
-the columns and their sort order are in
+the table is
+[`ProjectsTable.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectsTable.tsx),
+and the columns and their sort order are in
 [`projectColumns.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/projectColumns.ts).
 
 ## Props (`ILoadProjectDialogProps`)

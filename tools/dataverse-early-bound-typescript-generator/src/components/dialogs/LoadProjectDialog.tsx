@@ -1,35 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogBody,
-    DialogContent,
-    DialogSurface,
-    DialogTitle,
-    Link,
-    MessageBar,
-    MessageBarBody,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellLayout,
-    TableHeader,
-    TableHeaderCell,
-    TableRow,
-    TableSelectionCell,
-    Text,
-    Tooltip,
-} from '@fluentui/react-components';
-import { DeleteRegular, EditRegular } from '@fluentui/react-icons';
+import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, MessageBar, MessageBarBody, Text } from '@fluentui/react-components';
+import { DeleteRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
-import { useLoadProjectDialogStyles, useSortableTableStyles } from '../../styles';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
-import { formatDateTime } from '../shared/format';
+import { useLoadProjectDialogStyles } from '../../styles';
 import { nextSort } from '../shared/sorting';
-import { activateRowOnKey } from '../shared/tableRows';
 import { ConfirmationDialog } from './ConfirmationDialog';
-import { DEFAULT_PROJECT_SORT, PROJECT_COLUMNS, sortProjects, type ProjectColumnKey } from './projectColumns';
+import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from './projectColumns';
+import { ProjectsTable } from './ProjectsTable';
 import { NewProjectDialog, type NewProject } from './NewProjectDialog';
 import { reportError } from '../../services';
 
@@ -63,7 +40,6 @@ export interface ILoadProjectDialogProps {
  */
 export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onBrowseLocation }: ILoadProjectDialogProps) {
     const styles = useLoadProjectDialogStyles();
-    const tableStyles = useSortableTableStyles();
     const [selectedId, setSelectedId] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -138,109 +114,18 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                                 <Text className={styles.empty}>No saved projects yet. Create one with New Project.</Text>
                             ) : (
                                 <div className={styles.tableWrapper}>
-                                    <Table aria-label="Saved projects" size="small" sortable>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableSelectionCell type="radio" invisible />
-                                                {PROJECT_COLUMNS.map((column) => (
-                                                    <SortableHeaderCell
-                                                        key={column.key}
-                                                        sortDirection={sort.column === column.key ? sort.direction : undefined}
-                                                        onClick={() => toggleSort(column.key)}
-                                                    >
-                                                        {column.label}
-                                                    </SortableHeaderCell>
-                                                ))}
-                                                <TableHeaderCell className={styles.actionsCell} aria-label="Actions" />
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {sorted.map((project) => {
-                                                const isSelected = project.id === selectedId;
-                                                return (
-                                                    <TableRow
-                                                        key={project.id}
-                                                        className={tableStyles.row}
-                                                        aria-selected={isSelected}
-                                                        appearance={isSelected ? 'brand' : 'none'}
-                                                        tabIndex={0}
-                                                        onClick={() => select(project)}
-                                                        onKeyDown={(e) => activateRowOnKey(e, () => select(project))}
-                                                    >
-                                                        <TableSelectionCell
-                                                            type="radio"
-                                                            checked={isSelected}
-                                                            radioIndicator={{ 'aria-label': `Select ${project.name}` }}
-                                                        />
-                                                        <TableCell>
-                                                            <TableCellLayout truncate>
-                                                                <Link
-                                                                    disabled={loading}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        void load(project);
-                                                                    }}
-                                                                >
-                                                                    {project.name}
-                                                                </Link>
-                                                            </TableCellLayout>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            {project.description ? (
-                                                                <Tooltip
-                                                                    content={{ children: project.description, className: styles.descriptionTooltip }}
-                                                                    relationship="description"
-                                                                    withArrow
-                                                                >
-                                                                    <TableCellLayout truncate>{project.description}</TableCellLayout>
-                                                                </Tooltip>
-                                                            ) : (
-                                                                <TableCellLayout truncate>
-                                                                    <span className={styles.muted}>—</span>
-                                                                </TableCellLayout>
-                                                            )}
-                                                        </TableCell>
-                                                        <TableCell>{project.version}</TableCell>
-                                                        <TableCell>
-                                                            <Tooltip content={project.location} relationship="description" withArrow>
-                                                                <span className={styles.path}>{project.location}</span>
-                                                            </Tooltip>
-                                                        </TableCell>
-                                                        <TableCell>{formatDateTime(project.createdOn)}</TableCell>
-                                                        <TableCell>{formatDateTime(project.modifiedOn)}</TableCell>
-                                                        <TableCell className={styles.actionsCell}>
-                                                            <Tooltip content="Edit project" relationship="label" withArrow>
-                                                                <Button
-                                                                    appearance="subtle"
-                                                                    icon={<EditRegular />}
-                                                                    aria-label={`Edit ${project.name}`}
-                                                                    disabled={busy}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setEditing(project);
-                                                                    }}
-                                                                    onKeyDown={(e) => e.stopPropagation()}
-                                                                />
-                                                            </Tooltip>
-                                                            <Tooltip content="Delete project" relationship="label" withArrow>
-                                                                <Button
-                                                                    appearance="subtle"
-                                                                    icon={<DeleteRegular />}
-                                                                    aria-label={`Delete ${project.name}`}
-                                                                    disabled={busy}
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        setPendingDelete(project);
-                                                                    }}
-                                                                    onKeyDown={(e) => e.stopPropagation()}
-                                                                />
-                                                            </Tooltip>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                        </TableBody>
-                                    </Table>
+                                    <ProjectsTable
+                                        projects={sorted}
+                                        sort={sort}
+                                        onToggleSort={toggleSort}
+                                        selectedId={selectedId}
+                                        onSelect={select}
+                                        onLoad={(project) => void load(project)}
+                                        onEdit={setEditing}
+                                        onDelete={setPendingDelete}
+                                        loading={loading}
+                                        busy={busy}
+                                    />
                                 </div>
                             )}
                             {loadError && (
