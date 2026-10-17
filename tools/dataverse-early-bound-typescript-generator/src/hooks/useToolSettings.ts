@@ -81,7 +81,7 @@ export function useToolSettings({ onError, onPlanStale }: UseToolSettingsOptions
 
     /**
      * After a Generate run, updates the saved project whose location is `root`: a patch version bump and a new
-     * Modified On when the run added files or stopped producing ones the previous run did. Folders that
+     * Modified on when the run added files or stopped producing ones the previous run did. Folders that
      * aren't saved projects are left alone; a failure to save is logged, since the files were written.
      */
     const recordProjectGeneration = useCallback(

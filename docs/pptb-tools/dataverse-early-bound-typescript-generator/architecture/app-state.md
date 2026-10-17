@@ -44,7 +44,7 @@ recreated with an empty cache whenever the connection changes, and a single `Ppt
 | `runGenerate` | `usePreviewGenerate` | Writes new and changed files, saves the config, marks written files unchanged, then calls `recordProjectGeneration`. |
 | `startGenerate` | `usePreviewGenerate` | Opens the right confirmation (Delete orphaned files, or Ask before generating) or runs Generate straight away. |
 | `confirmDelete`, `confirmGenerate`, `cancelDelete`, `cancelGenerate` | `usePreviewGenerate` | Close a confirmation, and on Confirm run Generate (with the deletion for `confirmDelete`). `GenerateConfirmationDialogs` in `components/dialogs/GenerateConfirmations.tsx` renders both dialogs and their labels. |
-| `recordProjectGeneration` | `useToolSettings` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified On when the run added or dropped files. |
+| `recordProjectGeneration` | `useToolSettings` | Updates the saved project for the open folder with `recordGeneration`: a patch version bump and new Modified on when the run added or dropped files. |
 
 The metadata fallback warning shows for 5 seconds (`METADATA_FALLBACK_WARNING_MS` in `useEnvironmentMetadata`) when
 the provider starts using it because `$metadata` is too large, then hides itself.

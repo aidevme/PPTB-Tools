@@ -24,7 +24,7 @@ and the columns and their sort order are in
 ## Behavior
 
 - Shows the saved projects in a Fluent UI `Table` with the columns **Name**, **Description**, **Version**,
-  **Location**, **Created On** and **Modified On**. Header cells are semibold.
+  **Location**, **Created on** and **Modified on**. Header cells are semibold.
 - **Description** is cut off to fit the column. Hovering over or focusing it shows the full text in a Fluent UI
   `Tooltip`, keeping its line breaks. Projects without a description show a dash and no tooltip.
 - **Sorting:** clicking a column header sorts by that column, ascending; clicking it again flips to

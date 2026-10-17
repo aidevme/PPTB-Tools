@@ -87,7 +87,7 @@ export function NewProjectDialog({ open, onOpenChange, existingNames, project, o
                     <DialogTitle>{project ? 'Edit project' : 'New project'}</DialogTitle>
                     <DialogContent className={styles.form}>
                         <Field
-                            label="Project Name"
+                            label="Project name"
                             required
                             validationState={duplicate ? 'error' : 'none'}
                             validationMessage={duplicate ? 'A project with this name already exists.' : undefined}

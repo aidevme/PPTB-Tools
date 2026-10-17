@@ -40,7 +40,7 @@ across the top shows the four steps you're about to go through. Click a step to 
 The first time, create a project:
 
 1. Click **New Project**.
-2. Enter a **Project Name** and an optional **Description**.
+2. Enter a **Project name** and an optional **Description**.
 3. For **Location**, click **Browse…** and pick your TypeScript project's folder: the one that has, or will
    have, `.dataverse-gen.json`.
 4. Click **Save**. The new project opens straight away.
@@ -138,7 +138,7 @@ helpers.
 ## Keeping types up to date
 
 When tables change in Dataverse, open the project, click **Preview** to see what changed, then **Generate**.
-If a run adds files or stops producing some, the project's version and **Modified On** are updated
+If a run adds files or stops producing some, the project's version and **Modified on** are updated
 automatically.
 
 ## If something goes wrong

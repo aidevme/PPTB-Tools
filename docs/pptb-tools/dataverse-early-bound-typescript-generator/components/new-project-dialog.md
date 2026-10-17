@@ -21,12 +21,12 @@ Source: [`src/components/dialogs/NewProjectDialog.tsx`](https://github.com/aidev
 `createdOn` and `modifiedOn` timestamps (both the creation time) before saving. Projects saved before
 `version` and `modifiedOn` existed get those same defaults when they load.
 
-## Version and Modified On
+## Version and Modified on
 
 After each successful Generate of a saved project's folder, the tool compares the files the
 run produced with the ones the project's previous run produced (`lastGeneratedFiles`). If any file was
 added, or a previously generated file is no longer produced (an orphan), the version gets a patch bump
-(`1.0.0` → `1.0.1`) and **Modified On** is set to now. Changes to the content of the same files don't count.
+(`1.0.0` → `1.0.1`) and **Modified on** is set to now. Changes to the content of the same files don't count.
 
 - **First run:** with no previous list, the files the run created on disk count as added.
 - **Which project:** the open folder is matched to a saved project by location, ignoring separators and, on
@@ -37,14 +37,14 @@ added, or a previously generated file is no longer produced (an orphan), the ver
 
 | Field | Required | Notes |
 | --- | --- | --- |
-| Project Name | Yes | Trimmed. Can't match an existing project's name, ignoring case. |
+| Project name | Yes | Trimmed. Can't match an existing project's name, ignoring case. |
 | Description | No | Multi-line. |
 | Location | Yes | A folder path. Type it, or pick it with **Browse…**. |
 
 ## Behavior
 
 - The form is empty each time the dialog opens.
-- **Save** is enabled once Project Name and Location are filled in and the name isn't already used. It saves
+- **Save** is enabled once Project name and Location are filled in and the name isn't already used. It saves
   and closes the dialog, or shows the error and stays open if saving fails. After saving, `App.tsx` also opens
   the new project (as Load Existing Project would), which lists the tables on the Select card; if opening
   fails, the error shows in the page, since the project was saved.

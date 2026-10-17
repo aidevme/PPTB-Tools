@@ -34,8 +34,8 @@ export const PROJECT_COLUMNS: Array<{ key: ProjectColumnKey; label: string; comp
     { key: 'description', label: 'Description', compare: (a, b) => compareText(a.description, b.description) },
     { key: 'version', label: 'Version', compare: (a, b) => compareVersions(a.version, b.version) },
     { key: 'location', label: 'Location', compare: (a, b) => compareText(a.location, b.location) },
-    { key: 'createdOn', label: 'Created On', compare: (a, b) => compareDates(a.createdOn, b.createdOn) },
-    { key: 'modifiedOn', label: 'Modified On', compare: (a, b) => compareDates(a.modifiedOn, b.modifiedOn) },
+    { key: 'createdOn', label: 'Created on', compare: (a, b) => compareDates(a.createdOn, b.createdOn) },
+    { key: 'modifiedOn', label: 'Modified on', compare: (a, b) => compareDates(a.modifiedOn, b.modifiedOn) },
 ];
 
 export const DEFAULT_PROJECT_SORT: ProjectSort = { column: 'name', direction: 'ascending' };

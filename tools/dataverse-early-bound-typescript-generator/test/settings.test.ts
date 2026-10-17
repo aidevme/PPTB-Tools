@@ -409,20 +409,20 @@ describe('new project dialog', () => {
             act(async () => {
                 root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(NewProjectDialog, { ...props, ...change })));
             });
-        await type(field('Project Name'), 'Draft');
+        await type(field('Project name'), 'Draft');
         await rerender({ open: false });
         await rerender({ open: true });
-        expect(field('Project Name').value).toBe('');
+        expect(field('Project name').value).toBe('');
         await rerender({ open: false });
         await rerender({ open: true, project: PROJECT });
-        expect(field('Project Name').value).toBe(PROJECT.name);
+        expect(field('Project name').value).toBe(PROJECT.name);
         expect(field('Location').value).toBe(PROJECT.location);
     });
 
     it('enables Save once name and location are set, then saves trimmed values and closes', async () => {
         const props = await render();
         expect(button('Save').disabled).toBe(true);
-        await type(field('Project Name') as HTMLInputElement, '  Fabrikam  ');
+        await type(field('Project name') as HTMLInputElement, '  Fabrikam  ');
         expect(button('Save').disabled).toBe(true);
         await click(button('Browse…'));
         expect(props.onBrowseLocation).toHaveBeenCalledWith('');
@@ -437,7 +437,7 @@ describe('new project dialog', () => {
 
     it('rejects a name that is already used', async () => {
         await render();
-        await type(field('Project Name') as HTMLInputElement, 'contoso');
+        await type(field('Project name') as HTMLInputElement, 'contoso');
         await type(field('Location') as HTMLInputElement, '/projects/x');
         expect(button('Save').disabled).toBe(true);
         expect(document.body.textContent).toContain('A project with this name already exists.');
@@ -445,7 +445,7 @@ describe('new project dialog', () => {
 
     it('Cancel closes without saving, and a failed save keeps the dialog open', async () => {
         const failing = await render({ onSave: vi.fn(async () => Promise.reject(new Error('quota'))) });
-        await type(field('Project Name') as HTMLInputElement, 'Fabrikam');
+        await type(field('Project name') as HTMLInputElement, 'Fabrikam');
         await type(field('Location') as HTMLInputElement, '/projects/x');
         await click(button('Save'));
         expect(failing.onOpenChange).not.toHaveBeenCalledWith(false);
@@ -489,7 +489,7 @@ describe('load existing project dialog', () => {
         expect(text).toContain('/src/contoso');
         expect(text).toContain('1.2.0');
         const headers = Array.from(document.querySelectorAll('th')).map((th) => th.textContent).filter(Boolean);
-        expect(headers).toEqual(['Name', 'Description', 'Version', 'Location', 'Created On', 'Modified On']);
+        expect(headers).toEqual(['Name', 'Description', 'Version', 'Location', 'Created on', 'Modified on']);
         expect(button('Load').disabled).toBe(true);
 
         await click(radios()[1]);
@@ -561,7 +561,7 @@ describe('load existing project dialog', () => {
         expect(names()).toEqual(['Alpha', 'Beta']);
         expect(header('Version').getAttribute('aria-sort')).toBe('descending');
 
-        await click(sortButton('Created On'));
+        await click(sortButton('Created on'));
         expect(names()).toEqual(['Alpha', 'Beta']);
     });
 
