@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
 import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
-import { resolveConfig } from '../../core';
 import { useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
-import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError, resolveOutputRoot } from '../../services';
+import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 
 /**
@@ -34,7 +33,7 @@ export default function App() {
         onError: setError,
         onPlanStale: markPlanStale,
     });
-    const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear, clearAll } = useProject({
+    const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear } = useProject({
         sink,
         connKey,
         inPptb,
@@ -199,10 +198,7 @@ export default function App() {
                     onLoadExistingProject={() => setLoadProjectOpen(true)}
                     onOpenRecent={openRecent}
                     onReload={() => projectRoot && loadProject(projectRoot)}
-                    outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
-                    hasSelection={hasSelection}
                     onCopyPath={(path, label) => void copyPath(path, label)}
-                    onClearSelection={clearAll}
                 />
                 <SelectionCard
                     step={steps[1]}

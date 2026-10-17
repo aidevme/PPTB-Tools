@@ -126,10 +126,7 @@ async function renderProjectCard(overrides: Partial<ProjectCardProps> = {}) {
         onLoadExistingProject: vi.fn(),
         onOpenRecent: vi.fn(),
         onReload: vi.fn(),
-        outputFolder: null,
-        hasSelection: false,
         onCopyPath: vi.fn(),
-        onClearSelection: vi.fn(),
         now: NOW,
         ...overrides,
     };

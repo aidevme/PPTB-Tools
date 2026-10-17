@@ -19,10 +19,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 | `onLoadExistingProject` | `() => void` | Opens the [LoadProjectDialog](../dialogs/load-project-dialog.md). |
 | `onOpenRecent` | `(target: ProjectOpenTarget) => void` | Opens a recent project directly. `ProjectOpenTarget` is `{ name, location }`. |
 | `onReload` | `() => void` | Re-reads `.dataverse-gen.json` from disk. |
-| `outputFolder` | `string \| null` | Absolute output folder (`output.outputRoot` resolved against the project). |
-| `hasSelection` | `boolean` | Whether anything is selected, enabling "Clear selection". |
 | `onCopyPath` | `(path: string, label: string) => void` | Copies a path to the clipboard; `label` names it in the confirmation toast. |
-| `onClearSelection` | `() => void` | Clears every selected table, action and function. |
 | `recentProjectCount` | `number` (optional) | How many recent projects to show; 0 hides the list. Defaults to 3. `App.tsx` passes the `general.recentProjectCount` setting. |
 | `now` | `number` (optional) | Current time for relative dates. Defaults to `Date.now()`; tests pass a fixed value. |
 
@@ -63,9 +60,6 @@ The open project and duplicates (the same folder, compared with `isSamePath`) ar
 
 - The empty state and the summary fade in when they appear. The fade is switched off when the user has
   asked their system for reduced motion.
-- The **History** menu (copy the project folder, `.dataverse-gen.json` or output folder path, and **Clear
-  selection**) is hidden; set `SHOW_HISTORY_MENU` to `true` in `ProjectCard.tsx` to show it again. The
-  summary's copy button covers the project folder path.
 - The recent projects list is `RecentProjectsList` (`src/components/cards/RecentProjectsList.tsx`, styled by
   `src/styles/RecentProjectsList.styles.ts`); the card passes it the heading, the entries and `onOpenRecent`.
 - Styles are in `src/styles/ProjectCard.styles.ts`. Relative times and shortened paths come from

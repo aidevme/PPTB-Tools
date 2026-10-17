@@ -1,24 +1,9 @@
-import {
-    Badge,
-    Button,
-    Menu,
-    MenuButton,
-    MenuDivider,
-    MenuItem,
-    MenuList,
-    MenuPopover,
-    MenuTrigger,
-    Text,
-    Tooltip,
-} from '@fluentui/react-components';
+import { Badge, Button, Text, Tooltip } from '@fluentui/react-components';
 import {
     AddRegular,
     ArrowClockwiseRegular,
-    CopyRegular,
-    DismissCircleRegular,
     DocumentAddRegular,
     DocumentCheckmarkRegular,
-    DocumentRegular,
     FolderAddRegular,
     FolderListRegular,
     FolderOpenRegular,
@@ -33,9 +18,6 @@ import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 import { RecentProjectsList } from './RecentProjectsList';
 import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './recentProjects';
-
-/** Temporarily hidden; set to `true` to show the History menu (copy paths, clear selection) again. */
-const SHOW_HISTORY_MENU = false;
 
 export interface ProjectCardProps {
     step: StepState;
@@ -55,12 +37,7 @@ export interface ProjectCardProps {
     /** Opens a recent project directly. */
     onOpenRecent: (target: ProjectOpenTarget) => void;
     onReload: () => void;
-    /** Absolute output folder (`output.outputRoot` resolved against the project), when a project is open. */
-    outputFolder: string | null;
-    /** Whether anything is selected, enabling "Clear selection". */
-    hasSelection: boolean;
     onCopyPath: (path: string, label: string) => void;
-    onClearSelection: () => void;
     /** Current time for relative dates; a parameter so tests get stable output. */
     now?: number;
 }
@@ -102,7 +79,6 @@ export function ProjectCard(props: ProjectCardProps) {
                     </div>
                 )}
                 <RecentProjectsList heading={projectRoot ? 'Switch to a recent project' : 'Recent projects'} items={recent} busy={busy} onOpen={onOpenRecent} />
-                {SHOW_HISTORY_MENU && <HistoryMenu {...props} />}
             </div>
         </StepCard>
     );
@@ -172,38 +148,4 @@ export function ProjectCard(props: ProjectCardProps) {
             </div>
         );
     }
-}
-
-/** Copy-path and clear-selection actions; hidden while `SHOW_HISTORY_MENU` is `false`. */
-function HistoryMenu({ projectRoot, configState, outputFolder, hasSelection, busy, onCopyPath, onClearSelection }: ProjectCardProps) {
-    return (
-        <Menu>
-            <MenuTrigger disableButtonEnhancement>
-                <MenuButton appearance="subtle" disabled={busy}>
-                    History
-                </MenuButton>
-            </MenuTrigger>
-            <MenuPopover>
-                <MenuList>
-                    <MenuItem icon={<FolderRegular />} disabled={!projectRoot} onClick={() => projectRoot && onCopyPath(projectRoot, 'Project folder path')}>
-                        Copy project folder path
-                    </MenuItem>
-                    <MenuItem
-                        icon={<DocumentRegular />}
-                        disabled={!configState?.path}
-                        onClick={() => configState?.path && onCopyPath(configState.path, '.dataverse-gen.json path')}
-                    >
-                        Copy .dataverse-gen.json path
-                    </MenuItem>
-                    <MenuItem icon={<CopyRegular />} disabled={!outputFolder} onClick={() => outputFolder && onCopyPath(outputFolder, 'Output folder path')}>
-                        Copy output folder path
-                    </MenuItem>
-                    <MenuDivider />
-                    <MenuItem icon={<DismissCircleRegular />} disabled={!hasSelection} onClick={onClearSelection}>
-                        Clear selection
-                    </MenuItem>
-                </MenuList>
-            </MenuPopover>
-        </Menu>
-    );
 }
