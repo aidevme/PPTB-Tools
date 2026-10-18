@@ -991,7 +991,7 @@
       "group": "pptb",
       "ported": true,
       "source": "authored",
-      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
+      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/<tool-name>/."
     },
     {
       "name": "aidevme-github",

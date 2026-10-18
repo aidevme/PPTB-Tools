@@ -4,16 +4,17 @@ layer: orchestration
 scope: project
 description: |
   Analyze and refactor one or more PPTB tools under tools/ in stages: a read-only analysis that produces a
-  refactoring proposal (current state, plan, risks, summary), a TODO file in docs/todos/ written before any change,
-  then execution of only the steps the user approves, with a build and test check after each step and the report
-  added to the same TODO file. The user can also save the plan as a TODO file only, without any code change. Findings
-  about Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server. Use when:
+  refactoring proposal (current state, plan, risks, summary), a TODO file in docs/todos/<tool-name>/ written before
+  any change, then execution of only the steps the user approves, with a build and test check after each step and
+  the report added to the same TODO file. The user can also save the plan as a TODO file only, without any code
+  change. Findings about Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP
+  Server. Use when:
   (1) User says "refactor <tool>", "analyze <tool> for refactoring", "propose a refactoring plan", "clean up the tools"
   (2) User wants a code-quality, dependency, UI consistency or test-coverage review of a tool that ends in a plan
   (3) User wants a refactoring plan saved as a TODO list to do later
   (4) An approved refactoring proposal should be executed step by step
   Does NOT modify any file before explicit approval, touch tools the user didn't select, make breaking changes
-  without approval, or overwrite existing files in docs/todos/. Does NOT do marketplace policy reviews
+  without approval, or overwrite existing files in docs/todos/<tool-name>/. Does NOT do marketplace policy reviews
   (intake-policy-review) or Verified badge reviews (tool-verification).
 allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion, mcp__microsoft-learn__microsoft_docs_search, mcp__microsoft-learn__microsoft_docs_fetch, mcp__microsoft-learn__microsoft_code_sample_search
 argument-hint: "[tool-name ... | all]"
@@ -131,10 +132,10 @@ analysis, "Save as TODO only", or approval of a different plan version isn't app
 Runs right after an "accept" or "Save as TODO only" answer, before any other file is touched. It's the only write
 allowed before execution.
 
-1. Folder: `docs/todos/` at the repository root (`git rev-parse --show-toplevel`; here
-   `C:\aidevme\PPTB-Tools\docs\todos`). Create it if it doesn't exist.
-2. One file per selected tool: `refactoring-<tool-name>-<YYYY-MM-DD>.md` (today's date). **Never overwrite an
-   existing file:** if the name exists, use `-02`, `-03`, … (`refactoring-<tool-name>-<YYYY-MM-DD>-02.md`). Check
+1. Folder: `docs/todos/<tool-name>/` at the repository root (`git rev-parse --show-toplevel`; for example
+   `C:\aidevme\PPTB-Tools\docs\todos\dataverse-early-bound-typescript-generator`). Create it if it doesn't exist.
+2. One file per selected tool, in that tool's folder: `refactoring-<tool-name>-<YYYY-MM-DD>.md` (today's date).
+   **Never overwrite an existing file:** if the name exists, use `-02`, `-03`, … (`refactoring-<tool-name>-<YYYY-MM-DD>-02.md`). Check
    with `Test-Path` before writing, and write with a create-only operation.
 3. Content: [`references/todo-template.md`](references/todo-template.md) with status `Planned` (an "accept" answer)
    or `Saved as TODO, no changes made` ("Save as TODO only"): header (tool, date, skill, decision, proposal
@@ -142,7 +143,8 @@ allowed before execution.
    effort, risk), marking which steps were approved.
 4. Validate it with `aidevme-docs-maintenance` (Validate-Markdown on that file); fix markdownlint findings in the
    file and add one-off words to a `<!-- cspell:ignore … -->` comment after the H1.
-5. Don't modify other files in `docs/todos/` (no index updates) and don't commit the file unless asked.
+5. Don't modify other files in `docs/todos/` or the tool folders under it (no index updates), and don't commit the
+   file unless asked.
 6. Tell the user the saved path(s). After "Save as TODO only", end here and say plainly that nothing else changed.
 
 ## Phase 5 — Execution
@@ -188,7 +190,7 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 - **Read-only until approved.** Phases 1–3 modify nothing; Phase 4 writes only the new TODO file.
 - **Only selected tools, only approved steps.** Preserve behavior and public interfaces unless a breaking change was
   explicitly approved.
-- **Never overwrite an existing file in `docs/todos/`.** Only the file created in this run may be edited later.
+- **Never overwrite an existing file in `docs/todos/<tool-name>/`.** Only the file created in this run may be edited later.
 - **Stop on surprises** and ask; no workaround scripts.
 - **Report what actually ran.** Quote exit codes and test counts; never call a check passed that wasn't run.
 - **Check Microsoft platform behavior in Microsoft Learn** through its MCP Server and cite it; never invent API
@@ -201,3 +203,4 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 | 2026-10-16 | aidevme | Created: selection, read-only analysis, approval gate, verified step-by-step execution, report, and the automatic `docs/todos/` record. |
 | 2026-10-16 | aidevme | The TODO file is written before any change; new "Save as TODO only" answer; the execution report updates the same file. |
 | 2026-10-17 | aidevme | Findings, failures and fixes that depend on Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server and cited; the report lists the pages used. |
+| 2026-10-18 | aidevme | TODO files are saved per tool in `docs/todos/<tool-name>/` instead of directly in `docs/todos/`. |

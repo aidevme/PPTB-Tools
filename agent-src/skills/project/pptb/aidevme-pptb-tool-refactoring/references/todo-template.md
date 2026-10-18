@@ -3,14 +3,14 @@
 <!-- cspell:ignore toplevel -->
 
 Phase 4 creates the file before any change. Phase 7 edits the same file after execution; nothing else in
-`docs/todos/` is touched.
+`docs/todos/` (including the tool folders) is touched.
 
 ## File name
 
-`docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md`; if it exists, `-02`, `-03`, … before `.md`. Never overwrite:
+`docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md` (one folder per tool); if it exists, `-02`, `-03`, … before `.md`. Never overwrite:
 
 ```powershell
-$dir  = Join-Path (git rev-parse --show-toplevel) 'docs/todos'
+$dir  = Join-Path (git rev-parse --show-toplevel) 'docs/todos/<tool-name>'
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 $base = "refactoring-<tool-name>-$(Get-Date -Format 'yyyy-MM-dd')"
 $path = Join-Path $dir "$base.md"; $n = 2

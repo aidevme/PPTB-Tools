@@ -168,7 +168,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `pptb-tool-dev` | Building, debugging, validating or publishing a PPTB tool |
 | `intake-policy-review` | Checking a tool against the PPTB marketplace and AI-assisted development policies |
 | `tool-verification` | Checking a tool against the Verified badge requirements |
-| `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/`) |
+| `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/<tool-name>/`) |
 | `aidevme-pptb-tool-developer` | Moving inline `makeStyles` hooks out of a tool's components into `src/styles/<ComponentName>.styles.ts` (`use<ComponentName>Styles`) |
 | `aidevme-github` | Git and GitHub work when asked: one commit per file (Conventional Commits), branch names, issues, pull requests, review comments, CI status, "ship it" |
 | `aidevme-spec-kit` | Spec-driven development with GitHub Spec Kit: detects the phase (setup, constitution, spec, plan, tasks, implement, converge), runs the matching `/speckit-*` command and stops for review; commits and pull requests go through `aidevme-github` |
