@@ -5,8 +5,14 @@ import { useHeaderStyles } from '../../styles';
 import { AppIcon } from '../shared/AppIcon';
 import { ConnectionStatus } from './ConnectionStatus';
 
+/** Props for {@link Header}. */
 export interface IHeaderProps {
+    /**
+     * The active PPTB connection, shown in the connection pill with its environment name and, in a tooltip, its URL;
+     * `null` shows "Not connected".
+     */
     connection: ToolBoxAPI.Connection | null;
+    /** Called when the Settings button is clicked. The button stays enabled without a connection. */
     onOpenSettings: () => void;
 }
 
@@ -44,5 +50,5 @@ export function Header({ connection, onOpenSettings }: IHeaderProps) {
     );
 }
 
-/** @deprecated Renamed to `IHeaderProps`. */
+/** @deprecated Renamed to {@link IHeaderProps}. */
 export type HeaderProps = IHeaderProps;
