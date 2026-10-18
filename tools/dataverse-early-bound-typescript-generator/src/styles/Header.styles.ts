@@ -1,8 +1,8 @@
-import { makeStyles, shorthands, tokens } from '@fluentui/react-components';
+import { makeStyles, tokens } from '@fluentui/react-components';
 
 /**
  * Styles for `Header`: a brand-tinted band with the app icon, title and version on the left, and the connection
- * pill and Settings button on the right.
+ * pill (`ConnectionStatus`) and Settings button on the right.
  */
 export const useHeaderStyles = makeStyles({
     header: {
@@ -42,32 +42,4 @@ export const useHeaderStyles = makeStyles({
     },
     subtitle: { color: tokens.colorNeutralForeground3 },
     right: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS },
-
-    // Connection pill
-    connection: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: tokens.spacingHorizontalS,
-        padding: `${tokens.spacingVerticalXS} ${tokens.spacingHorizontalM}`,
-        borderRadius: tokens.borderRadiusCircular,
-        backgroundColor: tokens.colorNeutralBackground1,
-        ...shorthands.border('1px', 'solid', tokens.colorNeutralStroke2),
-        boxShadow: tokens.shadow2,
-        maxWidth: '320px',
-        minWidth: 0,
-    },
-    connectionDisconnected: { backgroundColor: tokens.colorPaletteYellowBackground1, ...shorthands.borderColor(tokens.colorPaletteYellowBorder1) },
-    statusDot: { width: '8px', height: '8px', flexShrink: 0, borderRadius: tokens.borderRadiusCircular },
-    statusDotConnected: { backgroundColor: tokens.colorPaletteGreenForeground1, boxShadow: `0 0 0 3px ${tokens.colorPaletteGreenBackground1}` },
-    statusDotDisconnected: { backgroundColor: tokens.colorPaletteMarigoldForeground1 },
-    connectionIcon: { fontSize: '16px', color: tokens.colorNeutralForeground3, flexShrink: 0 },
-    connectionText: { display: 'flex', flexDirection: 'column', minWidth: 0, lineHeight: tokens.lineHeightBase200 },
-    connectionLabel: { fontSize: tokens.fontSizeBase100, color: tokens.colorNeutralForeground3, textTransform: 'uppercase', letterSpacing: '0.04em' },
-    connectionName: {
-        fontSize: tokens.fontSizeBase200,
-        fontWeight: tokens.fontWeightSemibold,
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        whiteSpace: 'nowrap',
-    },
 });

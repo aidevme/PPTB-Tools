@@ -93,6 +93,7 @@ export default defineConfig({
                                     items: [
                                         { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/header" },
                                         { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/footer" },
+                                        { text: "ConnectionStatus", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/connection-status" },
                                     ],
                                 },
                                 {

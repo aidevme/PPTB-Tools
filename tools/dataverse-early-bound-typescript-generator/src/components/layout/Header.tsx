@@ -1,7 +1,8 @@
-import { Badge, Button, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
-import { CodeRegular, PlugConnectedRegular, PlugDisconnectedRegular, SettingsRegular } from '@fluentui/react-icons';
+import { Badge, Button, Text, Tooltip } from '@fluentui/react-components';
+import { CodeRegular, SettingsRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useHeaderStyles } from '../../styles';
+import { ConnectionStatus } from './ConnectionStatus';
 
 export interface HeaderProps {
     connection: ToolBoxAPI.Connection | null;
@@ -35,27 +36,7 @@ export function Header({ connection, onOpenSettings }: HeaderProps) {
                 </div>
             </div>
             <div className={styles.right}>
-                {connection ? (
-                    <Tooltip content={connection.url} relationship="description" withArrow>
-                        <div className={styles.connection} role="status" aria-label={`Connected to ${connection.name}`}>
-                            <span className={mergeClasses(styles.statusDot, styles.statusDotConnected)} aria-hidden="true" />
-                            <PlugConnectedRegular className={styles.connectionIcon} aria-hidden="true" />
-                            <span className={styles.connectionText}>
-                                <span className={styles.connectionLabel}>Connected</span>
-                                <span className={styles.connectionName}>{connection.name}</span>
-                            </span>
-                        </div>
-                    </Tooltip>
-                ) : (
-                    <div className={mergeClasses(styles.connection, styles.connectionDisconnected)} role="status">
-                        <span className={mergeClasses(styles.statusDot, styles.statusDotDisconnected)} aria-hidden="true" />
-                        <PlugDisconnectedRegular className={styles.connectionIcon} aria-hidden="true" />
-                        <span className={styles.connectionText}>
-                            <span className={styles.connectionLabel}>Connection</span>
-                            <span className={styles.connectionName}>Not connected</span>
-                        </span>
-                    </div>
-                )}
+                <ConnectionStatus connection={connection} />
                 <Tooltip content="Settings" relationship="label" withArrow>
                     <Button appearance="subtle" size="large" icon={<SettingsRegular />} onClick={onOpenSettings} />
                 </Tooltip>

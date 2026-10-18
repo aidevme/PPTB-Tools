@@ -4,6 +4,8 @@
  */
 export { CodeViewer } from './viewers/CodeViewer';
 export type { ICodeViewerProps } from './viewers/CodeViewer';
+export { ConnectionStatus } from './layout/ConnectionStatus';
+export type { IConnectionStatusProps } from './layout/ConnectionStatus';
 export { Footer } from './layout/Footer';
 export { Header } from './layout/Header';
 export type { HeaderProps } from './layout/Header';

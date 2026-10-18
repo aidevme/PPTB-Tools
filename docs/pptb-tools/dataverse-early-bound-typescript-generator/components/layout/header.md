@@ -22,11 +22,8 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
 - **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient.
 - **Version:** a small badge after the title with the tool's version, read from `package.json` at build
   time. Only the version number ends up in the bundle.
-- **Connection pill:**
-  - **Connected:** a green status dot, "CONNECTED" and the connection name. Hovering shows the environment
-    URL in a tooltip.
-  - **Not connected:** an amber pill with "Not connected".
-  - It has `role="status"`, so screen readers announce changes.
+- **Connection pill:** [ConnectionStatus](./connection-status.md) shows the connected environment, or "Not
+  connected".
 - **Settings** is an icon button with a tooltip. It's always enabled, even without a connection.
 
 There's no Regenerate button any more. Use **Preview** and then **Generate** on the

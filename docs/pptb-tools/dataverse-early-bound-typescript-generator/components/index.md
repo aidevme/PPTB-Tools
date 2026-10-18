@@ -18,6 +18,7 @@ These pages are grouped in the same folders as the source: `apps/`, `cards/`, `d
 | --- | --- | --- |
 | — | [App](./apps/app.md) | The root component: calls the state hooks and renders everything below |
 | — | [Header](./layout/header.md) | App icon, title and version, connection status, and the Settings button |
+| — | [ConnectionStatus](./layout/connection-status.md) | The Header's connection pill: connected environment or "Not connected" |
 | — | [WorkflowProgress](./shared/workflow-progress.md) | The four steps across the top of the page; click one to scroll to its card |
 | — | [SettingsPanel](./panels/settings-panel.md) | Drawer opened from the header's Settings button |
 | 1 | [ProjectCard](./cards/project-card.md) | Pick the project folder and load `.dataverse-gen.json` |
