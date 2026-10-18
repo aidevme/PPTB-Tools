@@ -3,7 +3,7 @@ import { BookOpenRegular, BranchForkRegular, CodeRegular, InfoRegular, OpenRegul
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
 
-/** The docs site isn't published yet, so documentation links to the docs page on GitHub. */
+/** The tool's Getting started page on the published docs site (GitHub Pages). */
 const DOCUMENTATION_URL = 'https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/';
 const REPOSITORY_URL = 'https://github.com/aidevme/PPTB-Tools';
 

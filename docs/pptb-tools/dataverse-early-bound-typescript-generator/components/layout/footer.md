@@ -25,8 +25,8 @@ right:
   metadata, so review the preview before committing them.
 - **Links:** **Documentation** and **GitHub Repo** as subtle buttons with icons and an "opens in a new
   window" marker. They're in a `nav` labelled "Project links".
-  - **Documentation** points to the tool's docs page on GitHub. The docs site isn't published yet; update
-    `DOCUMENTATION_URL` in `Footer.tsx` once it is.
+  - **Documentation** points to the tool's Getting started page on the docs site
+    (`DOCUMENTATION_URL` in `Footer.tsx`).
   - **GitHub Repo** points to <https://github.com/aidevme/PPTB-Tools>.
 
 All external links open in a new window. On narrow windows the sections wrap onto separate rows.
