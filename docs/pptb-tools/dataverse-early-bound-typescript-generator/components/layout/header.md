@@ -19,7 +19,8 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
   which `index.css` uses as `scroll-padding-top`, so jumping to a step card stops below the header.
 - **Background:** a soft gradient from the brand color into the page background, with a light shadow
   underneath.
-- **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient.
+- **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient (`AppIcon` in
+  `components/layout/AppIcon.tsx`, size `large`, shared with the [Footer](./footer.md)).
 - **Version:** a small badge after the title with the tool's version, read from `package.json` at build
   time. Only the version number ends up in the bundle.
 - **Connection pill:** [ConnectionStatus](./connection-status.md) shows the connected environment, or "Not

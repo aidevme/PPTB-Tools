@@ -14,7 +14,7 @@ The footer stays at the bottom of the window while the page scrolls: `App.tsx` w
 The footer uses the header's soft brand gradient, mirrored, with a top border and shadow. From left to
 right:
 
-- **Identity:** a small version of the header's app icon tile, "Early-Bound TypeScript Generator", and
+- **Identity:** a small version of the header's app icon tile (`AppIcon`, size `small`), "Early-Bound TypeScript Generator", and
   "v*version* · Part of PPTB Tools". The version is read from `package.json` at build time.
 - **Credits:** "Compatible with Scott Durow's" followed by two link chips,
   [dataverse-ify](https://github.com/scottdurow/dataverse-ify) and

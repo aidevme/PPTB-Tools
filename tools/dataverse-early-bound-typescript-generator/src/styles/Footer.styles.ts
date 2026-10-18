@@ -19,18 +19,6 @@ export const useFooterStyles = makeStyles({
 
     // Identity
     identity: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, flexShrink: 0 },
-    appIcon: {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: '28px',
-        height: '28px',
-        flexShrink: 0,
-        borderRadius: tokens.borderRadiusLarge,
-        fontSize: '16px',
-        color: tokens.colorNeutralForegroundOnBrand,
-        backgroundImage: `linear-gradient(135deg, ${tokens.colorBrandBackground} 0%, ${tokens.colorPaletteTealForeground2} 100%)`,
-    },
     identityText: { display: 'flex', flexDirection: 'column', lineHeight: tokens.lineHeightBase200 },
     toolName: { fontSize: tokens.fontSizeBase200, fontWeight: tokens.fontWeightSemibold, color: tokens.colorNeutralForeground1 },
     toolMeta: { fontSize: tokens.fontSizeBase100, color: tokens.colorNeutralForeground3 },

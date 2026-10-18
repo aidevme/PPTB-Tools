@@ -1,7 +1,8 @@
 import { Badge, Button, Text, Tooltip } from '@fluentui/react-components';
-import { CodeRegular, SettingsRegular } from '@fluentui/react-icons';
+import { SettingsRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useHeaderStyles } from '../../styles';
+import { AppIcon } from './AppIcon';
 import { ConnectionStatus } from './ConnectionStatus';
 
 export interface HeaderProps {
@@ -18,9 +19,7 @@ export function Header({ connection, onOpenSettings }: HeaderProps) {
     return (
         <header className={styles.header}>
             <div className={styles.identity}>
-                <span className={styles.appIcon} aria-hidden="true">
-                    <CodeRegular />
-                </span>
+                <AppIcon size="large" />
                 <div className={styles.titleBlock}>
                     <div className={styles.titleRow}>
                         <Text as="h1" className={styles.title}>

@@ -1,7 +1,8 @@
 import { Button, Link, Text, Tooltip } from '@fluentui/react-components';
-import { BookOpenRegular, BranchForkRegular, CodeRegular, InfoRegular, OpenRegular } from '@fluentui/react-icons';
+import { BookOpenRegular, BranchForkRegular, InfoRegular, OpenRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
+import { AppIcon } from './AppIcon';
 
 /** The tool's Getting started page on the published docs site (GitHub Pages). */
 const DOCUMENTATION_URL = 'https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/';
@@ -22,9 +23,7 @@ export function Footer() {
     return (
         <footer className={styles.footer}>
             <div className={styles.identity}>
-                <span className={styles.appIcon} aria-hidden="true">
-                    <CodeRegular />
-                </span>
+                <AppIcon size="small" />
                 <span className={styles.identityText}>
                     <span className={styles.toolName}>Early-Bound TypeScript Generator</span>
                     <span className={styles.toolMeta}>v{version} · Part of PPTB Tools</span>

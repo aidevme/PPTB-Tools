@@ -1,5 +1,6 @@
 /** makeStyles hooks, one file per component (and one for App). */
 export { useAppStyles } from './App.styles';
+export { useAppIconStyles } from './AppIcon.styles';
 export { useCodeViewerStyles } from './CodeViewer.styles';
 export { useConnectionStatusStyles } from './ConnectionStatus.styles';
 export { useFileSearchBoxStyles } from './FileSearchBox.styles';
