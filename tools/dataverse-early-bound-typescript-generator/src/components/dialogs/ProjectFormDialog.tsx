@@ -22,8 +22,14 @@ import { reportError } from '../../services';
 /** The values the dialog collects; the id and creation time are added when saving. */
 export type NewProject = Pick<ProjectEntry, 'name' | 'description' | 'location'>;
 
+/** Props for {@link ProjectFormDialog}. */
 export interface IProjectFormDialogProps {
+    /** Shows the dialog; each time it opens, the form starts empty or with `project`'s values. */
     open: boolean;
+    /**
+     * Called with `false` when the dialog asks to close (Cancel, Escape, or after a successful save); not called
+     * while saving.
+     */
     onOpenChange: (open: boolean) => void;
     /** Names of the other saved projects; the project can't reuse one (case-insensitive). */
     existingNames: string[];

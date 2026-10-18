@@ -54,16 +54,23 @@ export function GenerateSummary({ plan, skipDuplicates }: { plan: WritePlan; ski
     );
 }
 
+/** Props for {@link GenerateConfirmationDialogs}. */
 export interface IGenerateConfirmationDialogsProps {
+    /** The write plan the confirmations describe; neither dialog opens while it's `null`. */
     plan: WritePlan | null;
+    /** Whether files with duplicate identifiers are left unwritten; changes the counts and the duplicate warning. */
     skipDuplicates: boolean;
     /** The Delete orphaned files confirmation is open. */
     deleteOpen: boolean;
+    /** Called when the Delete orphaned files confirmation is accepted (its button also names pending writes). */
     onConfirmDelete: () => void;
+    /** Called when the Delete orphaned files confirmation is cancelled or dismissed with Escape. */
     onCancelDelete: () => void;
     /** The "Ask before generating" confirmation is open. */
     generateOpen: boolean;
+    /** Called when the "Ask before generating" confirmation is accepted. */
     onConfirmGenerate: () => void;
+    /** Called when the "Ask before generating" confirmation is cancelled or dismissed with Escape. */
     onCancelGenerate: () => void;
 }
 
