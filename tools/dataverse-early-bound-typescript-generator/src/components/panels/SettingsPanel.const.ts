@@ -3,7 +3,12 @@ import { CodeRegular, CodeTextRegular, OptionsRegular, WrenchRegular } from '@fl
 import type { SectionBadge } from './SettingsParts';
 
 /** The ids a setting's control is labelled and described by: its row's title and description. */
-export type ControlIds = { labelledBy: string; describedBy: string };
+export type ControlIds = {
+    /** The id of the row's title, for the control's `aria-labelledby`. */
+    labelledBy: string;
+    /** The id of the row's description, for the control's `aria-describedby`. */
+    describedBy: string;
+};
 
 /** The Settings panel's tabs. */
 export type SettingsTab = 'general' | 'options' | 'files' | 'templates';

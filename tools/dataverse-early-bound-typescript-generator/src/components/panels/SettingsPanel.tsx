@@ -113,7 +113,10 @@ export interface SettingsPanelProps {
     onOpenChange: (open: boolean) => void;
     /** The saved settings; edits are kept in a draft until Save. */
     settings: ToolConfig;
-    /** Persists the settings. The panel closes when it resolves and shows the error when it rejects. */
+    /**
+     * Called with the draft when Save is clicked, to persist it. The panel closes when it resolves and shows the error
+     * when it rejects.
+     */
     onSave: (settings: ToolConfig) => Promise<void>;
 }
 

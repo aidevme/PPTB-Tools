@@ -92,7 +92,10 @@ export interface SettingRowProps {
      * @defaultValue `inline`
      */
     layout?: 'inline' | 'stacked';
-    /** Renders the control, labelled by the title and described by the description. */
+    /**
+     * Renders the control, labelled by the title and described by the description. Called on every render with the
+     * ids of the row's title and description.
+     */
     control: (ids: { labelledBy: string; describedBy: string }) => ReactNode;
 }
 
@@ -129,6 +132,10 @@ export function SettingRow({ title, description, info, changed, layout = 'inline
 /**
  * What a project with these options generates, as a small folder tree. Every table gets a file in `entities/`; the
  * two interface options add to those files rather than adding files, and `index.ts` is the only optional file.
+ *
+ * @remarks
+ * `defaults` holds the project options to preview (the draft in the Settings panel); a blank output folder shows
+ * `./src/dataverse-gen`.
  */
 export function OutputPreview({ defaults }: { defaults: ProjectDefaults }) {
     const styles = useSettingsPanelStyles();
