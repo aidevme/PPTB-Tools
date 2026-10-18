@@ -46,6 +46,12 @@ describe('Footer', () => {
         }
     });
 
+    it('says in the credit tooltip that the link opens in a new window', async () => {
+        await act(async () => link('dataverse-gen').focus());
+        await act(async () => new Promise((r) => setTimeout(r, 300)));
+        expect(document.body.textContent).toContain('dataverse-gen: the CLI this tool shares its project file with (MIT license). Opens in a new window.');
+    });
+
     it('links the documentation and the repository in a labelled nav, marked as opening in a new window', () => {
         const nav = document.querySelector('nav[aria-label="Project links"]') as HTMLElement;
         expect(nav).not.toBeNull();

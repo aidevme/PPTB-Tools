@@ -19,8 +19,8 @@ right:
 - **Credits:** "Compatible with Scott Durow's" followed by two link chips,
   [dataverse-ify](https://github.com/scottdurow/dataverse-ify) and
   [dataverse-gen](https://github.com/scottdurow/dataverse-gen), each tagged **MIT**. A tooltip on each says
-  what the project is: the runtime the generated types are for, and the CLI this tool shares its project
-  file with.
+  what the project is (the runtime the generated types are for, and the CLI this tool shares its project
+  file with) and that the link opens in a new window.
 - **Reminder** under the credits, with an info icon: files are generated from the connected environment's
   metadata, so review the preview before committing them.
 - **Links:** **Documentation** and **GitHub Repo** as subtle buttons with icons and an "opens in a new

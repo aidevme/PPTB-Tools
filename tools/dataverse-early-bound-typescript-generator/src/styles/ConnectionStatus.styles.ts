@@ -13,6 +13,7 @@ export const useConnectionStatusStyles = makeStyles({
         boxShadow: tokens.shadow2,
         maxWidth: '320px',
         minWidth: 0,
+        ':focus-visible': { outline: `${tokens.strokeWidthThick} solid ${tokens.colorStrokeFocus2}`, outlineOffset: '2px' },
     },
     pillDisconnected: { backgroundColor: tokens.colorPaletteYellowBackground1, ...shorthands.borderColor(tokens.colorPaletteYellowBorder1) },
     dot: { width: '8px', height: '8px', flexShrink: 0, borderRadius: tokens.borderRadiusCircular },

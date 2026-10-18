@@ -9,7 +9,8 @@ export interface IConnectionStatusProps {
 
 /**
  * The Header's connection pill: a green dot and the environment name (with its URL in a tooltip) when connected,
- * or a yellow "Not connected" pill. It's a `status` region, so changes are announced.
+ * or a yellow "Not connected" pill. It's a `status` region, so changes are announced; the connected pill is
+ * focusable, so the tooltip also opens from the keyboard.
  */
 export function ConnectionStatus({ connection }: IConnectionStatusProps) {
     const styles = useConnectionStatusStyles();
@@ -27,7 +28,8 @@ export function ConnectionStatus({ connection }: IConnectionStatusProps) {
     }
     return (
         <Tooltip content={connection.url} relationship="description" withArrow>
-            <div className={styles.pill} role="status" aria-label={`Connected to ${connection.name}`}>
+            {/* Focusable so keyboard users can open the URL tooltip. */}
+            <div className={styles.pill} role="status" aria-label={`Connected to ${connection.name}`} tabIndex={0}>
                 <span className={mergeClasses(styles.dot, styles.dotConnected)} aria-hidden="true" />
                 <PlugConnectedRegular className={styles.icon} aria-hidden="true" />
                 <span className={styles.text}>

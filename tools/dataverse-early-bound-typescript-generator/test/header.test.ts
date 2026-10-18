@@ -43,6 +43,8 @@ describe('Header', () => {
         const status = document.querySelector('[role="status"]') as HTMLElement;
         expect(status.getAttribute('aria-label')).toBe('Connected to Contoso Dev');
         expect(status.textContent).toContain('Contoso Dev');
+        // Focusable, so the URL tooltip also opens from the keyboard.
+        expect(status.tabIndex).toBe(0);
     });
 
     it('says when there is no connection', async () => {

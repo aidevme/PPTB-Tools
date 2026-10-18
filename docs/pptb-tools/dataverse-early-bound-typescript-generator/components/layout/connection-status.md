@@ -14,7 +14,8 @@ Source: [`src/components/layout/ConnectionStatus.tsx`](https://github.com/aidevm
 ## Behavior
 
 - **Connected:** a green status dot, "CONNECTED" and the connection name, with the environment URL in a tooltip on
-  hover. Screen readers hear "Connected to *name*".
+  hover. The pill is focusable, so keyboard users reach it with Tab and see the same tooltip, with a focus ring.
+  Screen readers hear "Connected to *name*".
 - **Not connected:** an amber pill with "Not connected".
 - The pill has `role="status"`, so screen readers announce changes.
 - Long connection names are cut with an ellipsis; the pill is at most 320 px wide.

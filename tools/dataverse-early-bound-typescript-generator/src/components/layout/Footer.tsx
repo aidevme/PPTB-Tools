@@ -34,7 +34,7 @@ export function Footer() {
                 <div className={styles.credits}>
                     <Text size={200}>Compatible with Scott Durow's</Text>
                     {CREDITS.map((credit) => (
-                        <Tooltip key={credit.name} content={`${credit.name}: the ${credit.role} (MIT license)`} relationship="description" withArrow>
+                        <Tooltip key={credit.name} content={`${credit.name}: the ${credit.role} (MIT license). Opens in a new window.`} relationship="description" withArrow>
                             <Link href={credit.url} target="_blank" rel="noreferrer" className={styles.creditChip}>
                                 {credit.name}
                                 <span className={styles.license}>MIT</span>
