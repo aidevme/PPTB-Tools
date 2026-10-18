@@ -20,16 +20,29 @@ import { CodeViewer } from '../viewers/CodeViewer';
 
 /** A badge on a section header, e.g. where its values are saved. */
 export interface SectionBadge {
+    /** The badge text. */
     label: string;
+    /**
+     * The Fluent UI badge color, for example `danger` for a warning.
+     * @defaultValue `informative`
+     */
     color?: BadgeProps['color'];
 }
 
+/** Props for {@link SettingsSection}. */
 export interface SettingsSectionProps {
+    /** The section heading; it also labels the card for screen readers. */
     title: string;
+    /** Shown before the heading. Decorative, so it's hidden from screen readers. */
     icon: ReactElement;
+    /**
+     * Badges after the heading, such as where the values apply.
+     * @defaultValue `[]`
+     */
     badges?: SectionBadge[];
     /** Red accent for settings that delete or can't be undone. */
     danger?: boolean;
+    /** The section's rows, usually {@link SettingRow}s. */
     children: ReactNode;
     /** Shown under the rows, e.g. a preview. */
     extra?: ReactNode;
@@ -64,7 +77,9 @@ export function SettingsSection({ title, icon, badges = [], danger, children, ex
     );
 }
 
+/** Props for {@link SettingRow}. */
 export interface SettingRowProps {
+    /** The setting's name, shown in semibold; with `info`, it gets an info button next to it. */
     title: string;
     /** One line shown under the title. */
     description: string;
@@ -72,7 +87,10 @@ export interface SettingRowProps {
     info?: ReactNode;
     /** The value differs from the saved one. */
     changed?: boolean;
-    /** `stacked` puts the control under the text, for wide controls such as a text input. */
+    /**
+     * `stacked` puts the control under the text, for wide controls such as a text input.
+     * @defaultValue `inline`
+     */
     layout?: 'inline' | 'stacked';
     /** Renders the control, labelled by the title and described by the description. */
     control: (ids: { labelledBy: string; describedBy: string }) => ReactNode;

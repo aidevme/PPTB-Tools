@@ -102,8 +102,14 @@ function spinValue(data: { value?: number | null; displayValue?: string }, curre
     return data.displayValue !== undefined && data.displayValue.trim() !== '' && Number.isFinite(typed) ? typed : current;
 }
 
+/** Props for {@link SettingsPanel}. */
 export interface SettingsPanelProps {
+    /** Whether the drawer is open. Each time it opens, the draft starts again from `settings` and the search is cleared. */
     open: boolean;
+    /**
+     * Called with `false` when the panel should close: the Close or Cancel button, the drawer's own dismiss (for
+     * example Escape), or a successful Save.
+     */
     onOpenChange: (open: boolean) => void;
     /** The saved settings; edits are kept in a draft until Save. */
     settings: ToolConfig;
