@@ -10,7 +10,11 @@ npm run dev      # Vite dev server; PPTB APIs are absent, so the UI shows a warn
 npm run build    # tsc typecheck + vite build -> dist/
 npm run watch    # rebuild dist/ on change
 npm test         # vitest suite
+npm run lint:tsdoc  # TSDoc comment syntax only
 ```
+
+`npm run lint:tsdoc` runs ESLint with `eslint.config.mjs`, which loads only `eslint-plugin-tsdoc`'s `tsdoc/syntax` rule
+(as a warning) for `src/**/*.{ts,tsx}`. It isn't a general lint setup, and it isn't part of the build or CI.
 
 ## Single-script bundle
 

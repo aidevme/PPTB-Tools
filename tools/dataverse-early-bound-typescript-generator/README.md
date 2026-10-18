@@ -83,6 +83,7 @@ npm run dev      # Vite dev server; PPTB APIs are absent so the UI shows a warni
 npm run build    # tsc typecheck + vite build -> dist/ (single IIFE bundle)
 npm run watch    # rebuild dist/ on change
 npm test         # vitest: core snapshot tests + planner/config tests
+npm run lint:tsdoc  # TSDoc comment syntax only (ESLint tsdoc/syntax, eslint.config.mjs); warnings don't fail it
 ```
 
 To test inside PPTB: build, enable the Debug Menu in Settings, use Debug → Browse to load this folder, connect

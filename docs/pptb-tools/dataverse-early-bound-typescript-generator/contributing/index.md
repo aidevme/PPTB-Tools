@@ -24,10 +24,11 @@ npm run dev      # Vite dev server; PPTB APIs are absent, so the UI shows a warn
 npm run build    # tsc typecheck + vite build -> dist/ (single IIFE bundle)
 npm run watch    # rebuild dist/ on change
 npm test         # vitest suite
+npm run lint:tsdoc  # TSDoc comment syntax only
 ```
 
 `npm run build` runs `tsc`, so it is the correctness check to run after changes; run `npm test` too. There is no
-lint script.
+general lint script; after changing doc comments, run `npm run lint:tsdoc` to check their TSDoc syntax.
 
 ## Dev server versus PPTB
 
