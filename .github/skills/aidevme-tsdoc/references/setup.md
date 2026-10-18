@@ -6,7 +6,9 @@ Purpose: set up the `tsdoc/syntax` check (and optionally doc generation) in a pr
 ask before installing a package or editing a config file.
 
 Versions checked on 2026-10-18: `eslint-plugin-tsdoc` 0.5.4 (peer `eslint >=7`; it depends on `@microsoft/tsdoc`
-0.17.1 and `@microsoft/tsdoc-config` 0.18.3), `typedoc` 0.28.20, `@microsoft/api-extractor` 7.59.4.
+0.17.1 and `@microsoft/tsdoc-config` 0.18.3), `typedoc` 0.28.20, `@microsoft/api-extractor` 7.59.4. The check script
+was tested with `eslint` 10.13.0 and 9.39.5 and `@typescript-eslint/parser` 8.71.2 (TypeScript 5.9.3); ESLint 9 is
+out of support, so install 10.
 
 ## What the check needs
 
@@ -32,7 +34,7 @@ The script uses its own inline config, so it works even if the project's ESLint 
 3. **Show the diff and the install command, and ask.** Example:
 
    ```bash
-   npm install --save-dev eslint-plugin-tsdoc @typescript-eslint/parser eslint
+   npm install --save-dev eslint-plugin-tsdoc @typescript-eslint/parser eslint@10
    ```
 
 4. **After approval:** install, edit, run `node <skill>/scripts/check-tsdoc.mjs <a few files>`, and report. Hand the
@@ -60,6 +62,12 @@ export default [
 The plugin exports a single rule, `syntax`, and no preset configs. Its README only shows the legacy setup, so this
 flat form follows ESLint's standard plugin pattern. TODO: verify against a future eslint-plugin-tsdoc README that
 documents flat config. With `typescript-eslint`'s `tseslint.config(...)`, add the same object to its list.
+
+In a TSDoc-only config (no other lint rules), `eslint-disable` comments in the code that name other rules
+(`react-hooks/exhaustive-deps`, …) are reported as unknown or unused. Either register those rule names as no-op rules
+in a placeholder plugin (`{ rules: { 'exhaustive-deps': { create: () => ({}) } } }`) and set
+`linterOptions: { reportUnusedDisableDirectives: 'off' }`, or set `linterOptions: { noInlineConfig: true }`. The
+check script does the latter and reports only `tsdoc/syntax` findings.
 
 ## Legacy config (.eslintrc.*)
 

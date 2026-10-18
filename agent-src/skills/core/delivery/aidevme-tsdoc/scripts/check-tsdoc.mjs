@@ -116,13 +116,17 @@ async function main(argv) {
                 {
                     files: ['**/*.{ts,tsx,mts,cts}'],
                     languageOptions: { parser: tools.parser },
+                    // Only the TSDoc rule runs, so `eslint-disable` comments for other rules would be reported as
+                    // unknown or unused rules; ignore inline config instead.
+                    linterOptions: { noInlineConfig: true, reportUnusedDisableDirectives: 'off' },
                     plugins: { tsdoc: tools.tsdoc },
                     rules: { 'tsdoc/syntax': 'warn' },
                 },
             ],
         });
         for (const result of await linter.lintFiles(projectFiles)) {
-            for (const message of result.messages) {
+            // Keep TSDoc findings and parse errors; drop ESLint's notes about the ignored inline config.
+            for (const message of result.messages.filter((m) => m.ruleId === 'tsdoc/syntax' || m.fatal)) {
                 findings.push({
                     file: path.relative(process.cwd(), result.filePath),
                     line: message.line,
