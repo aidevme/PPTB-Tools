@@ -67,6 +67,8 @@ export interface ToolConfig {
     skipDuplicateIdentifiers: boolean;
     /** Rename later duplicate enum members to `<Name>_<Value>` so the generated files compile. */
     renameDuplicateIdentifiers: boolean;
+    /** Write dataverse-gen's EJS templates to the project's `templateRoot` on Generate, like `dataverse-gen eject`. */
+    generateTemplates: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -155,6 +157,8 @@ export const toolConfig: ToolConfig = {
     confirmBeforeGenerate: defaults.confirmBeforeGenerate === true,
     skipDuplicateIdentifiers: defaults.skipDuplicateIdentifiers === true,
     renameDuplicateIdentifiers: defaults.renameDuplicateIdentifiers === true,
+    // On unless the bundled JSON turns it off, so Generate keeps writing the templates by default.
+    generateTemplates: defaults.generateTemplates !== false,
     projectDefaults: normalizeProjectDefaults(defaults.projectDefaults, BUILT_IN_PROJECT_DEFAULTS),
     projects: normalizeProjects(defaults.projects as unknown[]),
 };
@@ -171,6 +175,7 @@ export function mergeToolConfig(saved: unknown): ToolConfig {
             typeof values.skipDuplicateIdentifiers === 'boolean' ? values.skipDuplicateIdentifiers : toolConfig.skipDuplicateIdentifiers,
         renameDuplicateIdentifiers:
             typeof values.renameDuplicateIdentifiers === 'boolean' ? values.renameDuplicateIdentifiers : toolConfig.renameDuplicateIdentifiers,
+        generateTemplates: typeof values.generateTemplates === 'boolean' ? values.generateTemplates : toolConfig.generateTemplates,
         projectDefaults: normalizeProjectDefaults(values.projectDefaults, toolConfig.projectDefaults),
         projects: Array.isArray(values.projects) ? normalizeProjects(values.projects) : toolConfig.projects,
     };

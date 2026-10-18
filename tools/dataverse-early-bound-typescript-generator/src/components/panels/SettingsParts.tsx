@@ -152,8 +152,9 @@ export function TemplatesViewer() {
             <MessageBar intent="info">
                 <MessageBarBody>
                     The templates behind the generated files. Generate writes them to your project's <code>templateRoot</code> (
-                    <code>{DEFAULT_TEMPLATE_ROOT}</code> by default), overwriting edited copies. The tool generates with built-in copies
-                    of the same templates, so editing the written files doesn't change its output.
+                    <code>{DEFAULT_TEMPLATE_ROOT}</code> by default), overwriting edited copies, unless <strong>Generate templates</strong> is
+                    off on the Generate &amp; files tab. The tool generates with built-in copies of the same templates, so editing the
+                    written files doesn't change its output.
                 </MessageBarBody>
             </MessageBar>
             <TabList size="small" selectedValue={selected} onTabSelect={(_, data) => setSelected(data.value as string)} aria-label="Templates">

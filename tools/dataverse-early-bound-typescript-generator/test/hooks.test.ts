@@ -8,8 +8,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
 import { resolveConfig, type DataverseGenConfig } from '../src/core';
 import { useAsyncAction, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
-import { InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
-import type { EntitySummary, OperationSummary } from '../src/types';
+import { DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
+import type { EntitySummary, OperationSummary, WritePlan } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -412,6 +412,36 @@ describe('usePreviewGenerate', () => {
         await flush();
         expect(direct.result.current.preview.confirmGenerateOpen).toBe(false);
         expect(sink.files.has('/src/contoso/src/dataverse-gen/entities/Account.ts')).toBe(true);
+    });
+
+    it('puts the dataverse-gen templates in the preview only when Generate templates is on', async () => {
+        const empty = { entityTypes: [], complexTypes: [], enumTypes: [], actions: [], functions: [] };
+        const provider = { getSchemaForSelection: vi.fn(async () => empty), getEntities: vi.fn(async () => []) } as unknown as PptbMetadataProvider;
+        const templatesIn = async (generateTemplates: boolean) => {
+            const hook = renderHook(() =>
+                usePreviewGenerate({
+                    planState: usePlanState(),
+                    projectRoot: '/src/contoso',
+                    config: {},
+                    provider,
+                    sink: new InMemoryFileSink(),
+                    toolSettings: settings({ generateTemplates }),
+                    recordProjectGeneration: vi.fn(async () => undefined),
+                    markConfigSaved: vi.fn(),
+                    noteMetadataFallback: vi.fn(),
+                    setError: vi.fn(),
+                }),
+            );
+            let plan: Awaited<ReturnType<typeof hook.result.current.runPreview>> = null;
+            await act(async () => {
+                plan = await hook.result.current.runPreview();
+            });
+            act(() => root?.unmount());
+            container?.remove();
+            return (plan as WritePlan | null)?.files.filter((f) => f.relativePath.includes('_templates/')).length ?? -1;
+        };
+        expect(await templatesIn(true)).toBe(DATAVERSE_GEN_TEMPLATES.length);
+        expect(await templatesIn(false)).toBe(0);
     });
 
     it('asks before deleting orphaned files', async () => {

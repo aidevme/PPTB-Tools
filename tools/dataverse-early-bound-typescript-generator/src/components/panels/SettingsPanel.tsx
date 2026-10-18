@@ -47,6 +47,7 @@ import {
 } from '../shared/settingsInfo';
 import { RECENT_PROJECT_COUNT_RANGE, SELECTION_ROW_LIMIT_RANGE, type ToolConfig } from '../../config';
 import { useSettingsDraft } from '../../hooks';
+import { DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { version } from '../../../package.json';
 import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
@@ -357,6 +358,31 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     keywords: 'confirm confirmation overwrite',
                     changed: draft.confirmBeforeGenerate !== settings.confirmBeforeGenerate,
                     control: switchControl(draft.confirmBeforeGenerate, (checked) => update({ confirmBeforeGenerate: checked })),
+                },
+            ],
+        },
+        {
+            id: 'templateFiles',
+            tab: 'files',
+            title: 'Templates',
+            icon: <CodeTextRegular />,
+            badges: [SCOPE_ALL_PROJECTS],
+            settings: [
+                {
+                    id: 'generateTemplates',
+                    title: 'Generate templates',
+                    description: "Write dataverse-gen's EJS templates to the project's templateRoot.",
+                    info: (
+                        <>
+                            Generate writes the templates to <code>templateRoot</code> (<code>{DEFAULT_TEMPLATE_ROOT}</code> by default),
+                            overwriting edited copies, like <code>dataverse-gen eject</code>. When off, they aren't written and
+                            existing copies are left as they are. The tool itself always uses its built-in templates. Saved as{' '}
+                            <code>generateTemplates</code>.
+                        </>
+                    ),
+                    keywords: 'templates ejs eject templateRoot dataverse-gen write',
+                    changed: draft.generateTemplates !== settings.generateTemplates,
+                    control: switchControl(draft.generateTemplates, (checked) => update({ generateTemplates: checked })),
                 },
             ],
         },

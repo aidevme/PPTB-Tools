@@ -57,6 +57,7 @@ describe('tool config', () => {
             confirmBeforeGenerate: false,
             skipDuplicateIdentifiers: false,
             renameDuplicateIdentifiers: false,
+            generateTemplates: true,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
             projects: [],
         });
@@ -83,6 +84,12 @@ describe('tool config', () => {
     it('reads confirmBeforeGenerate only when it is a boolean', () => {
         expect(mergeToolConfig({ confirmBeforeGenerate: true }).confirmBeforeGenerate).toBe(true);
         expect(mergeToolConfig({ confirmBeforeGenerate: 'yes' }).confirmBeforeGenerate).toBe(false);
+    });
+
+    it('reads generateTemplates only when it is a boolean, defaulting to true', () => {
+        expect(mergeToolConfig({ generateTemplates: false }).generateTemplates).toBe(false);
+        expect(mergeToolConfig({ generateTemplates: 'no' }).generateTemplates).toBe(true);
+        expect(mergeToolConfig({}).generateTemplates).toBe(true);
     });
 
     it('reads renameDuplicateIdentifiers only when it is a boolean', () => {
@@ -265,6 +272,21 @@ describe('settings panel', () => {
         await click(control('Ask before generating'));
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ confirmBeforeGenerate: true }));
+    });
+
+    it('offers Generate templates in its own card after Before generating, on by default', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        const text = document.body.textContent ?? '';
+        expect(text.indexOf('Before generating')).toBeLessThan(text.indexOf('Generate templates'));
+        expect(text.indexOf('Generate templates')).toBeLessThan(text.indexOf('Duplicate identifiers'));
+        expect(document.querySelector('button[aria-label="About Generate templates"]')).not.toBeNull();
+        expect(control('Generate templates').checked).toBe(true);
+
+        await click(control('Generate templates'));
+        await click(button('Save'));
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ generateTemplates: false }));
     });
 
     it('shows the dataverse-gen templates, read-only, on the Templates tab', async () => {

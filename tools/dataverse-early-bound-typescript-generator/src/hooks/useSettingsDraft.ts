@@ -11,6 +11,7 @@ function withDefaults(config: ToolConfig): ToolConfig {
         confirmBeforeGenerate: toolConfig.confirmBeforeGenerate,
         skipDuplicateIdentifiers: toolConfig.skipDuplicateIdentifiers,
         renameDuplicateIdentifiers: toolConfig.renameDuplicateIdentifiers,
+        generateTemplates: toolConfig.generateTemplates,
         projectDefaults: { ...toolConfig.projectDefaults },
     };
 }

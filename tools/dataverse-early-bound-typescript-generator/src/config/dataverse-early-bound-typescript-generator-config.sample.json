@@ -11,6 +11,7 @@
     "confirmBeforeGenerate": true,
     "skipDuplicateIdentifiers": false,
     "renameDuplicateIdentifiers": false,
+    "generateTemplates": true,
     "projectDefaults": {
         "outputRoot": "./src/generated/dataverse",
         "generateEntityTypes": true,
