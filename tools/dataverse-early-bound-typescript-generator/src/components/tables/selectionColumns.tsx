@@ -8,7 +8,9 @@ import type { TableType } from '../../types';
 
 /** A column header: its label and the explanation shown in its tooltip. */
 export interface SelectionColumn {
+    /** The header text; also the header cell's React key, so unique within a tab. */
     label: string;
+    /** The explanation shown in the header's tooltip. */
     help: ReactNode;
 }
 

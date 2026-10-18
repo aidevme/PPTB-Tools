@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { TableHeaderCell, Tooltip, mergeClasses, type SortDirection } from '@fluentui/react-components';
 import { useSortableTableStyles } from '../../styles';
 
+/** Props for {@link SortableHeaderCell}. */
 export interface ISortableHeaderCellProps {
     /** Explanation of the column, shown in a tooltip above the header; no tooltip when omitted. */
     help?: ReactNode;
@@ -9,7 +10,9 @@ export interface ISortableHeaderCellProps {
     className?: string;
     /** The column's sort direction, or `undefined` when another column (or none) is sorted. */
     sortDirection: SortDirection | undefined;
+    /** Called when the header is clicked (or its sort button activated from the keyboard). */
     onClick: () => void;
+    /** The header's label. */
     children: ReactNode;
 }
 

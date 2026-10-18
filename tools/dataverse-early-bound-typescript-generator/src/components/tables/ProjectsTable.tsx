@@ -8,17 +8,23 @@ import { formatDateTime } from '../shared/format';
 import { activateRowOnKey } from './tableRows';
 import { PROJECT_COLUMNS, type ProjectColumnKey, type ProjectSort } from './projectColumns';
 
+/** Props for {@link ProjectsTable}. */
 export interface IProjectsTableProps {
     /** The saved projects, already sorted. */
     projects: ProjectEntry[];
+    /** The sorted column and direction, shown in the column headers. */
     sort: ProjectSort;
+    /** Called with the column when its header is clicked, to sort by it or reverse its direction. */
     onToggleSort: (column: ProjectColumnKey) => void;
+    /** Id of the selected project, whose row is highlighted and its radio checked; an empty string selects none. */
     selectedId: string;
     /** Selects a row (a click or Enter/Space on it). */
     onSelect: (project: ProjectEntry) => void;
     /** Opens a project directly (a click on its name). */
     onLoad: (project: ProjectEntry) => void;
+    /** Called with the row's project when its Edit button is clicked; the row isn't selected. */
     onEdit: (project: ProjectEntry) => void;
+    /** Called with the row's project when its Delete button is clicked; the row isn't selected. */
     onDelete: (project: ProjectEntry) => void;
     /** A project is being opened: the name links are disabled. */
     loading: boolean;

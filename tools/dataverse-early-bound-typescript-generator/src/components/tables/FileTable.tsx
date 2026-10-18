@@ -30,13 +30,20 @@ const STATUS_DOT: Record<FileStatus, keyof FileTableStyles> = {
     duplicate: 'dotDuplicate',
 };
 
+/** Props for {@link FileTable}. */
 export interface IFileTableProps {
     /** The files to list, already filtered and sorted. */
     files: PlannedFile[];
+    /** Relative path of the file shown in the viewer, whose row is highlighted; `null` when none is selected. */
     selectedPath: string | null;
+    /**
+     * Called with a file's relative path when its row is clicked, activated with Enter or Space, or reached with the
+     * Up or Down arrow key.
+     */
     onSelect: (relativePath: string) => void;
     /** The sort direction of `column`, or `undefined` when it isn't the sorted column. */
     sortDirection: (column: FileSortColumn) => SortDirection | undefined;
+    /** Called with the column when its header is clicked, to sort by it or reverse its direction. */
     onToggleSort: (column: FileSortColumn) => void;
 }
 

@@ -11,19 +11,27 @@ import { activateRowOnKey } from './tableRows';
  * value per cell.
  */
 export interface SelectionRow {
+    /** Identifies the row in `selectedKeys` and is passed to `onToggleRow`; also the React key. */
     key: string;
+    /** Name used in the checkbox's accessible label, after "Select". */
     label: string;
+    /** Content of the cells after the checkbox, one per column, in column order. */
     cells: ReactNode[];
+    /** The value each cell sorts by, in column order; `undefined` sorts last. */
     sortValues: SortValue[];
 }
 
+/** Props for {@link SelectionTable}. */
 export interface ISelectionTableProps {
     /** The table's accessible name, for example "Tables". */
     ariaLabel: string;
+    /** The column headers, with their help tooltips, in the same order as each row's `cells`. */
     columns: SelectionColumn[];
     /** The rows to show, already filtered, sorted and limited. */
     rows: SelectionRow[];
+    /** The sorted column (an index into `columns`) and direction, or `null` when no column is sorted. */
     sort: SortState | null;
+    /** Called with the column's index when its header is clicked, to sort by it or reverse its direction. */
     onToggleSort: (column: number) => void;
     /** Keys of the selected rows. */
     selectedKeys: ReadonlySet<string>;
