@@ -25,11 +25,12 @@ defaults:
     working-directory: tools/dataverse-early-bound-typescript-generator
 
 jobs:
-  # Checks package.json against PPTB's tool requirements (required fields, icon path, reachable repository and
-  # readme URLs). It doesn't need the build output, so it runs first and stops the workflow early on a bad manifest.
-  validate:
-    name: Validate
+  # One job, so dependencies are installed once. The steps run in order and the job stops at the first failure:
+  # the manifest check first (cheapest, needs no build output), then the tests, then the build and its artifact.
+  build:
+    name: Validate, test and build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout repository
@@ -46,50 +47,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Checks package.json against PPTB's tool requirements (required fields, icon path, reachable repository and
+      # readme URLs).
       - name: Validate
         run: npm run validate
 
-  test:
-    name: Test
-    needs: validate
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-          cache: npm
-          cache-dependency-path: tools/dataverse-early-bound-typescript-generator/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Test
         run: npm test
-
-  build:
-    name: Build
-    # Only build (and publish dist/) once the tests have passed.
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v5
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-          cache: npm
-          cache-dependency-path: tools/dataverse-early-bound-typescript-generator/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
 
       # `npm run build` runs `tsc` (typecheck) before `vite build`.
       - name: Build
