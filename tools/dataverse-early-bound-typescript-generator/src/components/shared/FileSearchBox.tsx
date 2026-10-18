@@ -1,11 +1,13 @@
 import { SearchBox, mergeClasses } from '@fluentui/react-components';
 import { useFileSearchBoxStyles } from '../../styles';
 
+/** Props for {@link FileSearchBox}. */
 export interface IFileSearchBoxProps {
     /** The search text. */
     value: string;
     /** Called with the new text on every keystroke, and with `''` when the clear button is clicked. */
     onChange: (value: string) => void;
+    /** Extra class merged after the box's own root style, for layout set by the parent. */
     className?: string;
 }
 

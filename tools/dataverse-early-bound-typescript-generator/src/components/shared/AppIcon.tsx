@@ -2,6 +2,7 @@ import { mergeClasses } from '@fluentui/react-components';
 import { CodeRegular } from '@fluentui/react-icons';
 import { useAppIconStyles } from '../../styles';
 
+/** Props for {@link AppIcon}. */
 export interface IAppIconProps {
     /** `large` in the Header (44 px), `small` in the Footer (28 px). */
     size: 'large' | 'small';

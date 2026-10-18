@@ -3,8 +3,11 @@
  * generate. Both places show the same title and info text, so they live here once.
  */
 
+/** Switch label for `skipDuplicateIdentifiers`, explained by {@link SKIP_DUPLICATES_INFO}. */
 export const SKIP_DUPLICATES_TITLE = 'Skip duplicated identifier(s)';
+/** Switch label for `renameDuplicateIdentifiers`, explained by {@link RENAME_DUPLICATES_INFO}. */
 export const RENAME_DUPLICATES_TITLE = 'Rename duplicated identifier(s)';
+/** Switch label for `deleteOrphanedFiles`, explained by {@link DELETE_ORPHANS_INFO}. */
 export const DELETE_ORPHANS_TITLE = 'Delete orphaned files';
 
 /** Skip duplicated identifier(s): `skipDuplicateIdentifiers`. */

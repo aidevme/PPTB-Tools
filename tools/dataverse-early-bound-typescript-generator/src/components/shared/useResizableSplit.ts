@@ -4,6 +4,14 @@ import { DEFAULT_LIST_WIDTH, clampListWidth } from './previewFiles';
 /**
  * The Preview card's resizable divider between the file list and the viewer: dragging it, or ←/→ while it has
  * focus, changes the list's width, kept within `clampListWidth` of the split container (`splitRef`).
+ *
+ * @remarks
+ * The width starts at `DEFAULT_LIST_WIDTH` and each arrow key press moves it by 32 px. A drag listens for
+ * `pointermove` and `pointerup` on `window` and removes both listeners when the pointer is released.
+ *
+ * @returns `listWidth` (the list's width in px), `splitRef` (attach to the split container, whose width bounds the
+ * list), `startResize` (the divider's `onPointerDown` handler) and `onSplitterKeyDown` (the divider's `onKeyDown`
+ * handler).
  */
 export function useResizableSplit() {
     const [listWidth, setListWidth] = useState(DEFAULT_LIST_WIDTH);

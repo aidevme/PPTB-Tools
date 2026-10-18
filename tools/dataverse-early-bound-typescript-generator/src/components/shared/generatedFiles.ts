@@ -16,6 +16,9 @@ const FOLDER_TYPES: Record<string, GeneratedFileType> = {
 /**
  * `entities/Account.ts` → `entities`; `metadata.ts` → `metadata`; `_templates/entity.ejs` → `templates`. Everything
  * else, including `complextypes/` and `index.ts`, is `other`.
+ *
+ * @param relativePath - The file's path relative to the output root, with `/` separators.
+ * @returns The type from the first folder (case-insensitive), `metadata` for a root `metadata.*` file, or `other`.
  */
 export function fileType(relativePath: string): GeneratedFileType {
     const slash = relativePath.indexOf('/');
@@ -23,7 +26,12 @@ export function fileType(relativePath: string): GeneratedFileType {
     return FOLDER_TYPES[relativePath.substring(0, slash).toLowerCase()] ?? 'other';
 }
 
-/** The file name without its folder: `entities/Account.ts` → `Account.ts`. */
+/**
+ * The file name without its folder: `entities/Account.ts` → `Account.ts`.
+ *
+ * @param relativePath - The file's path relative to the output root, with `/` separators.
+ * @returns The part after the last `/`, or the whole path when it has none.
+ */
 export const fileName = (relativePath: string) => relativePath.substring(relativePath.lastIndexOf('/') + 1);
 
 /** How each status is shown: badge color and a one-line explanation of what Generate does. */

@@ -3,10 +3,13 @@ import { CopyRegular } from '@fluentui/react-icons';
 import { usePathChipStyles } from '../../styles';
 import { shortenPath } from './format';
 
+/** Props for {@link PathChip}. */
 export interface IPathChipProps {
+    /** The full path: shown shortened, in full in the tooltip, and copied by the copy button. */
     path: string;
     /** What the path is, for example "Project folder path": the copy notification's label and, lowercased, the copy button's tooltip. */
     label: string;
+    /** Called with the full `path` and the `label` when the copy button is clicked; the parent does the copying. */
     onCopy: (path: string, label: string) => void;
     /** Longest text shown before the middle of the path is shortened; defaults to `shortenPath`'s 48. */
     maxLength?: number;

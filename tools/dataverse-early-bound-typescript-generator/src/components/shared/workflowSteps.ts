@@ -1,11 +1,15 @@
 import type { BadgeProps } from '@fluentui/react-components';
 
+/** Identifies one of the four workflow steps; also used in its card's element id ({@link stepElementId}). */
 export type StepKey = 'project' | 'select' | 'options' | 'preview';
 
 /** What a card's step header and the workflow progress bar show for one step. */
 export interface StepState {
+    /** Which step this is. */
     key: StepKey;
+    /** The step's 1-based position, shown in its indicator until the step is done. */
     number: number;
+    /** The step's name, shown in its card header and the progress bar, for example "Preview and generate". */
     title: string;
     /** The step is done: shown as a check mark. */
     complete: boolean;
@@ -13,18 +17,32 @@ export interface StepState {
     active: boolean;
     /** Short status for the step's badge, e.g. "Ready" or "12 selected". */
     status: string;
+    /**
+     * The status badge's color: `success` when done, `informative` when not started, and `warning` (out of date) or
+     * `brand` (files to write) for the preview step.
+     */
     statusColor: NonNullable<BadgeProps['color']>;
 }
 
+/** The app state {@link computeWorkflowSteps} derives the steps from. */
 export interface WorkflowInput {
+    /** A project folder is open. */
     hasProject: boolean;
     /** Number of selected tables, actions and functions together. */
     selectedCount: number;
-    /** The last preview, or `null` before the first one. */
+    /**
+     * The last preview, or `null` before the first one: `pending` is how many changes Generate would still make,
+     * and `stale` means the preview is out of date and needs to be run again.
+     */
     plan: { pending: number; stale: boolean } | null;
 }
 
-/** Element id of a step's card, used by the progress bar to scroll to it. */
+/**
+ * Element id of a step's card, used by the progress bar to scroll to it.
+ *
+ * @param key - The step.
+ * @returns `workflow-step-` followed by `key`.
+ */
 export const stepElementId = (key: StepKey) => `workflow-step-${key}`;
 
 /**
@@ -34,6 +52,9 @@ export const stepElementId = (key: StepKey) => `workflow-step-${key}`;
  * - **Select** is done once anything is selected.
  * - **Options** is done once a project is open: its options then exist, with defaults if never changed.
  * - **Preview** is done when an up-to-date preview has nothing left to write.
+ *
+ * @param input - Whether a project is open, the selection count and the last preview; see {@link WorkflowInput}.
+ * @returns The four steps in order, with exactly one `active` (the first not done), or none when all are done.
  */
 export function computeWorkflowSteps({ hasProject, selectedCount, plan }: WorkflowInput): StepState[] {
     const steps: Array<Omit<StepState, 'active'>> = [
