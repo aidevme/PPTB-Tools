@@ -2,7 +2,7 @@ import { Badge, Button, Text, Tooltip } from '@fluentui/react-components';
 import { SettingsRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useHeaderStyles } from '../../styles';
-import { AppIcon } from './AppIcon';
+import { AppIcon } from '../shared/AppIcon';
 import { ConnectionStatus } from './ConnectionStatus';
 
 export interface IHeaderProps {

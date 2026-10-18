@@ -4,8 +4,8 @@
  */
 export { CodeViewer } from './viewers/CodeViewer';
 export type { ICodeViewerProps } from './viewers/CodeViewer';
-export { AppIcon } from './layout/AppIcon';
-export type { IAppIconProps } from './layout/AppIcon';
+export { AppIcon } from './shared/AppIcon';
+export type { IAppIconProps } from './shared/AppIcon';
 export { ConnectionStatus } from './layout/ConnectionStatus';
 export type { IConnectionStatusProps } from './layout/ConnectionStatus';
 export { Footer } from './layout/Footer';

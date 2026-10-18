@@ -2,7 +2,7 @@ import { Button, Link, Text, Tooltip } from '@fluentui/react-components';
 import { BookOpenRegular, BranchForkRegular, InfoRegular, OpenRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
-import { AppIcon } from './AppIcon';
+import { AppIcon } from '../shared/AppIcon';
 
 /** The tool's Getting started page on the published docs site (GitHub Pages). */
 const DOCUMENTATION_URL = 'https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/';
