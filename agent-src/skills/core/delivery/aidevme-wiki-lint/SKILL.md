@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-lint
-layer: governance
-scope: core
+metadata:
+  layer: governance
+  scope: core
 description: |
   Enforce the agent/ wiki invariants and regenerate index.md. Aggressive by default: auto-corrects
   what is safe and commits each correction as a reviewable chore(wiki-lint): commit; flags what needs

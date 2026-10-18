@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-process-inbox
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Triage everything in agent/_inbox/ and route it into the wiki. For each item: if it is a SOURCE
   (transcript, discovery doc, export, screenshot), move it to the matching raw/ subfolder (or write

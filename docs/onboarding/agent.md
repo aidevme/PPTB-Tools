@@ -71,7 +71,8 @@ agent-src/skills/project/**┘
    - `project` → `agent-src/skills/project/` (engagement-specific; never upstream).
    - Rule: a skill naming a client, env URL, pipeline ID, or sprint convention is `project`.
 2. Register it in `skills-manifest.json` (`scope`, `group`, `ported: true`).
-3. `sync.ps1` → `verify-parity.ps1` (must be clean).
+3. `validate-skills.ps1` (Agent Skills specification, via skills-ref; `layer` and `scope` live under `metadata`) →
+   `sync.ps1` → `verify-parity.ps1` (all must be clean).
 
 ## The wiki (`agent/`)
 

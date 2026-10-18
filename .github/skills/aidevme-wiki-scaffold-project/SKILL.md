@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-scaffold-project
-layer: meta
-scope: core
+metadata:
+  layer: meta
+  scope: core
 description: |
   Create the hybrid `agent/` wiki layout (four layers: `raw/`, `_inbox/`, `wiki/`, `work/`) in an
   existing repo, or fill in missing pieces of a partially-scaffolded one. Produces stub `README.md`,

@@ -1,7 +1,8 @@
 ---
 name: aidevme-dataverse-sdk-reference
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Microsoft Dataverse SDK and Power Apps platform development reference from official Microsoft documentation. Use when asking about:
   - Dataverse SDK APIs (IOrganizationService, Entity, QueryExpression)

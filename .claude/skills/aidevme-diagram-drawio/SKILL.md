@@ -1,7 +1,8 @@
 ---
 name: aidevme-diagram-drawio
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Author and render draw.io (diagrams.net) diagrams as HSO-branded SVG/PNG for embedding in markdown deliverables and reveal.js presentations. Use when:
   (1) User asks to "create a diagram", "draw an ERD", "draw an architecture diagram", "add a diagram to the doc/deck"

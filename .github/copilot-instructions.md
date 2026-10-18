@@ -154,12 +154,18 @@ Skills and subagents are authored once under `agent-src/` and generated into eac
 `CLAUDE.md` and `.github/copilot-instructions.md`. Edit the source, then:
 
 ```bash
-pwsh -File agent-src/sync/sync.ps1 -DryRun   # see what would change
-pwsh -File agent-src/sync/sync.ps1           # regenerate (it deletes and recreates the generated folders)
-pwsh -File agent-src/sync/verify-parity.ps1  # must pass
+pwsh -File agent-src/sync/validate-skills.ps1  # Agent Skills specification check (skills-ref); must pass
+pwsh -File agent-src/sync/sync.ps1 -DryRun     # see what would change
+pwsh -File agent-src/sync/sync.ps1             # regenerate (it deletes and recreates the generated folders)
+pwsh -File agent-src/sync/verify-parity.ps1    # must pass
 ```
 
 New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are created with `aidevme-skill-creator`.
+Their frontmatter follows the [Agent Skills specification](https://agentskills.io/specification): `name` (equal to
+the folder name), `description` (at most 1024 characters), optional `license`, `allowed-tools`, `compatibility`, and
+`metadata`, which holds this repo's `layer` and `scope`; `argument-hint` is the one Claude Code extension allowed.
+`validate-skills.ps1` checks this with a pinned skills-ref; the first run needs `-Install` (it downloads it from PyPI
+into the gitignored `agent-src/sync/.venv-skills-ref`).
 
 ### Installed skills
 
@@ -182,7 +188,7 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `aidevme-diagram-drawio` | draw.io diagrams for the docs |
 | `aidevme-wiki-*` | The `agent/` wiki: `capture`, `lint`, `process-inbox`, `query`, `scaffold-project`, `update-topic`, `write-decision` |
 | `aidevme-skill-creator`, `skill-creator` | Creating or improving skills |
-| `aidevme-skills-sync` | Checking that the generated skill folders match the source |
+| `aidevme-skills-sync` | Checking that the skills follow the Agent Skills specification and that the generated skill folders match the source |
 | `aidevme-docs-maintenance` | Validating Markdown (markdownlint + cspell), syncing `cspell.json`, syncing the `docs/` entries in `.github/CODEOWNERS` |
 
 ### The `agent/` wiki

@@ -1,14 +1,17 @@
 ---
 name: aidevme-skill-creator
-layer: meta
-scope: core
+metadata:
+  layer: meta
+  scope: core
 description: |
-  Create a new skill following the template's conventions, placed correctly from birth by a REQUIRED
-  scope choice (core | project). Use when:
+  Create or update a skill following the template's conventions, placed correctly from birth by a REQUIRED
+  scope choice (core | project) and validated against the Agent Skills specification with skills-ref. Use when:
   (1) User asks to "create a skill", "add a new skill", "build a skill"
   (2) A repeatable workflow should become a reusable capability
   (3) A project-level skill should be promoted to the reusable core
-  Enforces naming, the scope split, no-client-data rules, the manifest registration, and a re-sync.
+  (4) An existing skill's SKILL.md frontmatter changes (name, description, metadata, tools)
+  Enforces naming, the scope split, no-client-data rules, spec-valid frontmatter, the manifest registration,
+  and a re-sync.
 ---
 
 # aidevme-skill-creator
@@ -54,10 +57,11 @@ which every skill has (Step 4).
 
 ```yaml
 ---
-name: aidevme-your-skill
-layer: atomic          # foundation | atomic | orchestration | scenario | governance | meta | reference
-scope: core            # core | project — MUST match the folder it lives in
-description: |
+name: aidevme-your-skill   # MUST equal the folder name; lowercase letters, digits, single hyphens; max 64
+metadata:
+  layer: atomic            # foundation | atomic | orchestration | scenario | governance | meta | reference
+  scope: core              # core | project — MUST match the folder it lives in
+description: |             # max 1024 characters
   One-sentence summary. Use when:
   (1) trigger phrase 1
   (2) trigger phrase 2
@@ -66,6 +70,10 @@ description: |
 # argument-hint: <ticket-key>          # OPTIONAL — set on skills invoked with an argument
 ---
 ```
+
+Only the [Agent Skills specification](https://agentskills.io/specification)'s fields go at the top level: `name`,
+`description`, `license`, `allowed-tools`, `metadata` and `compatibility`, plus `argument-hint`, which Claude
+Code reads there. Repository conventions (`layer`, `scope`) go under `metadata`. Step 7 checks this.
 
 The `description` IS the trigger mechanism — make it comprehensive and include an explicit **"Use
 when"** list and a **"Does NOT"** clause so the router picks between sibling skills correctly; the
@@ -139,7 +147,22 @@ Add an entry to `agent-src/sync/skills-manifest.json`:
 
 `ported: true` means the folder exists and the sync will fan it out.
 
-## Step 7 — Sync + verify
+## Step 7 — Validate against the Agent Skills specification
+
+```powershell
+pwsh -File agent-src/sync/validate-skills.ps1 agent-src/skills/<scope>/<group>/<name>   # must print "1 valid"
+```
+
+The script runs the specification's reference validator, [skills-ref](https://github.com/agentskills/agentskills)
+(pinned in the script, installed in the gitignored `agent-src/sync/.venv-skills-ref`). It checks the allowed
+fields, that `name` matches the folder, and the length limits (`name` 64, `description` 1024, `compatibility`
+500), and sets aside only `argument-hint`. Exit 2 means skills-ref isn't installed: ask the user before running
+`validate-skills.ps1 -Install`, which downloads it from PyPI. Fix every problem it reports in the source
+`SKILL.md`, never in the generated copies, and re-run until it's clean.
+
+**Updating an existing skill:** run the same command after any change to its `SKILL.md` frontmatter, then sync.
+
+## Step 8 — Sync + verify
 
 ```powershell
 pwsh -File agent-src/sync/sync.ps1
@@ -155,6 +178,8 @@ files directly there — they are generated.
 - ALWAYS register in the manifest with the correct scope, then sync.
 - ALWAYS include a `Changelog` section (date · author · description).
 - ALWAYS create `evals/evals.json` with at least three test cases, one of them an edge or boundary case.
+- ALWAYS run `agent-src/sync/validate-skills.ps1` on the skill after creating or changing it, and fix what it reports
+  before syncing.
 
 ## Changelog
 
@@ -162,3 +187,4 @@ files directly there — they are generated.
 |---|---|---|
 | 2026-09-10 | aidevme | Ported from HINT; added the required core\|project scope selector, manifest registration, and the sync/verify step for the inverted model. |
 | 2026-10-16 | aidevme | New skills always get `evals/evals.json` (new Step 4 with the shared format and guidance; critical rule); steps renumbered. |
+| 2026-10-18 | aidevme | Skills are validated against the Agent Skills specification with skills-ref (new Step 7, `agent-src/sync/validate-skills.ps1`, also after updates); `layer` and `scope` move under `metadata`; sync is now Step 8. |

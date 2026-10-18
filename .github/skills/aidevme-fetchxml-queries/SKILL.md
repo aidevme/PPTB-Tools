@@ -1,7 +1,8 @@
 ---
 name: aidevme-fetchxml-queries
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Write, review, and optimize FetchXML queries for Dataverse. Use when:
   (1) User asks to write a FetchXML query, retrieve records, or filter data

@@ -1,7 +1,8 @@
 ---
 name: aidevme-dataverse-customapi
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Create, update, query, and delete Dataverse Custom APIs (metadata + request parameters + response properties) via the Dataverse Web API. Use when:
   (1) User asks to "create a Custom API" or "register a Custom API" in Dataverse

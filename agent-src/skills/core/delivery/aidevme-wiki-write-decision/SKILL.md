@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-write-decision
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Scaffold an Architecture Decision Record (ADR) into agent/wiki/decisions/ with the next number,
   correct frontmatter, and the Context / Options / Decision / Consequences structure. Use when:

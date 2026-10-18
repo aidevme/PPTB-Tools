@@ -1,7 +1,8 @@
 ---
 name: aidevme-vitepress
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Work on a VitePress documentation site: write and move pages, change the sidebar, nav and site config, and fix
   build errors and dead links, with VitePress questions answered from the official VitePress docs through the

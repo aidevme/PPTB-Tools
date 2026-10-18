@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-capture
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Freeze an external source (Teams meeting, SharePoint doc, ADO item, Slack thread, URL) as an
   immutable, timestamped capture file in agent/raw/ with correct type: capture frontmatter and a

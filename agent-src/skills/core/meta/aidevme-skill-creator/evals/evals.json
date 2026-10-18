@@ -4,16 +4,17 @@
     {
       "id": 1,
       "prompt": "Create a skill that summarizes the changes on the current branch into release notes. It should work in any repo.",
-      "expected_output": "A core skill named aidevme-<domain>-<purpose> is created under agent-src/skills/core/<group>/<name>/ with complete frontmatter and an evals/evals.json, registered in skills-manifest.json, and synced; verify-parity.ps1 passes.",
+      "expected_output": "A core skill named aidevme-<domain>-<purpose> is created under agent-src/skills/core/<group>/<name>/ with complete frontmatter and an evals/evals.json, registered in skills-manifest.json, validated with validate-skills.ps1, and synced; verify-parity.ps1 passes.",
       "files": [],
       "expectations": [
         "Chooses scope core (reusable, no client data) and one of the core groups (foundation, dataverse, server, client, pipelines, delivery, reference, meta)",
         "Names the skill with the aidevme- prefix in hyphen-case, for example aidevme-release-notes",
         "Creates the folder under agent-src/skills/core/<group>/<name>/, never directly in .claude/skills or .github/skills",
-        "Writes SKILL.md frontmatter with name, layer, scope: core and a description containing a 'Use when' list and a 'Does NOT' clause",
+        "Writes SKILL.md frontmatter with name (equal to the folder name), metadata.layer, metadata.scope: core and a description of at most 1024 characters containing a 'Use when' list and a 'Does NOT' clause",
         "Doesn't create README.md or CHANGELOG.md files, and adds a Changelog section (date, author, description) to SKILL.md",
         "Creates evals/evals.json in the skill folder with skill_name matching the skill, at least three cases (id, prompt, expected_output, files, expectations) and at least one edge or boundary case",
         "Adds a manifest entry with name, scope core, the group, ported true and source authored",
+        "Runs pwsh -File agent-src/sync/validate-skills.ps1 on the new skill folder before syncing, and it reports 1 valid",
         "Runs pwsh -File agent-src/sync/sync.ps1, then agent-src/sync/verify-parity.ps1, and reports the parity result"
       ]
     },
@@ -24,7 +25,7 @@
       "files": [],
       "expectations": [
         "Recognizes that a client name, environment URL or pipeline ID makes the skill project-scoped",
-        "Places it under agent-src/skills/project/<group>/<name>/ with scope: project in the frontmatter, matching the folder",
+        "Places it under agent-src/skills/project/<group>/<name>/ with metadata.scope: project in the frontmatter, matching the folder",
         "Registers it in the manifest with scope project",
         "Suggests moving the URL and pipeline ID into configuration if the skill should later become core"
       ]
@@ -83,9 +84,34 @@
       "expectations": [
         "Removes the client name and repository URL from the skill, reading them from configuration or using <placeholder> syntax",
         "Moves the folder from agent-src/skills/project/<group>/<name>/ to agent-src/skills/core/<group>/<name>/",
-        "Changes scope to core in both the SKILL.md frontmatter and the manifest entry",
+        "Changes metadata.scope to core in the SKILL.md frontmatter and scope in the manifest entry",
         "Adds a Changelog row describing the promotion",
         "Runs the sync and verify-parity.ps1 and reports the result"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Update aidevme-github: add these five new trigger phrases and a paragraph about stacked pull requests to its description.",
+      "expected_output": "The source SKILL.md under agent-src is edited, validate-skills.ps1 is run on it, and because the description would pass 1024 characters the reported problem is fixed by tightening the text (detail moves to the body or a reference) before syncing.",
+      "files": [],
+      "expectations": [
+        "Edits agent-src/skills/core/delivery/aidevme-github/SKILL.md, not the generated .claude/skills or .github/skills copy",
+        "Runs pwsh -File agent-src/sync/validate-skills.ps1 agent-src/skills/core/delivery/aidevme-github after the edit",
+        "Treats 'Description exceeds 1024 character limit' as a failure to fix, shortening the description or moving detail into the body or references, and re-runs until it reports 1 valid",
+        "Keeps layer and scope under metadata and doesn't add other top-level frontmatter keys",
+        "Runs sync.ps1 and verify-parity.ps1 only after validation passes"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Validate all our skills against the Agent Skills spec. (agent-src/sync/.venv-skills-ref doesn't exist yet.)",
+      "expected_output": "validate-skills.ps1 exits 2 because skills-ref isn't installed; the user is asked before -Install downloads the pinned version from PyPI, and then every skill is validated and the results reported.",
+      "files": [],
+      "expectations": [
+        "Runs pwsh -File agent-src/sync/validate-skills.ps1 and reports that it exited 2 because skills-ref isn't installed",
+        "Asks the user before running validate-skills.ps1 -Install, saying it downloads the pinned skills-ref from PyPI into the gitignored agent-src/sync/.venv-skills-ref",
+        "Doesn't install the npm package named skills-ref or an unpinned version",
+        "After installing, reports the valid and invalid counts and each problem with its skill folder"
       ]
     }
   ]

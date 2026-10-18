@@ -1,7 +1,8 @@
 ---
 name: aidevme-dataverse-data
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Query and manipulate Dataverse record data using the Web API. Use when:
   - Querying records with OData filters (e.g., "get all active solution areas", "find templates for F&O")

@@ -1,20 +1,20 @@
 ---
 name: aidevme-pptb-tool-developer
-layer: atomic
-scope: project
+metadata:
+  layer: atomic
+  scope: project
 description: |
-  Standardize styling in Power Platform ToolBox (PPTB) tools under tools/: find Fluent UI makeStyles hooks defined
-  inside React component files (`const useStyles = makeStyles({...})`) and move each one to
-  src/styles/<ComponentName>.styles.ts as `use<ComponentName>Styles`, exported from the src/styles/index.ts
-  barrel. A read-only analysis and an approval gate come before any change; styling questions are answered from
-  Microsoft Learn through the Microsoft Learn MCP Server. Use when:
-  (1) User says "extract the styles", "move useStyles out of the components", "standardize the styles",
+  Standardize styling in PPTB tools under tools/: move Fluent UI makeStyles hooks defined inside React component
+  files into src/styles/ as one ComponentName.styles.ts file per component, exporting useComponentNameStyles from
+  the src/styles/index.ts barrel. A read-only analysis and an approval gate come before any change; styling
+  questions are checked in Microsoft Learn through the Microsoft Learn MCP Server. Use when:
+  (1) User says "extract the styles", "move useStyles out of the components", "standardize the styles" or
       "create .styles.ts files" for a PPTB tool
-  (2) A tool has makeStyles hooks inline in its .tsx components and should follow the src/styles convention
-  (3) User wants to check which components still define their own useStyles
-  Does NOT change any style value or behavior, process tools the user didn't select, overwrite an existing style
-  file without confirmation, or modify files before approval. Does NOT build, debug or publish tools
-  (pptb-tool-dev) or do general refactoring (aidevme-pptb-tool-refactoring).
+  (2) A tool's .tsx components define makeStyles hooks inline
+  (3) User wants to know which components still define their own useStyles
+  Does NOT change style values or behavior, process tools the user didn't select, overwrite a style file without
+  confirmation, or change files before approval. Does NOT build, debug or publish tools (pptb-tool-dev) or do
+  general refactoring (aidevme-pptb-tool-refactoring).
 allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion, mcp__microsoft-learn__microsoft_docs_search, mcp__microsoft-learn__microsoft_docs_fetch, mcp__microsoft-learn__microsoft_code_sample_search
 argument-hint: "[tool-name ... | all]"
 ---

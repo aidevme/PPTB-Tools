@@ -1,7 +1,8 @@
 ---
 name: aidevme-docs-maintenance
-layer: atomic
-scope: project
+metadata:
+  layer: atomic
+  scope: project
 description: |
   Keep this repository's documentation tooling in order with three PowerShell scripts: validate Markdown
   (markdownlint + cspell), sync the cspell word list (cspell.json), and sync the docs/ entries in

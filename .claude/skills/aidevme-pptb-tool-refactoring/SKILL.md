@@ -1,21 +1,20 @@
 ---
 name: aidevme-pptb-tool-refactoring
-layer: orchestration
-scope: project
+metadata:
+  layer: orchestration
+  scope: project
 description: |
-  Analyze and refactor one or more PPTB tools under tools/ in stages: a read-only analysis that produces a
-  refactoring proposal (current state, plan, risks, summary), a TODO file in docs/todos/<tool-name>/ written before
-  any change, then execution of only the steps the user approves, with a build and test check after each step and
-  the report added to the same TODO file. The user can also save the plan as a TODO file only, without any code
-  change. Findings about Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP
-  Server. Use when:
-  (1) User says "refactor <tool>", "analyze <tool> for refactoring", "propose a refactoring plan", "clean up the tools"
-  (2) User wants a code-quality, dependency, UI consistency or test-coverage review of a tool that ends in a plan
-  (3) User wants a refactoring plan saved as a TODO list to do later
-  (4) An approved refactoring proposal should be executed step by step
-  Does NOT modify any file before explicit approval, touch tools the user didn't select, make breaking changes
-  without approval, or overwrite existing files in docs/todos/<tool-name>/. Does NOT do marketplace policy reviews
-  (intake-policy-review) or Verified badge reviews (tool-verification).
+  Analyze and refactor PPTB tools under tools/ in stages: a read-only analysis and proposal (state, plan, risks);
+  a TODO file in the tool's folder under docs/todos/, written before any change; then only the approved steps, each
+  built, tested and committed, with the report added to the TODO file. The plan can also be saved as a TODO only.
+  Microsoft platform findings are checked in Microsoft Learn. Use when:
+  (1) User says "refactor" a tool, "analyze it for refactoring", "propose a refactoring plan" or "clean up the tools"
+  (2) User wants a code, dependency, UI or test-coverage review of a tool that ends in a plan
+  (3) User wants a refactoring plan saved as a TODO list for later
+  (4) An approved proposal should be executed step by step
+  Does NOT change files before approval, touch unselected tools, make unapproved breaking changes, or overwrite
+  files in docs/todos/. Does NOT do marketplace policy reviews (intake-policy-review) or
+  Verified badge reviews (tool-verification).
 allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion, mcp__microsoft-learn__microsoft_docs_search, mcp__microsoft-learn__microsoft_docs_fetch, mcp__microsoft-learn__microsoft_code_sample_search
 argument-hint: "[tool-name ... | all]"
 ---

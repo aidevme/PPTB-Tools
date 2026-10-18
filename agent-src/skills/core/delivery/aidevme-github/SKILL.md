@@ -1,7 +1,8 @@
 ---
 name: aidevme-github
-layer: orchestration
-scope: core
+metadata:
+  layer: orchestration
+  scope: core
 description: |
   Git and GitHub workflow, one entry point: commit changes one file at a time with Conventional Commits 1.0.0
   messages, name branches, link or create issues, open or update a pull request and write its description, address

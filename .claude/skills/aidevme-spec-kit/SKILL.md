@@ -1,7 +1,8 @@
 ---
 name: aidevme-spec-kit
-layer: orchestration
-scope: core
+metadata:
+  layer: orchestration
+  scope: core
 description: |
   Spec-driven development (SDD) with GitHub Spec Kit, one entry point: detects which phase the repository is in,
   runs the matching installed /speckit-* command, checks the file it produced, and stops for review before the next
