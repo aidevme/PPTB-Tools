@@ -76,7 +76,12 @@ Run this whenever TypeScript code was just created or changed, by the user or by
 
 - The first line is a one-sentence summary in the present tense ("Returns…", "Creates…").
 - Describe intent and behavior; never repeat the type. No JSDoc `{type}` annotations in `.ts` or `.tsx`.
-- `@param name - description` with the hyphen; `@typeParam T - description` for generics.
+- **Every function documents its inputs and output:** exported functions, public methods and hooks get
+  `@param name - description` (with the hyphen) for each parameter and `@returns` for the result, unless it returns
+  `void` or `Promise<void>`, even when the summary already mentions them. `@typeParam T - description` for generics.
+  Components are the exception: their props are documented on the props interface.
+- **Layout:** summary; blank line; `@remarks` (when needed); blank line; the `@param`, `@typeParam`, `@returns` and
+  `@throws` block; blank line; modifier tags such as `@deprecated` or release tags.
 - `@returns`, never `@return`; `@throws` for every error the caller must handle.
 - `@remarks` for detail beyond the summary; `@example` only when usage isn't obvious, as a fenced `ts` block.
 - `{@link Symbol}` for cross-references; `@deprecated` names what to use instead.
@@ -110,4 +115,5 @@ Run this whenever TypeScript code was just created or changed, by the user or by
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-18 | aidevme | Created: write, review, fix and setup modes; rules, tag reference, React, review checklist, ESLint setup, JavaScript notes and sources; check-tsdoc.mjs; starter tsdoc.json and flat-config snippet. Checked against TSDoc `76dcd8e` and eslint-plugin-tsdoc 0.5.4. |
+| 2026-10-18 | aidevme | Every exported function, public method and hook documents each parameter (`@param`) and its result (`@returns`) in a fixed layout (summary, `@remarks`, parameters and result, modifiers); components keep their props on the props interface. |
 | 2026-10-18 | aidevme | New "After a code change" section and trigger: other skills and ad-hoc edits hand off here to document only the symbols they touched, in the same commit. |

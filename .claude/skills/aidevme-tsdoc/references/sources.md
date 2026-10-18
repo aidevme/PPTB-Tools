@@ -26,8 +26,9 @@ Used as sources of rules only; neither is installed.
   the hyphen in `@param` and `@typeParam`; `@returns` over `@return`; `@deprecated` is a block tag that names the
   replacement; `{@inheritDoc}` excludes its own summary and `@remarks`; prefer the `override` keyword over the
   `@override` tag; an `@example`'s first line is its title; never invent tags.
-- Not adopted: "convention only, don't add eslint-plugin-tsdoc by default" (this skill uses the rule as the check,
-  offered with the user's approval); "TypeDoc setup is out of scope" (setup.md mentions it as optional).
+- Not adopted: "`@param` and `@returns` only where non-obvious" (this skill documents every parameter and result
+  of exported functions, public methods and hooks); "convention only, don't add eslint-plugin-tsdoc by default"
+  (this skill uses the rule as the check, offered with the user's approval); "TypeDoc setup is out of scope" (setup.md mentions it as optional).
 
 **consentdotio/agent-skills `tsdoc-jsdoc-authoring`**
 ([skills.cat](https://skills.cat/skills/consentdotio/agent-skills/tsdoc-jsdoc-authoring); the repository now

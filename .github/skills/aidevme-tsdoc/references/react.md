@@ -22,6 +22,9 @@ subscriptions, writes, focus changes). Don't describe the markup.
 export function PathChip(props: PathChipProps) { … }
 ```
 
+Components don't take `@param` or `@returns` tags: the props are documented on the props interface below, and
+the result is always the rendered element.
+
 ## Props
 
 Document the props interface, one comment per prop, and not the destructuring in the function signature.

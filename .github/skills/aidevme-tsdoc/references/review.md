@@ -23,11 +23,12 @@ Purpose: audit existing comments (`review`), and fix them after confirmation (`f
 | error | The comment contradicts the code: wrong parameter name, wrong return value, an error that's never thrown, outdated behavior |
 | error | A `@param` for a parameter that doesn't exist, or a JSDoc `{type}` in a TypeScript file |
 | warning | A public symbol (export, public class member, component props, hook) has no comment, or its behavior isn't obvious and the comment doesn't explain it |
+| warning | An exported function, public method or hook without a `@param` for every parameter, or without `@returns` for a result that isn't `void` |
 | warning | The comment repeats the type or the name instead of describing behavior |
 | warning | Wrong tag: `@return`, `@default`, `@exception`, a release tag in application code, a custom tag missing from `tsdoc.json` |
 | warning | An async function that doesn't say what it resolves to, or an error the caller must handle without `@throws` |
 | warning | `@deprecated` without a replacement |
-| info | Style: summary not in the present tense or longer than one sentence, missing period, `@example` without a fenced block |
+| info | Style: summary not in the present tense or longer than one sentence, missing period, `@example` without a fenced block, no blank lines between the summary, `@remarks` and the tag block |
 | info | A default written in prose where new comments would use `@defaultValue` (existing correct prose is fine) |
 
 ## Output

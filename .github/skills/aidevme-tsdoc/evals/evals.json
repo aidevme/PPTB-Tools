@@ -9,7 +9,8 @@
       "expectations": [
         "Reads the implementation of writeCounts and summarizePlan before writing their comments",
         "Shows a short plan (symbol, summary, tags) before editing",
-        "Adds a one-sentence present-tense summary, @param name - description with the hyphen and @returns (not @return), without JSDoc {type} annotations",
+        "Adds a one-sentence present-tense summary, a @param name - description (with the hyphen) for every parameter and @returns (not @return), without JSDoc {type} annotations",
+        "Keeps the layout: summary, blank line, @remarks when needed, blank line, then the @param and @returns block",
         "Skips groupByFolder because it isn't exported, and says so in the report",
         "Changes only comment lines: no code, imports or formatting outside the comments",
         "Runs node scripts/check-tsdoc.mjs src/services/plan.ts and reports the result",
@@ -124,6 +125,19 @@
         "Keeps the existing description for the renamed prop and updates any reference to the old name",
         "Leaves comments on unchanged symbols as they are",
         "Runs scripts/check-tsdoc.mjs on the file and says the comments belong in the same commit as the code change"
+      ]
+    }
+  ,
+    {
+      "id": 11,
+      "prompt": "Add TSDoc to shortenPath(path: string, max = 48): string in src/components/shared/format.ts. (It has a one-line comment that already says it shortens the path to at most max characters.)",
+      "expected_output": "The existing summary is kept and @param path, @param max and @returns are added in the standard layout, even though the summary mentions them.",
+      "files": [],
+      "expectations": [
+        "Keeps the existing summary sentence",
+        "Adds @param path - and @param max - descriptions, with max saying what happens when it's omitted",
+        "Adds @returns describing the shortened path",
+        "Separates the summary and the tag block with a blank line, and adds no @example since usage is obvious"
       ]
     }
   ]

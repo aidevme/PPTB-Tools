@@ -30,6 +30,38 @@ id: string;
 
 Document it once something isn't obvious: units, ranges, who sets it, what `undefined` means.
 
+## Functions: every parameter and the result
+
+Every exported function, public method and hook gets one `@param` per parameter, in signature order, and a `@returns`
+for its result, even when the summary already says it. Skip `@returns` only for `void` and `Promise<void>`.
+Components are the exception: their single props parameter is documented on the props interface (react.md).
+
+Keep this layout, with a blank line between the parts:
+
+```ts
+/**
+ * Returns the average of two numbers.
+ *
+ * @remarks
+ * Rounds nothing; the result can have a fraction.
+ *
+ * @param x - The first input number.
+ * @param y - The second input number.
+ * @returns The arithmetic mean of `x` and `y`.
+ */
+export function getAverage(x: number, y: number): number {
+    return (x + y) / 2;
+}
+```
+
+1. The summary (one sentence).
+2. `@remarks`, only when there's more to say.
+3. `@typeParam`, `@param`, `@returns`, then `@throws`, one per line.
+4. Modifier tags last: `@deprecated`, and release tags only in packages that publish an API (tags.md).
+
+Each `@param` says what the argument means or how it's used, not its type. Each `@returns` says what comes back
+(what a promise resolves to, for async functions).
+
 ## Types belong to TypeScript
 
 ```ts
