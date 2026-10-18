@@ -2,6 +2,7 @@ import { Tooltip, mergeClasses } from '@fluentui/react-components';
 import { PlugConnectedRegular, PlugDisconnectedRegular } from '@fluentui/react-icons';
 import { useConnectionStatusStyles } from '../../styles';
 
+/** Props for {@link ConnectionStatus}. */
 export interface IConnectionStatusProps {
     /** The active PPTB connection, or `null` when none is selected. */
     connection: ToolBoxAPI.Connection | null;
