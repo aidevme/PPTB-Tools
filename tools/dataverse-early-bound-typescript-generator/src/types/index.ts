@@ -7,6 +7,8 @@ export type { FileStatus, PlannedFile, WritePlan, WriteResult, WriteStatus } fro
 export interface Progress {
     /** Short description of what is happening right now. */
     message: string;
+    /** Steps finished so far. */
     completed: number;
+    /** Steps in all; `0` shows an indeterminate progress bar. */
     total: number;
 }
