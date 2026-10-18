@@ -1002,6 +1002,14 @@
       "note": "Git and GitHub workflow router: one commit per file with Conventional Commits, branch names, issues, pull requests, review comments, CI and security through the GitHub MCP server; references loaded on demand; never push or bypass hooks unless asked."
     },
     {
+      "name": "aidevme-spec-kit",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Spec-driven development with GitHub Spec Kit (pinned v1.2.1): phase detection, one /speckit-* command per phase with a review gate, power-platform and typescript-web constitution profiles; git and GitHub work handed to aidevme-github."
+    },
+    {
       "name": "aidevme-vitepress",
       "scope": "core",
       "group": "delivery",
