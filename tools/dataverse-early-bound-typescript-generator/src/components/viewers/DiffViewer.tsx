@@ -4,6 +4,7 @@ import { useFileViewerStyles } from '../../styles';
 import { diffLines } from '../shared/lineDiff';
 import { CodeViewer } from './CodeViewer';
 
+/** Props for {@link DiffViewer}. */
 export interface IDiffViewerProps {
     /** What's on disk now. */
     oldText: string;

@@ -5,7 +5,7 @@ import { useCodeViewerStyles } from '../../styles';
 
 type TokenStyle = Exclude<keyof ReturnType<typeof useCodeViewerStyles>, 'code' | 'line' | 'lineNumber' | 'lineContent' | 'flagged' | 'flaggedNumber'>;
 
-/** Prism token type -> style. Unlisted types (plain identifiers, properties) keep the default foreground. */
+/** Prism token type → style. Unlisted types (plain identifiers, properties) keep the default foreground. */
 const TOKEN_STYLE: Record<string, TokenStyle> = {
     comment: 'comment',
     keyword: 'keyword',
@@ -34,7 +34,9 @@ function languageFor(path: string): string | undefined {
     return undefined;
 }
 
+/** Props for {@link CodeViewer}. */
 export interface ICodeViewerProps {
+    /** The file's text; CRLF and CR line endings are shown as plain line breaks, and a final newline is dropped. */
     code: string;
     /** File path; its extension picks the highlighting language. */
     path: string;

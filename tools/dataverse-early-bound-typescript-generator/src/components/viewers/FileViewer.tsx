@@ -11,18 +11,29 @@ import { DiffViewer } from './DiffViewer';
 
 type ViewerTab = 'changes' | 'content';
 
+/** Props for {@link FileViewer}. */
 export interface IFileViewerProps {
     /** The selected file, or `null` for the empty state. */
     file: PlannedFile | null;
-    /** Copies text to the clipboard; `label` names it in the confirmation. */
+    /**
+     * Copies text to the clipboard; `label` names it in the confirmation. Called with the generated content and
+     * "`<file name>` content" when the Copy button is clicked.
+     */
     onCopyText: (text: string, label: string) => void;
-    /** Whether Generate leaves files with duplicate identifiers unwritten (Skip duplicated identifier(s)). */
+    /**
+     * Whether Generate leaves files with duplicate identifiers unwritten (Skip duplicated identifier(s)).
+     * @defaultValue false
+     */
     skipDuplicates?: boolean;
 }
 
 /**
  * The lines of a generated file that declare one of its duplicated identifiers (`Name = value` enum members),
  * 1-based, each with a note naming the identifier and all its values.
+ *
+ * @param content - The generated file's text; `undefined` for an orphaned file.
+ * @param duplicates - The file's duplicated identifiers, with their values.
+ * @returns The note per 1-based line number; empty when there's no content or no duplicates.
  */
 export function duplicateLineNotes(content: string | undefined, duplicates: DuplicateIdentifier[] | undefined): Map<number, string> {
     const notes = new Map<number, string>();
