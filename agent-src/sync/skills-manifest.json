@@ -1010,6 +1010,14 @@
       "note": "Spec-driven development with GitHub Spec Kit (pinned v1.2.1): phase detection, one /speckit-* command per phase with a review gate, power-platform and typescript-web constitution profiles; git and GitHub work handed to aidevme-github."
     },
     {
+      "name": "aidevme-tsdoc",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Writes, reviews and fixes TSDoc comments on public TypeScript symbols (incl. React components, props, hooks); checked with ESLint tsdoc/syntax via scripts/check-tsdoc.mjs; never installs or commits."
+    },
+    {
       "name": "aidevme-vitepress",
       "scope": "core",
       "group": "delivery",
