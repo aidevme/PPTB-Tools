@@ -62,7 +62,8 @@ npm run validate # pptb-validate, the PPTB manifest checks
 ```
 
 `npm run build` (which runs `tsc`) is the correctness check to run after changes; also run `npm test` when the tool
-has one. There is no lint script.
+has one. There is no general lint script; the generator has `npm run lint:tsdoc`, which checks only TSDoc comment
+syntax (ESLint with `eslint-plugin-tsdoc`).
 
 To test inside PPTB itself: build, then in PPTB enable the Debug Menu in Settings, use Debug → Browse to point at
 the tool's directory (or `dist`), connect to a Dataverse environment, and reopen the tool tab after each rebuild.
