@@ -88,7 +88,8 @@ export function SettingRow({ title, description, info, changed, layout = 'inline
             <div className={styles.rowText}>
                 <span className={styles.rowTitle}>
                     {info ? (
-                        <InfoLabel weight="semibold" info={info} label={{ id: titleId }} infoButton={{ 'aria-label': `About ${title}` }}>
+                        // Not inline: Fluent's Card clips overflow, so an inline popover is cut off at the card's edge.
+                        <InfoLabel weight="semibold" info={info} label={{ id: titleId }} infoButton={{ 'aria-label': `About ${title}`, inline: false }}>
                             {title}
                         </InfoLabel>
                     ) : (
