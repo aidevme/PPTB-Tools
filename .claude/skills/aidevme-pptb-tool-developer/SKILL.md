@@ -134,7 +134,8 @@ whether to continue. Then, for each approved component:
 1. **Create** `src/styles/<ComponentName>.styles.ts` with the style definition unchanged, renamed to
    `use<ComponentName>Styles`, as a named export, with every import it needs (Fluent imports, and constants it
    uses, moved or imported as agreed in Phase 3). Add a one-line TSDoc comment when the tool's style files have
-   one.
+   one; after the component is done, hand the new style file and the changed component to `aidevme-tsdoc` ("After
+   a code change"), which keeps correct comments and adds missing ones.
 2. **Remove** the original hook definition from the component file.
 3. **Replace** every call of the old hook in that file with `use<ComponentName>Styles()`.
 4. **Import** the hook from the styles barrel with the right relative path, for example
@@ -189,3 +190,4 @@ Don't commit unless the user asks; if asked, use Conventional Commits from `CONT
 | --- | --- | --- |
 | 2026-10-16 | aidevme | Created: tool selection, read-only analysis of inline makeStyles hooks with edge-case flags, approval gate, extraction to src/styles/<ComponentName>.styles.ts with the barrel, build/test/lint verification, report. |
 | 2026-10-16 | aidevme | Styling questions are answered from Microsoft Learn through the Microsoft Learn MCP Server (search, fetch, code samples), cited in the proposal and the report; Learn-based improvements are reported as follow-ups, never applied. |
+| 2026-10-18 | aidevme | New style files and changed components are handed to `aidevme-tsdoc` ("After a code change") after extraction. |

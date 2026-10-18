@@ -164,7 +164,9 @@ allowed before execution.
    verification result. Stage only the step's files, never the TODO file. The user's approval of the plan is the
    approval for these commits; don't push.
 6. **Docs move with code:** update the tool's README, docs pages and TSDoc in the same step when behavior or
-   structure they describe changes. Run `aidevme-docs-maintenance` (Validate-Markdown) on changed Markdown.
+   structure they describe changes. For TSDoc, hand off to `aidevme-tsdoc` ("After a code change") on the step's
+   changed files and run `npm run lint:tsdoc` where the tool has it; for Markdown, run `aidevme-docs-maintenance`
+   (Validate-Markdown).
 
 ## Phase 6 — Report
 
@@ -203,3 +205,4 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 | 2026-10-16 | aidevme | The TODO file is written before any change; new "Save as TODO only" answer; the execution report updates the same file. |
 | 2026-10-17 | aidevme | Findings, failures and fixes that depend on Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server and cited; the report lists the pages used. |
 | 2026-10-18 | aidevme | TODO files are saved per tool in `docs/todos/<tool-name>/` instead of directly in `docs/todos/`. |
+| 2026-10-18 | aidevme | Each step's TSDoc goes through `aidevme-tsdoc` ("After a code change") and `npm run lint:tsdoc`. |

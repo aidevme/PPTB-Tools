@@ -10,11 +10,14 @@ and a commit offer after each.
 1. **Check `tasks.md` is approved.** Asked to "build it" earlier: refuse, and name the phase that's waiting.
 2. **Pick the next open task** (or the group the user agreed, for example all `[P]` setup tasks), and say which.
 3. **Run `/speckit-implement`** scoped to that task, for example `/speckit-implement T003 only`.
-4. **Run the tests** the task and the plan name (for example `npm run build` and `npm test`).
-5. **Tests pass:** tick the task (`- [x] T003`) if `/speckit-implement` didn't, show the diff summary, and **offer**
+4. **Update the doc comments** of the symbols the task created or changed. In TypeScript code, hand off to the
+   aidevme-tsdoc skill ("After a code change") when it's installed; otherwise follow the repository's comment
+   convention.
+5. **Run the tests** the task and the plan name (for example `npm run build` and `npm test`).
+6. **Tests pass:** tick the task (`- [x] T003`) if `/speckit-implement` didn't, show the diff summary, and **offer**
    a commit through aidevme-github ([github-handoff.md](github-handoff.md)): the message references the task ID
    and adds `Refs #n` when the task has an issue. Commit only if the user asks.
-6. **Stop** after each task (or group) for review, then continue with the next.
+7. **Stop** after each task (or group) for review, then continue with the next.
 
 ## Review gate
 

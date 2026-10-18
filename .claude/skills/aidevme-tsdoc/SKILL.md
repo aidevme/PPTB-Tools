@@ -9,6 +9,7 @@ description: |
   (2) User says "review the doc comments" or "fix the doc comments"
   (3) User asks to document a component, hook or API
   (4) User asks why tsdoc/syntax is failing, or wants eslint-plugin-tsdoc set up
+  (5) A component, hook or service was just created or changed, by the user or another skill
   Does NOT change code behavior, signatures or formatting outside comments; document private symbols unless asked;
   edit generated files; install packages without asking; or commit (hand-off to aidevme-github).
 license: MIT
@@ -38,6 +39,20 @@ and `eslint-plugin-tsdoc` 0.5.4 on 2026-10-18. Load only the reference a request
 | `review` | "review the doc comments", `--review` | Report problems ([review.md](references/review.md)); edit nothing |
 | `fix` | "fix the doc comments" | Review, show the findings, and apply fixes after the user confirms |
 | `setup` | "set up eslint-plugin-tsdoc", or the check exits 2 | Load [setup.md](references/setup.md) |
+
+## After a code change
+
+Run this whenever TypeScript code was just created or changed, by the user or by another skill that hands off
+(spec-driven implementation, refactoring, style extraction):
+
+- **Scope:** the files the change touched (`--changed`, or the list the calling skill passes). Within them, only the
+  public symbols that are new or whose name, parameters, props, return value or behavior changed. Remove tags for
+  parameters that no longer exist.
+- **Keep** comments that still match the code; update the ones that don't; add the missing ones.
+- **No separate plan** for a handful of files: the change that's already approved covers its comments. Edits stay
+  comment-only.
+- **Check** with `scripts/check-tsdoc.mjs` on the touched files, and report what was added and updated.
+- **Same commit:** the comments go into the commit with the code they describe, not a separate docs commit.
 
 ## Workflow (write and fix)
 
@@ -95,3 +110,4 @@ and `eslint-plugin-tsdoc` 0.5.4 on 2026-10-18. Load only the reference a request
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-18 | aidevme | Created: write, review, fix and setup modes; rules, tag reference, React, review checklist, ESLint setup, JavaScript notes and sources; check-tsdoc.mjs; starter tsdoc.json and flat-config snippet. Checked against TSDoc `76dcd8e` and eslint-plugin-tsdoc 0.5.4. |
+| 2026-10-18 | aidevme | New "After a code change" section and trigger: other skills and ad-hoc edits hand off here to document only the symbols they touched, in the same commit. |

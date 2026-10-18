@@ -112,5 +112,19 @@
         "Doesn't run scripts/check-tsdoc.mjs on the .js file"
       ]
     }
+  ,
+    {
+      "id": 10,
+      "prompt": "I just added an optional 'compact' prop to PathChipProps and renamed its 'label' prop to 'copyLabel'. Update the docs.",
+      "expected_output": "Only the changed symbols in the touched file are documented: the new prop gets a comment with @defaultValue, the renamed prop's comment moves with it, unchanged comments stay, and the check runs.",
+      "files": [],
+      "expectations": [
+        "Uses the After a code change flow and limits the work to the touched file and the changed props",
+        "Adds a comment for compact with @defaultValue matching the default in the code",
+        "Keeps the existing description for the renamed prop and updates any reference to the old name",
+        "Leaves comments on unchanged symbols as they are",
+        "Runs scripts/check-tsdoc.mjs on the file and says the comments belong in the same commit as the code change"
+      ]
+    }
   ]
 }
