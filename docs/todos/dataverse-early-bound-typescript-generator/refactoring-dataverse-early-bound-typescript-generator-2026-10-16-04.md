@@ -7,15 +7,15 @@
 | Tool | `tools/dataverse-early-bound-typescript-generator` (Dataverse Early-Bound TypeScript Generator, 1.0.0) |
 | Date | 2026-10-16 |
 | Skill | `aidevme-pptb-tool-refactoring` |
-| Decision | Accepted selected steps: S2, S3, S4, S5 |
+| Decision | Accepted selected steps: S6, S7, S8, S9, S10, S11, S13 |
 | Status | Executed |
-| Proposal version | v2 (v1 without S1), reviewed at commit `7e5bd05` on `features/dataverse-early-bound-typescript-generator` |
-| Branch and commits | `features/dataverse-early-bound-typescript-generator`, f241b0e..5e076e6 |
+| Proposal version | v3 (v1 without S1–S5), reviewed at commit `5e076e6` on `features/dataverse-early-bound-typescript-generator` |
+| Branch and commits | `features/dataverse-early-bound-typescript-generator`, b948df6..9d0ebef (with two of your own commits in between: 0988e06, 287a4a3) |
 
-Follows [refactoring-dataverse-early-bound-typescript-generator-2026-10-16-02.md](./refactoring-dataverse-early-bound-typescript-generator-2026-10-16-02.md),
-which completed S1. The analysis below is from v1 (`adcc2d6`); since then only S1 changed the tool, so line
-numbers in `services/metadataProvider.ts` have moved.
-Related: [the 2026-10-14 refactoring plan](./dataverse-early-bound-typescript-generator-general-reactoring.md)
+Follows [refactoring-dataverse-early-bound-typescript-generator-2026-10-16-03.md](./refactoring-dataverse-early-bound-typescript-generator-2026-10-16-03.md),
+which completed S2–S5 (S1 was completed in -02). The analysis below is from v1 (`adcc2d6`); since then only S1–S5
+changed the tool, so line numbers in the analysis have moved.
+Related: [the 2026-10-14 refactoring plan](../dataverse-early-bound-typescript-generator-general-reactoring.md)
 plans part of S7: its row 1 is the App.tsx split, and its row 4 overlaps S7's dialog move.
 
 ## TODO
@@ -27,40 +27,40 @@ needs S7.
   be built instead of skipping it silently; add a test (files: `services/metadataProvider.ts`,
   `test/customApi.test.ts`; effort S; risk Medium). Done earlier in 7e5bd05
 - [x] S2: fix: complete `runGenerate`'s dependency list; remove the dead `notice` state and message bar, the dead
-  `config ?:` branch and the `ready` alias (files: `components/apps/App.tsx`; effort S; risk Low). Approved. Done in f241b0e
+  `config ?:` branch and the `ready` alias (files: `components/apps/App.tsx`; effort S; risk Low). Done earlier in f241b0e
 - [x] S3: merge the three settings handlers into one `changeSetting(key)` (files: `components/apps/App.tsx`;
-  effort S; risk Low). Approved. Done in 02f4497
+  effort S; risk Low). Done earlier in 02f4497
 - [x] S4: remove services duplication: one `api()` accessor, one `plural()`, reuse `technicalMessage` and core's
   `labelText` (files: `services/metadataProvider.ts`, `solutions.ts`, `plan.ts`, `notifications.ts`, `errors.ts`;
-  effort S; risk Low). Approved. Done in 12d38c4
+  effort S; risk Low). Done earlier in 12d38c4
 - [x] S5: remove the six unused exports and drop internal-only constants from the barrels (files:
   `services/paths.ts`, `services/dataverseGenTemplates.ts`, `services/index.ts`, `types/index.ts`,
-  `components/index.ts`; effort S; risk Low). Approved. Done in 5e076e6
-- [ ] S6: typed Web API row reader (`str`/`num`/`bool`) to replace the `row.x as string` casts and the two `!`
+  `components/index.ts`; effort S; risk Low). Done earlier in 5e076e6
+- [x] S6: typed Web API row reader (`str`/`num`/`bool`) to replace the `row.x as string` casts and the two `!`
   assertions (files: `services/metadataProvider.ts`, `services/solutions.ts`, a new helper; effort M; risk
-  Low). Not approved
-- [ ] S7: split `App.tsx` into `useToolSettings`, `useProject`, `useEnvironmentMetadata`, `usePreviewGenerate`
+  Low). Approved. Done in b948df6
+- [x] S7: split `App.tsx` into `useToolSettings`, `useProject`, `useEnvironmentMetadata`, `usePreviewGenerate`
   plus a shared `invalidatePlan()`; move `OrphanList`/`GenerateSummary` to `dialogs/`; move `pendingWrites` into
   a `plan.ts` helper (files: `App.tsx`, `hooks/*`, `dialogs/*`, `services/plan.ts`, the app-state docs page;
-  effort L; risk Medium). Not approved
-- [ ] S8: shared table helpers: sortable header cell, `useSortState`, selectable-row keyboard handler, shared
+  effort L; risk Medium). Approved. Done in fdd8087, 9e5853e, b370641, 49e67e1, 4ea255d
+- [x] S8: shared table helpers: sortable header cell, `useSortState`, selectable-row keyboard handler, shared
   header and row styles (files: `PreviewCard`, `SelectionCard`, `LoadProjectDialog` and their styles,
-  `components/shared/*`; effort M; risk Low). Not approved
-- [ ] S9: SettingsPanel switch helper, `useSettingsDraft`, setting titles shared in `settingsInfo.tsx` (makes the
+  `components/shared/*`; effort M; risk Low). Approved. Done in e602ff7
+- [x] S9: SettingsPanel switch helper, `useSettingsDraft`, setting titles shared in `settingsInfo.tsx` (makes the
   label casing consistent) (files: `SettingsPanel.tsx`, `shared/settingsInfo.tsx`, `PreviewCard.tsx`; effort M;
-  risk Low). Not approved
-- [ ] S10: split PreviewCard into `StatusTiles`, `FileTable`, `PreviewActionBar` and `useResizableSplit`; make the
+  risk Low). Approved. Done in 50f0efe
+- [x] S10: split PreviewCard into `StatusTiles`, `FileTable`, `PreviewActionBar` and `useResizableSplit`; make the
   color and dot maps module-level constants (files: `PreviewCard.tsx`, its styles, `components/index.ts`; effort M;
-  risk Low). Not approved
-- [ ] S11: tests for the S7 hooks, `services/solutions.ts` and the remembered-folder settings functions (files:
-  `test/*`; effort M; risk Low). Not approved
+  risk Low). Approved. Done in 06cd6ca
+- [x] S11: tests for the S7 hooks, `services/solutions.ts` and the remembered-folder settings functions (files:
+  `test/*`; effort M; risk Low). Approved. Done in 47fd149
 - [ ] S12: `engines.node` to `>=22.12.0`, a `.gitattributes` LF rule for `test/reference/**` and
   `test/fixtures/**`, remove `manualChunks: undefined`; run `npm run validate` (files: `package.json`,
   `package-lock.json`, `/.gitattributes`, `vite.config.ts`; effort S; risk Low). Not approved
-- [ ] S13: docs: add `src/config` to the architecture layers, the three missing test files to the testing table,
+- [x] S13: docs: add `src/config` to the architecture layers, the three missing test files to the testing table,
   orphan deletion and `_templates` to the Generate flow; fix `src/config/README.md:17`; add `src/config/` to the
   AGENTS.md tree and re-sync (files: the tool's architecture and build-and-testing docs pages,
-  `src/config/README.md`, `AGENTS.md`; effort S; risk Low). Not approved
+  `src/config/README.md`, `AGENTS.md`; effort S; risk Low). Approved. Done in 9d0ebef
 
 ## Analysis
 
@@ -188,48 +188,45 @@ coverage and fix build and docs drift. A smaller first pass is S1–S6, S12 and 
 
 | ID | Step | Result | Commit | Notes |
 | --- | --- | --- | --- | --- |
-| S2 | Complete `runGenerate`'s dependencies; remove dead App state | Completed | f241b0e | Also removed `EMPTY_SELECTION`, now unused; `architecture/app-state.md` updated |
-| S3 | Merge the setting handlers into `changeSetting(key)` | Completed | 02f4497 | |
-| S4 | Remove duplicated service helpers | Completed | 12d38c4 | `dataverseApi()` lives in `services/errors.ts`; `labelText` is now exported from `core` |
-| S5 | Remove unused and internal-only exports | Completed | 5e076e6 | Internal-only names keep `export` in their own files; only the barrel entries were dropped. `DEFAULT_REFERENCED_TYPES` left alone (core config model) |
-| S6–S13 | See [TODO](#todo) | Skipped (not approved) | | |
+| S6 | Typed Web API row reader | Completed | b948df6 | `textOf(row, column)` in `services/webApiRow.ts`; the `!` assertions became `optionSetCast(attribute)`. The `as unknown as …Input[]` casts at the core boundary stay |
+| S7 | Split `App.tsx` into hooks | Completed | fdd8087, 9e5853e, b370641, 49e67e1, 4ea255d | One commit per part. The planned `invalidatePlan()` became `usePlanState` (`clearPlan`, `resetPlan`, `markPlanStale`), called first because the other hooks need it. `App.tsx`: 858 lines before S2, 283 now |
+| S8 | Shared table helpers | Completed | e602ff7 | `SortableHeaderCell`, `nextSort`, `activateRowOnKey`, `useSortableTableStyles` |
+| S9 | SettingsPanel helper, draft hook, shared titles | Completed | 50f0efe | Scope widened with approval: sentence case everywhere ("Rename duplicated identifier(s)", "Skip duplicated identifier(s)", "Delete orphaned files"), including FileViewer, the status tooltip, docs and test lookups. One test now finds the switch by its label instead of the phrase anywhere |
+| S10 | Split PreviewCard | Completed | 06cd6ca | `PreviewParts.tsx`; `useResizableSplit` lives in `components/shared/` (it needs `previewFiles`). `PreviewCard.tsx`: 473 → 195 lines |
+| S11 | Tests for hooks, solutions, remembered folder | Completed | 47fd149 | 27 new tests in 3 files. `renderHook` fails after 200 renders instead of exhausting memory |
+| S12 | Build hygiene | Skipped (not approved) | | |
+| S13 | Docs drift | Completed | 9d0ebef | Also the README MD040 finding and `dataverseApi()` in `services.md`; `AGENTS.md` re-synced |
 
 ### Files changed
 
 ```text
- .../architecture/app-state.md                      |  2 +-
- .../src/components/apps/App.tsx                    | 52 +++++-----------------
- .../src/components/index.ts                        |  4 +-
- .../src/core/index.ts                              |  2 +-
- .../src/core/model.ts                              |  3 +-
- .../src/services/dataverseGenTemplates.ts          |  3 --
- .../src/services/errors.ts                         |  6 +++
- .../src/services/index.ts                          | 14 +++---
- .../src/services/metadataProvider.ts               | 20 +++------
- .../src/services/notifications.ts                  |  4 +-
- .../src/services/paths.ts                          |  4 --
- .../src/services/plan.ts                           |  3 +-
- .../src/services/solutions.ts                      |  7 +--
- .../src/types/index.ts                             |  6 ---
- 14 files changed, 41 insertions(+), 89 deletions(-)
+  54 files changed, 2164 insertions(+), 1234 deletions(-)
 ```
+
+(`git diff --stat 5e076e6 HEAD`, without `docs/todos/` and `_templates/`, which came from your own commits 0988e06 and 287a4a3.)
 
 ### Verification
 
 | Step | Command | Exit code | Result |
 | --- | --- | --- | --- |
-| S2 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
-| S2 | Validate-Markdown on `architecture/app-state.md` | 0 | Passed |
-| S3 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
-| S4 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files, including the byte-for-byte reference comparison |
-| S5 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S6 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S7 (each of a–e) | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S8 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S9 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files (after updating the label lookups) |
+| S10 | `npm run build` / `npm test` | 0 / 0 | OK / 206 passed in 17 files |
+| S11 | `npm run build` / `npm test` | 0 / 0 | OK / 233 passed in 20 files |
+| S13 | Validate-Markdown on every changed file; `verify-parity.ps1` | 0 | Passed; zero drift |
+| S13 | `npm run docs:build` | 1 | Fails on two files this run didn't touch: `docs/decisions/_TEMPLATE.md`, `docs/review-logs/part4-pipelines-03-convergence.md` |
+| Final | `npm run build` / `npm test` at 9d0ebef | 0 / 0 | OK / 233 passed in 20 files |
 
-Not verified: a live PPTB host (the Preview card switches after S3; table and solution listing after S4), light and
-dark themes, and `npm run docs:build`.
+Not verified: a live PPTB host, light and dark themes, and the docs site build (broken by the two files above).
 
 ## Follow-up TODOs
 
-- [ ] Test in PPTB: toggle Delete orphaned files and Skip/Rename duplicated identifier(s) on the Preview card and
-  check that each saves and is reflected in the Settings panel; list tables and solutions.
-- [ ] Run `npm run docs:build`.
-- [ ] Decide on S6–S13; S7 (split `App.tsx`) is now unblocked, since S2 and S3 are done.
+- [ ] Test in PPTB, light and dark theme: open a saved and a new project, select tables, Preview, Generate (with
+  and without Ask before generating), Delete orphaned files, change a setting and check the preview goes stale,
+  the solution filter, the Settings panel (Save, Cancel, Reset to defaults), and resizing the file list.
+- [ ] Decide on S12 (engines, `.gitattributes` LF rule, `manualChunks`).
+- [ ] Fix the two files that break `npm run docs:build`, then run it.
+- [ ] Not proposed and still open: major dependency upgrades, a theme-change listener, the double error display
+  (toast and banner), bulk option-set error handling, and memoizing the large tables.

@@ -14,7 +14,7 @@
 
 Supersedes the plan saved earlier today in
 [refactoring-dataverse-early-bound-typescript-generator-2026-10-16.md](./refactoring-dataverse-early-bound-typescript-generator-2026-10-16.md).
-Related: [the 2026-10-14 refactoring plan](./dataverse-early-bound-typescript-generator-general-reactoring.md)
+Related: [the 2026-10-14 refactoring plan](../dataverse-early-bound-typescript-generator-general-reactoring.md)
 plans part of S7: its row 1 is the App.tsx split, and its row 4 overlaps S7's dialog move.
 
 ## TODO

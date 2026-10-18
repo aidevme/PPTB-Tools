@@ -11,7 +11,7 @@
 | Status | Saved as TODO, no changes made |
 | Proposal version | v1, reviewed at commit `adcc2d6` on `features/dataverse-early-bound-typescript-generator` |
 
-Related: [the 2026-10-14 refactoring plan](./dataverse-early-bound-typescript-generator-general-reactoring.md)
+Related: [the 2026-10-14 refactoring plan](../dataverse-early-bound-typescript-generator-general-reactoring.md)
 plans part of S7: its row 1 is the App.tsx split, and its row 4 overlaps S7's dialog move.
 
 ## TODO
