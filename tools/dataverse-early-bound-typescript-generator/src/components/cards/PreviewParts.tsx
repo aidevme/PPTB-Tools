@@ -75,25 +75,42 @@ function generateHelp(plan: WritePlan | null, writable: number, deletable: numbe
         .join(', ');
 }
 
+/** Props for {@link PreviewActionBar}. */
 export interface IPreviewActionBarProps {
+    /** The last computed write plan; `null` before the first preview disables Generate and the switches. */
     plan: WritePlan | null;
+    /** The selection or options changed since the plan was computed; disables Generate until the next preview. */
     stale: boolean;
+    /** Enables the Preview button (unless `busy`). */
     canPreview: boolean;
+    /** Shows the "Open a project (step 1)" hint after the buttons. */
     needsProject: boolean;
+    /** Work in progress: disables both buttons and the switches. */
     busy: boolean;
+    /** When the plan was computed (ISO), shown as "Previewed … ago"; nothing is shown while `null`. */
     previewedAt: string | null;
     /** How many files Generate writes. */
     writable: number;
+    /** Whether Generate also deletes the orphaned files; the Delete orphaned files switch shows it. */
     deleteOrphans: boolean;
+    /** Called with the new value when the Delete orphaned files switch is toggled. */
     onDeleteOrphansChange: (checked: boolean) => void;
+    /** Whether Generate leaves files with duplicate identifiers unwritten; the Skip switch shows it. */
     skipDuplicates: boolean;
     /** The switch is hidden without it. */
     onSkipDuplicatesChange?: (checked: boolean) => void;
+    /**
+     * Whether later duplicate enum members are renamed; the Rename switch shows it.
+     * @defaultValue false
+     */
     renameDuplicates?: boolean;
     /** The switch is hidden without it. */
     onRenameDuplicatesChange?: (checked: boolean) => void;
+    /** Called when Preview is clicked. */
     onPreview: () => void;
+    /** Called when Generate (or Delete orphaned files, when there's nothing to write) is clicked. */
     onGenerate: () => void;
+    /** Current time for the "Previewed … ago" text; a parameter so tests get stable output. */
     now?: number;
 }
 
@@ -155,10 +172,13 @@ export function PreviewActionBar(props: IPreviewActionBarProps) {
     );
 }
 
+/** Props for {@link StatusTiles}. */
 export interface IStatusTilesProps {
+    /** The write plan whose per-status counts the tiles show; the duplicate tile appears only when it has some. */
     plan: WritePlan;
     /** The status the list is filtered to, or `null`. */
     selectedStatus: FileStatus | null;
+    /** Called with the tile's status when a tile is clicked; the caller toggles the filter on or off. */
     onToggleStatus: (status: FileStatus) => void;
 }
 

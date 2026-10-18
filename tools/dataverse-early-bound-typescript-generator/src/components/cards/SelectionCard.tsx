@@ -24,6 +24,7 @@ import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS } from '../tables/sele
 import { buildEntityRows, buildOperationRows } from './selectionRows';
 import type { StepState } from '../shared/workflowSteps';
 
+/** A Select tab, and the matching list of names in the config (tables, actions or functions). */
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
@@ -31,6 +32,7 @@ const MAX_ROWS = 500;
 
 /** The solution dropdown and what the chosen solution contains. */
 export interface ISelectionSolutionFilter {
+    /** The solutions the dropdown offers; the dropdown is disabled while it's empty. */
     solutions: SolutionSummary[];
     /** The chosen solution, or `null` for all solutions. */
     selectedId: string | null;
@@ -42,29 +44,46 @@ export interface ISelectionSolutionFilter {
 
 /** Which lists are still loading. */
 export interface ISelectionLoading {
+    /** The tables list; the Tables tab shows a spinner. */
     entities: boolean;
+    /** The actions and functions (the `$metadata` document); the Actions and Functions tabs show a spinner. */
     operations: boolean;
     /** The chosen solution's components. */
     solution: boolean;
 }
 
+/** Props for {@link SelectionCard}. */
 export interface ISelectionCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
     step: StepState;
+    /** The environment's tables, listed on the Tables tab. */
     entities: EntitySummary[];
+    /** The environment's actions and functions, or `null` until they're loaded (see `onEnsureOperations`). */
     operations: OperationSummary[] | null;
+    /** The solution dropdown's options and what the chosen solution contains. */
     solutionFilter: ISelectionSolutionFilter;
+    /** Which lists are still loading. */
     loading: ISelectionLoading;
+    /** The selected names per tab (logical names for tables), as stored in the config. */
     selected: Record<SelectionKind, string[]>;
     /** Names in the config that the connected environment does not have. */
     missing: Record<SelectionKind, string[]>;
+    /**
+     * Disables the row checkboxes and Clear (no connection or project yet, or work in progress); an empty list
+     * then asks the user to connect.
+     */
     disabled: boolean;
     /**
      * No project open yet: the lists stay empty and the tabs, search, solution filter, switches and Clear are
      * disabled until one is created or opened.
+     * @defaultValue false
      */
     needsProject?: boolean;
+    /** Called when a row's checkbox changes, with the current tab, the row's name and whether it's now checked. */
     onToggle: (kind: SelectionKind, name: string, checked: boolean) => void;
+    /** Called with the current tab when Clear is clicked, to empty that tab's selection. */
     onClear: (kind: SelectionKind) => void;
+    /** Called with the chosen solution's id when the solution dropdown changes, or `null` when it's cleared. */
     onSolutionChange: (solutionId: string | null) => void;
     /** Called when the actions/functions tabs are opened, so the CSDL is only fetched when needed. */
     onEnsureOperations: () => void;

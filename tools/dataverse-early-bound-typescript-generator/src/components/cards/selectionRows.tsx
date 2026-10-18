@@ -15,20 +15,30 @@ interface RowFilter {
     selectedSet: ReadonlySet<string>;
 }
 
+/** The Tables tab's filters, for {@link buildEntityRows}. */
 export interface EntityRowFilter extends RowFilter {
     /** Entity `MetadataId`s in the chosen solution, or `null` when no solution filter is active. */
     solutionEntityIds: Set<string> | null;
 }
 
+/** The Actions or Functions tab's filters, for {@link buildOperationRows}. */
 export interface OperationRowFilter extends RowFilter {
+    /** Which operations the tab lists: actions or functions. */
     kind: 'action' | 'function';
+    /** Lists only custom APIs and custom process actions (the Custom only switch). */
     customApisOnly: boolean;
+    /** The chosen solution, or `null` for all solutions; while set, only operations in `solutionComponentIds` pass. */
     selectedSolutionId: string | null;
     /** Ids of custom API / process-action records in the chosen solution, or `null` when not filtering. */
     solutionComponentIds: Set<string> | null;
 }
 
-/** The Type column text of an action or function. */
+/**
+ * Returns the Type column text of an action or function.
+ *
+ * @param o - The action or function to describe.
+ * @returns `"Private custom API"`, `"Custom API"`, `"Custom action"` (a custom process action) or `"Built-in"`.
+ */
 export function operationType(o: OperationSummary): string {
     if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
     return o.isProcessAction ? 'Custom action' : 'Built-in';
@@ -39,7 +49,16 @@ const matcher =
     (...values: Array<string | undefined>) =>
         !term || values.some((v) => v?.toLowerCase().includes(term));
 
-/** The Tables tab rows: entities in the solution filter, selection filter and search, in the given order. */
+/**
+ * The Tables tab rows: entities in the solution filter, selection filter and search, in the given order.
+ *
+ * @param entities - The environment's tables.
+ * @param filter - The solution, Selected only and search filters; the search matches the logical, display and
+ * schema names.
+ * @param styles - The SelectionCard class names for the monospace and muted cells.
+ * @returns One row per matching table, keyed by logical name, with display name, logical name, schema name,
+ * description and table type cells.
+ */
 export function buildEntityRows(entities: EntitySummary[], filter: EntityRowFilter, styles: SelectionRowStyles): SelectionRow[] {
     const matches = matcher(filter.term);
     return entities
@@ -73,6 +92,12 @@ export function buildEntityRows(entities: EntitySummary[], filter: EntityRowFilt
 /**
  * The Actions or Functions tab rows: operations of `filter.kind` that pass the filters, custom APIs and custom
  * actions first, then case-insensitive by name.
+ *
+ * @param operations - The environment's actions and functions; `null` (not loaded yet) gives no rows.
+ * @param filter - The kind, Custom only, solution, Selected only and search filters; the search matches the name,
+ * bound table and display name.
+ * @param styles - The SelectionCard class names for the stacked name and secondary text cells.
+ * @returns One row per matching operation, keyed by name, with name, binding, parameter count and type cells.
  */
 export function buildOperationRows(operations: OperationSummary[] | null, filter: OperationRowFilter, styles: SelectionRowStyles): SelectionRow[] {
     const matches = matcher(filter.term);

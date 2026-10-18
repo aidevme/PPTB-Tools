@@ -3,11 +3,15 @@ import { FolderRegular, HistoryRegular } from '@fluentui/react-icons';
 import { useRecentProjectsListStyles } from '../../styles';
 import type { ProjectOpenTarget, RecentProject } from './recentProjects';
 
+/** Props for {@link RecentProjectsList}. */
 export interface IRecentProjectsListProps {
     /** "Recent projects", or "Switch to a recent project" while one is open. */
     heading: string;
+    /** The projects to offer, in order (see `recentProjects`); the list renders nothing when it's empty. */
     items: RecentProject[];
+    /** Disables every project button. */
     busy: boolean;
+    /** Called with the project's name and location when its button is clicked. */
     onOpen: (target: ProjectOpenTarget) => void;
 }
 

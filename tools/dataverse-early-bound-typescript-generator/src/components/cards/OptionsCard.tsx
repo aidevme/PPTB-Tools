@@ -5,10 +5,18 @@ import { useOptionsCardStyles } from '../../styles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 
+/** Props for {@link OptionsCard}. */
 export interface IOptionsCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
     step: StepState;
+    /** The project's `.dataverse-gen.json` settings the inputs show; unset options show dataverse-gen's defaults. */
     config: DataverseGenConfig;
+    /** Disables the output folder input and the switches (no connection or project yet, or work in progress). */
     disabled: boolean;
+    /**
+     * Called on every edit with only the changed settings: `output` (with `outputRoot` merged into the existing
+     * `output`), `generateEntityTypes`, `generateFormContext` or `generateIndex`.
+     */
     onChange: (update: Partial<DataverseGenConfig>) => void;
 }
 

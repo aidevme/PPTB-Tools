@@ -19,16 +19,24 @@ import type { StepState } from '../shared/workflowSteps';
 import { RecentProjectsList } from './RecentProjectsList';
 import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './recentProjects';
 
+/** Props for {@link ProjectCard}. */
 export interface IProjectCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
     step: StepState;
+    /** The open project's folder, or `null` for the empty state with Load Existing Project and New Project. */
     projectRoot: string | null;
     /** Folder used last time with this connection, offered first for reopening while no project is open. */
     rememberedFolder: string | null;
+    /**
+     * The open project's `.dataverse-gen.json`: whether it exists (a "found" or "created on generate" badge) and its
+     * selection counts. No badges while `null`.
+     */
     configState: ProjectConfigState | null;
     /** Saved projects, for the open project's name and version and for the recent-projects list. */
     projects: ProjectEntry[];
     /** How many recent projects to offer (the General setting); 0 hides the list. Defaults to 3. */
     recentProjectCount?: number;
+    /** Work in progress (or not running in PPTB): disables every button, including the recent projects. */
     busy: boolean;
     /** Opens the New Project dialog. */
     onNewProject: () => void;
@@ -36,7 +44,9 @@ export interface IProjectCardProps {
     onLoadExistingProject: () => void;
     /** Opens a recent project directly. */
     onOpenRecent: (target: ProjectOpenTarget) => void;
+    /** Called when the reload button of an open project is clicked, to read `.dataverse-gen.json` from disk again. */
     onReload: () => void;
+    /** Called with the project folder and `"Project folder path"` when its copy button is clicked. */
     onCopyPath: (path: string, label: string) => void;
     /** Current time for relative dates; a parameter so tests get stable output. */
     now?: number;

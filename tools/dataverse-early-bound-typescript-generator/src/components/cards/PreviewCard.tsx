@@ -39,17 +39,23 @@ export interface IPreviewGenerateOptions {
     onRenameDuplicatesChange?: (checked: boolean) => void;
     /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
     deleteOrphans: boolean;
+    /** Called with the new value when the Delete orphaned files switch is toggled; saves `deleteOrphanedFiles`. */
     onDeleteOrphansChange: (checked: boolean) => void;
 }
 
+/** Props for {@link PreviewCard}. */
 export interface IPreviewCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
     step: StepState;
+    /** The last computed write plan, or `null` before the first preview (the list shows a placeholder). */
     plan: WritePlan | null;
     /** Whether the plan is stale because the selection or options changed since it was computed. */
     stale: boolean;
+    /** Enables Preview and the stale warning's Preview again; the app sets it once connected, with a selection. */
     canPreview: boolean;
     /** True when everything is ready except the project folder; shows a hint next to the buttons. */
     needsProject: boolean;
+    /** Work in progress: disables the buttons and switches, and shows a loading skeleton while there's no plan yet. */
     busy: boolean;
     /** When the current plan was computed (ISO), for "Previewed … ago". */
     previewedAt: string | null;
@@ -57,7 +63,9 @@ export interface IPreviewCardProps {
     lastResult: string | null;
     /** The Generate settings shown as switches in the action bar. */
     generateOptions: IPreviewGenerateOptions;
+    /** Called when Preview or Preview again is clicked, to compute a new plan. */
     onPreview: () => void;
+    /** Called when Generate is clicked; the caller confirms where needed, then writes (and deletes) the files. */
     onGenerate: () => void;
     /** Copies text (a file's content or a path) to the clipboard; `label` names it in the confirmation. */
     onCopyText: (text: string, label: string) => void;
