@@ -22,7 +22,8 @@ Spec Kit's git extension and `/speckit-taskstoissues` are not used ([setup.md](s
 ## Handoffs
 
 - **Branch:** suggest `feature/<NNN>-<slug>` from the feature folder (`specs/003-zip-export` →
-  `feature/003-zip-export`); aidevme-github validates and creates it only when asked.
+  `feature/003-zip-export`). With one Spec Kit project per package, feature numbers repeat across packages, so add
+  the package: `feature/<package>-<NNN>-<slug>`. aidevme-github validates and creates it only when asked.
 - **Commit:** after a task passes its tests ([implement.md](implement.md)), offer the commit; the message names the
   task ID (for example `feat(export): add zip builder (T003)`) and `Refs #n` when the task has an issue.
 - **Issues:** created from tasks only on request ([tasks.md](tasks.md)).

@@ -4,7 +4,7 @@ metadata:
   layer: orchestration
   scope: core
 description: |
-  Spec-driven development (SDD) with GitHub Spec Kit, one entry point: detects which phase the repository is in,
+  Spec-driven development (SDD) with GitHub Spec Kit, one entry point: detects which phase the Spec Kit project is in,
   runs the matching installed /speckit-* command, checks the file it produced, and stops for review before the next
   phase. Wraps Spec Kit; never re-implements or edits its prompts. Use when:
   (1) User says "spec this feature", "start SDD", or "set up spec kit"
@@ -26,13 +26,21 @@ One entry point for the [Spec Kit](https://github.com/github/spec-kit) SDD proce
 the phase detection, the shared rules and the routing; each phase is in a reference file under `references/`. Load
 only the reference the current phase needs. Checked against Spec Kit **v1.2.1** (2026-10-17).
 
-## Phase detection (run first)
+## Find the Spec Kit project (run first)
+
+A Spec Kit project is the folder that contains `.specify/`; every path below is relative to it. Look for the nearest
+`.specify/` from the current folder up to the repository root. A repository with several independently built
+packages (for example `tools/<tool-name>/`) has one project per package: work out the package from the request or
+the current folder, and ask when it's unclear. No `.specify/` anywhere: the phase is setup, which also decides
+where the project goes ([setup.md](references/setup.md)).
+
+## Phase detection
 
 Check in this order and stop at the first match. Say the detected phase and the next action before doing anything.
 
 | Check | Phase |
 | --- | --- |
-| No `.specify/` folder | setup |
+| No `.specify/` folder in the project | setup |
 | `.specify/memory/constitution.md` missing, or still has template placeholders such as `[PROJECT_NAME]` or `[PRINCIPLE_1_NAME]` | constitution |
 | No current feature: `.specify/feature.json` missing and no `specs/NNN-*/spec.md` for the requested feature | specify |
 | `spec.md` but no `plan.md` in the feature folder | plan |
@@ -88,3 +96,4 @@ speed; say which gate is waiting instead.
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-17 | aidevme | Created: phase detection, review gates, routing to per-phase references, `power-platform` and `typescript-web` profiles, and the handoff to aidevme-github; checked against Spec Kit v1.2.1. |
+| 2026-10-18 | aidevme | One Spec Kit project per package (the nearest `.specify/`), initialized in the package folder when the repository has several packages or regenerates its root `.claude/skills/`; replaces the root-only setup and its sync blocker. Branch names carry the package in a monorepo. |

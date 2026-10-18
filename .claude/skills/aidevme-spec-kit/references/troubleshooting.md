@@ -50,9 +50,18 @@ scripts are preserved only while they match the recorded copy, so don't make the
 ## "speckit command not found" after init
 
 - Restart Claude Code or reload skills; new skills in `.claude/skills/` aren't picked up mid-session.
-- Check `.claude/skills/speckit-*` exists. In a repository with a skills sync, a sync may have deleted them (see
-  [setup.md](setup.md)); restore them with `specify integration upgrade claude`.
+- Check `.claude/skills/speckit-*` exists in the project folder. If Spec Kit was initialized at a repository root
+  whose `.claude/skills/` a sync script regenerates, the sync deleted them: initialize in a package folder instead
+  ([setup.md](setup.md#choose-the-project-folder)), or restore them with `specify integration upgrade claude`.
+- Started in another folder, Claude Code loads a nested project's skills only after it reads or edits a file there;
+  start it in the project folder.
 - With `--no-model-invocation` the skills don't trigger on their own; type `/speckit-<command>`.
+
+## A feature landed in the wrong project
+
+Spec Kit uses the nearest `.specify/`. Start Claude Code in the right project folder, or set `SPECIFY_INIT_DIR` to it
+before starting the assistant (the folder must contain `.specify/`; there's no fallback). Move the misplaced
+`specs/NNN-*` folder only after asking.
 
 ## Review gate
 
