@@ -73,18 +73,18 @@ change should be listed as a deliberate deviation in the tool's README.
 ## Continuous integration
 
 `.github/workflows/dataverse-early-bound-typescript-generator-build.yml` runs on pushes and pull requests to
-`main` that touch the tool. It has three jobs, each starting only after the previous one passes:
+`main` that touch the tool, and on demand (`workflow_dispatch`). It has one job, **Validate, test and build**,
+which installs dependencies once (`npm ci`, with the npm cache) and then runs these steps in order, stopping at
+the first failure:
 
-- **Validate:** `npm ci`, then `npm run validate` (`pptb-validate`, from `@pptb/types`). It checks `package.json`
-  against PPTB's tool requirements: required fields such as `configurations` and `features.connections`,
-  the icon path's format, and that the repository and readme URLs respond. It doesn't need the build output,
-  so it runs first. Errors fail the job; warnings don't.
-- **Test:** `npm ci`, then `npm test`.
-- **Build:** runs only after Test passes (`needs: test`). `npm ci`, then `npm run build` (typecheck and bundle),
-  then uploads `dist/` as a build artifact for 14 days.
+- **Validate:** `npm run validate` (`pptb-validate`, from `@pptb/types`). It checks `package.json` against PPTB's
+  tool requirements: required fields such as `configurations` and `features.connections`, the icon path's format,
+  and that the repository and readme URLs respond. It doesn't need the build output, so it runs first. Errors
+  fail the job; warnings don't.
+- **Test:** `npm test`.
+- **Build:** `npm run build` (typecheck and bundle), then uploads `dist/` as a build artifact for 14 days.
 
-Each job runs on a fresh runner, so each installs dependencies; the npm cache keeps that fast. The repo-wide
-`build-tool.yml` workflow also builds every tool after CodeQL finishes.
+CodeQL (`codeql.yml`) scans the whole repository separately, on every push and pull request to `main` and weekly.
 
 ## Testing inside PPTB
 
