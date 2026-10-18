@@ -25,17 +25,14 @@ import {
 import {
     AlertRegular,
     ArrowResetRegular,
-    CodeRegular,
     CodeTextRegular,
     DeleteRegular,
     DismissRegular,
     DocumentCheckmarkRegular,
     FolderRegular,
     ListRegular,
-    OptionsRegular,
     SettingsRegular,
     WarningRegular,
-    WrenchRegular,
 } from '@fluentui/react-icons';
 import {
     DELETE_ORPHANS_INFO,
@@ -51,30 +48,16 @@ import { DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { version } from '../../../package.json';
 import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
-
-type SettingsTab = 'general' | 'options' | 'files' | 'templates';
-
-const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; icon: ReactElement }> = [
-    { value: 'general', label: 'General', subtitle: 'Notifications and lists', icon: <OptionsRegular /> },
-    { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: <WrenchRegular /> },
-    { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: <CodeRegular /> },
-    { value: 'templates', label: 'Templates', subtitle: 'EJS templates', icon: <CodeTextRegular /> },
-];
-
-/** One-line explanation at the top of each tab. */
-const TAB_INTROS: Record<SettingsTab, string> = {
-    general: 'How the tool itself behaves.',
-    options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
-    files: 'How Generate treats files in the output folders, for every project.',
-    templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
-};
-
-const SCOPE_INSTALLATION: SectionBadge = { label: 'This PPTB installation' };
-const SCOPE_PROJECTS: SectionBadge = { label: 'Default for every project', color: 'brand' };
-const SCOPE_CONFIG_FILE: SectionBadge = { label: '.dataverse-gen.json' };
-const SCOPE_ALL_PROJECTS: SectionBadge = { label: 'All projects' };
-
-type ControlIds = { labelledBy: string; describedBy: string };
+import {
+    SCOPE_ALL_PROJECTS,
+    SCOPE_CONFIG_FILE,
+    SCOPE_INSTALLATION,
+    SCOPE_PROJECTS,
+    TABS,
+    TAB_INTROS,
+    type ControlIds,
+    type SettingsTab,
+} from './SettingsPanel.const';
 
 /** A setting as listed in a section; also what search matches against. */
 interface SettingDefinition {

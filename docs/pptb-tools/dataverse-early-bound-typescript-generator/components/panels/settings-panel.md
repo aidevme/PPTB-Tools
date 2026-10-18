@@ -6,7 +6,9 @@ Tool settings, shown in a Fluent UI `OverlayDrawer` that slides in from the righ
 Settings button in the [Header](../layout/header.md).
 
 Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx)
-(the panel and the list of settings) and
+(the panel and the list of settings),
+[`SettingsPanel.const.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.const.ts)
+(the tabs, their intros and the scope badges) and
 [`SettingsParts.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsParts.tsx)
 (`SettingsSection`, `SettingRow`, `OutputPreview`); styles in `src/styles/SettingsPanel.styles.ts`. The draft, Save and
 Reset to defaults are in `src/hooks/useSettingsDraft.ts`, and the titles and info text the panel shares with the
