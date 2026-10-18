@@ -140,6 +140,7 @@ export function dataverseApi(): typeof window.dataverseAPI {
     return withRetries(window.dataverseAPI);
 }
 
+/** Options for {@link withRetry}; every one is optional. */
 export interface RetryOptions {
     /** Total attempts, including the first. Default 3. */
     attempts?: number;

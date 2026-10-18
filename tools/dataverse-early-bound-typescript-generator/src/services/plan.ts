@@ -40,6 +40,7 @@ export function writeStatusOf(file: PlannedFile): WriteStatus | undefined {
 
 /** How Generate treats files: `skipDuplicates` leaves files with duplicate identifiers unwritten. */
 export interface WriteOptions {
+    /** Leave files with the duplicate identifiers status unwritten (the `skipDuplicateIdentifiers` setting). */
     skipDuplicates?: boolean;
 }
 
@@ -103,9 +104,9 @@ export function summarizePlan(
 }
 
 /**
- * One line saying what a finished Generate run did, e.g. `2 files written · 279 unchanged · 9 orphaned ·
- * .dataverse-gen.json saved`. With `deleted` (the run deleted orphans), orphans read `9 deleted` and any left over
- * `1 orphaned`.
+ * One line saying what a finished Generate run did, for example
+ * `2 files written · 279 unchanged · 9 orphaned · .dataverse-gen.json saved`. With `deleted` (the run deleted
+ * orphans), orphans read `9 deleted` and any left over `1 orphaned`.
  */
 export function summarizeGeneration(written: number, counts: WritePlan['counts'], deleted?: number, skipDuplicates = false): string {
     const orphans = deleted === undefined ? [`${counts.orphaned} orphaned`] : [`${deleted} deleted`, ...(counts.orphaned > deleted ? [`${counts.orphaned - deleted} orphaned`] : [])];
@@ -241,6 +242,7 @@ export async function applyWritePlan(
     return { written: toWrite.length, skipped: plan.files.length - toWrite.length };
 }
 
+/** What {@link deleteOrphanedFiles} did. */
 export interface DeleteResult {
     /** Relative paths of the orphans that were deleted. */
     deleted: string[];

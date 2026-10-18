@@ -3,17 +3,26 @@
  * for tests. All paths are absolute host paths (PPTB's `toolboxAPI.fileSystem` rejects relative ones).
  */
 
+/** One entry of a directory listing ({@link FileSink.list}). */
 export interface DirectoryEntry {
+    /** The entry's name inside the directory, not a path. */
     name: string;
+    /** Whether the entry is a file or a subdirectory. */
     type: 'file' | 'directory';
 }
 
+/** The file operations the write planner and the project config use. Every path is absolute. */
 export interface FileSink {
+    /** Resolves to `true` when a file or directory exists at `path`. */
     exists(path: string): Promise<boolean>;
     /** Directory listing; resolves to `[]` when the directory does not exist. */
     list(dir: string): Promise<DirectoryEntry[]>;
     /** File contents, or `null` when the file does not exist. */
     read(path: string): Promise<string | null>;
+    /**
+     * Writes `content` to the file, replacing it if it exists. Callers create the parent directory first
+     * ({@link FileSink.createDirectory}), as {@link applyWritePlan} does.
+     */
     write(path: string, content: string): Promise<void>;
     /** Create a directory and any missing parents. */
     createDirectory(path: string): Promise<void>;
@@ -48,7 +57,11 @@ export function buildDeleteCommands(paths: string[]): string[] {
     return commands;
 }
 
-/** `toolboxAPI.fileSystem` adapter. */
+/**
+ * `toolboxAPI.fileSystem` adapter.
+ * @remarks Every method throws when the PPTB file system API isn't available (outside Power Platform ToolBox).
+ * `list` and `read` check `exists` first, so a missing directory lists as `[]` and a missing file reads as `null`.
+ */
 export class PptbFileSink implements FileSink {
     private get fs(): ToolBoxAPI.FileSystemAPI {
         if (!window.toolboxAPI?.fileSystem) throw new Error('The PPTB file system API is not available (not running inside Power Platform ToolBox?)');
@@ -104,9 +117,15 @@ export class PptbFileSink implements FileSink {
 
 /** In-memory implementation for unit tests. Paths are compared case-sensitively, like a Linux disk. */
 export class InMemoryFileSink implements FileSink {
+    /** File contents by absolute path; tests read it to check what was written. */
     readonly files = new Map<string, string>();
+    /** Every directory that exists, by absolute path. */
     readonly directories = new Set<string>();
 
+    /**
+     * Creates the sink with `initialFiles` already on "disk".
+     * @param initialFiles - File contents by absolute path; their parent directories are created too.
+     */
     constructor(initialFiles: Record<string, string> = {}) {
         for (const [path, content] of Object.entries(initialFiles)) this.seed(path, content);
     }
@@ -116,6 +135,7 @@ export class InMemoryFileSink implements FileSink {
         return index > 0 ? path.substring(0, index) : '';
     }
 
+    /** Puts a file on "disk", creating its parent directories, without the checks {@link InMemoryFileSink.write} makes. */
     seed(path: string, content: string): void {
         this.files.set(path, content);
         let dir = this.parentOf(path);
@@ -144,6 +164,10 @@ export class InMemoryFileSink implements FileSink {
         return this.files.get(path) ?? null;
     }
 
+    /**
+     * {@inheritDoc FileSink.write}
+     * @throws An `Error` when the parent directory doesn't exist, to catch writes the planner didn't prepare.
+     */
     async write(path: string, content: string): Promise<void> {
         if (!this.directories.has(this.parentOf(path))) throw new Error(`Directory does not exist: ${this.parentOf(path)}`);
         this.files.set(path, content);

@@ -37,6 +37,7 @@ export function joinPath(base: string, ...parts: string[]): string {
     return joined === '' ? sep : joined;
 }
 
+/** Returns the parent folder of an absolute path, ignoring trailing separators. */
 export function dirname(absolutePath: string): string {
     const sep = separatorOf(absolutePath);
     const trimmed = absolutePath.replace(/[\\/]+$/, '');
@@ -45,6 +46,7 @@ export function dirname(absolutePath: string): string {
     return trimmed.substring(0, index);
 }
 
+/** Returns the last segment of a path (a file or folder name), ignoring trailing separators. */
 export function basename(absolutePath: string): string {
     const trimmed = absolutePath.replace(/[\\/]+$/, '');
     const index = Math.max(trimmed.lastIndexOf('\\'), trimmed.lastIndexOf('/'));
