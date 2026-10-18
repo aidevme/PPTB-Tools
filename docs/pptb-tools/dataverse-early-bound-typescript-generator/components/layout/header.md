@@ -5,7 +5,9 @@ connection and the **Settings** button on the right.
 
 Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Header.tsx)
 
-## Props (`HeaderProps`)
+## Props (`IHeaderProps`)
+
+`HeaderProps` remains as a deprecated alias of `IHeaderProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |

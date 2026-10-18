@@ -5,7 +5,7 @@ import { useHeaderStyles } from '../../styles';
 import { AppIcon } from './AppIcon';
 import { ConnectionStatus } from './ConnectionStatus';
 
-export interface HeaderProps {
+export interface IHeaderProps {
     connection: ToolBoxAPI.Connection | null;
     onOpenSettings: () => void;
 }
@@ -14,7 +14,7 @@ export interface HeaderProps {
  * The bar across the top: app icon, title, version and subtitle on the left; the active connection and the
  * Settings button on the right.
  */
-export function Header({ connection, onOpenSettings }: HeaderProps) {
+export function Header({ connection, onOpenSettings }: IHeaderProps) {
     const styles = useHeaderStyles();
     return (
         <header className={styles.header}>
@@ -43,3 +43,6 @@ export function Header({ connection, onOpenSettings }: HeaderProps) {
         </header>
     );
 }
+
+/** @deprecated Renamed to `IHeaderProps`. */
+export type HeaderProps = IHeaderProps;

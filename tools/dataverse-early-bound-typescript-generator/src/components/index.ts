@@ -10,7 +10,7 @@ export { ConnectionStatus } from './layout/ConnectionStatus';
 export type { IConnectionStatusProps } from './layout/ConnectionStatus';
 export { Footer } from './layout/Footer';
 export { Header } from './layout/Header';
-export type { HeaderProps } from './layout/Header';
+export type { HeaderProps, IHeaderProps } from './layout/Header';
 export { ConfirmationDialog } from './dialogs/ConfirmationDialog';
 export type { IConfirmationDialogProps } from './dialogs/ConfirmationDialog';
 export { GenerateConfirmationDialogs, GenerateSummary, OrphanList } from './dialogs/GenerateConfirmations';
