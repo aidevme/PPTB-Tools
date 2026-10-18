@@ -201,6 +201,10 @@ Record load-bearing decisions as ADRs in `agent/wiki/decisions/` (`aidevme-wiki-
   anything that needs a live PPTB host).
 - **Keep docs and comments accurate.** Update the tool's docs, README and TSDoc in the same change as the behavior;
   a comment must match the code it describes.
+- **TSDoc with every TypeScript change.** When you create or change an exported component, props type, hook,
+  service or other public symbol, write or update its TSDoc in the same change with the `aidevme-tsdoc` skill
+  (only the symbols you touched; comments that are still correct stay as they are), then run `npm run lint:tsdoc`
+  in tools that have it. This applies to ad-hoc edits as well as to work done through other skills.
 - **Never invent APIs or metadata.** Check the PPTB API reference and live Dataverse metadata rather than guessing.
 
 ## 6. Commits
