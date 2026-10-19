@@ -11,8 +11,18 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
 import { parseCsdl, resolveConfig, type DataverseGenConfig, type EntityMetadataInput } from '../src/core';
-import { useAsyncAction, useAutoHideFooter, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
-import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
+import {
+    useAsyncAction,
+    useAutoHideFooter,
+    useCustomEnumTemplateConfirmation,
+    useEnvironmentMetadata,
+    usePlanState,
+    usePreviewGenerate,
+    useProject,
+    useToolSettings,
+    type PlanState,
+} from '../src/hooks';
+import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, dataverseGenTemplateFiles, type PptbMetadataProvider } from '../src/services';
 import type { EntitySummary, OperationSummary, WritePlan } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -610,5 +620,57 @@ describe('useAutoHideFooter', () => {
         act(() => root?.unmount());
         root = undefined;
         expect(vi.getTimerCount()).toBe(0);
+    });
+});
+
+describe('useCustomEnumTemplateConfirmation (spec 001, FR-012)', () => {
+    /** A preview plan of a project whose `_templates/enum.ejs` on disk is `onDisk`. */
+    const planWith = async (onDisk: string) => {
+        const config = resolveConfig({});
+        const sink = new InMemoryFileSink({ '/src/contoso/_templates/enum.ejs': onDisk });
+        return createWritePlan(sink, '/src/contoso', config, [], dataverseGenTemplateFiles(config));
+    };
+    const original = DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content;
+
+    it('asks before turning it on over an edited enum.ejs, and saves only on confirm', async () => {
+        const plan = await planWith('// my own enum template\n');
+        const save = vi.fn();
+        const { result } = renderHook(() => useCustomEnumTemplateConfirmation(plan, true, save));
+        act(() => result.current.request(true));
+        expect(save).not.toHaveBeenCalled();
+        expect(result.current.pendingPath).toBe('/src/contoso/_templates/enum.ejs');
+        act(() => result.current.confirm());
+        expect(save).toHaveBeenCalledWith(true);
+        expect(result.current.pendingPath).toBeNull();
+    });
+
+    it('saves nothing on cancel', async () => {
+        const plan = await planWith('// my own enum template\n');
+        const save = vi.fn();
+        const { result } = renderHook(() => useCustomEnumTemplateConfirmation(plan, true, save));
+        act(() => result.current.request(true));
+        act(() => result.current.cancel());
+        expect(save).not.toHaveBeenCalled();
+        expect(result.current.pendingPath).toBeNull();
+    });
+
+    it("saves straight away without an edited enum.ejs, with Generate templates off, when turning off, or before a preview", async () => {
+        const save = vi.fn();
+        const unedited = await planWith(original);
+        const edited = await planWith('// mine\n');
+        for (const [plan, generateTemplates, checked] of [
+            [unedited, true, true],
+            [edited, false, true],
+            [edited, true, false],
+            [null, true, true],
+        ] as const) {
+            const { result } = renderHook(() => useCustomEnumTemplateConfirmation(plan, generateTemplates, save));
+            act(() => result.current.request(checked));
+            expect(result.current.pendingPath).toBeNull();
+            act(() => root?.unmount());
+            container?.remove();
+            root = undefined;
+        }
+        expect(save.mock.calls).toEqual([[true], [true], [false], [true]]);
     });
 });

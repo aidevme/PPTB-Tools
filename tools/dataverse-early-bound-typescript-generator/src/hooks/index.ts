@@ -1,6 +1,7 @@
 /** React hooks used by `App.tsx` and the Settings panel. */
 export { useStickyBarHeights } from './useStickyBarHeights';
 export { useAutoHideFooter } from './useAutoHideFooter';
+export { useCustomEnumTemplateConfirmation } from './useCustomEnumTemplateConfirmation';
 export type { FooterPhase } from './useAutoHideFooter';
 export { useConnection } from './useConnection';
 export { usePlanState } from './usePlanState';

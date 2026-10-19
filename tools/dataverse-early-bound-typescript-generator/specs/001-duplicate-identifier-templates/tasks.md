@@ -218,7 +218,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   (original, custom, CRLF/LF variants, edited, missing, no templates in the plan)
 - [x] T023 [US1] Add the shared dialog text (`EDITED_ENUM_TEMPLATE_TITLE`, a message builder taking the path) to
   `src/components/shared/settingsInfo.tsx`, per `contracts/preview-proposal.md` (Confirmation dialog)
-- [ ] T024 [US1] Add `useCustomEnumTemplateConfirmation` in `src/hooks/` (exported from `src/hooks/index.ts`): turning
+- [x] T024 [US1] Add `useCustomEnumTemplateConfirmation` in `src/hooks/` (exported from `src/hooks/index.ts`): turning
   on with an edited `enum.ejs` (and Generate templates on) opens the dialog instead of saving; confirm saves, cancel
   closes; turning off saves at once; wire it in `src/components/apps/App.tsx` for the proposal and the Preview card
   switch, rendering `ConfirmationDialog`; tests in `test/hooks.test.ts` (opens only when edited and templates on;

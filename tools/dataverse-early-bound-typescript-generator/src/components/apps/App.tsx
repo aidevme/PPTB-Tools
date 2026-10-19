@@ -1,10 +1,21 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, mergeClasses } from '@fluentui/react-components';
-import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
-import { useAutoHideFooter, useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
+import { ConfirmationDialog, Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
+import {
+    useAutoHideFooter,
+    useConnection,
+    useCustomEnumTemplateConfirmation,
+    useEnvironmentMetadata,
+    usePlanState,
+    usePreviewGenerate,
+    useProject,
+    useStickyBarHeights,
+    useToolSettings,
+} from '../../hooks';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
+import { EDITED_ENUM_TEMPLATE_CONFIRM, EDITED_ENUM_TEMPLATE_TITLE, editedEnumTemplateMessage } from '../shared/settingsInfo';
 
 /**
  * Top-level orchestration. The state lives in hooks (`hooks/`): the tool config (`useToolSettings`), the project
@@ -35,6 +46,10 @@ export default function App() {
         onError: setError,
         onPlanStale: markPlanStale,
     });
+    // The Preview card's custom enum template proposal and switch ask first when they'd replace an edited enum.ejs.
+    const customEnumTemplate = useCustomEnumTemplateConfirmation(plan, toolSettings.generateTemplates, (checked) =>
+        void changeSetting('customEnumTemplate', checked),
+    );
     const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear } = useProject({
         sink,
         connKey,
@@ -238,7 +253,7 @@ export default function App() {
                         onRenameDuplicatesChange: (checked) => void changeSetting('renameDuplicateIdentifiers', checked),
                         customEnumTemplate: toolSettings.customEnumTemplate,
                         generateTemplates: toolSettings.generateTemplates,
-                        onCustomEnumTemplateChange: (checked) => void changeSetting('customEnumTemplate', checked),
+                        onCustomEnumTemplateChange: customEnumTemplate.request,
                     }}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
@@ -253,6 +268,14 @@ export default function App() {
                 generateOpen={confirmGenerateOpen}
                 onConfirmGenerate={confirmGenerate}
                 onCancelGenerate={cancelGenerate}
+            />
+            <ConfirmationDialog
+                open={customEnumTemplate.pendingPath !== null}
+                title={EDITED_ENUM_TEMPLATE_TITLE}
+                message={editedEnumTemplateMessage(customEnumTemplate.pendingPath ?? '')}
+                confirmLabel={EDITED_ENUM_TEMPLATE_CONFIRM}
+                onConfirm={customEnumTemplate.confirm}
+                onCancel={customEnumTemplate.cancel}
             />
             <div
                 ref={footerRef}
