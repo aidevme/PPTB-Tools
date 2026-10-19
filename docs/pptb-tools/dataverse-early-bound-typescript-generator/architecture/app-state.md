@@ -11,7 +11,8 @@ The tool's state lives in custom hooks in `src/hooks/`; there's no state managem
 | Hook | Owns |
 | --- | --- |
 | `useConnection` | The active PPTB connection. Read on mount and again whenever PPTB raises `connection:created`, `connection:updated` or `connection:deleted`; `null` outside PPTB (for example under `npm run dev`). Returns `{ connection, isLoading, refreshConnection }`. |
-| `useStickyBarHeights` | Publishes the sticky header and footer heights as CSS variables, so scrolling to a step card lands below the header. |
+| `useStickyBarHeights` | Publishes the sticky header and footer heights as CSS variables, so scrolling to a step card lands below the header. The footer's is `0px` once it's docked. |
+| `useAutoHideFooter` | The footer's phase: `pinned` for `FOOTER_AUTO_HIDE_MS` (5 s), then `sliding` for `FOOTER_SLIDE_OUT_MS`, then `docked` at the end of the page. It docks straight away when the page is already at its end. |
 | `usePlanState` | `plan`, `planStale`, `previewedAt` and `lastResult`. It comes first so the hooks below can invalidate the plan: `clearPlan` drops it, `resetPlan` also clears the stale flag (another project opened), and `markPlanStale` keeps it but asks for a new preview. |
 | `useToolSettings` | `toolSettings`: Settings-panel values and saved `projects`. Starts as the bundled defaults, replaced by the saved values once `loadToolConfig` resolves. `saveToolSettings`, `saveNewProject`, `deleteProject`, `editProject`, `recordProjectGeneration`, and `changeSetting` for the Preview card's switches. |
 | `useProject` | `projectRoot`, `rememberedFolder` and `configState` (the `.dataverse-gen.json` contents, its path, and whether it exists yet; the selection lives here too). Opening a folder or a saved project, the folder picker for project locations, config edits, and applying the Settings panel's Options. |

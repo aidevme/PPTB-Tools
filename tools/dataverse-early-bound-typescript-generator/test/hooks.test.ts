@@ -7,7 +7,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
 import { resolveConfig, type DataverseGenConfig } from '../src/core';
-import { useAsyncAction, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
+import { useAsyncAction, useAutoHideFooter, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
 import { DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
 import type { EntitySummary, OperationSummary, WritePlan } from '../src/types';
 
@@ -475,5 +475,46 @@ describe('usePreviewGenerate', () => {
         await flush();
         expect(result.current.preview.confirmGenerateOpen).toBe(false);
         expect(sink.files.has('/src/contoso/src/dataverse-gen/entities/Account.ts')).toBe(true);
+    });
+});
+
+describe('useAutoHideFooter', () => {
+    /** Makes the page `height` pixels tall, so it scrolls when that's more than the window. */
+    const setPageHeight = (height: number) => Object.defineProperty(document.documentElement, 'scrollHeight', { configurable: true, value: height });
+    const advance = (ms: number) => act(() => vi.advanceTimersByTime(ms));
+
+    afterEach(() => {
+        vi.useRealTimers();
+        delete (document.documentElement as { scrollHeight?: number }).scrollHeight;
+    });
+
+    it('pins the footer, then slides it out and docks it', () => {
+        vi.useFakeTimers();
+        setPageHeight(window.innerHeight + 2000);
+        const { result } = renderHook(() => useAutoHideFooter(5000, 250));
+        expect(result.current).toBe('pinned');
+        advance(4999);
+        expect(result.current).toBe('pinned');
+        advance(1);
+        expect(result.current).toBe('sliding');
+        advance(250);
+        expect(result.current).toBe('docked');
+    });
+
+    it('docks straight away when the page is already at its end', () => {
+        vi.useFakeTimers();
+        setPageHeight(window.innerHeight);
+        const { result } = renderHook(() => useAutoHideFooter(5000, 250));
+        advance(5000);
+        expect(result.current).toBe('docked');
+    });
+
+    it('clears its timers on unmount', () => {
+        vi.useFakeTimers();
+        setPageHeight(window.innerHeight + 2000);
+        renderHook(() => useAutoHideFooter(5000, 250));
+        act(() => root?.unmount());
+        root = undefined;
+        expect(vi.getTimerCount()).toBe(0);
     });
 });

@@ -10,9 +10,16 @@ the links and credits are constants in
 
 ## Layout
 
-The footer stays at the bottom of the window while the page scrolls: `App.tsx` wraps it in a sticky container
-(`stickyFooter` in `App.styles.ts`), which also holds the gap above it. Its height is published as
-`--app-footer-height` for `scroll-padding-bottom`, like the [Header](./header.md)'s.
+When the tool opens, the footer is pinned to the bottom of the window for 5 seconds (`FOOTER_AUTO_HIDE_MS` in
+`Footer.const.ts`). Then it slides down out of the window (`FOOTER_SLIDE_OUT_MS`, 250 ms; instant when the system
+asks for reduced motion) and stays at the end of the page, so it shows again whenever the page is scrolled to the
+bottom. If the page is already scrolled to the end, or doesn't scroll, it stays where it is.
+
+`App.tsx` wraps the footer in a container (`stickyFooter` in `App.styles.ts`, which also holds the gap above it) and
+applies the phase from `useAutoHideFooter`: `pinned` (sticky), `sliding` (`footerSliding`) and `docked`
+(`footerDocked`, in the normal flow). While it's pinned or sliding, its height is published as `--app-footer-height`
+for `scroll-padding-bottom`, like the [Header](./header.md)'s; once docked it covers nothing, so the height is `0px`.
+The links stay in the page and keyboard focus, so Tab still reaches them and scrolls them into view.
 
 The footer uses the header's soft brand gradient, mirrored, with a top border and shadow. From left to
 right:
