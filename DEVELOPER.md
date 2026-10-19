@@ -2,6 +2,33 @@
 
 ![A glowing open toolbox labelled "Shared instructions, better outcomes" releases three skill cards: teal "Build, fix, create" with a wrench and code brackets, amber "Review, assess, improve" with a magnifying glass over a document, and green "Verify, validate, trust" with a shield and checkmark. Each card is linked to an AI assistant orb above, with SKILL.md panels floating on a dark blue background](assets/pptb-tools-developer-preview.png)
 
+## Contents
+
+- [GitHub Spec Kit](#github-spec-kit)
+  - [When to use it for a PPTB tool](#when-to-use-it-for-a-pptb-tool)
+  - [How it fits this repository](#how-it-fits-this-repository)
+  - [What you need](#what-you-need)
+  - [Choose where Spec Kit lives](#choose-where-spec-kit-lives)
+  - [Install and initialize](#install-and-initialize)
+  - [The workflow](#the-workflow)
+  - [Writing the constitution for a PPTB tool](#writing-the-constitution-for-a-pptb-tool)
+  - [Example: a feature end to end](#example-a-feature-end-to-end)
+  - [Using the aidevme-spec-kit skill](#using-the-aidevme-spec-kit-skill)
+  - [Keeping specs over time](#keeping-specs-over-time)
+  - [Customizing and upgrading](#customizing-and-upgrading)
+  - [Troubleshooting](#troubleshooting)
+  - [Sources](#sources)
+- [AI Agent Skills](#ai-agent-skills)
+  - [The skills](#the-skills)
+  - [Prerequisites](#prerequisites)
+  - [Installing the skills in this repository](#installing-the-skills-in-this-repository)
+  - [Example prompts](#example-prompts)
+  - [Scope and limitations](#scope-and-limitations)
+- [ToolBox Development — VS Code Extension](#toolbox-development--vs-code-extension)
+  - [When to use it for this repository's tools](#when-to-use-it-for-this-repositorys-tools)
+  - [Debugging a published tool in VS Code](#debugging-a-published-tool-in-vs-code)
+  - [Contributing to the extension itself](#contributing-to-the-extension-itself)
+
 ## GitHub Spec Kit
 
 <!-- cspell:ignore speckit taskstoissues -->
@@ -364,3 +391,63 @@ For the other assistants, copy the same folders to:
 - **Maturity:** `tool-dev` isn't tested end to end yet. Its agent-integration guidance may describe APIs newer than
   the PPTB version you have installed, so validate generated code. In this repo, that means `npm run build`,
   `npm test` and `npm run validate` in the tool's folder, then a test in PPTB.
+
+## ToolBox Development — VS Code Extension
+
+<!-- cspell:ignore Supabase webview webviews -->
+
+Power Platform ToolBox also runs inside VS Code: the
+[Power Platform ToolBox extension](https://marketplace.visualstudio.com/items?itemName=PowerPlatformToolBox.power-platform-toolbox)
+(`PowerPlatformToolBox.power-platform-toolbox`) manages Power Platform connections and hosts PPTB tools in VS Code,
+using the same `toolboxAPI` as the Desktop App. It's in this repository's recommended extensions
+(`.vscode/extensions.json`), so VS Code offers to install it when you open the repository.
+
+This section was checked against the PPTB documentation on 2026-10-19:
+[ToolBox Dev — VS Code Extension](https://docs.powerplatformtoolbox.com/toolbox-development/vscode-extension) and
+[Debugging (VS Code Extension)](https://docs.powerplatformtoolbox.com/tool-development/debugging/vscode).
+
+### When to use it for this repository's tools
+
+The extension **only runs published tools**, installed from the marketplace; it can't load a local build. So it
+doesn't replace the Desktop App for development:
+
+| Work | Use |
+| --- | --- |
+| Building and fixing a tool (`npm run watch`, reload, repeat) | The Desktop App: Settings → Debug Menu, then Debug → Browse to the tool's folder (see `AGENTS.md`) |
+| Checking that a published or pre-release version behaves the same in VS Code | The VS Code extension |
+| Reproducing a bug a user reported against a released version | The VS Code extension, since it runs the same build users install |
+
+The recommended loop: fix in the Desktop App, publish a new version or pre-release, then reinstall it in VS Code to
+confirm.
+
+### Debugging a published tool in VS Code
+
+1. **Publish the build** (or a pre-release) to the marketplace; see the tool's publishing steps in the `pptb-tool-dev`
+   skill.
+2. **Optional, for breakpoints:** publish a `-beta` or pre-release built with source maps, then turn them off again
+   for the stable release. The tools here use Vite, so that's `build.sourcemap: true` in the tool's
+   `vite.config.ts`; the Dataverse Early-Bound TypeScript Generator doesn't set it today, so its releases have no
+   source maps.
+3. **Install and launch:** open the **Power Platform ToolBox** view in the Activity Bar, install or update the tool
+   from **Marketplace**, then select it under **Installed Tools** and click **Launch**.
+4. **Open DevTools:** in the Command Palette (`Ctrl+Shift+P`, or `Cmd+Shift+P` on macOS) run
+   **Developer: Open Webview Developer Tools**, and pick the tool's webview if asked.
+5. **Debug:** the **Console** runs `toolboxAPI` calls and shows the tool's logs, **Network** shows the Dataverse and
+   Power Platform requests, and **Sources** takes breakpoints when the build has source maps.
+
+### Contributing to the extension itself
+
+The extension's own code is in
+[PowerPlatformToolBox/vscode-extension](https://github.com/PowerPlatformToolBox/vscode-extension) (TypeScript and
+React, built with webpack), not in this repository. To work on it you need Node.js 20+, npm 10+ and VS Code 1.85+:
+
+```bash
+git clone https://github.com/PowerPlatformToolBox/vscode-extension.git
+cd vscode-extension
+npm install
+cp .env.example .env   # PPTB_SUPABASE_URL and PPTB_SUPABASE_ANON_KEY; ask the maintainers for access
+code .                 # then F5 starts an Extension Development Host with the extension loaded
+```
+
+`npm run watch` rebuilds on save; run `npm run lint` and `npm run package` before opening a pull request against
+`main`. The full guide, including its architecture and release process, is the PPTB documentation page above.
