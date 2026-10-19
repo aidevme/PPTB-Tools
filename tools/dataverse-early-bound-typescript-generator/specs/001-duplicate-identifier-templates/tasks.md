@@ -198,3 +198,7 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 | No EJS at run time | `dist/assets/*.js` has no `ejs.render` or `new Function(` |
 | Protected files | `test/reference/`, `test/fixtures/`, `src/assets/dataverse-gen-templates/` unchanged since before T001 |
 | Docs | `Validate-Markdown.ps1` passed on every changed page; `npm run docs:build` OK |
+
+## Phase 7: Convergence
+
+- [ ] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per Constitution VII (partial)
