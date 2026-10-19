@@ -1,3 +1,5 @@
 .github/workflows/*.lock.yml linguist-generated=true
 # dataverse-gen 2.0.17 EJS templates, copied byte for byte (CRLF) and written to projects as _templates.
 tools/dataverse-early-bound-typescript-generator/src/assets/dataverse-gen-templates/*.ejs -text
+# The custom enum template derived from dataverse-gen's (CRLF like the originals), written to projects in its place.
+tools/dataverse-early-bound-typescript-generator/src/assets/custom-templates/*.ejs -text
