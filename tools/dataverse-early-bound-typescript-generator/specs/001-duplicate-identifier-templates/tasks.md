@@ -46,10 +46,10 @@ reports no new warning, changed Markdown passes `Validate-Markdown.ps1`, and the
   back to the default") to `ToolConfig`, the defaults and `mergeToolConfig` in `src/config/index.ts`, and to
   `src/config/dataverse-early-bound-typescript-generator-config.json`, `…-config.schema.json` (description, type,
   default) and `…-config.sample.json`; tests in `test/settings.test.ts` (tool config: default, merge, invalid value)
-- [ ] T004 Create `src/assets/custom-templates/enum.ejs`: dataverse-gen 2.0.17's `enum.ejs` with the renaming loop
+- [x] T004 Create `src/assets/custom-templates/enum.ejs`: dataverse-gen 2.0.17's `enum.ejs` with the renaming loop
   from `contracts/custom-enum-template.md` (used-name set in member order; append `_<Value>` while taken), keeping
   the header, indentation and the closing `}` + newline + two spaces
-- [ ] T005 Add `test/customEnumTemplate.test.ts` rendering with `ejs` the three guarantees of
+- [x] T005 Add `test/customEnumTemplate.test.ts` rendering with `ejs` the three guarantees of
   `contracts/custom-enum-template.md` (custom template = `renderEnum(renameDuplicateEnumMembers(model))`; custom =
   original when there are no duplicates; control: original = `renderEnum(model)`) over models with no duplicates, one
   duplicate, a taken renamed name (`Open`, `Open`, `Open_3`), and a string-valued enum
