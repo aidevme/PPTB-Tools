@@ -51,6 +51,29 @@ export const CUSTOM_ENUM_TEMPLATE_INFO = (
     </>
 );
 
+/** Title of the confirmation shown before the custom enum template replaces an edited `enum.ejs` (spec 001, FR-012). */
+export const EDITED_ENUM_TEMPLATE_TITLE = 'Replace your edited enum.ejs?';
+
+/** Confirm button of that confirmation; the same words as the proposal's button. */
+export const EDITED_ENUM_TEMPLATE_CONFIRM = 'Use custom enum template';
+
+/**
+ * Message of the confirmation shown before the custom enum template replaces an edited `enum.ejs`.
+ *
+ * @param path - The project's `enum.ejs`, as an absolute path.
+ * @returns The dialog's message: which file, why it looks edited, what the next Generate does, and that nothing is
+ * written now.
+ */
+export function editedEnumTemplateMessage(path: string) {
+    return (
+        <>
+            <code>{path}</code> differs from dataverse-gen's <code>enum.ejs</code>, so it looks edited. With the custom enum template
+            on, the next Generate replaces it with the custom template, and your edits are lost unless they're in source control.
+            Nothing is written now: the next preview lists the change first.
+        </>
+    );
+}
+
 /** Delete orphaned files: `deleteOrphanedFiles`. */
 export const DELETE_ORPHANS_INFO = (
     <>
