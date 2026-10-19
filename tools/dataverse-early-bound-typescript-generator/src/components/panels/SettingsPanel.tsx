@@ -8,17 +8,24 @@ import {
     DrawerHeader,
     DrawerHeaderTitle,
     Input,
+    Menu,
+    MenuItem,
+    MenuList,
+    MenuPopover,
+    MenuTrigger,
     MessageBar,
     MessageBarBody,
     OverlayDrawer,
     SearchBox,
     SpinButton,
+    SplitButton,
     Switch,
     Tab,
     TabList,
     Text,
     Title3,
     mergeClasses,
+    type MenuButtonProps,
     type SelectTabData,
     type SelectTabEvent,
 } from '@fluentui/react-components';
@@ -124,8 +131,8 @@ export interface SettingsPanelProps {
  * Tool settings, in an overlay drawer that slides in from the right. A navigation column (search, then vertical
  * tabs with subtitles) sits beside section cards; each setting is a row with its title and description on the left
  * and its control on the right. Changes are made on a draft: a dot marks each changed value, the footer says when
- * there are unsaved changes, Save (enabled once something changed) persists them, Cancel discards them, and Reset
- * to defaults restores the bundled defaults (saved projects are kept).
+ * there are unsaved changes, Save (enabled once something changed) persists them, and the Cancel split button
+ * discards them; its menu also has Reset to defaults, which restores the bundled defaults (saved projects are kept).
  */
 export function SettingsPanel({ open, onOpenChange, settings, onSave }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();
@@ -555,15 +562,33 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     {dirty ? '● Unsaved changes' : 'No unsaved changes'}
                 </span>
                 <span className={styles.footerActions}>
-                    <Button appearance="subtle" icon={<ArrowResetRegular />} disabled={atDefaults || saving} onClick={resetToDefaults}>
-                        Reset to defaults
-                    </Button>
                     <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>
                         {saving ? 'Saving…' : 'Save'}
                     </Button>
-                    <Button disabled={saving} onClick={() => onOpenChange(false)}>
-                        Cancel
-                    </Button>
+                    {/* Clicking Cancel closes the panel; the chevron opens the menu with Cancel (the default) and Reset to defaults. */}
+                    <Menu positioning="above-end">
+                        <MenuTrigger disableButtonEnhancement>
+                            {(triggerProps: MenuButtonProps) => (
+                                <SplitButton
+                                    disabled={saving}
+                                    menuButton={{ ...triggerProps, 'aria-label': 'More actions' }}
+                                    primaryActionButton={{ onClick: () => onOpenChange(false) }}
+                                >
+                                    Cancel
+                                </SplitButton>
+                            )}
+                        </MenuTrigger>
+                        <MenuPopover>
+                            <MenuList>
+                                <MenuItem icon={<DismissRegular />} onClick={() => onOpenChange(false)}>
+                                    Cancel
+                                </MenuItem>
+                                <MenuItem icon={<ArrowResetRegular />} disabled={atDefaults} onClick={resetToDefaults}>
+                                    Reset to defaults
+                                </MenuItem>
+                            </MenuList>
+                        </MenuPopover>
+                    </Menu>
                 </span>
             </DrawerFooter>
         </OverlayDrawer>

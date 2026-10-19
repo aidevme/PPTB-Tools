@@ -45,8 +45,9 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
   The controls are labelled by the row's title and described by its description (`aria-labelledby`,
   `aria-describedby`).
 - **Tab changes** fade the content in briefly; the animation is off when the system asks for reduced motion.
-- **Footer:** on the left, **● Unsaved changes** (highlighted) or **No unsaved changes**; on the right, **Reset to
-  defaults**, **Save** and **Cancel**.
+- **Footer:** on the left, **● Unsaved changes** (highlighted) or **No unsaved changes**; on the right, **Save** and
+  a **Cancel** split button (Fluent UI `SplitButton` with a `Menu`). Clicking Cancel closes the panel; the chevron
+  (**More actions**) opens a menu with **Cancel** (the default) and **Reset to defaults**.
 
 ## Settings
 
@@ -126,7 +127,8 @@ With no matches it says so.
 - **Save** is enabled only when a value differs from the saved one. It saves and closes the panel, or shows the
   error and stays open if saving fails.
 - **Cancel** (or closing the panel) discards the changes.
-- **Reset to defaults** sets every setting back to the bundled default, keeping saved projects. It's disabled when
+- **Reset to defaults** (in the Cancel button's menu) sets every setting back to the bundled default, keeping saved
+  projects. It's disabled when
   everything already has its default value, and it only changes the draft: Save still has to be clicked.
 - **Where values come from:** the defaults are in
   `src/config/dataverse-early-bound-typescript-generator-config.json` (`general`, `deleteOrphanedFiles: false`,

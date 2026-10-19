@@ -57,8 +57,8 @@ For settings most projects never need to change. It has no settings yet.
 
 - Changes are a draft until you click **Save**, which is enabled only when something differs from the saved values.
   **Cancel**, or closing the panel, discards them.
-- **Reset to defaults** sets every setting back to its default and keeps your saved projects. You still have to
-  click **Save**.
+- **Reset to defaults** sets every setting back to its default and keeps your saved projects. It's in the menu that
+  opens from the arrow next to **Cancel**. You still have to click **Save**.
 - Numbers outside the allowed range are rounded and clamped to it when saved.
 
 ## Where settings are saved
