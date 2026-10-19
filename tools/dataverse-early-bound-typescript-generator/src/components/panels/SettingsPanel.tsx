@@ -43,6 +43,8 @@ import {
     WarningRegular,
 } from '@fluentui/react-icons';
 import {
+    CUSTOM_ENUM_TEMPLATE_INFO,
+    CUSTOM_ENUM_TEMPLATE_TITLE,
     DELETE_ORPHANS_INFO,
     DELETE_ORPHANS_TITLE,
     RENAME_DUPLICATES_INFO,
@@ -155,9 +157,15 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
     const savedGeneral = settings.general;
     /** A setting row's Switch, labelled and described by the row's title and description. */
     const switchControl =
-        (checked: boolean, onChange: (checked: boolean) => void) =>
+        (checked: boolean, onChange: (checked: boolean) => void, disabled = false) =>
         ({ labelledBy, describedBy }: ControlIds) => (
-            <Switch checked={checked} aria-labelledby={labelledBy} aria-describedby={describedBy} onChange={(_, data) => onChange(data.checked)} />
+            <Switch
+                checked={checked}
+                disabled={disabled}
+                aria-labelledby={labelledBy}
+                aria-describedby={describedBy}
+                onChange={(_, data) => onChange(data.checked)}
+            />
         );
     const notificationSwitch = (key: 'showProjectLoadedNotification' | 'showPreviewReadyNotification' | 'showGenerationCompleteNotification') =>
         switchControl(general[key], (checked) => updateGeneral({ [key]: checked }));
@@ -396,11 +404,27 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                 {
                     id: 'renameDuplicateIdentifiers',
                     title: RENAME_DUPLICATES_TITLE,
-                    description: 'Give later duplicate enum members their value as a suffix, so the files compile.',
+                    description: draft.customEnumTemplate
+                        ? `On because ${CUSTOM_ENUM_TEMPLATE_TITLE} is on, which renames them too.`
+                        : 'Give later duplicate enum members their value as a suffix, so the files compile.',
                     info: RENAME_DUPLICATES_INFO,
                     keywords: 'duplicate duplicated identifier identifiers enum label rename suffix compile',
                     changed: draft.renameDuplicateIdentifiers !== settings.renameDuplicateIdentifiers,
-                    control: switchControl(draft.renameDuplicateIdentifiers, (checked) => update({ renameDuplicateIdentifiers: checked })),
+                    // The custom enum template renames too, so while it's on this shows on and can't be turned off here.
+                    control: switchControl(
+                        draft.renameDuplicateIdentifiers || draft.customEnumTemplate,
+                        (checked) => update({ renameDuplicateIdentifiers: checked }),
+                        draft.customEnumTemplate,
+                    ),
+                },
+                {
+                    id: 'customEnumTemplate',
+                    title: CUSTOM_ENUM_TEMPLATE_TITLE,
+                    description: "Rename duplicates and write an enum.ejs that does the same for the dataverse-gen CLI.",
+                    info: CUSTOM_ENUM_TEMPLATE_INFO,
+                    keywords: 'duplicate duplicated identifier identifiers enum label rename custom template ejs cli dataverse-gen',
+                    changed: draft.customEnumTemplate !== settings.customEnumTemplate,
+                    control: switchControl(draft.customEnumTemplate, (checked) => update({ customEnumTemplate: checked })),
                 },
                 {
                     id: 'skipDuplicateIdentifiers',

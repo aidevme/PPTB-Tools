@@ -362,6 +362,30 @@ describe('PreviewCard', () => {
             expect(tiles()[0]).toBe('1Duplicate identifiers');
         });
 
+        it('offers a Custom enum template switch that can be turned on and off (US3)', async () => {
+            const input = (title: string) => {
+                const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === title);
+                return document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement;
+            };
+            const onCustomEnumTemplateChange = vi.fn();
+            const onRenameDuplicatesChange = vi.fn();
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange, onRenameDuplicatesChange })));
+            expect(input('Custom enum template').checked).toBe(false);
+            await act(async () => input('Custom enum template').click());
+            expect(onCustomEnumTemplateChange).toHaveBeenCalledWith(true);
+
+            // On (after a preview without duplicates): it stays usable so it can be turned off, and Rename shows on, disabled.
+            const plain: PlannedFile = { ...DUPLICATE, status: 'new', writeStatus: undefined, duplicateIdentifiers: undefined };
+            await rerender({ ...props([plain], 0, { onCustomEnumTemplateChange, onRenameDuplicatesChange, customEnumTemplate: true }), previewedAt: 't2' });
+            expect(input('Custom enum template').checked).toBe(true);
+            expect(input('Custom enum template').disabled).toBe(false);
+            expect(input('Rename duplicated identifier(s)').checked).toBe(true);
+            expect(input('Rename duplicated identifier(s)').disabled).toBe(true);
+            await act(async () => input('Custom enum template').click());
+            expect(onCustomEnumTemplateChange).toHaveBeenLastCalledWith(false);
+            expect(onRenameDuplicatesChange).not.toHaveBeenCalled();
+        });
+
         it("says the CLI won't get the fix while Generate templates is off", async () => {
             await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange: vi.fn(), generateTemplates: false })));
             expect(document.body.textContent).toContain("Generate templates is off, so the CLI won't get the fix until it's turned on.");

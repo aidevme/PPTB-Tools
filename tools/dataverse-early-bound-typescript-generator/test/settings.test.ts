@@ -343,6 +343,22 @@ describe('settings panel', () => {
         expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
 
+    it('saves the Custom enum template switch, which shows Rename on and disabled while on (spec 001, US3)', async () => {
+        const onSave = vi.fn(async () => {});
+        await render(toolConfig, onSave);
+        await openTab('Generate & files');
+        expect(control('Rename duplicated identifier(s)').checked).toBe(false);
+        expect(control('Rename duplicated identifier(s)').disabled).toBe(false);
+        await click(control('Custom enum template'));
+        expect(control('Custom enum template').checked).toBe(true);
+        expect(control('Rename duplicated identifier(s)').checked).toBe(true);
+        expect(control('Rename duplicated identifier(s)').disabled).toBe(true);
+        expect(document.body.textContent).toContain('On because Custom enum template is on');
+        await click(button('Save'));
+        // Rename itself stays off: turning the custom template off later restores the default output.
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ customEnumTemplate: true }));
+    });
+
     it('searches across all tabs', async () => {
         await render(toolConfig, vi.fn(async () => {}));
         const search = document.querySelector('input[aria-label="Search settings"]') as HTMLInputElement;

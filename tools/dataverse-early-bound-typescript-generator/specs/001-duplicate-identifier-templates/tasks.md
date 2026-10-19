@@ -118,7 +118,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 
 **Independent Test**: turn the setting off, preview: `enum.ejs` and the enum files are planned as dataverse-gen's again.
 
-- [ ] T014 [US3] Add the **Custom enum template** switch to the Duplicate identifiers card (Generate & files tab) in
+- [x] T014 [US3] Add the **Custom enum template** switch to the Duplicate identifiers card (Generate & files tab) in
   `src/components/panels/SettingsPanel.tsx` and to the Preview card's action bar in
   `src/components/cards/PreviewParts.tsx`, both with `CUSTOM_ENUM_TEMPLATE_INFO`; while it's on, show the Rename
   duplicated identifier(s) switch as on and disabled with "on because Custom enum template is on"; tests in
