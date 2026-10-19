@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { resolveConfig } from '../src/core';
 import { fileType } from '../src/components/shared/generatedFiles';
-import { DATAVERSE_GEN_TEMPLATES, dataverseGenTemplateFiles } from '../src/services/dataverseGenTemplates';
+import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, dataverseGenTemplateFiles } from '../src/services/dataverseGenTemplates';
 import { InMemoryFileSink } from '../src/services/fileSink';
 import { applyWritePlan, createWritePlan } from '../src/services/plan';
 
@@ -31,6 +31,27 @@ describe('dataverse-gen templates', () => {
         expect(dataverseGenTemplateFiles(resolveConfig({ output: { templateRoot: '.\\tpl\\' } }))[0].path).toBe('tpl/action.ejs');
         expect(dataverseGenTemplateFiles(resolveConfig({ output: { templateRoot: '  ' } }))[0].path).toBe('_templates/action.ejs');
         expect(fileType('_templates/entity.ejs')).toBe('templates');
+    });
+
+    it("are dataverse-gen's, byte for byte, unless the custom enum template is asked for", () => {
+        const config = resolveConfig({});
+        const originals = DATAVERSE_GEN_TEMPLATES.map((t) => t.content);
+        expect(dataverseGenTemplateFiles(config).map((f) => f.content)).toEqual(originals);
+        expect(dataverseGenTemplateFiles(config, { customEnum: false }).map((f) => f.content)).toEqual(originals);
+    });
+
+    it('swap in only the custom enum.ejs when customEnum is on', () => {
+        const config = resolveConfig({ output: { templateRoot: './tpl' } });
+        const defaults = dataverseGenTemplateFiles(config);
+        const custom = dataverseGenTemplateFiles(config, { customEnum: true });
+        expect(custom.map((f) => f.path)).toEqual(defaults.map((f) => f.path));
+        for (const [i, file] of custom.entries()) {
+            if (file.path === 'tpl/enum.ejs') expect(file.content).toBe(CUSTOM_ENUM_TEMPLATE);
+            else expect(file.content).toBe(defaults[i].content);
+        }
+        expect(CUSTOM_ENUM_TEMPLATE).not.toBe(DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content);
+        // The bundled copy is the file on disk, byte for byte (CRLF kept by .gitattributes).
+        expect(CUSTOM_ENUM_TEMPLATE).toBe(fs.readFileSync(path.join(__dirname, '..', 'src', 'assets', 'custom-templates', 'enum.ejs'), 'utf8'));
     });
 
     it('are written to the project folder on Generate, overwriting changed copies and never counted as orphans', async () => {

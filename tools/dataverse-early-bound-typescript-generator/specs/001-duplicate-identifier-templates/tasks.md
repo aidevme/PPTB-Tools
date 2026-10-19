@@ -53,7 +53,7 @@ reports no new warning, changed Markdown passes `Validate-Markdown.ps1`, and the
   `contracts/custom-enum-template.md` (custom template = `renderEnum(renameDuplicateEnumMembers(model))`; custom =
   original when there are no duplicates; control: original = `renderEnum(model)`) over models with no duplicates, one
   duplicate, a taken renamed name (`Open`, `Open`, `Open_3`), and a string-valued enum
-- [ ] T006 Extend `dataverseGenTemplateFiles(config, options)` in `src/services/dataverseGenTemplates.ts` with
+- [x] T006 Extend `dataverseGenTemplateFiles(config, options)` in `src/services/dataverseGenTemplates.ts` with
   `{ customEnum?: boolean }`, importing `../assets/custom-templates/enum.ejs?raw`, so `enum.ejs` gets the custom
   content and the other six stay dataverse-gen's; tests in `test/dataverseGenTemplates.test.ts` (default output
   byte for byte unchanged; with `customEnum` only `enum.ejs` differs)

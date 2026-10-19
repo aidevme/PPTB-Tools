@@ -25,7 +25,8 @@ export {
     countStatuses,
 } from './plan';
 export type { WriteOptions } from './plan';
-export { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT, dataverseGenTemplateFiles } from './dataverseGenTemplates';
+export { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT, dataverseGenTemplateFiles } from './dataverseGenTemplates';
+export type { TemplateFileOptions } from './dataverseGenTemplates';
 export type { DeleteResult } from './plan';
 export { loadProjectConfig, saveProjectConfig } from './projectConfig';
 export type { ProjectConfigState } from './projectConfig';
