@@ -12,7 +12,7 @@ import {
     useStickyBarHeights,
     useToolSettings,
 } from '../../hooks';
-import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
+import { PptbFileSink, PptbMetadataProvider, connectionKey, editedEnumTemplate, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
 import { EDITED_ENUM_TEMPLATE_CONFIRM, EDITED_ENUM_TEMPLATE_TITLE, editedEnumTemplateMessage } from '../shared/settingsInfo';
@@ -146,6 +146,7 @@ export default function App() {
                 onOpenChange={setSettingsOpen}
                 settings={toolSettings}
                 onSave={saveToolSettings}
+                editedEnumTemplatePath={editedEnumTemplate(plan)?.absolutePath}
             />
             <ProjectFormDialog
                 open={newProjectOpen}

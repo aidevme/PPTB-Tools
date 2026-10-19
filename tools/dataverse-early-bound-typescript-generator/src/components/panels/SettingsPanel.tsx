@@ -47,11 +47,15 @@ import {
     CUSTOM_ENUM_TEMPLATE_TITLE,
     DELETE_ORPHANS_INFO,
     DELETE_ORPHANS_TITLE,
+    EDITED_ENUM_TEMPLATE_CONFIRM,
+    EDITED_ENUM_TEMPLATE_TITLE,
     RENAME_DUPLICATES_INFO,
     RENAME_DUPLICATES_TITLE,
     SKIP_DUPLICATES_INFO,
     SKIP_DUPLICATES_TITLE,
+    editedEnumTemplateMessage,
 } from '../shared/settingsInfo';
+import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
 import { RECENT_PROJECT_COUNT_RANGE, SELECTION_ROW_LIMIT_RANGE, type ToolConfig } from '../../config';
 import { useSettingsDraft } from '../../hooks';
 import { DEFAULT_TEMPLATE_ROOT } from '../../services';
@@ -128,6 +132,12 @@ export interface SettingsPanelProps {
      * when it rejects.
      */
     onSave: (settings: ToolConfig) => Promise<void>;
+    /**
+     * The project's `enum.ejs` path when the last preview found it edited (`editedEnumTemplate`). When Save turns the
+     * custom enum template on with Generate templates on, the panel then asks before saving, since the next Generate
+     * would overwrite the file (spec 001, FR-012). Without it, Save never asks.
+     */
+    editedEnumTemplatePath?: string;
 }
 
 /**
@@ -137,7 +147,7 @@ export interface SettingsPanelProps {
  * there are unsaved changes, Save (enabled once something changed) persists them, and the Cancel split button
  * discards them; its menu also has Reset to defaults, which restores the bundled defaults (saved projects are kept).
  */
-export function SettingsPanel({ open, onOpenChange, settings, onSave }: SettingsPanelProps) {
+export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnumTemplatePath }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();
     const [tab, setTab] = useState<SettingsTab>('general');
     const [query, setQuery] = useState('');
@@ -147,6 +157,14 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
         onSave,
         onOpenChange,
     });
+    // Save asks first when it turns the custom enum template on over an edited enum.ejs; Cancel keeps the draft.
+    const [confirmEnumTemplateOpen, setConfirmEnumTemplateOpen] = useState(false);
+    const requestSave = () => {
+        const overwritesEditedTemplate =
+            !!editedEnumTemplatePath && draft.customEnumTemplate && !settings.customEnumTemplate && draft.generateTemplates;
+        if (overwritesEditedTemplate) setConfirmEnumTemplateOpen(true);
+        else void save();
+    };
 
     // Start every visit with an empty search.
     useEffect(() => {
@@ -597,7 +615,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     {dirty ? '● Unsaved changes' : 'No unsaved changes'}
                 </span>
                 <span className={styles.footerActions}>
-                    <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>
+                    <Button appearance="primary" disabled={!dirty || saving} onClick={requestSave}>
                         {saving ? 'Saving…' : 'Save'}
                     </Button>
                     {/* Clicking Cancel closes the panel; the chevron opens the menu with Cancel (the default) and Reset to defaults. */}
@@ -626,6 +644,17 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     </Menu>
                 </span>
             </DrawerFooter>
+            <ConfirmationDialog
+                open={confirmEnumTemplateOpen}
+                title={EDITED_ENUM_TEMPLATE_TITLE}
+                message={editedEnumTemplateMessage(editedEnumTemplatePath ?? '')}
+                confirmLabel={EDITED_ENUM_TEMPLATE_CONFIRM}
+                onConfirm={() => {
+                    setConfirmEnumTemplateOpen(false);
+                    void save();
+                }}
+                onCancel={() => setConfirmEnumTemplateOpen(false)}
+            />
         </OverlayDrawer>
     );
 }

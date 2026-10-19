@@ -167,12 +167,16 @@ describe('settings panel', () => {
         root = undefined;
     });
 
-    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn()) {
+    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn(), editedEnumTemplatePath?: string) {
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
             root!.render(
-                createElement(FluentProvider, { theme: webLightTheme }, createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave })),
+                createElement(
+                    FluentProvider,
+                    { theme: webLightTheme },
+                    createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave, editedEnumTemplatePath }),
+                ),
             );
         });
         return onOpenChange;
@@ -357,6 +361,67 @@ describe('settings panel', () => {
         await click(button('Save'));
         // Rename itself stays off: turning the custom template off later restores the default output.
         expect(onSave).toHaveBeenCalledWith(settingsWith({ customEnumTemplate: true }));
+    });
+
+    describe('confirmation before replacing an edited enum.ejs (spec 001, FR-012)', () => {
+        const EDITED = 'C:\\proj\\_templates\\enum.ejs';
+        const dialogShown = () => document.body.textContent?.includes('Replace your edited enum.ejs?') ?? false;
+        const confirmButton = () =>
+            Array.from(document.querySelectorAll('[role="alertdialog"] button')).find((b) => b.textContent === 'Use custom enum template') as HTMLButtonElement;
+        const dialogCancel = () =>
+            Array.from(document.querySelectorAll('[role="alertdialog"] button')).find((b) => b.textContent === 'Cancel') as HTMLButtonElement;
+
+        it('asks on Save when the custom enum template is turned on over an edited enum.ejs; Cancel saves nothing', async () => {
+            const onSave = vi.fn(async () => {});
+            const onOpenChange = await render(toolConfig, onSave, vi.fn(), EDITED);
+            await openTab('Generate & files');
+            await click(control('Custom enum template'));
+            await click(button('Save'));
+            expect(dialogShown()).toBe(true);
+            expect(document.body.textContent).toContain(EDITED);
+            expect(onSave).not.toHaveBeenCalled();
+            await click(dialogCancel());
+            expect(dialogShown()).toBe(false);
+            expect(onSave).not.toHaveBeenCalled();
+            expect(onOpenChange).not.toHaveBeenCalledWith(false);
+            // The draft is kept.
+            expect(control('Custom enum template').checked).toBe(true);
+        });
+
+        it('saves after confirming', async () => {
+            const onSave = vi.fn(async () => {});
+            await render(toolConfig, onSave, vi.fn(), EDITED);
+            await openTab('Generate & files');
+            await click(control('Custom enum template'));
+            await click(button('Save'));
+            await click(confirmButton());
+            expect(onSave).toHaveBeenCalledWith(settingsWith({ customEnumTemplate: true }));
+        });
+
+        it("doesn't ask without an edited enum.ejs, with Generate templates off, or when turning it off", async () => {
+            const cases: Array<[ToolConfig, string | undefined, (() => Promise<void>)[], Partial<ToolConfig>]> = [
+                [toolConfig, undefined, [() => click(control('Custom enum template'))], { customEnumTemplate: true }],
+                [
+                    toolConfig,
+                    EDITED,
+                    [() => click(control('Generate templates')), () => click(control('Custom enum template'))],
+                    { customEnumTemplate: true, generateTemplates: false },
+                ],
+                [settingsWith({ customEnumTemplate: true }), EDITED, [() => click(control('Custom enum template'))], { customEnumTemplate: false }],
+            ];
+            for (const [settings, path, steps, expected] of cases) {
+                const onSave = vi.fn(async () => {});
+                await render(settings, onSave, vi.fn(), path);
+                await openTab('Generate & files');
+                for (const step of steps) await step();
+                await click(button('Save'));
+                expect(dialogShown()).toBe(false);
+                expect(onSave).toHaveBeenCalledWith(settingsWith(expected));
+                act(() => root?.unmount());
+                container?.remove();
+                root = undefined;
+            }
+        });
     });
 
     it('searches across all tabs', async () => {

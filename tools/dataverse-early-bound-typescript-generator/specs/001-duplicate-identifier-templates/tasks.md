@@ -223,7 +223,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   closes; turning off saves at once; wire it in `src/components/apps/App.tsx` for the proposal and the Preview card
   switch, rendering `ConfirmationDialog`; tests in `test/hooks.test.ts` (opens only when edited and templates on;
   confirm saves `true`; cancel saves nothing; off saves at once)
-- [ ] T025 [US1] Add the optional `editedEnumTemplatePath` prop to `SettingsPanel` in
+- [x] T025 [US1] Add the optional `editedEnumTemplatePath` prop to `SettingsPanel` in
   `src/components/panels/SettingsPanel.tsx` and pass it from `App.tsx`; on **Save**, when the draft turns the custom
   template on with Generate templates on and the prop set, show the dialog before `onSave`; **Cancel** keeps the
   panel open with its draft; tests in `test/settings.test.ts` (dialog shown and Cancel saves nothing; confirm saves;
