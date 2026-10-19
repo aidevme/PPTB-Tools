@@ -22,7 +22,8 @@ The tool writes only when you click **Generate**, and only inside the project fo
   are lost unless they're in source control. Preview lists them, with their changes. Turn off **Settings →
   Generate & files → Generate templates** to stop writing them. With **Custom enum template** on, `enum.ejs` is
   replaced by the custom version (also over an edited copy); turning the setting on or off writes nothing by
-  itself, and Preview lists the change before Generate writes it.
+  itself, and Preview lists the change before Generate writes it. When the last preview found your `enum.ejs`
+  edited, turning the setting on asks first, naming the file (**Replace your edited enum.ejs?**).
 
 ## Orphaned files
 

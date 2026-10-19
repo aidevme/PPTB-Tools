@@ -50,6 +50,11 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
   preview and Generate, that renaming the labels is the lasting fix, and, with Generate templates off, that the CLI
   won't get the fix. **Use custom enum template** calls `onCustomEnumTemplateChange(true)`; **Not now** hides it for
   this preview only (the card keeps the dismissed `previewedAt`), so a new preview shows it again. Nothing is saved.
+- **Edited enum.ejs confirmation:** `App.tsx` routes `onCustomEnumTemplateChange` (the proposal and the switch)
+  through `useCustomEnumTemplateConfirmation`. Turning it on with Generate templates on, when the last preview found
+  the project's `enum.ejs` edited (`editedEnumTemplate`), opens a `ConfirmationDialog` ("Replace your edited
+  enum.ejs?", with the path, from `settingsInfo.tsx`) instead of saving; **Use custom enum template** saves, **Cancel**
+  saves nothing. Other changes save straight away.
 
 - **Out of date:** when the selection or options changed since the preview, a warning bar says so and has a
   **Preview again** button.

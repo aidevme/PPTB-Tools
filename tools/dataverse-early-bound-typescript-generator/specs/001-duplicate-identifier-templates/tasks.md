@@ -228,7 +228,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   template on with Generate templates on and the prop set, show the dialog before `onSave`; **Cancel** keeps the
   panel open with its draft; tests in `test/settings.test.ts` (dialog shown and Cancel saves nothing; confirm saves;
   no dialog without the prop, with Generate templates off in the draft, or when turning it off)
-- [ ] T026 [P] Update the docs: `/docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/troubleshooting.md`
+- [x] T026 [P] Update the docs: `/docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/troubleshooting.md`
   and `guide/safety.md` (the confirmation), `components/cards/preview-card.md`, `components/panels/settings-panel.md`,
   and the README's "What this tool changes"
 - [ ] T027 Regenerate the API pages (`npm run docs:api`), rerun the full verification (build, tests, validate, audit,

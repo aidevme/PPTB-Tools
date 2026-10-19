@@ -60,8 +60,10 @@ preview with duplicates). Nothing changes until you preview again and generate. 
 - the generated files rename later duplicates exactly as **Rename duplicated identifier(s)** does (which then shows
   as on);
 - Generate writes a custom `enum.ejs` to your project's `templateRoot` (`_templates` by default) in place of
-  dataverse-gen's, replacing any copy there, including one you edited. The [dataverse-gen
-  CLI](./moving-from-dataverse-gen.md) uses it, so it writes the same names as this tool;
+  dataverse-gen's, replacing any copy there, including one you edited. If the last preview found your `enum.ejs`
+  edited, turning the setting on first asks **Replace your edited enum.ejs?** with the file's path; **Cancel** leaves
+  it off. The [dataverse-gen CLI](./moving-from-dataverse-gen.md) uses the custom template, so it writes the same
+  names as this tool;
 - the CLI only gets the fix while **Generate templates** is on.
 
 Turn it off again in **Settings** → **Generate & files** or next to the Generate button; the next Generate writes
