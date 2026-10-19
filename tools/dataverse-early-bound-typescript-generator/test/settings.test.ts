@@ -59,6 +59,7 @@ describe('tool config', () => {
             skipDuplicateIdentifiers: false,
             renameDuplicateIdentifiers: false,
             generateTemplates: true,
+            customEnumTemplate: false,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
             projects: [],
         });
@@ -91,6 +92,13 @@ describe('tool config', () => {
         expect(mergeToolConfig({ generateTemplates: false }).generateTemplates).toBe(false);
         expect(mergeToolConfig({ generateTemplates: 'no' }).generateTemplates).toBe(true);
         expect(mergeToolConfig({}).generateTemplates).toBe(true);
+    });
+
+    it('reads customEnumTemplate only when it is a boolean, defaulting to false', () => {
+        expect(mergeToolConfig({ customEnumTemplate: true }).customEnumTemplate).toBe(true);
+        expect(mergeToolConfig({ customEnumTemplate: 'yes' }).customEnumTemplate).toBe(false);
+        // Settings saved before the key existed load with the default.
+        expect(mergeToolConfig({ renameDuplicateIdentifiers: true }).customEnumTemplate).toBe(false);
     });
 
     it('reads renameDuplicateIdentifiers only when it is a boolean', () => {

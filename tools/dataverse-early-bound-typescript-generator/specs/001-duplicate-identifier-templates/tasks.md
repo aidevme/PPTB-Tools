@@ -42,7 +42,7 @@ reports no new warning, changed Markdown passes `Validate-Markdown.ps1`, and the
 
 **Purpose**: the setting, the custom template and its proof, and template selection
 
-- [ ] T003 Add the tool setting `customEnumTemplate` (boolean, default `false`; "Non-boolean or missing values fall
+- [x] T003 Add the tool setting `customEnumTemplate` (boolean, default `false`; "Non-boolean or missing values fall
   back to the default") to `ToolConfig`, the defaults and `mergeToolConfig` in `src/config/index.ts`, and to
   `src/config/dataverse-early-bound-typescript-generator-config.json`, `…-config.schema.json` (description, type,
   default) and `…-config.sample.json`; tests in `test/settings.test.ts` (tool config: default, merge, invalid value)
