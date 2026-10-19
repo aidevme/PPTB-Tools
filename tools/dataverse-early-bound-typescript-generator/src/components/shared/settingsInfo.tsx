@@ -9,6 +9,8 @@ export const SKIP_DUPLICATES_TITLE = 'Skip duplicated identifier(s)';
 export const RENAME_DUPLICATES_TITLE = 'Rename duplicated identifier(s)';
 /** Switch label for `deleteOrphanedFiles`, explained by {@link DELETE_ORPHANS_INFO}. */
 export const DELETE_ORPHANS_TITLE = 'Delete orphaned files';
+/** Switch label for `customEnumTemplate`, explained by {@link CUSTOM_ENUM_TEMPLATE_INFO}. */
+export const CUSTOM_ENUM_TEMPLATE_TITLE = 'Custom enum template';
 
 /** Skip duplicated identifier(s): `skipDuplicateIdentifiers`. */
 export const SKIP_DUPLICATES_INFO = (
@@ -30,6 +32,22 @@ export const RENAME_DUPLICATES_INFO = (
         new name. When off, the output matches dataverse-gen and the file is marked as having duplicate identifiers. Renaming the
         label in Dataverse is the lasting fix. Changing this needs a new preview. The same setting is in Settings → Generate &amp;
         files and in Preview and generate. Saved as <code>renameDuplicateIdentifiers</code>.
+    </>
+);
+
+/**
+ * Custom enum template: `customEnumTemplate`. Also the core of the proposal Preview and generate shows when a preview
+ * finds duplicate identifiers.
+ */
+export const CUSTOM_ENUM_TEMPLATE_INFO = (
+    <>
+        Fixes duplicate identifiers in the generated files and for the dataverse-gen CLI alike. When on, each later member whose name is
+        taken gets its value appended, for example <code>InProgress_700970000</code>, as Rename duplicated identifier(s) does, and
+        Generate writes a custom <code>enum.ejs</code> to the project's <code>templateRoot</code> in place of dataverse-gen's,
+        replacing an edited copy, so the CLI renames them the same way. The CLI only gets it while Generate templates is on. When off,
+        the output and <code>enum.ejs</code> are dataverse-gen's again. Renaming the labels in Dataverse is the lasting fix, and a
+        reorder of the options can move the suffix to another member. Changing this needs a new preview. The same setting is in
+        Settings → Generate &amp; files and in Preview and generate. Saved as <code>customEnumTemplate</code>.
     </>
 );
 

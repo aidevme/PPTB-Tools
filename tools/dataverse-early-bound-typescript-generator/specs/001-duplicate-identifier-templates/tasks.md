@@ -80,7 +80,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 - [x] T009 [US1] Add `'customEnumTemplate'` to `PreviewSettingKey` in `src/hooks/useToolSettings.ts` and mark the plan
   stale when it changes; add it to the defaults in `src/hooks/useSettingsDraft.ts`; tests in `test/hooks.test.ts`
   (changing it saves the setting and marks the plan stale)
-- [ ] T010 [P] [US1] Add `CUSTOM_ENUM_TEMPLATE_TITLE` ("Custom enum template") and `CUSTOM_ENUM_TEMPLATE_INFO` to
+- [x] T010 [P] [US1] Add `CUSTOM_ENUM_TEMPLATE_TITLE` ("Custom enum template") and `CUSTOM_ENUM_TEMPLATE_INFO` to
   `src/components/shared/settingsInfo.tsx`, per `contracts/preview-proposal.md` (what it renames, that it replaces the
   project's `enum.ejs`, that it needs a new preview, that the CLI only gets it while Generate templates is on, and that
   renaming the labels in Dataverse is the lasting fix)
