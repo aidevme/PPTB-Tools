@@ -11,7 +11,7 @@ Reference documentation for
 Workflow that reviews a PPTB tool for marketplace intake readiness and reports the result as an issue.
 
 For gh-aw in general (installing the CLI, how compiling works, monitoring runs, switching engines), see
-[GitHub Agentic Workflows](../repository/agentic-workflows.md). This page covers only this workflow, in detail.
+[GitHub Agentic Workflows](../../repository/agentic-workflows.md). This page covers only this workflow, in detail.
 
 | | |
 | --- | --- |
