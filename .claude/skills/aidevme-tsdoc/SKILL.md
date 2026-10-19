@@ -103,7 +103,7 @@ Run this whenever TypeScript code was just created or changed, by the user or by
 | Request | Load |
 | --- | --- |
 | Writing rules, before/after examples, overloads, generics, async, enums, classes, barrels | [references/rules.md](references/rules.md) |
-| Which tag to use, tag syntax, release tags | [references/tags.md](references/tags.md) |
+| Which tag to use, tag syntax, release tags, each tag's tsdoc.org page | [references/tags.md](references/tags.md) |
 | React components, props, hooks, context providers | [references/react.md](references/react.md) |
 | Reviewing or fixing existing comments, the findings table | [references/review.md](references/review.md) |
 | `eslint-plugin-tsdoc`, `tsdoc.json`, TypeDoc, API Extractor, "why is tsdoc/syntax failing" | [references/setup.md](references/setup.md) |
@@ -117,3 +117,4 @@ Run this whenever TypeScript code was just created or changed, by the user or by
 | 2026-10-18 | aidevme | Created: write, review, fix and setup modes; rules, tag reference, React, review checklist, ESLint setup, JavaScript notes and sources; check-tsdoc.mjs; starter tsdoc.json and flat-config snippet. Checked against TSDoc `76dcd8e` and eslint-plugin-tsdoc 0.5.4. |
 | 2026-10-18 | aidevme | Every exported function, public method and hook documents each parameter (`@param`) and its result (`@returns`) in a fixed layout (summary, `@remarks`, parameters and result, modifiers); components keep their props on the props interface. |
 | 2026-10-18 | aidevme | New "After a code change" section and trigger: other skills and ad-hoc edits hand off here to document only the symbols they touched, in the same commit. |
+| 2026-10-19 | aidevme | tags.md links every tag to its tsdoc.org reference page (25 tags; the `@jsx…` pragmas have none) and explains release-tag inheritance from the `@alpha` example. |

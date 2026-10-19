@@ -9,6 +9,7 @@ Purpose: where this skill's rules come from, what was checked when, and what was
 | Source | Version | Used for |
 | --- | --- | --- |
 | [TSDoc](https://tsdoc.org/), [microsoft/tsdoc](https://github.com/microsoft/tsdoc) (MIT) | `main` at `76dcd8e` | The 29 standard tags with kind and group (`tsdoc/src/details/StandardTags.ts`), `tsdoc.json` keys (`tsdoc/schemas/tsdoc.schema.json`) |
+| [tsdoc.org tag pages](https://tsdoc.org/pages/tags/alpha/) | Checked 2026-10-19 | The per-tag links in tags.md (25 tags; the `@jsx…` pragmas have no page), release-tag inheritance from the `@alpha` example |
 | `@microsoft/tsdoc` | 0.17.1 | The parser |
 | `@microsoft/tsdoc-config` | 0.18.3 | `tsdoc.json` loading (README: location, `extends`) |
 | `eslint-plugin-tsdoc` | 0.5.4 | The `tsdoc/syntax` rule; the legacy config from its README; exports one rule and no presets (`eslint-plugin/src/index.ts`) |
