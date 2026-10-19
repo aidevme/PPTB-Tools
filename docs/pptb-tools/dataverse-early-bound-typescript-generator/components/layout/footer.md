@@ -3,7 +3,10 @@
 The bar at the bottom of the tool. It shows the tool's name and version, credits the projects the tool is
 compatible with, reminds users to review generated files, and links to the documentation and repository.
 
-Source: [`src/components/layout/Footer.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Footer.tsx)
+Source: [`src/components/layout/Footer.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Footer.tsx);
+the links and credits are constants in
+[`Footer.const.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Footer.const.ts)
+(`DOCUMENTATION_URL`, `REPOSITORY_URL`, `CREDITS`).
 
 ## Layout
 
@@ -26,8 +29,8 @@ right:
 - **Links:** **Documentation** and **GitHub Repo** as subtle buttons with icons and an "opens in a new
   window" marker. They're in a `nav` labelled "Project links".
   - **Documentation** points to the tool's Getting started page on the docs site
-    (`DOCUMENTATION_URL` in `Footer.tsx`).
-  - **GitHub Repo** points to <https://github.com/aidevme/PPTB-Tools>.
+    (`DOCUMENTATION_URL` in `Footer.const.ts`).
+  - **GitHub Repo** points to <https://github.com/aidevme/PPTB-Tools> (`REPOSITORY_URL`).
 
 All external links open in a new window. On narrow windows the sections wrap onto separate rows.
 
