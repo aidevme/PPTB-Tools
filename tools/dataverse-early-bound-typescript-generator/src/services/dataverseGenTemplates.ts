@@ -7,6 +7,7 @@
  * its built-in ones.
  */
 import type { GeneratedFile, ResolvedConfig } from '../core';
+import type { PlannedFile, WritePlan } from '../types';
 import action from '../assets/dataverse-gen-templates/action.ejs?raw';
 import complextype from '../assets/dataverse-gen-templates/complextype.ejs?raw';
 import entity from '../assets/dataverse-gen-templates/entity.ejs?raw';
@@ -61,4 +62,27 @@ export function dataverseGenTemplateFiles(config: ResolvedConfig, options: Templ
         path: root && root !== '.' ? `${root}/${t.name}` : t.name,
         content: options.customEnum && t.name === 'enum.ejs' ? CUSTOM_ENUM_TEMPLATE : t.content,
     }));
+}
+
+/** The text with CRLF and CR line endings turned into LF, so copies that differ only in line endings compare equal. */
+const lf = (text: string) => text.replace(/\r\n?/g, '\n');
+
+/**
+ * The project's `enum.ejs` from a write plan when it looks edited: it exists on disk and differs from both
+ * dataverse-gen's template and the custom enum template (line endings ignored, as the write plan compares).
+ *
+ * @remarks Used to confirm before the custom enum template replaces a copy the user changed (spec 001, FR-012). It
+ * only knows what the last preview read: a plan without templates (Generate templates off) or without an existing
+ * `enum.ejs` gives `undefined`.
+ *
+ * @param plan - The last preview's write plan, or `null` before the first preview.
+ * @returns The planned `enum.ejs` file, with its `absolutePath`, when it looks edited; otherwise `undefined`.
+ */
+export function editedEnumTemplate(plan: WritePlan | null): PlannedFile | undefined {
+    const original = lf(DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content);
+    const custom = lf(CUSTOM_ENUM_TEMPLATE);
+    const file = plan?.files.find((f) => f.inProjectFolder && (f.relativePath === 'enum.ejs' || f.relativePath.endsWith('/enum.ejs')));
+    if (!file || file.existingContent == null) return undefined;
+    const existing = lf(file.existingContent);
+    return existing === original || existing === custom ? undefined : file;
 }

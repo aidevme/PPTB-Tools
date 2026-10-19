@@ -212,7 +212,7 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 **Independent Test**: with an edited `enum.ejs` in the last preview, turn the setting on from the proposal, the
 Preview card switch and the Settings panel; each opens the dialog, **Cancel** saves nothing, confirming saves it.
 
-- [ ] T022 [US1] Add `editedEnumTemplate(plan)` to `src/services/dataverseGenTemplates.ts` (export through
+- [x] T022 [US1] Add `editedEnumTemplate(plan)` to `src/services/dataverseGenTemplates.ts` (export through
   `src/services/index.ts`): the plan's `enum.ejs` template entry when its `existingContent` is neither dataverse-gen's
   nor `CUSTOM_ENUM_TEMPLATE` (line endings ignored), else `undefined`; tests in `test/dataverseGenTemplates.test.ts`
   (original, custom, CRLF/LF variants, edited, missing, no templates in the plan)

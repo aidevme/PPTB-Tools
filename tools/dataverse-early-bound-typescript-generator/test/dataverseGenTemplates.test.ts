@@ -9,7 +9,7 @@ import * as path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { resolveConfig } from '../src/core';
 import { fileType } from '../src/components/shared/generatedFiles';
-import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, dataverseGenTemplateFiles } from '../src/services/dataverseGenTemplates';
+import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, dataverseGenTemplateFiles, editedEnumTemplate } from '../src/services/dataverseGenTemplates';
 import { InMemoryFileSink } from '../src/services/fileSink';
 import { applyWritePlan, createWritePlan } from '../src/services/plan';
 
@@ -77,5 +77,38 @@ describe('dataverse-gen templates', () => {
         expect(sink.files.get('C:\\proj\\_templates\\action.ejs')).toBe(action);
         expect(sink.files.get('C:\\proj\\_templates\\entity.ejs')).not.toBe('my customised template');
         expect(sink.files.get('C:\\proj\\gen\\metadata.ts')).toBe('M\n');
+    });
+});
+
+describe('editedEnumTemplate (spec 001, FR-012)', () => {
+    const original = DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content;
+    /** A preview plan of a project whose enum.ejs on disk is `onDisk` (undefined: not there). */
+    const planWith = async (onDisk: string | undefined, templateRoot = './_templates') => {
+        const config = resolveConfig({ output: { templateRoot } });
+        const root = templateRoot.replace(/^\.\//, '').replace(/\//g, '\\');
+        const sink = new InMemoryFileSink(onDisk === undefined ? {} : { [`C:\\proj\\${root ? `${root}\\` : ''}enum.ejs`]: onDisk });
+        return createWritePlan(sink, 'C:\\proj', config, [], dataverseGenTemplateFiles(config));
+    };
+
+    it("is undefined for dataverse-gen's or the custom template, with either line ending", async () => {
+        expect(editedEnumTemplate(await planWith(original))).toBeUndefined();
+        expect(editedEnumTemplate(await planWith(original.replace(/\r\n/g, '\n')))).toBeUndefined();
+        expect(editedEnumTemplate(await planWith(CUSTOM_ENUM_TEMPLATE))).toBeUndefined();
+        expect(editedEnumTemplate(await planWith(CUSTOM_ENUM_TEMPLATE.replace(/\r\n/g, '\n')))).toBeUndefined();
+    });
+
+    it('returns the planned file, with its path, when the copy on disk was edited', async () => {
+        const edited = editedEnumTemplate(await planWith('// my own enum template\n'));
+        expect(edited?.relativePath).toBe('_templates/enum.ejs');
+        expect(edited?.absolutePath).toBe('C:\\proj\\_templates\\enum.ejs');
+        expect(editedEnumTemplate(await planWith('// mine\n', './tpl'))?.absolutePath).toBe('C:\\proj\\tpl\\enum.ejs');
+    });
+
+    it('is undefined without a plan, without an enum.ejs on disk, or without templates in the plan', async () => {
+        expect(editedEnumTemplate(null)).toBeUndefined();
+        expect(editedEnumTemplate(await planWith(undefined))).toBeUndefined();
+        const config = resolveConfig({});
+        const sink = new InMemoryFileSink({ 'C:\\proj\\_templates\\enum.ejs': '// mine\n' });
+        expect(editedEnumTemplate(await createWritePlan(sink, 'C:\\proj', config, []))).toBeUndefined();
     });
 });
