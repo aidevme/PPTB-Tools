@@ -146,8 +146,10 @@ export function PreviewActionBar(props: IPreviewActionBarProps) {
                     {generateLabel(plan, writable, deletable)}
                 </Button>
             </Tooltip>
-            {/* Both switches only apply to files a preview found: they're disabled before a preview and while it found
-                none. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
+            {/* The switches only apply to files a preview found: they're disabled before a preview and while it found none
+                of their kind (orphaned files, or files with duplicate identifiers). Rename and Custom enum template stay
+                usable while on, since they remove the duplicates they act on; Rename is disabled while Custom enum template
+                is on. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
             <Switch
                 label={infoLabel(DELETE_ORPHANS_TITLE, switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
                 checked={deleteOrphans}

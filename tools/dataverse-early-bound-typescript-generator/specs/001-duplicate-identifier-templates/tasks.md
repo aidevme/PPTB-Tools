@@ -201,4 +201,4 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 
 ## Phase 7: Convergence
 
-- [ ] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per Constitution VII (partial)
+- [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per Constitution VII (partial)
