@@ -1,5 +1,7 @@
 # Writing Style Guide
 
+**Version:** 1.0.0 · **Last updated:** 2026-10-12
+
 ![Writing style guide banner—an open book with a pen across its pages, connected to icons for page structure, review checklists, and consistent terminology, on a blue-to-purple gradient background](../../assets/writing_style_guide_page.png)
 
 This guide provides prescriptive instructions for writing accessibility guidance pages in this repository. For scope, frontmatter requirements, environment setup, and how to submit changes, see [CONTRIBUTING.md](https://github.com/aidevme/PPTB-Tools/blob/main/CONTRIBUTING.md).

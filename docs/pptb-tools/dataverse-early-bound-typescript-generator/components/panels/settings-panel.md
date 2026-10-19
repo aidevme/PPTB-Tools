@@ -32,8 +32,9 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
   (`settingsOpen`).
 - **Navigation column** (left, sticky):
   - a **Search settings** box;
-  - four vertical tabs, each with a one-line subtitle: **General** (notifications and lists), **Options** (what
-    every project generates), **Generate & files** (confirmations and orphans) and **Templates** (EJS templates). The selected tab is view state
+  - five vertical tabs, each with an icon and a one-line subtitle: **General** (notifications and lists), **Options**
+    (what every project generates), **Generate & files** (confirmations and orphans), **Templates** (EJS templates)
+    and **Advanced** (for power users). The selected tab is view state
     inside the component and starts on General.
 - **Content** (right, at most 560 px wide): a one-line intro for the tab, then **section cards**. Each card has an
   icon, a title and **scope badges** saying where its values apply, then one **row** per setting:
@@ -44,8 +45,9 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
   The controls are labelled by the row's title and described by its description (`aria-labelledby`,
   `aria-describedby`).
 - **Tab changes** fade the content in briefly; the animation is off when the system asks for reduced motion.
-- **Footer:** on the left, **● Unsaved changes** (highlighted) or **No unsaved changes**; on the right, **Reset to
-  defaults**, **Save** and **Cancel**.
+- **Footer:** on the left, **● Unsaved changes** (highlighted) or **No unsaved changes**; on the right, **Save** and
+  a **Cancel** split button (Fluent UI `SplitButton` with a `Menu`). Clicking Cancel closes the panel; the chevron
+  (**More actions**) opens a menu with **Cancel** (the default) and **Reset to defaults**.
 
 ## Settings
 
@@ -105,6 +107,12 @@ as in the header, and **Read-only**), with no settings. `TemplatesViewer` in `Se
 The content comes from `DATAVERSE_GEN_TEMPLATES` in `services/dataverseGenTemplates.ts`, so it's exactly what
 Generate writes. The tab isn't searchable, since it has no settings, and Save and Reset to defaults don't affect it.
 
+## Advanced tab
+
+A placeholder for settings most projects never need to change (icon `DeveloperBoardRegular`). It has no sections
+yet, so the content shows its intro and "No settings on this tab yet." Settings added here with `tab: 'advanced'`
+appear on it and in search like any other.
+
 ## Search
 
 Typing in **Search settings** shows the matching settings from every tab at once, grouped in their section cards,
@@ -119,7 +127,8 @@ With no matches it says so.
 - **Save** is enabled only when a value differs from the saved one. It saves and closes the panel, or shows the
   error and stays open if saving fails.
 - **Cancel** (or closing the panel) discards the changes.
-- **Reset to defaults** sets every setting back to the bundled default, keeping saved projects. It's disabled when
+- **Reset to defaults** (in the Cancel button's menu) sets every setting back to the bundled default, keeping saved
+  projects. It's disabled when
   everything already has its default value, and it only changes the draft: Save still has to be clicked.
 - **Where values come from:** the defaults are in
   `src/config/dataverse-early-bound-typescript-generator-config.json` (`general`, `deleteOrphanedFiles: false`,

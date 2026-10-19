@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
+import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text, mergeClasses } from '@fluentui/react-components';
 import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
-import { useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
+import { useAutoHideFooter, useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
+import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
 
 /**
  * Top-level orchestration. The state lives in hooks (`hooks/`): the tool config (`useToolSettings`), the project
@@ -15,7 +16,8 @@ export default function App() {
     const styles = useAppStyles();
     const headerRef = useRef<HTMLDivElement>(null);
     const footerRef = useRef<HTMLDivElement>(null);
-    useStickyBarHeights(headerRef, footerRef);
+    const footerPhase = useAutoHideFooter(FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS);
+    useStickyBarHeights(headerRef, footerRef, footerPhase !== 'docked');
     const { connection, isLoading: connectionLoading } = useConnection();
     const inPptb = typeof window !== 'undefined' && !!window.toolboxAPI && !!window.dataverseAPI;
     const connKey = connectionKey(connection);
@@ -249,7 +251,10 @@ export default function App() {
                 onConfirmGenerate={confirmGenerate}
                 onCancelGenerate={cancelGenerate}
             />
-            <div ref={footerRef} className={styles.stickyFooter}>
+            <div
+                ref={footerRef}
+                className={mergeClasses(styles.stickyFooter, footerPhase === 'sliding' && styles.footerSliding, footerPhase === 'docked' && styles.footerDocked)}
+            >
                 <Footer />
             </div>
         </div>

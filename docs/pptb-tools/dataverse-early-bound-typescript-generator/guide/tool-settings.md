@@ -1,6 +1,6 @@
 # Tool settings
 
-Open the Settings panel with the gear button in the header. It has three tabs, and a **Search settings** box that
+Open the Settings panel with the gear button in the header. It has five tabs, and a **Search settings** box that
 finds a setting in any tab by its name or description.
 
 ## General
@@ -49,12 +49,16 @@ tool's version. Generate writes them to your project's `templateRoot` folder (`_
 **Generate templates** is off. The tool generates with built-in copies, so editing the written files doesn't change
 its output, and the next Generate overwrites them. See [What gets generated](./what-gets-generated.md).
 
+## Advanced
+
+For settings most projects never need to change. It has no settings yet.
+
 ## Saving
 
 - Changes are a draft until you click **Save**, which is enabled only when something differs from the saved values.
   **Cancel**, or closing the panel, discards them.
-- **Reset to defaults** sets every setting back to its default and keeps your saved projects. You still have to
-  click **Save**.
+- **Reset to defaults** sets every setting back to its default and keeps your saved projects. It's in the menu that
+  opens from the arrow next to **Cancel**. You still have to click **Save**.
 - Numbers outside the allowed range are rounded and clamped to it when saved.
 
 ## Where settings are saved

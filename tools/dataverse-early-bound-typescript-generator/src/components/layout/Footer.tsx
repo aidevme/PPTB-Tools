@@ -3,15 +3,7 @@ import { BookOpenRegular, BranchForkRegular, InfoRegular, OpenRegular } from '@f
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
 import { AppIcon } from '../shared/AppIcon';
-
-/** The tool's Getting started page on the published docs site (GitHub Pages). */
-const DOCUMENTATION_URL = 'https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/';
-const REPOSITORY_URL = 'https://github.com/aidevme/PPTB-Tools';
-
-const CREDITS = [
-    { name: 'dataverse-ify', url: 'https://github.com/scottdurow/dataverse-ify', role: 'runtime the generated types are for' },
-    { name: 'dataverse-gen', url: 'https://github.com/scottdurow/dataverse-gen', role: 'CLI this tool shares its project file with' },
-];
+import { CREDITS, DOCUMENTATION_URL, REPOSITORY_URL } from './Footer.const';
 
 /**
  * The bar at the bottom: the tool's name and version; credits to Scott Durow's dataverse-ify and dataverse-gen

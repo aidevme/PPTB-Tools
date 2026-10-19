@@ -51,8 +51,9 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "lint:tsdoc": "eslint src",
-        "finalize-package": "npm shrinkwrap",
-        "validate": "pptb-validate"
+        "validate": "pptb-validate",
+        "finalize-package": "npm shrinkwrap"
+        
     },
     "dependencies": {
         "@fluentui/react-components": "^9.74.4",

@@ -1,0 +1,10 @@
+{
+    "$schema": "https://typedoc-plugin-markdown.org/schema.json",
+    "extends": ["./typedoc.json"],
+    "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+    "out": "../../docs/pptb-tools/dataverse-early-bound-typescript-generator/api",
+    "docsRoot": "../../docs",
+    "entryFileName": "index",
+    "hidePageHeader": true,
+    "hideBreadcrumbs": true
+}

@@ -1,5 +1,7 @@
 # Refactoring Style Guide
 
+**Version:** 1.0.0 · **Last updated:** 2026-10-18
+
 This guide sets the structure and writing rules for refactoring documents in this repository: the analysis, plan,
 decision and execution record for refactoring one tool under `tools/`. It applies to every
 `docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md` file, whether a person writes it or the

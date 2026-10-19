@@ -11,6 +11,7 @@
     "github.vscode-github-actions",
     "ms-vscode.vscode-typescript-next",
     "microsoft-isvexptools.powerplatform-vscode",
+    "powerplatformtoolbox.power-platform-toolbox",
     "bierner.markdown-mermaid",
     "davidanson.vscode-markdownlint"
   ],

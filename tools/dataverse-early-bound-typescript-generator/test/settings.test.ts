@@ -355,9 +355,17 @@ describe('settings panel', () => {
             projects: [PROJECT],
         });
         await render(custom, onSave);
-        expect(button('Reset to defaults').disabled).toBe(false);
-        await click(button('Reset to defaults'));
-        expect(button('Reset to defaults').disabled).toBe(true);
+        // Reset to defaults is the second item in the Cancel split button's menu.
+        const openMenu = () => click(document.querySelector('button[aria-label="More actions"]') as HTMLElement);
+        const resetItem = () =>
+            Array.from(document.querySelectorAll('[role="menuitem"]')).find((i) => i.textContent === 'Reset to defaults') as HTMLElement;
+        await openMenu();
+        const items = Array.from(document.querySelectorAll('[role="menuitem"]')).map((i) => i.textContent);
+        expect(items).toEqual(['Cancel', 'Reset to defaults']);
+        expect(resetItem().getAttribute('aria-disabled')).not.toBe('true');
+        await click(resetItem());
+        await openMenu();
+        expect(resetItem().getAttribute('aria-disabled')).toBe('true');
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(settingsWith({ projects: [PROJECT] }));
     });

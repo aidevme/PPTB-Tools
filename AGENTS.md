@@ -27,6 +27,9 @@ Check the tool's README for the original it's based on, what was intentionally l
 
 - **Docs site:** VitePress in `docs/`, published to GitHub Pages. `npm run docs:build` (repo root) fails on dead
   links; run it after changing docs. New pages must be added to the sidebar in `docs/.vitepress/config.mts`.
+- **API reference:** generated from TSDoc with TypeDoc. `npm run docs:api` (repo root) writes Markdown to
+  `docs/pptb-tools/<tool-name>/api/` (committed, never hand-edited), `npm run docs:api:html` an HTML site to the
+  gitignored `api-docs/`. Rerun `docs:api` after changing exported symbols or their TSDoc.
 - **Markdown checks:** after editing Markdown, run markdownlint and cspell through the `aidevme-docs-maintenance`
   skill (`Validate-Markdown.ps1`); it also maintains `cspell.json` and the `docs/` entries in `.github/CODEOWNERS`.
 - **Per tool:** `docs/pptb-tools/<tool-name>/`, split into a **user guide** (`getting-started/`, `guide/`) and a
