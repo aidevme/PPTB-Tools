@@ -57,7 +57,7 @@ reports no new warning, changed Markdown passes `Validate-Markdown.ps1`, and the
   `{ customEnum?: boolean }`, importing `../assets/custom-templates/enum.ejs?raw`, so `enum.ejs` gets the custom
   content and the other six stay dataverse-gen's; tests in `test/dataverseGenTemplates.test.ts` (default output
   byte for byte unchanged; with `customEnum` only `enum.ejs` differs)
-- [ ] T007 [P] Correct the TSDoc of `renameDuplicateEnumMembers` in `src/core/generator.ts`: string-valued enums come
+- [x] T007 [P] Correct the TSDoc of `renameDuplicateEnumMembers` in `src/core/generator.ts`: string-valued enums come
   from `$metadata` enum types, whose member names are unique, so they have no duplicates to rename (research R1)
 
 **Checkpoint**: the custom template exists and is proven to match the tool; nothing in the UI changes yet.
