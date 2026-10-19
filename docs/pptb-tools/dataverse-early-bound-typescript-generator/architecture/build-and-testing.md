@@ -86,6 +86,29 @@ the first failure:
 
 CodeQL (`codeql.yml`) scans the whole repository separately, on every push and pull request to `main` and weekly.
 
+## API reference
+
+The [API reference](../api/) is generated from the TSDoc comments with [TypeDoc](https://typedoc.org/). Run these
+from the **repository root**, after `npm install` there and in the tool's folder (TypeDoc compiles the tool with its
+own `tsconfig.json` and types):
+
+| Command | Output |
+| --- | --- |
+| `npm run docs:api` | Markdown pages in `docs/pptb-tools/dataverse-early-bound-typescript-generator/api/` and their sidebar (`typedoc-sidebar.json`), shown under **Contributor guide → API reference**. Commit them. |
+| `npm run docs:api:html` | TypeDoc's HTML site in `api-docs/dataverse-early-bound-typescript-generator/` (gitignored). Open its `index.html`. |
+| `npm run lint:tsdoc` | The tool's `lint:tsdoc`: `eslint-plugin-tsdoc` checks the comment syntax. |
+
+- **Configuration** is in the tool's folder: `typedoc.json` (entry points, HTML output) and `typedoc.markdown.json`,
+  which extends it with `typedoc-plugin-markdown` and `typedoc-vitepress-theme`. The entry points are the folders'
+  `index.ts` barrels: `core`, `config`, `types`, `services`, `hooks` and `components` (`styles` is left out).
+- **`tsdoc.json`** extends `typedoc/tsdoc.json`, so `lint:tsdoc` accepts TypeDoc's extra tags.
+- **When to regenerate:** after changing an exported symbol or its TSDoc, run `npm run docs:api` and commit the
+  pages with the change. The site's CI build doesn't regenerate them.
+- **Warnings:** TypeDoc warns when a documented symbol uses a type that isn't exported from a barrel (for example
+  `SortState`); the type then appears without a link. Export it from the folder's `index.ts` to include it.
+- The generated pages aren't checked by markdownlint or cspell (`.markdownlint-cli2.jsonc`, `cspell.json`); the TSDoc
+  in the code is.
+
 ## Testing inside PPTB
 
 Build, enable the Debug Menu in PPTB's Settings, use Debug → Browse to load the tool's folder, connect to an
