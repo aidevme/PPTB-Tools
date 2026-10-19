@@ -19,6 +19,7 @@
 - [useAsyncAction](functions/useAsyncAction.md)
 - [useAutoHideFooter](functions/useAutoHideFooter.md)
 - [useConnection](functions/useConnection.md)
+- [useCustomEnumTemplateConfirmation](functions/useCustomEnumTemplateConfirmation.md)
 - [useEnvironmentMetadata](functions/useEnvironmentMetadata.md)
 - [usePlanState](functions/usePlanState.md)
 - [usePreviewGenerate](functions/usePreviewGenerate.md)

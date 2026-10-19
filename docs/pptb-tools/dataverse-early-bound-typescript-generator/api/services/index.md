@@ -42,6 +42,7 @@
 - [dataverseGenTemplateFiles](functions/dataverseGenTemplateFiles.md)
 - [deleteOrphanedFiles](functions/deleteOrphanedFiles.md)
 - [dirname](functions/dirname.md)
+- [editedEnumTemplate](functions/editedEnumTemplate.md)
 - [errorStatus](functions/errorStatus.md)
 - [friendlyError](functions/friendlyError.md)
 - [getRememberedProjectFolder](functions/getRememberedProjectFolder.md)
