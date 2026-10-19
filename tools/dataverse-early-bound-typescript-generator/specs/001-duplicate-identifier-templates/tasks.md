@@ -251,7 +251,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 **Independent Test**: turn it on in one project, open another: it's off there; reopen the first: still on, and its
 `.dataverse-gen.json` has `pptbEarlyBoundGenerator.customEnumTemplate: true` after Generate.
 
-- [ ] T029 Add `projectCustomEnumTemplate(config)` and `withProjectCustomEnumTemplate(config, value)` to
+- [x] T029 Add `projectCustomEnumTemplate(config)` and `withProjectCustomEnumTemplate(config, value)` to
   `src/core/config.ts` (key `pptbEarlyBoundGenerator.customEnumTemplate`, "non-boolean values are ignored", other
   keys in the object kept); tests in `test/projectVersion.test.ts` or a new `test/projectTemplates.test.ts`
 - [ ] T030 Move the default to `ProjectDefaults.customEnumTemplate` (default `false`) in `src/config/index.ts` and the

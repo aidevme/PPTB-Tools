@@ -129,3 +129,47 @@ export function parseConfig(json: string): DataverseGenConfig {
 export function serializeConfig(config: DataverseGenConfig): string {
     return JSON.stringify(config, null, 2) + '\n';
 }
+
+/**
+ * Key of this tool's own settings object in `.dataverse-gen.json`. The dataverse-gen CLI keeps it (it writes the whole
+ * file back) and ignores it; namespacing it means it can't collide with a future dataverse-gen option.
+ */
+export const TOOL_CONFIG_KEY = 'pptbEarlyBoundGenerator';
+
+/** This tool's per-project settings, stored under {@link TOOL_CONFIG_KEY} in `.dataverse-gen.json`. */
+export interface ProjectToolSettings {
+    /** Use the custom enum template for this project (spec 001): rename duplicates and write the custom `enum.ejs`. */
+    customEnumTemplate?: boolean;
+    /** Keys a later version of the tool may add are kept as-is. */
+    [key: string]: unknown;
+}
+
+/** The project's tool settings object, or `{}` when it's missing or not an object. */
+function toolSettingsOf(config: DataverseGenConfig): ProjectToolSettings {
+    const value = config[TOOL_CONFIG_KEY];
+    return value !== null && typeof value === 'object' && !Array.isArray(value) ? (value as ProjectToolSettings) : {};
+}
+
+/**
+ * The project's custom enum template choice.
+ *
+ * @param config - The project's `.dataverse-gen.json` content.
+ * @returns `true` or `false` when the file sets it, or `undefined` when it doesn't (or the value isn't a boolean), so
+ * the default applies.
+ */
+export function projectCustomEnumTemplate(config: DataverseGenConfig): boolean | undefined {
+    const value = toolSettingsOf(config).customEnumTemplate;
+    return typeof value === 'boolean' ? value : undefined;
+}
+
+/**
+ * A copy of the config with the project's custom enum template choice set; every other key, including other keys of
+ * the tool's settings object, is kept.
+ *
+ * @param config - The project's `.dataverse-gen.json` content.
+ * @param value - The choice to store.
+ * @returns The updated config; `config` itself isn't changed.
+ */
+export function withProjectCustomEnumTemplate(config: DataverseGenConfig, value: boolean): DataverseGenConfig {
+    return { ...config, [TOOL_CONFIG_KEY]: { ...toolSettingsOf(config), customEnumTemplate: value } };
+}
