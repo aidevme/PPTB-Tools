@@ -12,6 +12,7 @@ import {
     useStickyBarHeights,
     useToolSettings,
 } from '../../hooks';
+import { projectCustomEnumTemplate, withProjectCustomEnumTemplate } from '../../core';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, editedEnumTemplate, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
@@ -46,10 +47,6 @@ export default function App() {
         onError: setError,
         onPlanStale: markPlanStale,
     });
-    // The Preview card's custom enum template proposal and switch ask first when they'd replace an edited enum.ejs.
-    const customEnumTemplate = useCustomEnumTemplateConfirmation(plan, toolSettings.generateTemplates, (checked) =>
-        void changeSetting('customEnumTemplate', checked),
-    );
     const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear } = useProject({
         sink,
         connKey,
@@ -61,6 +58,12 @@ export default function App() {
         resetPlan,
         markPlanStale,
     });
+    // The open project's custom enum template (its .dataverse-gen.json, saved by Generate). The proposal and the Preview
+    // card switch ask first when they'd replace an edited enum.ejs; updateConfig marks the preview stale.
+    const projectUsesCustomEnumTemplate = projectCustomEnumTemplate(config) ?? toolSettings.projectDefaults.customEnumTemplate;
+    const customEnumTemplate = useCustomEnumTemplateConfirmation(plan, toolSettings.generateTemplates, (checked) =>
+        updateConfig(withProjectCustomEnumTemplate(config, checked)),
+    );
     const selected = useMemo<Record<SelectionKind, string[]>>(
         () => ({ entities: config.entities ?? [], actions: config.actions ?? [], functions: config.functions ?? [] }),
         [config],
@@ -252,7 +255,7 @@ export default function App() {
                         onSkipDuplicatesChange: (checked) => void changeSetting('skipDuplicateIdentifiers', checked),
                         renameDuplicates: toolSettings.renameDuplicateIdentifiers,
                         onRenameDuplicatesChange: (checked) => void changeSetting('renameDuplicateIdentifiers', checked),
-                        customEnumTemplate: toolSettings.customEnumTemplate,
+                        customEnumTemplate: projectUsesCustomEnumTemplate,
                         generateTemplates: toolSettings.generateTemplates,
                         onCustomEnumTemplateChange: customEnumTemplate.request,
                     }}

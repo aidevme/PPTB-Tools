@@ -10,7 +10,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
-import { parseCsdl, resolveConfig, type DataverseGenConfig, type EntityMetadataInput } from '../src/core';
+import { parseCsdl, resolveConfig, withProjectCustomEnumTemplate, type DataverseGenConfig, type EntityMetadataInput } from '../src/core';
 import {
     useAsyncAction,
     useAutoHideFooter,
@@ -146,18 +146,15 @@ describe('useToolSettings', () => {
         expect(onPlanStale).toHaveBeenCalledTimes(1);
     });
 
-    it('saves the custom enum template from the Preview card and marks the plan stale, on and off', async () => {
-        const store = installSettingsStub();
+    it("doesn't mark the plan stale when only the custom enum template default changes (it's per project)", async () => {
+        installSettingsStub();
         const onPlanStale = vi.fn();
         const { result } = renderHook(() => useToolSettings({ onError: vi.fn(), onPlanStale }));
         await flush();
-        await act(() => result.current.changeSetting('customEnumTemplate', true));
-        expect(result.current.toolSettings.customEnumTemplate).toBe(true);
-        expect((store.toolConfig as ToolConfig).customEnumTemplate).toBe(true);
-        expect(onPlanStale).toHaveBeenCalledTimes(1);
-        await act(() => result.current.changeSetting('customEnumTemplate', false));
-        expect(result.current.toolSettings.customEnumTemplate).toBe(false);
-        expect(onPlanStale).toHaveBeenCalledTimes(2);
+        const settings = result.current.toolSettings;
+        await act(() => result.current.saveToolSettings({ ...settings, projectDefaults: { ...settings.projectDefaults, customEnumTemplate: true } }));
+        expect(result.current.toolSettings.projectDefaults.customEnumTemplate).toBe(true);
+        expect(onPlanStale).not.toHaveBeenCalled();
     });
 
     it('adds, edits and deletes saved projects', async () => {
@@ -487,12 +484,14 @@ describe('usePreviewGenerate', () => {
         })();
         const provider = { getSchemaForSelection: vi.fn(async () => edmx), getEntities: vi.fn(async () => [account]) } as unknown as PptbMetadataProvider;
 
-        async function previewWith(change: Partial<ToolConfig>): Promise<WritePlan> {
+        /** Previews the account fixture with the tool settings changed by `change` and, unless undefined, the project's custom enum template. */
+        async function previewWith(change: Partial<ToolConfig>, project?: boolean): Promise<WritePlan> {
+            const base: DataverseGenConfig = { entities: ['account'] };
             const hook = renderHook(() =>
                 usePreviewGenerate({
                     planState: usePlanState(),
                     projectRoot: '/src/contoso',
-                    config: { entities: ['account'] },
+                    config: project === undefined ? base : withProjectCustomEnumTemplate(base, project),
                     provider,
                     sink: new InMemoryFileSink(),
                     toolSettings: settings(change),
@@ -523,14 +522,14 @@ describe('usePreviewGenerate', () => {
 
         it('plans exactly the default output when the custom enum template is declined (off) (US2)', async () => {
             const byDefault = await previewWith({});
-            const declined = await previewWith({ customEnumTemplate: false });
+            const declined = await previewWith({}, false);
             const contents = (plan: WritePlan) => plan.files.map((f) => [f.relativePath, f.status, f.content]);
             expect(contents(declined)).toEqual(contents(byDefault));
             expect(declined.counts.duplicate).toBeGreaterThan(0);
         });
 
         it('renames the duplicate and plans the custom enum.ejs when the custom enum template is on', async () => {
-            const plan = await previewWith({ customEnumTemplate: true });
+            const plan = await previewWith({}, true);
             expect(plan.counts.duplicate).toBe(0);
             expect(enumFile(plan).content).toContain('  PreferredCustomer = 1,\n  PreferredCustomer_2 = 2,');
             expect(enumTemplate(plan)?.content).toBe(CUSTOM_ENUM_TEMPLATE);
@@ -541,10 +540,19 @@ describe('usePreviewGenerate', () => {
         });
 
         it('still renames, but writes no templates, when Generate templates is off', async () => {
-            const plan = await previewWith({ customEnumTemplate: true, generateTemplates: false });
+            const plan = await previewWith({ generateTemplates: false }, true);
             expect(plan.counts.duplicate).toBe(0);
             expect(enumFile(plan).content).toContain('PreferredCustomer_2');
             expect(enumTemplate(plan)).toBeUndefined();
+        });
+
+        it("uses the project's own value over the default, and the default only when the project has none (Amendment 2)", async () => {
+            const defaultOn = { projectDefaults: { ...toolConfig.projectDefaults, customEnumTemplate: true } };
+            expect((await previewWith(defaultOn)).counts.duplicate).toBe(0);
+            expect((await previewWith(defaultOn, false)).counts.duplicate).toBeGreaterThan(0);
+            expect(enumTemplate(await previewWith({}, true))?.content).toBe(CUSTOM_ENUM_TEMPLATE);
+            // A tool-wide value from before the setting moved to the project has no effect.
+            expect((await previewWith({ customEnumTemplate: true } as Partial<ToolConfig>)).counts.duplicate).toBeGreaterThan(0);
         });
     });
 

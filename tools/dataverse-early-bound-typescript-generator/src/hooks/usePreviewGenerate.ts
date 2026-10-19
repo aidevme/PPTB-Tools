@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import type { ToolConfig } from '../config';
-import { buildSchemaModel, generate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../core';
+import { buildSchemaModel, generate, projectCustomEnumTemplate, resolveConfig, resolveSelection, type DataverseGenConfig, type EntityMetadataInput } from '../core';
 import {
     applyWritePlan,
     countStatuses,
@@ -80,16 +80,17 @@ export function usePreviewGenerate({
             const byName = new Map<string, EntityMetadataInput>(loaded.map((e) => [e.LogicalName, e]));
             setProgress({ message: 'Generating files…', completed: 0, total: 1 });
             const model = buildSchemaModel(schema, resolved, (name) => byName.get(name));
-            // The custom enum template renames duplicates too, so either setting turns renaming on; turning the custom
-            // template off restores the default names unless Rename duplicated identifier(s) is on by itself.
-            const renameDuplicateIdentifiers = toolSettings.renameDuplicateIdentifiers || toolSettings.customEnumTemplate;
+            // The project's custom enum template renames duplicates too, so either it or the tool's Rename setting turns
+            // renaming on; turning the custom template off restores the default names unless Rename is on by itself.
+            const customEnumTemplate = projectCustomEnumTemplate(config) ?? toolSettings.projectDefaults.customEnumTemplate;
+            const renameDuplicateIdentifiers = toolSettings.renameDuplicateIdentifiers || customEnumTemplate;
             const files = generate(model, resolved, { renameDuplicateIdentifiers });
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
             // With Generate templates on, dataverse-gen's templates go into the project's templateRoot, like
             // `dataverse-gen eject`, with the custom enum.ejs in place of dataverse-gen's when the custom enum template
             // is on. Off, they're left out of the plan; existing copies are never orphans, so they stay.
             const templates = toolSettings.generateTemplates
-                ? dataverseGenTemplateFiles(resolved, { customEnum: toolSettings.customEnumTemplate })
+                ? dataverseGenTemplateFiles(resolved, { customEnum: customEnumTemplate })
                 : [];
             const nextPlan = await createWritePlan(sink, projectRoot, resolved, files, templates);
             setPlan(nextPlan);
@@ -118,7 +119,7 @@ export function usePreviewGenerate({
         toolSettings.deleteOrphanedFiles,
         toolSettings.skipDuplicateIdentifiers,
         toolSettings.renameDuplicateIdentifiers,
-        toolSettings.customEnumTemplate,
+        toolSettings.projectDefaults.customEnumTemplate,
         toolSettings.generateTemplates,
         toolSettings.general.showPreviewReadyNotification,
     ]);

@@ -258,7 +258,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   three config JSON files, drop `ToolConfig.customEnumTemplate`, and make `applyProjectDefaults` fill the project value
   only when missing; update `useSettingsDraft` defaults; tests in `test/settings.test.ts` (merge, default, fill-only,
   old key ignored)
-- [ ] T031 Read the project's value in `src/hooks/usePreviewGenerate.ts`; remove `'customEnumTemplate'` from
+- [x] T031 Read the project's value in `src/hooks/usePreviewGenerate.ts`; remove `'customEnumTemplate'` from
   `PreviewSettingKey` (`src/hooks/useToolSettings.ts`); route the proposal and the Preview card switch through
   `useCustomEnumTemplateConfirmation` to `updateConfig` in `src/components/apps/App.tsx`; tests in `test/hooks.test.ts`
   (project value drives renaming and enum.ejs; changing it marks the plan stale; two projects independent)
