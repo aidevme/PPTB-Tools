@@ -19,7 +19,28 @@ export default defineConfig({
             "/repository/": [
                 {
                     text: "Repository",
-                    items: [{ text: "GitHub Agentic Workflows", link: "/repository/agentic-workflows" }],
+                    items: [
+                        { text: "GitHub Agentic Workflows", link: "/repository/agentic-workflows" },
+                        { text: "Document templates", link: "/templates/" },
+                    ],
+                },
+            ],
+            // The templates have their own path, so they repeat the Repository sidebar.
+            "/templates/": [
+                {
+                    text: "Repository",
+                    items: [
+                        { text: "GitHub Agentic Workflows", link: "/repository/agentic-workflows" },
+                        {
+                            text: "Document templates",
+                            link: "/templates/",
+                            items: [
+                                { text: "Developer Guide Style Guide", link: "/templates/DEVELOPER_STYLE" },
+                                { text: "Refactoring Style Guide", link: "/templates/REFACTORING_STYLE" },
+                                { text: "Writing Style Guide", link: "/templates/WRITING_STYLE" },
+                            ],
+                        },
+                    ],
                 },
             ],
             "/pptb-tools/dataverse-early-bound-typescript-generator/": [
