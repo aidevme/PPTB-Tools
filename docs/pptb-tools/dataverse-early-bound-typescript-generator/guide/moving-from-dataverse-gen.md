@@ -46,5 +46,6 @@ If you switch back and forth, you may see these as one-time changes.
 - **Custom (ejected) EJS templates.** The tool writes dataverse-gen 2.0.17's templates to `templateRoot`
   (`_templates` by default) on every Generate, like `npx dataverse-gen eject`, so the CLI finds them there. It
   doesn't read them itself: EJS can't run in PPTB, whose iframe blocks `new Function`. Edits to them only affect
-  the CLI, and the next Generate overwrites them with the originals.
+  the CLI, and the next Generate overwrites them with the originals. To keep edited templates, turn off **Settings
+  → Generate & files → Generate templates**.
 - **The Node CLI and the headless "regenerate" mode** from the original plan.

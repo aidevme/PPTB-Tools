@@ -93,6 +93,7 @@ export default defineConfig({
                                     items: [
                                         { text: "Header", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/header" },
                                         { text: "Footer", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/footer" },
+                                        { text: "ConnectionStatus", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/layout/connection-status" },
                                     ],
                                 },
                                 {
@@ -109,6 +110,17 @@ export default defineConfig({
                                         { text: "WorkflowProgress", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/workflow-progress" },
                                         { text: "StepCard", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/step-card" },
                                         { text: "FileSearchBox", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/file-search-box" },
+                                        { text: "PathChip", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/shared/path-chip" },
+                                    ],
+                                },
+                                {
+                                    text: "Tables",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "FileTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/file-table" },
+                                        { text: "ProjectsTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/projects-table" },
+                                        { text: "SelectionTable", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/selection-table" },
+                                        { text: "SortableHeaderCell", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/tables/sortable-header-cell" },
                                     ],
                                 },
                                 {

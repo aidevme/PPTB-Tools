@@ -1,10 +1,18 @@
-import { Badge, Button, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
-import { CodeRegular, PlugConnectedRegular, PlugDisconnectedRegular, SettingsRegular } from '@fluentui/react-icons';
+import { Badge, Button, Text, Tooltip } from '@fluentui/react-components';
+import { SettingsRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useHeaderStyles } from '../../styles';
+import { AppIcon } from '../shared/AppIcon';
+import { ConnectionStatus } from './ConnectionStatus';
 
-export interface HeaderProps {
+/** Props for {@link Header}. */
+export interface IHeaderProps {
+    /**
+     * The active PPTB connection, shown in the connection pill with its environment name and, in a tooltip, its URL;
+     * `null` shows "Not connected".
+     */
     connection: ToolBoxAPI.Connection | null;
+    /** Called when the Settings button is clicked. The button stays enabled without a connection. */
     onOpenSettings: () => void;
 }
 
@@ -12,14 +20,12 @@ export interface HeaderProps {
  * The bar across the top: app icon, title, version and subtitle on the left; the active connection and the
  * Settings button on the right.
  */
-export function Header({ connection, onOpenSettings }: HeaderProps) {
+export function Header({ connection, onOpenSettings }: IHeaderProps) {
     const styles = useHeaderStyles();
     return (
         <header className={styles.header}>
             <div className={styles.identity}>
-                <span className={styles.appIcon} aria-hidden="true">
-                    <CodeRegular />
-                </span>
+                <AppIcon size="large" />
                 <div className={styles.titleBlock}>
                     <div className={styles.titleRow}>
                         <Text as="h1" className={styles.title}>
@@ -35,27 +41,7 @@ export function Header({ connection, onOpenSettings }: HeaderProps) {
                 </div>
             </div>
             <div className={styles.right}>
-                {connection ? (
-                    <Tooltip content={connection.url} relationship="description" withArrow>
-                        <div className={styles.connection} role="status" aria-label={`Connected to ${connection.name}`}>
-                            <span className={mergeClasses(styles.statusDot, styles.statusDotConnected)} aria-hidden="true" />
-                            <PlugConnectedRegular className={styles.connectionIcon} aria-hidden="true" />
-                            <span className={styles.connectionText}>
-                                <span className={styles.connectionLabel}>Connected</span>
-                                <span className={styles.connectionName}>{connection.name}</span>
-                            </span>
-                        </div>
-                    </Tooltip>
-                ) : (
-                    <div className={mergeClasses(styles.connection, styles.connectionDisconnected)} role="status">
-                        <span className={mergeClasses(styles.statusDot, styles.statusDotDisconnected)} aria-hidden="true" />
-                        <PlugDisconnectedRegular className={styles.connectionIcon} aria-hidden="true" />
-                        <span className={styles.connectionText}>
-                            <span className={styles.connectionLabel}>Connection</span>
-                            <span className={styles.connectionName}>Not connected</span>
-                        </span>
-                    </div>
-                )}
+                <ConnectionStatus connection={connection} />
                 <Tooltip content="Settings" relationship="label" withArrow>
                     <Button appearance="subtle" size="large" icon={<SettingsRegular />} onClick={onOpenSettings} />
                 </Tooltip>
@@ -63,3 +49,6 @@ export function Header({ connection, onOpenSettings }: HeaderProps) {
         </header>
     );
 }
+
+/** @deprecated Renamed to {@link IHeaderProps}. */
+export type HeaderProps = IHeaderProps;

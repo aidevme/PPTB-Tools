@@ -19,6 +19,12 @@ export function connectionKey(connection: { id?: string; url?: string } | null |
     return connection?.id || connection?.url || undefined;
 }
 
+/**
+ * Returns the project folder last used with a connection, or with any connection when there's none for it.
+ * @param key - The connection's {@link connectionKey}; without one, only the last folder used is considered.
+ * @returns The folder, or `undefined` outside PPTB, when nothing was remembered, or when reading the settings fails
+ * (the failure is logged).
+ */
 export async function getRememberedProjectFolder(key: string | undefined): Promise<string | undefined> {
     const api = settings();
     if (!api) return undefined;
@@ -35,6 +41,11 @@ export async function getRememberedProjectFolder(key: string | undefined): Promi
     }
 }
 
+/**
+ * Remembers `folder` for the connection and as the last folder used. Does nothing outside PPTB; a failed save is
+ * logged, not thrown.
+ * @param key - The connection's {@link connectionKey}; without one, only the last folder used is updated.
+ */
 export async function rememberProjectFolder(key: string | undefined, folder: string): Promise<void> {
     const api = settings();
     if (!api) return;

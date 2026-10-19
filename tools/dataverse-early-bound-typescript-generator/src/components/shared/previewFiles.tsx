@@ -20,6 +20,10 @@ const COMPARERS: Record<FileSortColumn, (a: PlannedFile, b: PlannedFile) => numb
 /**
  * Files in the order to list them: the plan's own order (grouped by folder) until a column is sorted, then by
  * that column, with ties in name order.
+ *
+ * @param files - The files in the plan's order; not modified.
+ * @param sort - The sorted column and direction, or `null` when no column is sorted.
+ * @returns `files` itself when `sort` is `null`, otherwise a sorted copy (ties broken by name, then by full path).
  */
 export function sortFiles(files: PlannedFile[], sort: { column: FileSortColumn; direction: SortDirection } | null): PlannedFile[] {
     if (!sort) return files;
@@ -27,12 +31,16 @@ export function sortFiles(files: PlannedFile[], sort: { column: FileSortColumn; 
     return [...files].sort((a, b) => sign * COMPARERS[sort.column](a, b) || COMPARERS.name(a, b) || textCompare(a.relativePath, b.relativePath));
 }
 
+/** The Preview card's file filters: the selected status tile, the Show unchanged switch and the search text. */
 export interface FileFilter {
     /** Only files with this status; `null` for the default view. */
     status: FileStatus | null;
     /** In the default view, also list unchanged files. */
     showUnchanged: boolean;
-    /** Case-insensitive text matched against the file's path. */
+    /**
+     * Search text, case-insensitive: matches files whose name or relative path starts with it, once it has
+     * {@link MIN_SEARCH_LENGTH} characters (see {@link matchesSearch}).
+     */
     search: string;
 }
 
@@ -41,6 +49,10 @@ export interface FileFilter {
  * duplicate-identifier files); unchanged files appear with `showUnchanged` or when their tile is selected. From
  * {@link MIN_SEARCH_LENGTH} characters, the search lists the files whose name or path starts with it, unchanged ones
  * included, still within a selected status tile.
+ *
+ * @param files - The plan's files.
+ * @param filter - The status tile, Show unchanged switch and search text to apply.
+ * @returns The files that pass the filter, in their original order.
  */
 export function visibleFiles(files: PlannedFile[], filter: FileFilter): PlannedFile[] {
     const searching = isSearchActive(filter.search);
@@ -54,12 +66,23 @@ export function visibleFiles(files: PlannedFile[], filter: FileFilter): PlannedF
 /** The search filters the table once more than two characters are typed. */
 export const MIN_SEARCH_LENGTH = 3;
 
-/** Whether the search box holds enough text to filter the table. */
+/**
+ * Whether the search box holds enough text to filter the table.
+ *
+ * @param search - The search box text.
+ * @returns `true` when the text, trimmed, has at least {@link MIN_SEARCH_LENGTH} characters.
+ */
 export function isSearchActive(search: string): boolean {
     return search.trim().length >= MIN_SEARCH_LENGTH;
 }
 
-/** Whether a file's name, or its path, starts with the search text (case-insensitive). */
+/**
+ * Whether a file's name, or its path, starts with the search text (case-insensitive).
+ *
+ * @param file - The file to test, by its relative path.
+ * @param search - The search text; surrounding whitespace is ignored.
+ * @returns `true` when the file name or the relative path starts with the trimmed search text.
+ */
 export function matchesSearch(file: PlannedFile, search: string): boolean {
     const term = search.trim().toLowerCase();
     return fileName(file.relativePath).toLowerCase().startsWith(term) || file.relativePath.toLowerCase().startsWith(term);
@@ -115,7 +138,12 @@ export const DEFAULT_LIST_WIDTH = 480;
 
 /**
  * A file-list width kept within bounds: at least {@link MIN_LIST_WIDTH}, and leaving {@link MIN_VIEWER_WIDTH} for the
- * viewer when the split's total width is known (`total` > 0).
+ * viewer when the split's total width is known (`total > 0`).
+ *
+ * @param width - The requested list width, in px.
+ * @param total - The split container's width in px, or 0 when it isn't known yet (no upper bound then).
+ * @returns `width` clamped to the allowed range; never less than {@link MIN_LIST_WIDTH}, even when the container is
+ * too narrow for both minimums.
  */
 export function clampListWidth(width: number, total: number): number {
     const max = total > 0 ? total - MIN_VIEWER_WIDTH : Number.MAX_SAFE_INTEGER;

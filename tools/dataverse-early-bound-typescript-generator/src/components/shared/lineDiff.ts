@@ -1,6 +1,8 @@
 /** One line in a diff: kept, added in the new text, or removed from the old one. */
 export interface DiffLine {
+    /** `equal` for a line in both texts, `add` for one only in the new text, `remove` for one only in the old text. */
     kind: 'equal' | 'add' | 'remove';
+    /** The line's content, without its line ending. */
     text: string;
     /** 1-based line number in the old text (`equal` and `remove`). */
     oldNumber?: number;
@@ -11,9 +13,13 @@ export interface DiffLine {
 /** A run of changed lines with surrounding context, or a marker for unchanged lines left out between runs. */
 export type DiffBlock = { kind: 'lines'; lines: DiffLine[] } | { kind: 'skipped'; count: number };
 
+/** The result of {@link diffLines}. */
 export interface DiffResult {
+    /** The diff in order: runs of changed lines with their context, and `skipped` markers between them. */
     blocks: DiffBlock[];
+    /** Number of lines only in the new text. */
     added: number;
+    /** Number of lines only in the old text. */
     removed: number;
 }
 
@@ -26,6 +32,15 @@ const splitLines = (text: string) => text.replace(/\r\n?/g, '\n').replace(/\n$/,
  * Line diff of `oldText` → `newText` (Myers' algorithm), with `context` unchanged lines kept around each change
  * and longer unchanged runs collapsed into `skipped` blocks. Line endings are ignored. Returns `null` when the
  * texts differ in more than about 2000 lines.
+ *
+ * @remarks
+ * The common prefix and suffix are matched directly; only the lines between them go through Myers' algorithm. A
+ * trailing line ending doesn't count as an extra empty line.
+ *
+ * @param oldText - The text before the change (for example the file on disk).
+ * @param newText - The text after the change (for example the generated content).
+ * @param context - Unchanged lines kept before and after each changed line; 3 when omitted.
+ * @returns The blocks with the added and removed line counts, or `null` when the edit distance passes the limit.
  */
 export function diffLines(oldText: string, newText: string, context = 3): DiffResult | null {
     const a = splitLines(oldText);

@@ -196,18 +196,19 @@
     },
     {
       "name": "aidevme-dataverse-data",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
-      "source": "HINT+shared"
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: query and change Dataverse records through the Web API (OData, FetchXML, batch)."
     },
     {
       "name": "aidevme-dataverse-customapi",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
+      "ported": false,
       "source": "HINT",
-      "note": "aka hso-create-custom-api."
+      "note": "Removed 2026-10-19: not needed for PPTB tool development (the generator reads custom APIs itself), and it referenced removed skills. Was: create/update/query/delete Custom APIs via the Web API. aka hso-create-custom-api."
     },
     {
       "name": "hso-dataverse-ui-config",
@@ -273,10 +274,11 @@
     },
     {
       "name": "aidevme-fetchxml-queries",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
-      "source": "shared"
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: write and optimize FetchXML queries."
     },
     {
       "name": "hso-semantic-data-modeling",
@@ -670,10 +672,11 @@
     },
     {
       "name": "aidevme-dataverse-sdk-reference",
-      "scope": "core",
+      "scope": "drop",
       "group": "reference",
-      "ported": true,
-      "source": "HINT+shared"
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: Dataverse SDK, Web API and metadata reference from Microsoft docs."
     },
     {
       "name": "hso-dataverse-ui-reference",
@@ -991,7 +994,7 @@
       "group": "pptb",
       "ported": true,
       "source": "authored",
-      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/."
+      "note": "Read-only analysis and refactoring proposal for selected PPTB tools, approval gate, verified step-by-step execution, report saved to docs/todos/<tool-name>/."
     },
     {
       "name": "aidevme-github",
@@ -999,7 +1002,31 @@
       "group": "delivery",
       "ported": true,
       "source": "authored",
-      "note": "Commit changes one file at a time with Conventional Commits 1.0.0 messages: safety check, per-file diffs, coupled-file grouping, plan and confirmation; never push or bypass hooks unless asked."
+      "note": "Git and GitHub workflow router: one commit per file with Conventional Commits, branch names, issues, pull requests, review comments, CI and security through the GitHub MCP server; references loaded on demand; never push or bypass hooks unless asked."
+    },
+    {
+      "name": "aidevme-spec-kit",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Spec-driven development with GitHub Spec Kit (pinned v1.2.1): phase detection, one /speckit-* command per phase with a review gate, power-platform and typescript-web constitution profiles; git and GitHub work handed to aidevme-github."
+    },
+    {
+      "name": "aidevme-tsdoc",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "Writes, reviews and fixes TSDoc comments on public TypeScript symbols (incl. React components, props, hooks); checked with ESLint tsdoc/syntax via scripts/check-tsdoc.mjs; never installs or commits."
+    },
+    {
+      "name": "aidevme-vitepress",
+      "scope": "core",
+      "group": "delivery",
+      "ported": true,
+      "source": "authored",
+      "note": "VitePress site changes (pages, sidebar, nav, config, build errors, dead links), grounded in the official VitePress docs through the Vue Docs MCP server (vue-mcp.org), with setup for Claude Code and VS Code Copilot."
     },
     {
       "name": "aidevme-pptb-tool-developer",

@@ -5,7 +5,9 @@ connection and the **Settings** button on the right.
 
 Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Header.tsx)
 
-## Props (`HeaderProps`)
+## Props (`IHeaderProps`)
+
+`HeaderProps` remains as a deprecated alias of `IHeaderProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -19,14 +21,12 @@ Source: [`src/components/layout/Header.tsx`](https://github.com/aidevme/PPTB-Too
   which `index.css` uses as `scroll-padding-top`, so jumping to a step card stops below the header.
 - **Background:** a soft gradient from the brand color into the page background, with a light shadow
   underneath.
-- **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient.
+- **App icon:** a rounded tile with a code icon, filled with a brand-to-teal gradient (`AppIcon` in
+  `components/shared/AppIcon.tsx`, size `large`, shared with the [Footer](./footer.md)).
 - **Version:** a small badge after the title with the tool's version, read from `package.json` at build
   time. Only the version number ends up in the bundle.
-- **Connection pill:**
-  - **Connected:** a green status dot, "CONNECTED" and the connection name. Hovering shows the environment
-    URL in a tooltip.
-  - **Not connected:** an amber pill with "Not connected".
-  - It has `role="status"`, so screen readers announce changes.
+- **Connection pill:** [ConnectionStatus](./connection-status.md) shows the connected environment, or "Not
+  connected".
 - **Settings** is an icon button with a tooltip. It's always enabled, even without a connection.
 
 There's no Regenerate button any more. Use **Preview** and then **Generate** on the

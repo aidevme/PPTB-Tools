@@ -26,6 +26,7 @@ function optionSetCast(attribute: AttributeMetadataInput): string | undefined {
     return typeName ? OPTION_SET_CASTS[typeName] : undefined;
 }
 
+/** How many metadata requests run at once when loading several tables or option sets. */
 export const METADATA_CONCURRENCY = 4;
 
 type RawRecord = Record<string, unknown>;
@@ -47,6 +48,11 @@ function isCsdlSizeLimitError(error: unknown): boolean {
 const ONE_TO_MANY_COLUMNS = ['SchemaName', 'ReferencedEntity', 'ReferencingEntity', 'ReferencedEntityNavigationPropertyName', 'ReferencingEntityNavigationPropertyName'];
 const MANY_TO_MANY_COLUMNS = ['SchemaName', 'Entity1LogicalName', 'Entity2LogicalName', 'Entity1NavigationPropertyName', 'Entity2NavigationPropertyName'];
 
+/**
+ * Loads the Dataverse metadata the generator needs through `window.dataverseAPI`.
+ * @remarks Everything is cached on the instance, so the app creates one per connection; {@link PptbMetadataProvider.reset}
+ * clears the cache.
+ */
 export class PptbMetadataProvider {
     private entityList?: Promise<EntitySummary[]>;
     private csdl?: Promise<string>;

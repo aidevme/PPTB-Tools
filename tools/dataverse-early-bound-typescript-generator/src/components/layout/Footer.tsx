@@ -1,9 +1,10 @@
 import { Button, Link, Text, Tooltip } from '@fluentui/react-components';
-import { BookOpenRegular, BranchForkRegular, CodeRegular, InfoRegular, OpenRegular } from '@fluentui/react-icons';
+import { BookOpenRegular, BranchForkRegular, InfoRegular, OpenRegular } from '@fluentui/react-icons';
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
+import { AppIcon } from '../shared/AppIcon';
 
-/** The docs site isn't published yet, so documentation links to the docs page on GitHub. */
+/** The tool's Getting started page on the published docs site (GitHub Pages). */
 const DOCUMENTATION_URL = 'https://aidevme.github.io/PPTB-Tools/pptb-tools/dataverse-early-bound-typescript-generator/getting-started/';
 const REPOSITORY_URL = 'https://github.com/aidevme/PPTB-Tools';
 
@@ -22,9 +23,7 @@ export function Footer() {
     return (
         <footer className={styles.footer}>
             <div className={styles.identity}>
-                <span className={styles.appIcon} aria-hidden="true">
-                    <CodeRegular />
-                </span>
+                <AppIcon size="small" />
                 <span className={styles.identityText}>
                     <span className={styles.toolName}>Early-Bound TypeScript Generator</span>
                     <span className={styles.toolMeta}>v{version} · Part of PPTB Tools</span>
@@ -35,7 +34,7 @@ export function Footer() {
                 <div className={styles.credits}>
                     <Text size={200}>Compatible with Scott Durow's</Text>
                     {CREDITS.map((credit) => (
-                        <Tooltip key={credit.name} content={`${credit.name}: the ${credit.role} (MIT license)`} relationship="description" withArrow>
+                        <Tooltip key={credit.name} content={`${credit.name}: the ${credit.role} (MIT license). Opens in a new window.`} relationship="description" withArrow>
                             <Link href={credit.url} target="_blank" rel="noreferrer" className={styles.creditChip}>
                                 {credit.name}
                                 <span className={styles.license}>MIT</span>

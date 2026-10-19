@@ -1,148 +1,81 @@
 ---
 name: aidevme-github
-layer: atomic
-scope: core
+metadata:
+  layer: orchestration
+  scope: core
 description: |
-  Commit changes in a git repository one file at a time, each with its own Conventional Commits 1.0.0 message
-  written for that file's diff. Use when:
-  (1) User says "commit this", "commit my changes", "commit each file", "stage and commit"
-  (2) User asks for commit messages, or to split changes into separate commits
-  (3) A task ends with changes the user asked to have committed
-  Does NOT commit without being asked, push, force-push, amend pushed commits, bypass hooks (--no-verify), rebase
-  shared branches, change git config, or commit secrets, build output or dependencies.
-allowed-tools: Bash, PowerShell, Read, Grep, Glob, AskUserQuestion
+  Git and GitHub workflow, one entry point: commit changes one file at a time with Conventional Commits 1.0.0
+  messages, name branches, link or create issues, open or update a pull request and write its description, address
+  pull request review comments, read CI/build status, and "ship it" (commit, push after confirmation, pull request,
+  CI). Local git through the git CLI; GitHub through the official GitHub MCP server. Use when:
+  (1) User says "commit this", "commit my changes", asks for commit messages, or to split changes into commits
+  (2) User asks to name a branch, or to link, find or create an issue
+  (3) User asks to open a PR, update it, or write its description
+  (4) User asks to address or reply to PR review comments, or why CI or the build is failing
+  (5) User says "ship it"
+  Does NOT act without being asked, push without explicit confirmation, force-push, use --no-verify, rebase shared
+  branches, change git config, or commit secrets, build output or dependencies.
+allowed-tools: Bash, PowerShell, Read, Grep, Glob, AskUserQuestion, mcp__github__get_me, mcp__github__issue_read, mcp__github__search_issues, mcp__github__issue_write, mcp__github__list_pull_requests, mcp__github__pull_request_read, mcp__github__create_pull_request, mcp__github__update_pull_request, mcp__github__add_reply_to_pull_request_comment, mcp__github__pull_request_review_write, mcp__github__actions_list, mcp__github__actions_get, mcp__github__get_job_logs, mcp__github__list_secret_scanning_alerts, mcp__github__list_code_scanning_alerts
 argument-hint: "[file ... | --staged]"
 ---
 
-# aidevme-github: one commit per file, Conventional Commits
+# aidevme-github: git and GitHub workflow
 
 <!-- cspell:ignore oneline -->
 
-Reference: [Conventional Commits 1.0.0](https://www.conventionalcommits.org/en/v1.0.0/)
+One entry point for local git and GitHub work. This file holds the shared rules and the routing; each capability
+is in a reference file under `references/`. Load only the reference the request needs.
 
-Use this skill whenever the user asks to commit, stage or write commit messages ("commit this", "commit my
-changes"). Committing is something the user asks for; never commit on your own initiative.
+## Shared rules (every reference)
 
-**Default mode: one commit per file.** Every changed file gets its own commit, with a message written for that
-file's diff. The user can override this (for example "one commit for all of it"), and coupled files can be grouped
-with the user's agreement (step 5).
+- **Only act when asked.** Never commit, push, open a pull request or write to GitHub on your own initiative.
+- **Show a plan before any write** to git or GitHub (commits, branches, pushes, issues, pull requests, replies), and
+  wait for confirmation unless the user said "just commit" (commits only).
+- **Push only after explicit confirmation**, every time. Never force-push.
+- **Never bypass hooks** (`--no-verify`), amend pushed commits, rebase shared branches, or change git config.
+- **Stop and report on any failure** (hook, build, test, API error); don't continue with the next step.
+- **GitHub MCP server unavailable:** say so and what's missing (see `references/mcp-setup.md`), do the local-git
+  part only, and never fall back to raw API calls with tokens.
+- Follow the repository's own rules (`CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`) where they're stricter.
 
-## Workflow
+## Routing
 
-1. **Inspect the repo state**
-   - `git status --porcelain` lists every change: modified, added, deleted, renamed, untracked.
-   - `git log --oneline -15` shows the repo's types, scopes, casing and style. Match them.
-   - Read the repo's own commit rules if it has them (`CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`, a
-     `commitlint` config); they take precedence over the house style below.
-   - If nothing changed, say so and stop.
+| Request | Load |
+| --- | --- |
+| Commit, stage, commit messages, split changes into commits | [references/commit.md](references/commit.md) |
+| Name, check or create a branch | [references/branch.md](references/branch.md) |
+| `Refs #n` / `Closes #n` footers, find or create an issue | [references/issues.md](references/issues.md) |
+| Open or update a pull request, write its title or description | [references/pull-request.md](references/pull-request.md) |
+| Address or reply to pull request review comments | [references/review.md](references/review.md) |
+| CI, build or workflow status, why a check failed | [references/ci.md](references/ci.md) |
+| Security alerts before a push (optional) | [references/security.md](references/security.md) |
+| Set up or check the GitHub MCP server | [references/mcp-setup.md](references/mcp-setup.md) |
+| Where the branch and review rules came from | [references/official-skills.md](references/official-skills.md) |
 
-2. **Respect what's already staged.** If the user staged files deliberately, process only those (or the files and
-   paths passed as arguments) unless they ask otherwise. Otherwise process every changed file, untracked files
-   included, after the safety check.
+GitHub-side references start with "Load `mcp-setup.md` first": check the server is connected before using its tools.
 
-3. **Safety check before anything is staged**
-   - Never commit secrets: `.env*`, keys and certificates (`*.pem`, `*.pfx`, `*.key`), tokens, connection strings,
-     `local.settings.json`, publish profiles, `CLAUDE.local.md` and other per-developer files. Skip them and warn
-     the user.
-   - Skip build output and dependencies (`bin/`, `obj/`, `dist/`, `node_modules/`, `out/`, coverage) and large
-     binaries; suggest `.gitignore` entries.
-   - If a file's diff contains what looks like a credential, skip it and say why.
+### "Ship it"
 
-4. **Read each file's diff on its own**
-   - Modified: `git diff -- <file>`; staged: `git diff --cached -- <file>`.
-   - Untracked (new): read the file.
-   - Deleted: note what the file was for (`git show HEAD:<file>` if needed).
-   - Renamed or moved: one change (old path → new path), one commit; stage both sides (`git add -A -- <old> <new>`).
+Run these in order, each with its own confirmation, and stop at the first failure:
 
-5. **Check for coupled files.** Some files only make sense together, and committing them apart leaves commits that
-   don't build or test. Typical groups:
-   - a source file and the test that depends on its new code;
-   - `package.json` and `package-lock.json` (or a project file and its lock file);
-   - a component and its manifest when a new property is added (for example a PCF `index.ts` and
-     `ControlManifest.Input.xml`);
-   - a renamed or moved file and the files that update their imports to it;
-   - a generated file and its source (regenerate it; don't hand-edit it).
+1. **Commit** the changes ([commit.md](references/commit.md)).
+2. **Push**: show `git push` (with `-u origin <branch>` for a new branch) and push only after explicit confirmation.
+3. **Pull request**: draft one, or update the existing one ([pull-request.md](references/pull-request.md)); create it
+   only after confirmation, as a draft by default.
+4. **CI**: report the checks for the pull request ([ci.md](references/ci.md)); read-only.
 
-   List the coupled groups and ask once whether to keep each group in one commit or still split per file. If the
-   user already said "strictly per file", don't ask.
+Without the GitHub MCP server, do steps 1–2 (push still needs confirmation) and say that steps 3–4 need it.
 
-6. **Write one message per file (or agreed group)** using the rules below. Each message describes that file's
-   change specifically; never reuse a description across files. Show the plan as a table:
+## Commit workflow in short
 
-   | # | File | Message |
-   | --- | --- | --- |
-   | 1 | `src/TagPicker.tsx` | `feat(pcf): add multi-select support to tag picker` |
-   | 2 | `README.md` | `docs(readme): document allowMultiple property` |
-
-   Add a body for any change that needs explaining (why, not how).
-
-7. **Commit file by file** after the user confirms the plan (skip the confirmation only if they said "just commit").
-   Order the commits so each builds on the previous: dependencies and config first, then source, then tests, then
-   docs. For each file:
-
-   ```bash
-   git add -- <file>          # git rm -- <file> for a deletion
-   git diff --cached --name-only   # must list exactly this file, or the agreed group
-   git commit -F - <<'EOF'
-   feat(pcf): add multi-select support to tag picker
-
-   Optional body for this file.
-   EOF
-   ```
-
-   If something else is already staged, unstage it first (`git restore --staged -- <other>`), so each commit holds
-   only its own file. In PowerShell, pass the message with a single-quoted here-string instead of `<<'EOF'`.
-
-8. **Confirm** with `git log --oneline -n <count>` and a short summary: commits created, files skipped and why.
-
-9. **Never, unless explicitly asked:** `git push`, `--force`, `--amend` on commits already pushed, `--no-verify`,
-   rebasing shared branches, or changing git config. If a pre-commit hook fails on a file, stop, report the error
-   and fix the cause; don't bypass the hook or continue with the remaining files until it's resolved.
-
-## Message format (Conventional Commits 1.0.0)
-
-```text
-<type>[optional scope][!]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-### Rules from the spec
-
-- The prefix is required: a type, an optional `(scope)`, an optional `!`, then a colon and a space (`:` followed by a space).
-- `feat` must be used for a new feature; `fix` must be used for a bug fix.
-- A scope is a noun for a section of the codebase, in parentheses: `fix(parser):`.
-- The description follows the colon and space directly.
-- The body starts one blank line after the description; free-form, any number of paragraphs.
-- Footers start one blank line after the body. Each is `Token: value` or `Token #value`. Tokens use `-` instead of
-  spaces (`Reviewed-by`, `Refs`), except `BREAKING CHANGE`.
-- Breaking changes: `!` just before the colon, and/or a footer `BREAKING CHANGE: <description>` (uppercase;
-  `BREAKING-CHANGE` is equivalent). Any type can be breaking.
-
-### House style (on top of the spec)
-
-- Lowercase type and scope. Description in the imperative mood ("add", not "added" or "adds"), lowercase start, no
-  trailing period, and the whole first line within about 72 characters.
-- **Types:** `feat`, `fix`, `docs`, `style` (formatting only), `refactor` (no behavior change), `perf`, `test`,
-  `build`, `ci`, `chore`, `revert`. Use only the types the repo uses when it lists them.
-- **Scope:** the area the file belongs to, taken from the repo's history first (a package, tool, folder or
-  feature name, for example `tools`, `docs`, `pcf`, `auth`). Omit the scope when no area fits rather than inventing
-  one.
-- **Body:** wrap at about 72 characters; say why the change was made and anything a reviewer must know (behavior
-  change, migration, follow-up). Don't restate the diff.
-- **Footers:** `Refs #123` or `Closes #123` for issues; `BREAKING CHANGE:` for breaking changes. Add an attribution
-  trailer (for example `Co-Authored-By:`) only when the repository or your environment's instructions ask for it,
-  with exactly the text given there.
-- **Examples:**
-  - `fix(connections): handle invalid connection urls`
-  - `docs(api): add missing type definitions`
-  - `chore(deps): update typescript to 5.9`
-  - `feat(settings)!: store settings per connection` with a `BREAKING CHANGE:` footer explaining the migration
+Every changed file gets its own commit with a Conventional Commits message written for its diff: inspect the repo
+state and recent log, skip secrets and build output, read each file's diff, offer to group coupled files, show a
+plan table, then commit one file at a time after confirmation. The full workflow, message format and house style
+are in [references/commit.md](references/commit.md).
 
 ## Changelog
 
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-17 | aidevme | Created: one commit per file with Conventional Commits 1.0.0 messages; repo-state inspection, safety check, per-file diffs, coupled-file grouping, plan table and confirmation, ordered commits, and the never-push/never-bypass rules. |
+| 2026-10-17 | aidevme | Restructured into a router with references: the commit workflow moved verbatim to `references/commit.md`; added branch naming, issues, pull requests, review comments, CI and security through the GitHub MCP server (tool names checked at `github-mcp-server@e3809fe`), MCP setup, and notes on the official `awesome-copilot` skills adapted (`@cb64ad1`). |

@@ -6,12 +6,18 @@ import { useAsyncAction } from '../../hooks';
 import { useLoadProjectDialogStyles } from '../../styles';
 import { nextSort } from '../shared/sorting';
 import { ConfirmationDialog } from './ConfirmationDialog';
-import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from './projectColumns';
-import { ProjectsTable } from './ProjectsTable';
+import { DEFAULT_PROJECT_SORT, sortProjects, type ProjectColumnKey } from '../tables/projectColumns';
+import { ProjectsTable } from '../tables/ProjectsTable';
 import { ProjectFormDialog, type NewProject } from './ProjectFormDialog';
 
+/** Props for {@link LoadProjectDialog}. */
 export interface ILoadProjectDialogProps {
+    /** Shows the dialog; each time it opens, the selection, error, sort and any pending delete or edit are reset. */
     open: boolean;
+    /**
+     * Called with `false` when the dialog asks to close (Cancel, Escape, or after a project is opened); ignored
+     * while a project is loading.
+     */
     onOpenChange: (open: boolean) => void;
     /** Projects saved with the New Project dialog. */
     projects: ProjectEntry[];

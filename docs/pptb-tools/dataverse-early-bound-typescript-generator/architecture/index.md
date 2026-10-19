@@ -41,7 +41,8 @@ inside `services/` import each other directly to avoid import cycles.
 6. `generate` renders that model into a list of files.
 7. `createWritePlan` compares each file with disk and marks it `new`, `changed`, `unchanged` or `orphaned`, or
    `duplicate` when `generate` found duplicate identifiers in it. dataverse-gen's own EJS templates
-   (`dataverseGenTemplateFiles`) are planned with them, for the project's `templateRoot` (`_templates` by default).
+   (`dataverseGenTemplateFiles`) are planned with them, for the project's `templateRoot` (`_templates` by default),
+   while the `generateTemplates` setting is on.
 
 **Generate** (`runGenerate`): `applyWritePlan` writes only new and changed files, including the templates (files
 with duplicate identifiers too, unless **Skip duplicated identifier(s)** is on). Then `saveProjectConfig` saves

@@ -15,6 +15,7 @@ export const QUERY_MAX_PAGES = 200;
 /** Runs one OData query and returns its rows, e.g. `dataverseAPI.queryData`. */
 export type QueryRunner = (odataQuery: string) => Promise<{ value: Record<string, unknown>[] }>;
 
+/** A query {@link queryAllPages} runs page by page, continuing after the last `idField` value. */
 export interface PagedQuery {
     /** Entity set name, e.g. `customapis`. */
     entitySet: string;

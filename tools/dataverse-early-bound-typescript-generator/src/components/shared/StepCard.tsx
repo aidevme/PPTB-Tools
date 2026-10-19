@@ -17,10 +17,13 @@ export function StepIndicator({ step }: { step: StepState }) {
     );
 }
 
+/** Props for {@link StepCard}. */
 export interface IStepCardProps {
+    /** The step this card is for: its number, title, status badge, completion and whether it's the active step. */
     step: StepState;
     /** Explanation under the title: a string (shown as small text) or an element. */
     description: string | ReactElement;
+    /** The card's body, rendered below the header. */
     children: ReactNode;
 }
 

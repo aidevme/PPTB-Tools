@@ -62,7 +62,8 @@ npm run validate # pptb-validate, the PPTB manifest checks
 ```
 
 `npm run build` (which runs `tsc`) is the correctness check to run after changes; also run `npm test` when the tool
-has one. There is no lint script.
+has one. There is no general lint script; the generator has `npm run lint:tsdoc`, which checks only TSDoc comment
+syntax (ESLint with `eslint-plugin-tsdoc`).
 
 To test inside PPTB itself: build, then in PPTB enable the Debug Menu in Settings, use Debug → Browse to point at
 the tool's directory (or `dist`), connect to a Dataverse environment, and reopen the tool tab after each rebuild.
@@ -154,12 +155,18 @@ Skills and subagents are authored once under `agent-src/` and generated into eac
 `CLAUDE.md` and `.github/copilot-instructions.md`. Edit the source, then:
 
 ```bash
-pwsh -File agent-src/sync/sync.ps1 -DryRun   # see what would change
-pwsh -File agent-src/sync/sync.ps1           # regenerate (it deletes and recreates the generated folders)
-pwsh -File agent-src/sync/verify-parity.ps1  # must pass
+pwsh -File agent-src/sync/validate-skills.ps1  # Agent Skills specification check (skills-ref); must pass
+pwsh -File agent-src/sync/sync.ps1 -DryRun     # see what would change
+pwsh -File agent-src/sync/sync.ps1             # regenerate (it deletes and recreates the generated folders)
+pwsh -File agent-src/sync/verify-parity.ps1    # must pass
 ```
 
 New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are created with `aidevme-skill-creator`.
+Their frontmatter follows the [Agent Skills specification](https://agentskills.io/specification): `name` (equal to
+the folder name), `description` (at most 1024 characters), optional `license`, `allowed-tools`, `compatibility`, and
+`metadata`, which holds this repo's `layer` and `scope`; `argument-hint` is the one Claude Code extension allowed.
+`validate-skills.ps1` checks this with a pinned skills-ref; the first run needs `-Install` (it downloads it from PyPI
+into the gitignored `agent-src/sync/.venv-skills-ref`).
 
 ### Installed skills
 
@@ -168,19 +175,18 @@ New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are crea
 | `pptb-tool-dev` | Building, debugging, validating or publishing a PPTB tool |
 | `intake-policy-review` | Checking a tool against the PPTB marketplace and AI-assisted development policies |
 | `tool-verification` | Checking a tool against the Verified badge requirements |
-| `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/`) |
+| `aidevme-pptb-tool-refactoring` | Analyzing tools and proposing a refactoring plan, then executing only the approved steps (report saved to `docs/todos/<tool-name>/`) |
 | `aidevme-pptb-tool-developer` | Moving inline `makeStyles` hooks out of a tool's components into `src/styles/<ComponentName>.styles.ts` (`use<ComponentName>Styles`) |
-| `aidevme-github` | Committing when asked: one commit per file, each with its own Conventional Commits message |
+| `aidevme-github` | Git and GitHub work when asked: one commit per file (Conventional Commits), branch names, issues, pull requests, review comments, CI status, "ship it" |
+| `aidevme-spec-kit` | Spec-driven development with GitHub Spec Kit: detects the phase (setup, constitution, spec, plan, tasks, implement, converge), runs the matching `/speckit-*` command and stops for review; commits and pull requests go through `aidevme-github` |
+| `aidevme-tsdoc` | Writing, reviewing and fixing TSDoc doc comments in TypeScript (public symbols, React components and hooks), checked with ESLint's `tsdoc/syntax` |
+| `aidevme-vitepress` | Changing the VitePress docs site (pages, sidebar, config, build errors), checked against the VitePress docs through the Vue Docs MCP server |
 | `playwright-cli` | Driving a browser: testing, screenshots, scraping |
-| `aidevme-dataverse-sdk-reference` | Dataverse SDK / Web API / metadata reference |
-| `aidevme-fetchxml-queries` | Writing or optimizing FetchXML |
-| `aidevme-dataverse-data` | Querying or changing Dataverse records through the Web API |
-| `aidevme-dataverse-customapi` | Creating or inspecting Custom APIs (for example to test the generator) |
-| `aidevme-shared-scripts` | Shared auth and Web API scripts the Dataverse skills load; not run directly |
+| `aidevme-shared-scripts` | Shared PowerShell library other skills load (the wiki skills use its `Wiki-Tiers.ps1`); not run directly |
 | `aidevme-diagram-drawio` | draw.io diagrams for the docs |
 | `aidevme-wiki-*` | The `agent/` wiki: `capture`, `lint`, `process-inbox`, `query`, `scaffold-project`, `update-topic`, `write-decision` |
 | `aidevme-skill-creator`, `skill-creator` | Creating or improving skills |
-| `aidevme-skills-sync` | Checking that the generated skill folders match the source |
+| `aidevme-skills-sync` | Checking that the skills follow the Agent Skills specification and that the generated skill folders match the source |
 | `aidevme-docs-maintenance` | Validating Markdown (markdownlint + cspell), syncing `cspell.json`, syncing the `docs/` entries in `.github/CODEOWNERS` |
 
 ### The `agent/` wiki
@@ -204,6 +210,10 @@ Record load-bearing decisions as ADRs in `agent/wiki/decisions/` (`aidevme-wiki-
   anything that needs a live PPTB host).
 - **Keep docs and comments accurate.** Update the tool's docs, README and TSDoc in the same change as the behavior;
   a comment must match the code it describes.
+- **TSDoc with every TypeScript change.** When you create or change an exported component, props type, hook,
+  service or other public symbol, write or update its TSDoc in the same change with the `aidevme-tsdoc` skill
+  (only the symbols you touched; comments that are still correct stay as they are), then run `npm run lint:tsdoc`
+  in tools that have it. This applies to ad-hoc edits as well as to work done through other skills.
 - **Never invent APIs or metadata.** Check the PPTB API reference and live Dataverse metadata rather than guessing.
 
 ## 6. Commits

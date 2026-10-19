@@ -1,8 +1,11 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, Text } from '@fluentui/react-components';
 
+/** Props for {@link ConfirmationDialog}. */
 export interface IConfirmationDialogProps {
+    /** Shows the dialog; the caller controls it and closes it from `onConfirm` or `onCancel`. */
     open: boolean;
+    /** The dialog's title, usually a question such as "Delete project?". */
     title: string;
     /** What will happen if the user confirms. */
     message: ReactNode;
@@ -12,9 +15,17 @@ export interface IConfirmationDialogProps {
     busyLabel?: string;
     /** Optional icon for the confirm button. */
     confirmIcon?: ReactElement;
+    /**
+     * Label of the cancel button.
+     * @defaultValue `'Cancel'`
+     */
     cancelLabel?: string;
-    /** While true, both buttons are disabled and the dialog can't be dismissed. */
+    /**
+     * While true, both buttons are disabled and the dialog can't be dismissed.
+     * @defaultValue false
+     */
     busy?: boolean;
+    /** Called when the confirm button is clicked; the caller performs the action. */
     onConfirm: () => void;
     /** Called by Cancel or the Escape key (unless `busy`). An alert dialog ignores clicks outside it. */
     onCancel: () => void;

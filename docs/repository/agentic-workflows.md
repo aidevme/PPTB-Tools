@@ -35,7 +35,7 @@ GitHub runs the `.lock.yml`. Commit both files, and never edit the `.lock.yml` b
 
 ### How it differs from what we already have
 
-| | Regular GitHub Actions (`build-tool.yml`, …) | Agentic workflows | Claude Code subagents (`.claude/agents/`) |
+| | Regular GitHub Actions (`dataverse-early-bound-typescript-generator-build.yml`, …) | Agentic workflows | Claude Code subagents (`.claude/agents/`) |
 | --- | --- | --- | --- |
 | Runs | In GitHub Actions | In GitHub Actions | On your machine, in your Claude Code session |
 | Good for | Deterministic steps: build, test, deploy | Judgment: reviews, triage, reports | Interactive work while you develop |

@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-update-topic
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Maintain anchor pages in `agent/wiki/topics/` — short orientation + link-dominated sections that surface digests, SOPs, ADRs, and skills under a subject area. Two modes: **auto** (mechanical append after an ingest skill writes a digest) and **synthesis** (proposes new links across SOPs / Reference / Decisions / Digests / Skills / External sections, asks per-link approval). Use for "update topic X", "create an anchor for X", or when `aidevme-wiki-lint` flags a dangling topic reference. Never authors content into a topic — only adds or proposes links; respects the fidelity ceiling.
 ---

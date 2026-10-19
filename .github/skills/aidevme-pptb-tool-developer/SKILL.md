@@ -1,20 +1,20 @@
 ---
 name: aidevme-pptb-tool-developer
-layer: atomic
-scope: project
+metadata:
+  layer: atomic
+  scope: project
 description: |
-  Standardize styling in Power Platform ToolBox (PPTB) tools under tools/: find Fluent UI makeStyles hooks defined
-  inside React component files (`const useStyles = makeStyles({...})`) and move each one to
-  src/styles/<ComponentName>.styles.ts as `use<ComponentName>Styles`, exported from the src/styles/index.ts
-  barrel. A read-only analysis and an approval gate come before any change; styling questions are answered from
-  Microsoft Learn through the Microsoft Learn MCP Server. Use when:
-  (1) User says "extract the styles", "move useStyles out of the components", "standardize the styles",
+  Standardize styling in PPTB tools under tools/: move Fluent UI makeStyles hooks defined inside React component
+  files into src/styles/ as one ComponentName.styles.ts file per component, exporting useComponentNameStyles from
+  the src/styles/index.ts barrel. A read-only analysis and an approval gate come before any change; styling
+  questions are checked in Microsoft Learn through the Microsoft Learn MCP Server. Use when:
+  (1) User says "extract the styles", "move useStyles out of the components", "standardize the styles" or
       "create .styles.ts files" for a PPTB tool
-  (2) A tool has makeStyles hooks inline in its .tsx components and should follow the src/styles convention
-  (3) User wants to check which components still define their own useStyles
-  Does NOT change any style value or behavior, process tools the user didn't select, overwrite an existing style
-  file without confirmation, or modify files before approval. Does NOT build, debug or publish tools
-  (pptb-tool-dev) or do general refactoring (aidevme-pptb-tool-refactoring).
+  (2) A tool's .tsx components define makeStyles hooks inline
+  (3) User wants to know which components still define their own useStyles
+  Does NOT change style values or behavior, process tools the user didn't select, overwrite a style file without
+  confirmation, or change files before approval. Does NOT build, debug or publish tools (pptb-tool-dev) or do
+  general refactoring (aidevme-pptb-tool-refactoring).
 allowed-tools: Bash, PowerShell, Read, Grep, Glob, Edit, Write, AskUserQuestion, mcp__microsoft-learn__microsoft_docs_search, mcp__microsoft-learn__microsoft_docs_fetch, mcp__microsoft-learn__microsoft_code_sample_search
 argument-hint: "[tool-name ... | all]"
 ---
@@ -134,7 +134,8 @@ whether to continue. Then, for each approved component:
 1. **Create** `src/styles/<ComponentName>.styles.ts` with the style definition unchanged, renamed to
    `use<ComponentName>Styles`, as a named export, with every import it needs (Fluent imports, and constants it
    uses, moved or imported as agreed in Phase 3). Add a one-line TSDoc comment when the tool's style files have
-   one.
+   one; after the component is done, hand the new style file and the changed component to `aidevme-tsdoc` ("After
+   a code change"), which keeps correct comments and adds missing ones.
 2. **Remove** the original hook definition from the component file.
 3. **Replace** every call of the old hook in that file with `use<ComponentName>Styles()`.
 4. **Import** the hook from the styles barrel with the right relative path, for example
@@ -189,3 +190,4 @@ Don't commit unless the user asks; if asked, use Conventional Commits from `CONT
 | --- | --- | --- |
 | 2026-10-16 | aidevme | Created: tool selection, read-only analysis of inline makeStyles hooks with edge-case flags, approval gate, extraction to src/styles/<ComponentName>.styles.ts with the barrel, build/test/lint verification, report. |
 | 2026-10-16 | aidevme | Styling questions are answered from Microsoft Learn through the Microsoft Learn MCP Server (search, fetch, code samples), cited in the proposal and the report; Learn-based improvements are reported as follow-ups, never applied. |
+| 2026-10-18 | aidevme | New style files and changed components are handed to `aidevme-tsdoc` ("After a code change") after extraction. |

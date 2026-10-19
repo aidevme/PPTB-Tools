@@ -3,7 +3,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { PreviewCard, type PreviewCardProps } from '../src/components/cards/PreviewCard';
+import { PreviewCard, type IPreviewCardProps, type IPreviewGenerateOptions } from '../src/components/cards/PreviewCard';
 import { FileSearchBox } from '../src/components/shared/FileSearchBox';
 import { fileType } from '../src/components/shared/generatedFiles';
 import { clampListWidth, matchesSearch, sortFiles, visibleFiles } from '../src/components/shared/previewFiles';
@@ -56,7 +56,9 @@ afterEach(() => {
     disconnect() {}
 };
 
-async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged = true } = {}) {
+type PreviewOverrides = Omit<Partial<IPreviewCardProps>, 'generateOptions'> & { generateOptions?: Partial<IPreviewGenerateOptions> };
+
+async function render(overrides: PreviewOverrides = {}, { showUnchanged = true } = {}) {
     container = document.body.appendChild(document.createElement('div'));
     root = createRoot(container);
     await act(async () =>
@@ -73,13 +75,12 @@ async function render(overrides: Partial<PreviewCardProps> = {}, { showUnchanged
                     busy: false,
                     previewedAt: null,
                     lastResult: null,
-                    deleteOrphans: false,
-                    onDeleteOrphansChange: vi.fn(),
                     onPreview: vi.fn(),
                     onGenerate: vi.fn(),
                     onCopyText: vi.fn(),
                     ...overrides,
-                } as PreviewCardProps),
+                    generateOptions: { deleteOrphans: false, onDeleteOrphansChange: vi.fn(), ...overrides.generateOptions },
+                } as IPreviewCardProps),
             ),
         ),
     );
@@ -291,7 +292,7 @@ describe('Delete orphaned files switch', () => {
 
     it('reflects the setting, reports changes, and explains itself in an info label', async () => {
         const onDeleteOrphansChange = vi.fn();
-        await render({ onDeleteOrphansChange });
+        await render({ generateOptions: { onDeleteOrphansChange } });
         const input = deleteSwitch();
         expect(input.checked).toBe(false);
         await act(async () => input.click());
@@ -308,7 +309,7 @@ describe('Delete orphaned files switch', () => {
             files: PLAN.files.filter((f) => f.status === 'orphaned' || f.status === 'unchanged'),
             counts: { new: 0, changed: 0, unchanged: 1, orphaned: 1, duplicate: 0 },
         };
-        await render({ plan: orphansOnly, deleteOrphans: true });
+        await render({ plan: orphansOnly, generateOptions: { deleteOrphans: true } });
         expect(document.body.textContent).toContain('1 orphaned file will be deleted.');
         expect(deleteSwitch().checked).toBe(true);
         expect(button('Delete 1 orphaned file').disabled).toBe(false);

@@ -3,7 +3,9 @@ import { useWorkflowProgressStyles } from '../../styles';
 import { StepIndicator } from './StepCard';
 import { stepElementId, type StepState } from './workflowSteps';
 
+/** Props for {@link WorkflowProgress}. */
 export interface IWorkflowProgressProps {
+    /** The steps to show, in order, as returned by `computeWorkflowSteps`. */
     steps: StepState[];
 }
 

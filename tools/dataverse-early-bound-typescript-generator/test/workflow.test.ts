@@ -7,7 +7,8 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectEntry } from '../src/config';
-import { ProjectCard, recentProjects, type ProjectCardProps } from '../src/components/cards/ProjectCard';
+import { ProjectCard, type IProjectCardProps } from '../src/components/cards/ProjectCard';
+import { recentProjects } from '../src/components/cards/recentProjects';
 import { formatRelativeTime, shortenPath } from '../src/components/shared/format';
 import { WorkflowProgress } from '../src/components/shared/WorkflowProgress';
 import { computeWorkflowSteps, stepElementId } from '../src/components/shared/workflowSteps';
@@ -113,8 +114,8 @@ async function renderInto(element: ReturnType<typeof createElement>) {
     await act(async () => root!.render(createElement(FluentProvider, { theme: webLightTheme }, element)));
 }
 
-async function renderProjectCard(overrides: Partial<ProjectCardProps> = {}) {
-    const props: ProjectCardProps = {
+async function renderProjectCard(overrides: Partial<IProjectCardProps> = {}) {
+    const props: IProjectCardProps = {
         step: computeWorkflowSteps({ hasProject: !!overrides.projectRoot, selectedCount: 0, plan: null })[0],
         projectRoot: null,
         rememberedFolder: null,
@@ -125,10 +126,7 @@ async function renderProjectCard(overrides: Partial<ProjectCardProps> = {}) {
         onLoadExistingProject: vi.fn(),
         onOpenRecent: vi.fn(),
         onReload: vi.fn(),
-        outputFolder: null,
-        hasSelection: false,
         onCopyPath: vi.fn(),
-        onClearSelection: vi.fn(),
         now: NOW,
         ...overrides,
     };

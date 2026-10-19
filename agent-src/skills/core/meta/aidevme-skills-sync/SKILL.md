@@ -1,18 +1,21 @@
 ---
 name: aidevme-skills-sync
-layer: governance
-scope: core
+metadata:
+  layer: governance
+  scope: core
 description: |
   Verification backstop for the single-source → dual-tool sync. Confirms the GENERATED tool
   directories (.claude/skills, .github/skills) and the generated instruction files (CLAUDE.md,
   .github/copilot-instructions.md) exactly reflect the committed SOURCE (agent-src/skills/**,
-  AGENTS.md). Reports orphans, drift, cross-tool mismatch, stray artifacts, and double-nesting.
+  AGENTS.md). Reports orphans, drift, cross-tool mismatch, stray artifacts, and double-nesting, and
+  validates every source skill against the Agent Skills specification (skills-ref).
 
   Use when:
   (1) User says "sync skills", "check skill parity", "are the skills in sync?"
   (2) After editing a skill under agent-src/skills/** — verify the outputs were regenerated
   (3) After adding/removing a skill — confirm the manifest and both tool dirs agree
   (4) Before committing / in CI — parity must be clean
+  (5) User asks whether the skills follow the Agent Skills specification
 
   Does NOT: hand-edit the generated mirrors (that is what drift IS). The fix for any drift is to
   re-run the generator (sync.ps1), never to patch .claude/ or .github/ by hand.
@@ -33,7 +36,19 @@ detects exactly that.
 
 ## Workflow
 
-### 1. Run the parity check
+### 1. Validate the source skills against the Agent Skills specification
+
+```powershell
+pwsh -File agent-src/sync/validate-skills.ps1
+```
+
+It runs the specification's reference validator (skills-ref, pinned in the script) over every
+`agent-src/skills/**/SKILL.md`: only the specification's top-level fields (plus `argument-hint`), `name`
+equal to the folder name, and the length limits. Exit 1 lists each invalid skill and its problems: fix them
+in the **source** `SKILL.md`. Exit 2 means skills-ref isn't installed: ask before running it with `-Install`,
+which downloads the pinned version from PyPI into the gitignored `agent-src/sync/.venv-skills-ref`.
+
+### 2. Run the parity check
 
 ```powershell
 pwsh -File agent-src/sync/verify-parity.ps1
@@ -49,11 +64,11 @@ It checks, and **exits non-zero on any problem**:
 | Instruction parity | `CLAUDE.md` and `copilot-instructions.md` each end with the `AGENTS.md` body |
 | Hygiene | no stray `*.zip` in a generated skill; no double-nested `<name>/<name>/` |
 
-### 2. If parity is clean
+### 3. If both are clean
 
-Report "PARITY OK — zero drift". Nothing to do.
+Report the validation count and "PARITY OK — zero drift". Nothing to do.
 
-### 3. If parity FAILS
+### 4. If parity FAILS
 
 The generated outputs are stale or were hand-edited. **Do not patch the mirrors.** Regenerate:
 
@@ -73,9 +88,12 @@ fix `agent-src/sync/skills-manifest.json` or the folder location, then sync.
 - Never resolve drift by editing `.claude/` or `.github/` — that re-creates the very problem this
   model removes.
 - CI and pre-commit run `verify-parity.ps1`; a non-zero exit blocks the commit.
+- A skill that fails `validate-skills.ps1` is fixed in the source, never by adding keys to the validator's
+  allowlist; that list (`CLIENT_EXTENSION_KEYS` in `validate_skills.py`) holds only keys a client documents.
 
 ## Changelog
 
 | Date | Author | Description |
 |---|---|---|
 | 2026-09-10 | aidevme | Rewritten from HINT's twin-mirror reconciler into a verification backstop for the inverted (source-committed) model; the double-nesting bug is designed out. |
+| 2026-10-18 | aidevme | New first step: validate every source skill against the Agent Skills specification with `agent-src/sync/validate-skills.ps1` (skills-ref); steps renumbered. |

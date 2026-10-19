@@ -3,3 +3,6 @@ dist/
 *.tgz
 .playwright-mcp/
 /tests/
+
+# skills-ref validator (agent-src/sync/validate-skills.ps1)
+agent-src/sync/.venv-skills-ref/

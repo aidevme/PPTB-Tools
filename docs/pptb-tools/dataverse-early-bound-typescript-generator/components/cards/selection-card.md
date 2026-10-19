@@ -5,20 +5,17 @@ directly in the config, so it's saved to `.dataverse-gen.json`.
 
 Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx)
 
-## Props (`SelectionCardProps`)
+## Props (`ISelectionCardProps`)
+
+`SelectionCardProps` remains as a deprecated alias of `ISelectionCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |
 | `step` | `StepState` | This step's state for the [StepCard](../shared/step-card.md) header. |
 | `entities` | `EntitySummary[]` | Tables in the connected environment. |
 | `operations` | `OperationSummary[] \| null` | Actions and functions; `null` until the `$metadata` document has been loaded. |
-| `solutions` | `SolutionSummary[]` | Solutions offered in the solution filter. |
-| `solutionEntityIds` | `Set<string> \| null` | Table `MetadataId`s in the chosen solution; `null` when no solution filter is active. |
-| `solutionComponentIds` | `Set<string> \| null` | Custom API and custom process action ids in the chosen solution; `null` when not filtering. |
-| `selectedSolutionId` | `string \| null` | The solution chosen in the filter. |
-| `loadingEntities` | `boolean` | Shows a spinner on the Tables tab. |
-| `loadingOperations` | `boolean` | Shows a spinner on the Actions and Functions tabs. |
-| `loadingSolution` | `boolean` | Shows a spinner while the solution's components load. |
+| `solutionFilter` | `ISelectionSolutionFilter` | The solution filter: `solutions` offered in the dropdown, the chosen `selectedId` (`null` for all), and what it contains: `entityIds` (table `MetadataId`s) and `componentIds` (custom API and custom process action ids), each `null` when no solution filter is active. |
+| `loading` | `ISelectionLoading` | Spinners: `entities` on the Tables tab, `operations` on the Actions and Functions tabs, `solution` while the chosen solution's components load. |
 | `selected` | `Record<SelectionKind, string[]>` | Selected names per tab. |
 | `missing` | `Record<SelectionKind, string[]>` | Names in the config that the connected environment doesn't have. |
 | `disabled` | `boolean` | Disables the checkboxes and Clear button. |
@@ -34,7 +31,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 ## Behavior
 
 - **Tabs:** Tables, Actions and Functions, each with an icon and a tooltip describing what it lists.
-- **Filters:** a search box, a solution dropdown, **Selected only**, and on the Actions and Functions tabs
+- **Filters:** a search box, a solution dropdown (named "Filter by solution" for screen readers), **Selected only**, and on the Actions and Functions tabs
   **Custom only** (custom APIs and custom process actions).
 - **Sorting:** actions and functions list custom APIs first, then sort by name ignoring case.
 - **Row limit:** the list shows at most `rowLimit` rows (500 by default); the footer says "Showing the first
@@ -56,11 +53,15 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 
 ## Where the code lives
 
-- `components/cards/SelectionCard.tsx`: the card.
-- `components/cards/selectionColumns.tsx`: the column definitions per tab (`ENTITY_COLUMNS`, `ACTION_COLUMNS`,
+- `components/cards/SelectionCard.tsx`: the card: tabs, filters, solution filter, row limit and missing items.
+- `components/cards/selectionRows.tsx`: `buildEntityRows` and `buildOperationRows`, pure functions that filter the
+  entities or operations, order them, and build the cells and sort values of each row; also `operationType`.
+- `components/tables/SelectionTable.tsx`: the table (a checkbox per row, sortable columns) and the `SelectionRow`
+  type.
+- `components/tables/selectionColumns.tsx`: the column definitions per tab (`ENTITY_COLUMNS`, `ACTION_COLUMNS`,
   `FUNCTION_COLUMNS`) with their header tooltips, and the badge colour per table type (`TABLE_TYPE_COLORS`).
 - `components/shared/sorting.ts`: `sortSelectionRows`, which sorts the rows by the chosen column, listing rows
   without a value last.
-- `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
-  `components/shared/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
+- `components/tables/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
+  `components/tables/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
   sortable tables (Select card, Preview card, Load Existing Project dialog), styled by `useSortableTableStyles`.

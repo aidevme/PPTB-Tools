@@ -1,7 +1,8 @@
 ---
 name: aidevme-wiki-query
-layer: atomic
-scope: core
+metadata:
+  layer: atomic
+  scope: core
 description: |
   Answer natural-language questions about project or product knowledge by searching `agent/wiki/`, `agent/work/`, and (in consuming repos) every inherited tier's `shared/<slug>/agent/wiki/`. Returns a cited answer — every claim links to its source file; paraphrased claims from `summary-only` chains are marked as such. Use for "what do we know about X?", "where is X documented?", "who decided X?", "search the wiki", or any project-history / ADR / topic / digest lookup. Never fabricates — says so explicitly when the wiki has no answer.
 ---

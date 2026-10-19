@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState } from 'react';
 import {
     Badge,
     Button,
@@ -9,13 +9,6 @@ import {
     Switch,
     Tab,
     TabList,
-    Table,
-    TableBody,
-    TableCell,
-    TableCellLayout,
-    TableHeader,
-    TableRow,
-    TableSelectionCell,
     Text,
     Tooltip,
     type SelectTabData,
@@ -23,59 +16,74 @@ import {
 } from '@fluentui/react-components';
 import { FlashRegular, MathFormulaRegular, TableRegular } from '@fluentui/react-icons';
 import type { EntitySummary, OperationSummary, SolutionSummary } from '../../types';
-import { useSelectionCardStyles, useSortableTableStyles } from '../../styles';
-import { SortableHeaderCell } from '../shared/SortableHeaderCell';
-import { nextSort, sortSelectionRows, type SortState, type SortValue } from '../shared/sorting';
-import { activateRowOnKey } from '../shared/tableRows';
+import { useSelectionCardStyles } from '../../styles';
+import { nextSort, sortSelectionRows, type SortState } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
-import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS, TABLE_TYPE_COLORS } from './selectionColumns';
+import { SelectionTable } from '../tables/SelectionTable';
+import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS } from '../tables/selectionColumns';
+import { buildEntityRows, buildOperationRows } from './selectionRows';
 import type { StepState } from '../shared/workflowSteps';
 
+/** A Select tab, and the matching list of names in the config (tables, actions or functions). */
 export type SelectionKind = 'entities' | 'actions' | 'functions';
 
 /** Default for the `rowLimit` prop (the General setting "Rows shown in the Select tables"). */
 const MAX_ROWS = 500;
 
-/**
- * One table row: the selection key, a name for the checkbox's accessible label, the cells after it, and one sort
- * value per cell.
- */
-interface SelectionRow {
-    key: string;
-    label: string;
-    cells: ReactNode[];
-    sortValues: SortValue[];
-}
-
-function operationType(o: OperationSummary): string {
-    if (o.isCustomApi) return o.isPrivate ? 'Private custom API' : 'Custom API';
-    return o.isProcessAction ? 'Custom action' : 'Built-in';
-}
-
-export interface SelectionCardProps {
-    step: StepState;
-    entities: EntitySummary[];
-    operations: OperationSummary[] | null;
+/** The solution dropdown and what the chosen solution contains. */
+export interface ISelectionSolutionFilter {
+    /** The solutions the dropdown offers; the dropdown is disabled while it's empty. */
     solutions: SolutionSummary[];
+    /** The chosen solution, or `null` for all solutions. */
+    selectedId: string | null;
     /** Entity `MetadataId`s in the chosen solution, or `null` when no solution filter is active. */
-    solutionEntityIds: Set<string> | null;
+    entityIds: Set<string> | null;
     /** Ids of custom API / process-action records in the chosen solution, or `null` when not filtering. */
-    solutionComponentIds: Set<string> | null;
-    selectedSolutionId: string | null;
-    loadingEntities: boolean;
-    loadingOperations: boolean;
-    loadingSolution: boolean;
+    componentIds: Set<string> | null;
+}
+
+/** Which lists are still loading. */
+export interface ISelectionLoading {
+    /** The tables list; the Tables tab shows a spinner. */
+    entities: boolean;
+    /** The actions and functions (the `$metadata` document); the Actions and Functions tabs show a spinner. */
+    operations: boolean;
+    /** The chosen solution's components. */
+    solution: boolean;
+}
+
+/** Props for {@link SelectionCard}. */
+export interface ISelectionCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
+    step: StepState;
+    /** The environment's tables, listed on the Tables tab. */
+    entities: EntitySummary[];
+    /** The environment's actions and functions, or `null` until they're loaded (see `onEnsureOperations`). */
+    operations: OperationSummary[] | null;
+    /** The solution dropdown's options and what the chosen solution contains. */
+    solutionFilter: ISelectionSolutionFilter;
+    /** Which lists are still loading. */
+    loading: ISelectionLoading;
+    /** The selected names per tab (logical names for tables), as stored in the config. */
     selected: Record<SelectionKind, string[]>;
     /** Names in the config that the connected environment does not have. */
     missing: Record<SelectionKind, string[]>;
+    /**
+     * Disables the row checkboxes and Clear (no connection or project yet, or work in progress); an empty list
+     * then asks the user to connect.
+     */
     disabled: boolean;
     /**
      * No project open yet: the lists stay empty and the tabs, search, solution filter, switches and Clear are
      * disabled until one is created or opened.
+     * @defaultValue false
      */
     needsProject?: boolean;
+    /** Called when a row's checkbox changes, with the current tab, the row's name and whether it's now checked. */
     onToggle: (kind: SelectionKind, name: string, checked: boolean) => void;
+    /** Called with the current tab when Clear is clicked, to empty that tab's selection. */
     onClear: (kind: SelectionKind) => void;
+    /** Called with the chosen solution's id when the solution dropdown changes, or `null` when it's cleared. */
     onSolutionChange: (solutionId: string | null) => void;
     /** Called when the actions/functions tabs are opened, so the CSDL is only fetched when needed. */
     onEnsureOperations: () => void;
@@ -84,10 +92,9 @@ export interface SelectionCardProps {
 }
 
 /** Step 2: pick tables, actions and functions. Selection is stored directly in the config. */
-export function SelectionCard(props: SelectionCardProps) {
-    const { step } = props;
+export function SelectionCard(props: ISelectionCardProps) {
+    const { step, solutionFilter } = props;
     const styles = useSelectionCardStyles();
-    const tableStyles = useSortableTableStyles();
     /** Nothing to browse until a project is open, so every control is disabled. */
     const noProject = !!props.needsProject;
     const [tab, setTab] = useState<SelectionKind>('entities');
@@ -101,85 +108,25 @@ export function SelectionCard(props: SelectionCardProps) {
     const selectedSet = useMemo(() => new Set(props.selected[tab]), [props.selected, tab]);
     const term = search.trim().toLowerCase();
 
-    const rows = useMemo(() => {
-        const matches = (...values: Array<string | undefined>) => !term || values.some((v) => v?.toLowerCase().includes(term));
-        if (tab === 'entities') {
-            return props.entities
-                .filter((e) => !props.solutionEntityIds || props.solutionEntityIds.has(e.metadataId.toLowerCase()))
-                .filter((e) => !selectedOnly || selectedSet.has(e.logicalName))
-                .filter((e) => matches(e.logicalName, e.displayName, e.schemaName))
-                .map(
-                    (e): SelectionRow => ({
-                        key: e.logicalName,
-                        label: e.displayName,
-                        cells: [
-                            e.displayName,
-                            <span className={styles.mono}>{e.logicalName}</span>,
-                            <span className={styles.mono}>{e.schemaName}</span>,
-                            e.description ? (
-                                <Tooltip content={e.description} relationship="description" withArrow>
-                                    <span>{e.description}</span>
-                                </Tooltip>
-                            ) : (
-                                <span className={styles.muted}>—</span>
-                            ),
-                            <Badge appearance="outline" size="small" color={TABLE_TYPE_COLORS[e.tableType]}>
-                                {e.tableType}
-                            </Badge>,
-                        ],
-                        sortValues: [e.displayName, e.logicalName, e.schemaName, e.description || undefined, e.tableType],
-                    }),
-                );
-        }
-        const kind = tab === 'actions' ? 'action' : 'function';
-        return (props.operations ?? [])
-            .filter((o) => o.kind === kind)
-            .filter((o) => !customApisOnly || o.isCustomApi || o.isProcessAction)
-            .filter((o) => !props.selectedSolutionId || (!!props.solutionComponentIds && !!o.componentId && props.solutionComponentIds.has(o.componentId.toLowerCase())))
-            .filter((o) => !selectedOnly || selectedSet.has(o.name))
-            .filter((o) => matches(o.name, o.boundTo, o.displayName))
-            // Custom APIs first, then case-insensitive by name (a plain sort puts lowercase publisher
-            // prefixes after hundreds of built-in PascalCase messages, past the row limit).
-            .sort((a, b) => Number(b.isCustomApi || b.isProcessAction) - Number(a.isCustomApi || a.isProcessAction) || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
-            .map((o): SelectionRow => {
-                const hasDisplayName = !!o.displayName && o.displayName !== o.name;
-                return {
-                    key: o.name,
-                    label: o.name,
-                    cells: [
-                        hasDisplayName ? (
-                            <span className={styles.stacked}>
-                                <span>{o.displayName}</span>
-                                <span className={styles.secondary}>{o.name}</span>
-                            </span>
-                        ) : (
-                            o.name
-                        ),
-                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
-                        o.inMetadata ? (
-                            String(o.parameterCount)
-                        ) : (
-                            <Tooltip content="Not in $metadata; types are built from the custom API definition" relationship="description" withArrow>
-                                <span className={styles.secondary}>From definition</span>
-                            </Tooltip>
-                        ),
-                        o.isCustomApi || o.isProcessAction ? (
-                            <Badge appearance="outline" size="small">
-                                {operationType(o)}
-                            </Badge>
-                        ) : (
-                            operationType(o)
-                        ),
-                    ],
-                    sortValues: [
-                        hasDisplayName ? o.displayName : o.name,
-                        o.isBound ? `Bound to ${o.boundTo ?? '?'}` : 'Unbound',
-                        o.inMetadata ? o.parameterCount : undefined,
-                        operationType(o),
-                    ],
-                };
-            });
-    }, [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, props.solutionEntityIds, props.solutionComponentIds, props.selectedSolutionId, styles]);
+    const rows = useMemo(
+        () =>
+            tab === 'entities'
+                ? buildEntityRows(props.entities, { term, selectedOnly, selectedSet, solutionEntityIds: solutionFilter.entityIds }, styles)
+                : buildOperationRows(
+                      props.operations,
+                      {
+                          kind: tab === 'actions' ? 'action' : 'function',
+                          term,
+                          selectedOnly,
+                          selectedSet,
+                          customApisOnly,
+                          selectedSolutionId: solutionFilter.selectedId,
+                          solutionComponentIds: solutionFilter.componentIds,
+                      },
+                      styles,
+                  ),
+        [tab, term, selectedOnly, customApisOnly, selectedSet, props.entities, props.operations, solutionFilter.entityIds, solutionFilter.componentIds, solutionFilter.selectedId, styles],
+    );
 
     const onTabSelect = (_: SelectTabEvent, data: SelectTabData) => {
         const next = data.value as SelectionKind;
@@ -187,7 +134,7 @@ export function SelectionCard(props: SelectionCardProps) {
         if (next !== 'entities') props.onEnsureOperations();
     };
 
-    const loading = tab === 'entities' ? props.loadingEntities : props.loadingOperations;
+    const loading = tab === 'entities' ? props.loading.entities : props.loading.operations;
     const missing = props.missing[tab];
     // Sorted before the row limit, so the first rows shown are the first of all matches.
     const sorted = useMemo(() => sortSelectionRows(rows, sort), [rows, sort]);
@@ -233,20 +180,21 @@ export function SelectionCard(props: SelectionCardProps) {
                         onChange={(_, data) => setSearch(data.value)}
                     />
                     <Dropdown
+                        aria-label="Filter by solution"
                         placeholder="All solutions"
                         clearable
-                        selectedOptions={props.selectedSolutionId ? [props.selectedSolutionId] : []}
-                        value={props.solutions.find((s) => s.id === props.selectedSolutionId)?.friendlyName ?? ''}
+                        selectedOptions={solutionFilter.selectedId ? [solutionFilter.selectedId] : []}
+                        value={solutionFilter.solutions.find((s) => s.id === solutionFilter.selectedId)?.friendlyName ?? ''}
                         onOptionSelect={(_, data) => props.onSolutionChange(data.optionValue ?? null)}
-                        disabled={noProject || props.solutions.length === 0}
+                        disabled={noProject || solutionFilter.solutions.length === 0}
                     >
-                        {props.solutions.map((s) => (
+                        {solutionFilter.solutions.map((s) => (
                             <Option key={s.id} value={s.id} text={s.friendlyName}>
                                 {`${s.friendlyName} (${s.uniqueName})`}
                             </Option>
                         ))}
                     </Dropdown>
-                    {props.loadingSolution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
+                    {props.loading.solution && <Spinner size="tiny" label="Loading solution components…" labelPosition="after" />}
                     {tab !== 'entities' && (
                         <Switch label="Custom only" checked={customApisOnly} disabled={noProject} onChange={(_, data) => setCustomApisOnly(data.checked)} />
                     )}
@@ -270,53 +218,16 @@ export function SelectionCard(props: SelectionCardProps) {
                     ) : shown.length === 0 ? (
                         <div className={styles.empty}>{props.disabled ? 'Connect to an environment to list items.' : 'Nothing matches.'}</div>
                     ) : (
-                        <Table aria-label={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'} size="small" sortable>
-                            <TableHeader>
-                                <TableRow className={tableStyles.headerRow}>
-                                    <TableSelectionCell type="checkbox" invisible />
-                                    {columns.map((column, index) => (
-                                        <SortableHeaderCell
-                                            key={column.label}
-                                            help={column.help}
-                                            sortDirection={sort?.column === index ? sort.direction : undefined}
-                                            onClick={() => toggleSort(index)}
-                                        >
-                                            {column.label}
-                                        </SortableHeaderCell>
-                                    ))}
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {shown.map((row) => {
-                                    const checked = selectedSet.has(row.key);
-                                    const toggleRow = () => {
-                                        if (!props.disabled) props.onToggle(tab, row.key, !checked);
-                                    };
-                                    return (
-                                        <TableRow
-                                            key={row.key}
-                                            className={props.disabled ? styles.rowDisabled : tableStyles.row}
-                                            aria-selected={checked}
-                                            appearance={checked ? 'brand' : 'none'}
-                                            tabIndex={0}
-                                            onClick={toggleRow}
-                                            onKeyDown={(e) => activateRowOnKey(e, toggleRow)}
-                                        >
-                                            <TableSelectionCell
-                                                type="checkbox"
-                                                checked={checked}
-                                                checkboxIndicator={{ 'aria-label': `Select ${row.label}`, disabled: props.disabled }}
-                                            />
-                                            {row.cells.map((cell, index) => (
-                                                <TableCell key={index}>
-                                                    <TableCellLayout truncate>{cell}</TableCellLayout>
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    );
-                                })}
-                            </TableBody>
-                        </Table>
+                        <SelectionTable
+                            ariaLabel={tab === 'entities' ? 'Tables' : tab === 'actions' ? 'Actions' : 'Functions'}
+                            columns={columns}
+                            rows={shown}
+                            sort={sort}
+                            onToggleSort={toggleSort}
+                            selectedKeys={selectedSet}
+                            disabled={!!props.disabled}
+                            onToggleRow={(key, checked) => props.onToggle(tab, key, checked)}
+                        />
                     )}
                 </div>
                 {!props.needsProject && (
@@ -328,3 +239,6 @@ export function SelectionCard(props: SelectionCardProps) {
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `ISelectionCardProps`. */
+export type SelectionCardProps = ISelectionCardProps;

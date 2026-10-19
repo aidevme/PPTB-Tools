@@ -1,19 +1,20 @@
 import { useMemo, useState } from 'react';
-import { Button, MessageBar, MessageBarActions, MessageBarBody, Skeleton, SkeletonItem, Switch, Text, Tooltip, mergeClasses, type SortDirection } from '@fluentui/react-components';
-import { ArrowSyncRegular, CopyRegular } from '@fluentui/react-icons';
+import { Button, MessageBar, MessageBarActions, MessageBarBody, Skeleton, SkeletonItem, Switch, Text, mergeClasses, type SortDirection } from '@fluentui/react-components';
+import { ArrowSyncRegular } from '@fluentui/react-icons';
 import type { FileStatus, WritePlan } from '../../types';
 import { summarizePlan, writeCounts } from '../../services';
 import { usePreviewCardStyles } from '../../styles';
-import { shortenPath } from '../shared/format';
 import { infoLabel } from '../shared/infoLabel';
 import { MIN_LIST_WIDTH, sortFiles, isSearchActive, visibleFiles, type FileFilter, type FileSortColumn } from '../shared/previewFiles';
+import { PathChip } from '../shared/PathChip';
 import { nextSort } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
 import { useResizableSplit } from '../shared/useResizableSplit';
 import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
-import { FileTable, PreviewActionBar, StatusTiles } from './PreviewParts';
+import { FileTable } from '../tables/FileTable';
+import { PreviewActionBar, StatusTiles } from './PreviewParts';
 
 /** Explanation in the Show unchanged switch's info label. */
 const SHOW_UNCHANGED_INFO = (
@@ -26,19 +27,8 @@ const SHOW_UNCHANGED_INFO = (
     </>
 );
 
-export interface PreviewCardProps {
-    step: StepState;
-    plan: WritePlan | null;
-    /** Whether the plan is stale because the selection or options changed since it was computed. */
-    stale: boolean;
-    canPreview: boolean;
-    /** True when everything is ready except the project folder; shows a hint next to the buttons. */
-    needsProject: boolean;
-    busy: boolean;
-    /** When the current plan was computed (ISO), for "Previewed … ago". */
-    previewedAt: string | null;
-    /** Summary of the last Generate run, shown as a success message until the next preview. */
-    lastResult: string | null;
+/** The Generate settings the Preview card shows as switches; each saves a tool-config key. */
+export interface IPreviewGenerateOptions {
     /** Whether Generate leaves files with duplicate identifiers unwritten (the tool config's `skipDuplicateIdentifiers`). */
     skipDuplicates?: boolean;
     /** The Skip duplicated identifier(s) switch; saves `skipDuplicateIdentifiers`. The switch is hidden without it. */
@@ -49,8 +39,33 @@ export interface PreviewCardProps {
     onRenameDuplicatesChange?: (checked: boolean) => void;
     /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
     deleteOrphans: boolean;
+    /** Called with the new value when the Delete orphaned files switch is toggled; saves `deleteOrphanedFiles`. */
     onDeleteOrphansChange: (checked: boolean) => void;
+}
+
+/** Props for {@link PreviewCard}. */
+export interface IPreviewCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
+    step: StepState;
+    /** The last computed write plan, or `null` before the first preview (the list shows a placeholder). */
+    plan: WritePlan | null;
+    /** Whether the plan is stale because the selection or options changed since it was computed. */
+    stale: boolean;
+    /** Enables Preview and the stale warning's Preview again; the app sets it once connected, with a selection. */
+    canPreview: boolean;
+    /** True when everything is ready except the project folder; shows a hint next to the buttons. */
+    needsProject: boolean;
+    /** Work in progress: disables the buttons and switches, and shows a loading skeleton while there's no plan yet. */
+    busy: boolean;
+    /** When the current plan was computed (ISO), for "Previewed … ago". */
+    previewedAt: string | null;
+    /** Summary of the last Generate run, shown as a success message until the next preview. */
+    lastResult: string | null;
+    /** The Generate settings shown as switches in the action bar. */
+    generateOptions: IPreviewGenerateOptions;
+    /** Called when Preview or Preview again is clicked, to compute a new plan. */
     onPreview: () => void;
+    /** Called when Generate is clicked; the caller confirms where needed, then writes (and deletes) the files. */
     onGenerate: () => void;
     /** Copies text (a file's content or a path) to the clipboard; `label` names it in the confirmation. */
     onCopyText: (text: string, label: string) => void;
@@ -63,9 +78,10 @@ export interface PreviewCardProps {
  * the table lists them (changes only by default) beside a viewer showing each file's content or changes. The
  * action bar, tiles and table are in `PreviewParts.tsx`.
  */
-export function PreviewCard(props: PreviewCardProps) {
-    const { step, plan, stale, canPreview, busy, lastResult, deleteOrphans, onPreview, onCopyText } = props;
-    const skipDuplicates = props.skipDuplicates ?? false;
+export function PreviewCard(props: IPreviewCardProps) {
+    const { step, plan, stale, canPreview, busy, lastResult, generateOptions, onPreview, onCopyText } = props;
+    const { deleteOrphans } = generateOptions;
+    const skipDuplicates = generateOptions.skipDuplicates ?? false;
     const styles = usePreviewCardStyles();
     const [selectedPath, setSelectedPath] = useState<string | null>(null);
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
@@ -114,12 +130,8 @@ export function PreviewCard(props: PreviewCardProps) {
                     busy={busy}
                     previewedAt={props.previewedAt}
                     writable={writes.created + writes.overwritten}
-                    deleteOrphans={deleteOrphans}
-                    onDeleteOrphansChange={props.onDeleteOrphansChange}
+                    {...generateOptions}
                     skipDuplicates={skipDuplicates}
-                    onSkipDuplicatesChange={props.onSkipDuplicatesChange}
-                    renameDuplicates={props.renameDuplicates}
-                    onRenameDuplicatesChange={props.onRenameDuplicatesChange}
                     onPreview={onPreview}
                     onGenerate={props.onGenerate}
                     now={props.now}
@@ -133,12 +145,7 @@ export function PreviewCard(props: PreviewCardProps) {
                             <Text size={200} className={styles.muted}>
                                 Output folder
                             </Text>
-                            <Tooltip content={plan.outputRoot} relationship="description" withArrow>
-                                <span className={styles.pathChip}>{shortenPath(plan.outputRoot, 64)}</span>
-                            </Tooltip>
-                            <Tooltip content="Copy output folder path" relationship="label" withArrow>
-                                <Button appearance="subtle" size="small" icon={<CopyRegular />} onClick={() => onCopyText(plan.outputRoot, 'Output folder path')} />
-                            </Tooltip>
+                            <PathChip path={plan.outputRoot} label="Output folder path" onCopy={onCopyText} maxLength={64} appearance="filled" />
                         </div>
                         <div className={styles.filterBar}>
                             <FileSearchBox value={filter.search} onChange={(search) => setFilter((f) => ({ ...f, search }))} />
@@ -193,3 +200,6 @@ export function PreviewCard(props: PreviewCardProps) {
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `IPreviewCardProps`. */
+export type PreviewCardProps = IPreviewCardProps;

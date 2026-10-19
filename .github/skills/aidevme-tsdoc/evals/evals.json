@@ -1,0 +1,144 @@
+{
+  "skill_name": "aidevme-tsdoc",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Document src/services/plan.ts. (It exports writeCounts, summarizePlan and an internal helper groupByFolder that isn't exported; the project has eslint, @typescript-eslint/parser and eslint-plugin-tsdoc installed.)",
+      "expected_output": "The exported functions get TSDoc comments that match their implementation, the unexported helper is skipped, only comments change, and the check passes before the commit is offered through aidevme-github.",
+      "files": [],
+      "expectations": [
+        "Reads the implementation of writeCounts and summarizePlan before writing their comments",
+        "Shows a short plan (symbol, summary, tags) before editing",
+        "Adds a one-sentence present-tense summary, a @param name - description (with the hyphen) for every parameter and @returns (not @return), without JSDoc {type} annotations",
+        "Keeps the layout: summary, blank line, @remarks when needed, blank line, then the @param and @returns block",
+        "Skips groupByFolder because it isn't exported, and says so in the report",
+        "Changes only comment lines: no code, imports or formatting outside the comments",
+        "Runs node scripts/check-tsdoc.mjs src/services/plan.ts and reports the result",
+        "Offers a docs(...) commit through aidevme-github and does not run git commit"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review the doc comments in src/hooks. Don't change anything.",
+      "expected_output": "A findings table sorted by severity, with no file edited.",
+      "files": [],
+      "expectations": [
+        "Uses review mode and edits no file",
+        "Runs scripts/check-tsdoc.mjs on the hook files and counts its findings as errors",
+        "Reports a table with file, line, symbol, severity, issue and suggested fix, most severe first",
+        "Flags exported hooks without comments as warnings and comments that contradict the code as errors",
+        "Ends with the count per severity and whether the syntax check ran"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fix the doc comments in src/core/format.ts. (One comment uses @return, one has @param path The path, and one says it returns null although the function returns undefined.)",
+      "expected_output": "The problems are listed first, fixed after confirmation as comment-only edits, and the check passes afterwards.",
+      "files": [],
+      "expectations": [
+        "Lists the findings before editing and asks which to fix",
+        "Replaces @return with @returns and adds the hyphen: @param path - ...",
+        "Corrects the description to say the function returns undefined, after reading the code",
+        "Re-runs scripts/check-tsdoc.mjs and reports a clean result"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Add TSDoc to the components in src/components/cards/PathChip.tsx.",
+      "expected_output": "The component gets a behavior-focused summary and its props interface gets one comment per prop, with @defaultValue for the optional ones.",
+      "files": [],
+      "expectations": [
+        "Loads references/react.md",
+        "Describes what the component shows and does, not its markup",
+        "Comments each prop on the props interface rather than on the destructured parameters",
+        "Uses @defaultValue on optional props that have a default, matching the default in the code",
+        "Says when callback props are called and with what"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Add doc comments to src/generated/client.ts and dist/index.d.ts.",
+      "expected_output": "Both files are refused as generated, with the reason, and nothing is edited.",
+      "files": [],
+      "expectations": [
+        "Recognizes src/generated/ and dist/*.d.ts as generated files",
+        "Edits neither file and explains that the generator owns them",
+        "Suggests documenting the generator's input or the hand-written source instead"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Document the changed files. (git diff --name-only HEAD lists src/a.ts, src/b.tsx and README.md; the project has no ESLint installed.)",
+      "expected_output": "Only the two TypeScript files are documented; the check reports it can't run, setup is offered but nothing is installed.",
+      "files": [],
+      "expectations": [
+        "Uses git diff --name-only HEAD and skips README.md as not TypeScript",
+        "Runs scripts/check-tsdoc.mjs and reports exit 2 (check unavailable: eslint, @typescript-eslint/parser, eslint-plugin-tsdoc missing)",
+        "Offers the setup from references/setup.md with the npm install command and asks before running it",
+        "Does not install any package without approval"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Also document the private methods of the PlanBuilder class.",
+      "expected_output": "Because the user asked explicitly, the private methods are documented too, following the same rules.",
+      "files": [],
+      "expectations": [
+        "Documents the private methods because the user asked for them",
+        "Still reads each implementation and keeps edits comment-only",
+        "Doesn't add release tags such as @internal to application code"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Why does tsdoc/syntax fail with tsdoc-undefined-tag on my @note tag? Just make it pass.",
+      "expected_output": "The finding is explained and fixed by using a standard tag; no custom tag is added to tsdoc.json and the rule isn't turned off.",
+      "files": [],
+      "expectations": [
+        "Explains that @note isn't a TSDoc tag (references/setup.md message table)",
+        "Rewrites the comment with a standard tag such as @remarks",
+        "Doesn't add @note to tsdoc.json unless the user explicitly asks for a custom tag",
+        "Doesn't disable or downgrade the tsdoc/syntax rule"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Add JSDoc to scripts/release.js.",
+      "expected_output": "The JavaScript file gets JSDoc with types in braces, never mixed with TSDoc syntax.",
+      "files": [],
+      "expectations": [
+        "Loads references/jsdoc-js.md",
+        "Uses JSDoc types such as @param {string} name and bracket syntax for optional parameters",
+        "Doesn't use @typeParam or other TSDoc-only syntax in the .js file",
+        "Doesn't run scripts/check-tsdoc.mjs on the .js file"
+      ]
+    }
+  ,
+    {
+      "id": 10,
+      "prompt": "I just added an optional 'compact' prop to PathChipProps and renamed its 'label' prop to 'copyLabel'. Update the docs.",
+      "expected_output": "Only the changed symbols in the touched file are documented: the new prop gets a comment with @defaultValue, the renamed prop's comment moves with it, unchanged comments stay, and the check runs.",
+      "files": [],
+      "expectations": [
+        "Uses the After a code change flow and limits the work to the touched file and the changed props",
+        "Adds a comment for compact with @defaultValue matching the default in the code",
+        "Keeps the existing description for the renamed prop and updates any reference to the old name",
+        "Leaves comments on unchanged symbols as they are",
+        "Runs scripts/check-tsdoc.mjs on the file and says the comments belong in the same commit as the code change"
+      ]
+    }
+  ,
+    {
+      "id": 11,
+      "prompt": "Add TSDoc to shortenPath(path: string, max = 48): string in src/components/shared/format.ts. (It has a one-line comment that already says it shortens the path to at most max characters.)",
+      "expected_output": "The existing summary is kept and @param path, @param max and @returns are added in the standard layout, even though the summary mentions them.",
+      "files": [],
+      "expectations": [
+        "Keeps the existing summary sentence",
+        "Adds @param path - and @param max - descriptions, with max saying what happens when it's omitted",
+        "Adds @returns describing the shortened path",
+        "Separates the summary and the tag block with a blank line, and adds no @example since usage is obvious"
+      ]
+    }
+  ]
+}

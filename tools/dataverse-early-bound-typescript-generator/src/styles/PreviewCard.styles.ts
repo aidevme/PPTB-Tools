@@ -46,13 +46,6 @@ export const usePreviewCardStyles = makeStyles({
 
     // Output folder
     outputRow: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, minWidth: 0, flexWrap: 'wrap' },
-    pathChip: {
-        fontFamily: tokens.fontFamilyMonospace,
-        fontSize: tokens.fontSizeBase200,
-        padding: `${tokens.spacingVerticalXXS} ${tokens.spacingHorizontalS}`,
-        borderRadius: tokens.borderRadiusMedium,
-        backgroundColor: tokens.colorNeutralBackground3,
-    },
 
     // Table filters
     filterBar: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalM, flexWrap: 'wrap' },
@@ -80,17 +73,6 @@ export const usePreviewCardStyles = makeStyles({
         ':hover::after': { backgroundColor: tokens.colorBrandStroke1 },
         ':focus-visible': { outline: `${tokens.strokeWidthThick} solid ${tokens.colorStrokeFocus2}`, borderRadius: tokens.borderRadiusMedium },
     },
-    typeColumn: { width: '104px' },
-    statusColumn: { width: '112px' },
-    fileName: { fontFamily: tokens.fontFamilyMonospace, fontSize: tokens.fontSizeBase200 },
-    typeIcon: { color: tokens.colorBrandForeground1 },
-    status: { display: 'inline-flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, fontSize: tokens.fontSizeBase200, whiteSpace: 'nowrap' },
-    dot: { width: '8px', height: '8px', borderRadius: tokens.borderRadiusCircular, flexShrink: 0 },
-    dotNew: { backgroundColor: tokens.colorPaletteGreenForeground1 },
-    dotChanged: { backgroundColor: tokens.colorPaletteMarigoldForeground1 },
-    dotUnchanged: { backgroundColor: tokens.colorNeutralForeground4 },
-    dotOrphaned: { backgroundColor: tokens.colorPaletteRedForeground1 },
-    dotDuplicate: { backgroundColor: tokens.colorPaletteDarkOrangeForeground1 },
     placeholder: { color: tokens.colorNeutralForeground3, padding: tokens.spacingVerticalXXL, textAlign: 'center' },
     skeleton: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS, padding: tokens.spacingHorizontalM },
 });

@@ -71,7 +71,8 @@ partial override keeps the other defaults.
 ## Options the tool ignores
 
 - **`output.templateRoot`:** Generate writes dataverse-gen 2.0.17's seven EJS templates here, overwriting what's
-  there, like `npx dataverse-gen eject`. The CLI uses them; this tool doesn't read them and always uses its built-in
+  there, like `npx dataverse-gen eject`, while the **Generate templates** setting is on (the default). The CLI uses
+  them; this tool doesn't read them and always uses its built-in
   templates. See [Moving from dataverse-gen](./moving-from-dataverse-gen.md).
 - **`output.useCache`:** a CLI-only setting.
 

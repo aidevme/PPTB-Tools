@@ -1,7 +1,8 @@
 ---
 name: aidevme-shared-scripts
-layer: foundation
-scope: core
+metadata:
+  layer: foundation
+  scope: core
 description: |
   Shared PowerShell library dot-sourced by other aidevme- skills: Dataverse + Azure DevOps
   authentication (Get-DataverseToken / Get-AdoToken), the single Invoke-DataverseApi Web API

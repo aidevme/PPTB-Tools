@@ -83,6 +83,7 @@ npm run dev      # Vite dev server; PPTB APIs are absent so the UI shows a warni
 npm run build    # tsc typecheck + vite build -> dist/ (single IIFE bundle)
 npm run watch    # rebuild dist/ on change
 npm test         # vitest: core snapshot tests + planner/config tests
+npm run lint:tsdoc  # TSDoc comment syntax only (ESLint tsdoc/syntax, eslint.config.mjs); warnings don't fail it
 ```
 
 To test inside PPTB: build, enable the Debug Menu in Settings, use Debug → Browse to load this folder, connect
@@ -166,10 +167,11 @@ into its own package when the CLI is built.
   passes files with status `orphaned`, no `..` segment, and a path equal to the output root joined with the
   relative path. Leftover files are reported as an error; the writes still count as done.
 - **Tool settings.** Besides `deleteOrphanedFiles`, the Settings panel saves `general` (three notification
-  switches, `recentProjectCount` 0 to 10, `selectionRowLimit` 100 to 2000), `confirmBeforeGenerate` and
-  `skipDuplicateIdentifiers`. With `confirmBeforeGenerate` on, Generate asks first, naming the output folder and
+  switches, `recentProjectCount` 0 to 10, `selectionRowLimit` 100 to 2000), `confirmBeforeGenerate`,
+  `skipDuplicateIdentifiers` and `generateTemplates`. With `confirmBeforeGenerate` on, Generate asks first, naming the output folder and
   the created and overwritten counts; when orphans are deleted, that confirmation covers the writes. With
-  `skipDuplicateIdentifiers` on, Generate doesn't write files with duplicate identifiers. See [`src/config/README.md`](./src/config/README.md).
+  `skipDuplicateIdentifiers` on, Generate doesn't write files with duplicate identifiers; with `generateTemplates` off
+  (it's on by default), Generate doesn't write dataverse-gen's templates to `templateRoot`. See [`src/config/README.md`](./src/config/README.md).
 - **Line endings.** Generated files use LF. Comparison ignores CRLF vs LF, so a CRLF checkout shows as unchanged.
 
 ### Deliberate deviations from dataverse-gen output
@@ -188,7 +190,7 @@ These only affect cases where dataverse-gen emits code that does not compile:
 ## Not implemented
 
 - Reading custom (ejected) templates. Generate writes dataverse-gen 2.0.17's EJS templates to `templateRoot`
-  (`_templates` by default, overwriting) for the CLI, like `dataverse-gen eject`, but the tool itself always uses its
+  (`_templates` by default, overwriting; off with the `generateTemplates` setting) for the CLI, like `dataverse-gen eject`, but the tool itself always uses its
   built-in templates (`core/templates.ts`), since EJS can't run in PPTB.
 - The optional Node CLI and the MCP/headless "regenerate" mode from the guide's later build steps.
 

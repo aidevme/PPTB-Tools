@@ -6,7 +6,9 @@ file's content or changes.
 
 Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx)
 
-## Props (`PreviewCardProps`)
+## Props (`IPreviewCardProps`)
+
+`PreviewCardProps` remains as a deprecated alias of `IPreviewCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -18,14 +20,24 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 | `busy` | `boolean` | Disables the buttons while another operation runs, and shows a loading placeholder before the first preview. |
 | `previewedAt` | `string \| null` | When the plan was computed (ISO), shown as "Previewed *2 minutes ago*". |
 | `lastResult` | `string \| null` | Summary of the last Generate run, shown as a success message until the next preview. |
-| `deleteOrphans` | `boolean` | Whether the **Delete orphaned files** switch is on (the tool setting `deleteOrphanedFiles`). |
-| `onDeleteOrphansChange` | `(checked: boolean) => void` | Called when the switch is toggled; the app saves the setting. |
-| `skipDuplicates` | `boolean` (optional) | Whether the **Skip duplicated identifier(s)** switch is on (the tool setting `skipDuplicateIdentifiers`). |
-| `onSkipDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled; the app saves the setting. Without it, the switch isn't shown. |
+| `generateOptions` | `IPreviewGenerateOptions` | The Generate settings shown as switches in the action bar (below). |
 | `onPreview` | `() => void` | Loads metadata, generates the files and compares them with disk. |
-| `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`; with `deleteOrphans` on and orphans present, the app asks for confirmation first, then also deletes them. |
+| `onGenerate` | `() => void` | Writes new and changed files and saves `.dataverse-gen.json`; with `generateOptions.deleteOrphans` on and orphans present, the app asks for confirmation first, then also deletes them. |
 | `onCopyText` | `(text: string, label: string) => void` | Copies a file's content or the output folder path. |
 | `now` | `number` (optional) | Current time for "Previewed … ago". Defaults to `Date.now()`; tests pass a fixed value. |
+
+### `IPreviewGenerateOptions`
+
+Each switch saves a tool setting; `App.tsx` passes the settings and saves the changes.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `deleteOrphans` | `boolean` | Whether the **Delete orphaned files** switch is on (the tool setting `deleteOrphanedFiles`). |
+| `onDeleteOrphansChange` | `(checked: boolean) => void` | Called when the switch is toggled. |
+| `skipDuplicates` | `boolean` (optional) | Whether the **Skip duplicated identifier(s)** switch is on (`skipDuplicateIdentifiers`). |
+| `onSkipDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled. Without it, the switch isn't shown. |
+| `renameDuplicates` | `boolean` (optional) | Whether the **Rename duplicated identifier(s)** switch is on (`renameDuplicateIdentifiers`). |
+| `onRenameDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled. Without it, the switch isn't shown. |
 
 ## Messages
 
@@ -95,7 +107,7 @@ Source: [`src/components/cards/PreviewCard.tsx`](https://github.com/aidevme/PPTB
 - **Tiles as filters:** clicking a tile shows only that status, and the tile is highlighted (`aria-pressed`).
   Clicking it again goes back to the default view.
 - **Output folder:** shown as a chip, shortened in the middle, with the full path in a tooltip and a copy
-  button.
+  button ([PathChip](../shared/path-chip.md)).
 
 ## File table
 
@@ -138,13 +150,13 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 ## Where the code lives
 
 - `components/cards/PreviewCard.tsx`: the card, its state (selection, filter, sort) and layout.
-- `components/cards/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches), `StatusTiles` and
-  `FileTable`.
+- `components/cards/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches) and `StatusTiles`.
+- `components/tables/FileTable.tsx`: the sortable file table.
 - `components/shared/useResizableSplit.ts`: the divider between the file list and the viewer.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the
   header tooltips (`HEADER_HELP`), and the list and viewer widths with `clampListWidth`.
-- `components/shared/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
-  `components/shared/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
+- `components/tables/SortableHeaderCell.tsx`, `nextSort` in `components/shared/sorting.ts` and
+  `components/tables/tableRows.ts`: the header cell, sort toggling and Enter/Space row handling shared by the
   sortable tables (Select card, Preview card, Load Existing Project dialog), styled by `useSortableTableStyles`.
 
 ## Duplicate identifiers

@@ -22,16 +22,17 @@
         "Covers structure, code quality (duplication, complexity, typing gaps, dead code, naming, error handling), dependencies, UI/UX consistency, performance and maintainability, and test coverage, citing file paths",
         "Lists steps with IDs (S1, S2, ...), rationale, expected benefit, files, effort S/M/L and risk Low/Medium/High, in execution order",
         "Gives mitigation and rollback for every Medium or High step and names breaking changes, treating a change to the byte-for-byte dataverse-gen output as breaking",
-        "Asks the user to choose Accept all, Accept selected steps only, Save as TODO only, or Reject (Request changes through the free-text answer), and doesn't start executing or write a TODO file before the answer"
+        "Asks the user to choose Accept all, Accept selected steps only, Save as TODO only, or Reject (Request changes through the free-text answer), and doesn't start executing or write a TODO file before the answer",
+        "Checks findings that depend on Microsoft platform behavior (Dataverse Web API, Fluent UI v9 tokens) with the Microsoft Learn MCP Server (microsoft_docs_search, then microsoft_docs_fetch when needed) and cites the Learn URLs in the evidence and the Microsoft Learn references section"
       ]
     },
     {
       "id": 3,
       "prompt": "Looks good, go ahead with S1 and S3 only.",
-      "expected_output": "Before any code change, docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md is written with the analysis and a TODO checklist; then only S1 and S3 are executed, in order, each verified with npm run build and npm test and committed separately; then the report is given and the same TODO file is updated without asking.",
+      "expected_output": "Before any code change, docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md is written with the analysis and a TODO checklist; then only S1 and S3 are executed, in order, each verified with npm run build and npm test and committed separately; then the report is given and the same TODO file is updated without asking.",
       "files": [],
       "expectations": [
-        "Writes docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md before touching any other file, with the header (tool, date, skill, 'Accepted selected steps: S1, S3', status Planned), a TODO checklist of every step marking S1 and S3 approved, and the full analysis",
+        "Writes docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md before touching any other file, with the header (tool, date, skill, 'Accepted selected steps: S1, S3', status Planned), a TODO checklist of every step marking S1 and S3 approved, and the full analysis",
         "Checks that the working tree is clean apart from that TODO file, and creates a branch if on main, before the first step",
         "Executes S1 and S3 only, flagging any dependency on an unselected step before starting",
         "Runs npm run build and npm test in the tool folder after each step and records exit codes and test counts",
@@ -42,13 +43,13 @@
     },
     {
       "id": 4,
-      "prompt": "Execute the plan. (The file docs/todos/refactoring-dataverse-early-bound-typescript-generator-2026-10-16.md already exists from this morning.)",
+      "prompt": "Execute the plan. (The file docs/todos/dataverse-early-bound-typescript-generator/refactoring-dataverse-early-bound-typescript-generator-2026-10-16.md already exists from this morning.)",
       "expected_output": "The existing report isn't overwritten; the new one is saved with a sequence suffix.",
       "files": [],
       "expectations": [
         "Checks whether the target file exists before writing",
         "Saves the new TODO file (in Phase 4, before any change) as refactoring-dataverse-early-bound-typescript-generator-2026-10-16-02.md (or the next free suffix), and later updates only that new file",
-        "Leaves the existing file and every other file in docs/todos unchanged"
+        "Leaves the existing file and every other file in docs/todos and its tool folders unchanged"
       ]
     },
     {
@@ -77,13 +78,24 @@
     {
       "id": 7,
       "prompt": "Save it as a TODO, don't change anything yet.",
-      "expected_output": "The proposal is saved as docs/todos/refactoring-<tool-name>-<YYYY-MM-DD>.md with every step as an open TODO; no other file is changed, nothing is committed, and the skill ends.",
+      "expected_output": "The proposal is saved as docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md with every step as an open TODO; no other file is changed, nothing is committed, and the skill ends.",
       "files": [],
       "expectations": [
-        "Writes only the new TODO file in docs/todos, never overwriting an existing one",
+        "Writes only the new TODO file in docs/todos/<tool-name>/, never overwriting an existing one",
         "The file has the header with decision 'Saved as TODO only' and status 'Saved as TODO, no changes made', a TODO checklist with every step open, and the full analysis",
         "Makes no change to tool code, config, docs or other files and makes no commit",
         "Doesn't start execution, and ends by stating the saved file path and that nothing else changed"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Refactor dataverse-early-bound-typescript-generator. (No Microsoft Learn MCP server is configured in this session.)",
+      "expected_output": "The read-only analysis and the approval question still happen; the user is told the Microsoft Learn MCP Server is not available, with how to add it, and findings that would need Learn are marked \"Microsoft Learn not checked\" instead of stated from memory.",
+      "files": [],
+      "expectations": [
+        "Says the Microsoft Learn MCP Server is not available and shows how to add it (https://learn.microsoft.com/api/mcp), without changing any MCP configuration itself",
+        "Marks findings about Microsoft platform behavior as \"Microsoft Learn not checked\" rather than presenting unverified API details as fact",
+        "Still completes the read-only analysis and asks the approval question without modifying any file"
       ]
     }
   ]

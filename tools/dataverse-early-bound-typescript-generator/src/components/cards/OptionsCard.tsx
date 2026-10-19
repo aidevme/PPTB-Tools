@@ -5,15 +5,23 @@ import { useOptionsCardStyles } from '../../styles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
 
-export interface OptionsCardProps {
+/** Props for {@link OptionsCard}. */
+export interface IOptionsCardProps {
+    /** The card's step in the workflow: number, title and completion badge. */
     step: StepState;
+    /** The project's `.dataverse-gen.json` settings the inputs show; unset options show dataverse-gen's defaults. */
     config: DataverseGenConfig;
+    /** Disables the output folder input and the switches (no connection or project yet, or work in progress). */
     disabled: boolean;
+    /**
+     * Called on every edit with only the changed settings: `output` (with `outputRoot` merged into the existing
+     * `output`), `generateEntityTypes`, `generateFormContext` or `generateIndex`.
+     */
     onChange: (update: Partial<DataverseGenConfig>) => void;
 }
 
 /** Step 3: output folder and which artefacts to emit (mirrors the dataverse-gen init prompts). */
-export function OptionsCard({ step, config, disabled, onChange }: OptionsCardProps) {
+export function OptionsCard({ step, config, disabled, onChange }: IOptionsCardProps) {
     const styles = useOptionsCardStyles();
     return (
         <StepCard step={step} description="Start from the Options in Settings; change them here for this project. Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
@@ -83,3 +91,6 @@ export function OptionsCard({ step, config, disabled, onChange }: OptionsCardPro
         </StepCard>
     );
 }
+
+/** @deprecated Renamed to `IOptionsCardProps`. */
+export type OptionsCardProps = IOptionsCardProps;

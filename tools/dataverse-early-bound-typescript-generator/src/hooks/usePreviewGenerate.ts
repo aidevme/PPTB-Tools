@@ -82,8 +82,10 @@ export function usePreviewGenerate({
             const model = buildSchemaModel(schema, resolved, (name) => byName.get(name));
             const files = generate(model, resolved, { renameDuplicateIdentifiers: toolSettings.renameDuplicateIdentifiers });
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
-            // dataverse-gen's templates go into the project's templateRoot on every Generate, like `dataverse-gen eject`.
-            const nextPlan = await createWritePlan(sink, projectRoot, resolved, files, dataverseGenTemplateFiles(resolved));
+            // With Generate templates on, dataverse-gen's templates go into the project's templateRoot, like
+            // `dataverse-gen eject`. Off, they're left out of the plan; existing copies are never orphans, so they stay.
+            const templates = toolSettings.generateTemplates ? dataverseGenTemplateFiles(resolved) : [];
+            const nextPlan = await createWritePlan(sink, projectRoot, resolved, files, templates);
             setPlan(nextPlan);
             setPreviewedAt(new Date().toISOString());
             setLastResult(null);
@@ -110,6 +112,7 @@ export function usePreviewGenerate({
         toolSettings.deleteOrphanedFiles,
         toolSettings.skipDuplicateIdentifiers,
         toolSettings.renameDuplicateIdentifiers,
+        toolSettings.generateTemplates,
         toolSettings.general.showPreviewReadyNotification,
     ]);
 

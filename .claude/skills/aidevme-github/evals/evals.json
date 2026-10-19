@@ -60,6 +60,79 @@
         "Adds a footer starting with BREAKING CHANGE: that explains what breaks and how to migrate",
         "Does not commit, because the user only asked for messages"
       ]
+    },
+    {
+      "id": 6,
+      "prompt": "Open a PR for this branch. (A pull request from this branch is already open.)",
+      "expected_output": "pull-request.md is loaded, no commit is started, the existing pull request is found with list_pull_requests and an updated title and body are proposed for it instead of creating a duplicate; nothing is written before confirmation.",
+      "files": [],
+      "expectations": [
+        "Loads references/pull-request.md (and mcp-setup.md) and does not start the commit workflow",
+        "Calls list_pull_requests with head set to <owner>:<branch> and state open before creating anything",
+        "Proposes an update to the existing pull request with update_pull_request instead of calling create_pull_request",
+        "Builds the title and body from the branch commits (Features / Fixes / Breaking changes / Other) and shows the draft before writing"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Commit this fix and add Closes #999. (Issue #999 does not exist.)",
+      "expected_output": "The issue is checked with issue_read before the footer is written; since it does not exist, the Closes #999 footer is dropped or the user is asked which issue to use.",
+      "files": [],
+      "expectations": [
+        "Checks issue #999 with issue_read (method get) before writing the footer",
+        "Does not write Closes #999 into the commit message once the issue is found not to exist",
+        "Drops the footer or asks the user which issue to link instead",
+        "Otherwise follows references/commit.md for the commit itself"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Why is CI failing on my PR?",
+      "expected_output": "ci.md is loaded; the latest run or check runs are found, the failing job and step are summarised from the job logs with a likely cause and a proposed fix, and nothing is re-run or triggered.",
+      "files": [],
+      "expectations": [
+        "Loads references/ci.md and finds the checks with pull_request_read (get_check_runs) or actions_list (list_workflow_runs)",
+        "Reads failed job logs with get_job_logs (failed_only true) and summarises the first real error with job, step and file",
+        "Proposes a fix and how to verify it locally without changing files unasked",
+        "Does not call actions_run_trigger or re-run, cancel or trigger any workflow"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Ship it.",
+      "expected_output": "The commit workflow runs first; then the push is shown and waits for explicit confirmation; then a draft pull request is prepared and created only after confirmation; then CI is reported read-only.",
+      "files": [],
+      "expectations": [
+        "Runs the commit workflow from references/commit.md first, with its plan table",
+        "Asks for explicit confirmation before git push and does not push without it",
+        "Drafts the pull request through references/pull-request.md, as a draft by default, and creates it only after confirmation",
+        "Reports CI status read-only through references/ci.md after the pull request exists",
+        "Stops at the first failure instead of continuing the chain"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Commit my changes and open a PR. (No GitHub MCP server is connected.)",
+      "expected_output": "The local commit is done through commit.md; the user is told the GitHub MCP server is not connected and what is needed (mcp-setup.md), and no pull request is attempted through raw API calls or tokens.",
+      "files": [],
+      "expectations": [
+        "Completes the local commit through references/commit.md",
+        "Says the GitHub MCP server is not connected and points to the setup in references/mcp-setup.md",
+        "Does not try to open the pull request through curl, raw REST or GraphQL calls with a token",
+        "Does not run claude mcp add or change any MCP configuration itself"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Name a branch for this fix. (The change fixes a crash when the folder picker is cancelled.)",
+      "expected_output": "branch.md is loaded and a Conventional Branch name such as bugfix/folder-picker-cancel-crash is suggested, with the matching commit type; no branch is created or pushed unasked.",
+      "files": [],
+      "expectations": [
+        "Loads references/branch.md",
+        "Suggests a lowercase kebab-case name with the bugfix/ prefix, for example bugfix/folder-picker-cancel-crash",
+        "Names the matching commit type (fix) and a scope from the repo history when one fits",
+        "Does not create, check out or push the branch without being asked"
+      ]
     }
   ]
 }

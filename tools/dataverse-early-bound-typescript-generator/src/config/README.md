@@ -77,6 +77,7 @@ remember the last project folder per connection. They aren't part of `ToolConfig
     "confirmBeforeGenerate": false,
     "skipDuplicateIdentifiers": false,
     "renameDuplicateIdentifiers": false,
+    "generateTemplates": true,
     "projectDefaults": {
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,
@@ -98,6 +99,10 @@ remember the last project folder per connection. They aren't part of `ToolConfig
 - **`confirmBeforeGenerate`:** `false`. Shown as the **Ask before generating** switch on the Generate & files
   tab. When on, Generate asks for confirmation before writing, naming the output folder and how many files will
   be created and overwritten. When orphans are deleted too, the delete confirmation covers the writes as well.
+- **`generateTemplates`:** `true`. Shown as the **Generate templates** switch in its own Templates card on the
+  Generate & files tab, after Before generating. When on, Generate writes dataverse-gen's EJS templates to the
+  project's `templateRoot`, overwriting edited copies; when off, it doesn't write them and leaves existing copies
+  alone. Unlike the other booleans, it's on unless the JSON sets it to `false`.
 - **`renameDuplicateIdentifiers`:** `false`. Shown as the **Rename duplicated identifier(s)** switch on the Generate &
   files tab and in Preview and generate. When on, `generate` renames later duplicate enum members to
   `<Name>_<Value>`, so the files compile; when off, the output matches dataverse-gen.
@@ -151,6 +156,7 @@ root (object, additionalProperties: false)
 ├── confirmBeforeGenerate  boolean, default false
 ├── skipDuplicateIdentifiers  boolean, default false
 ├── renameDuplicateIdentifiers  boolean, default false
+├── generateTemplates    boolean, default true
 ├── projectDefaults      #/definitions/projectDefaults
 └── projects             array of #/definitions/project, default []
 
@@ -264,6 +270,7 @@ interface ToolConfig {
     confirmBeforeGenerate: boolean;
     skipDuplicateIdentifiers: boolean;
     renameDuplicateIdentifiers: boolean;
+    generateTemplates: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -296,8 +303,8 @@ Builds a complete `ToolConfig` from stored data, falling back to `toolConfig` ke
   boolean; numbers only if finite numbers, then rounded and clamped to their range (`clampInteger`); anything
   else, including strings, falls back to the default. A `general` that isn't an object gives the defaults, so
   settings saved before it existed load unchanged.
-- `deleteOrphanedFiles`, `confirmBeforeGenerate`, `skipDuplicateIdentifiers` and `renameDuplicateIdentifiers` are taken
-  only if they're booleans.
+- `deleteOrphanedFiles`, `confirmBeforeGenerate`, `skipDuplicateIdentifiers`, `renameDuplicateIdentifiers` and
+  `generateTemplates` are taken only if they're booleans.
 - `projectDefaults` is merged key by key over `toolConfig.projectDefaults`: booleans only if boolean,
   `outputRoot` only if a non-blank string (stored trimmed).
 - `projects` is taken only if it's an array, then normalized. The result is a new array; a stored array is never
@@ -419,7 +426,7 @@ To add a new setting:
 
 | File | Covers |
 | --- | --- |
-| `test/settings.test.ts` | Defaults from the JSON; `mergeToolConfig` with unknown, mistyped and partial values, including the defaults for old projects, `general` merging, rounding and clamping, and boolean-only `confirmBeforeGenerate`; `toolConfigEquals`; `loadToolConfig` / `saveToolConfig` against a stubbed `toolboxAPI.settings` and outside PPTB; Settings panel General tab switches and spin buttons, the Generate & files "Ask before generating" switch, and Save/Cancel; New Project and Load Existing Project dialogs |
+| `test/settings.test.ts` | Defaults from the JSON; `mergeToolConfig` with unknown, mistyped and partial values, including the defaults for old projects, `general` merging, rounding and clamping, boolean-only `confirmBeforeGenerate`, and `generateTemplates` defaulting to `true`; `toolConfigEquals`; `loadToolConfig` / `saveToolConfig` against a stubbed `toolboxAPI.settings` and outside PPTB; Settings panel General tab switches and spin buttons, the Generate & files "Ask before generating" and "Generate templates" switches, and Save/Cancel; New Project and Load Existing Project dialogs |
 | `test/projectVersion.test.ts` | `bumpPatchVersion`; every `recordGeneration` branch; `lastGeneratedFiles` round-trip; `isSamePath` |
 
 ## Known limitations

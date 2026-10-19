@@ -8,7 +8,7 @@ using Fluent UI v9. They hold no app state: the hooks in `src/hooks/` own the st
 passes data and callbacks down as props. Everything is exported from the folder's `index.ts` barrel.
 
 These pages are grouped in the same folders as the source: `apps/`, `cards/`, `dialogs/`, `layout/`, `panels/`,
-`shared/` and `viewers/`.
+`shared/`, `tables/` and `viewers/`.
 
 ## Page layout
 
@@ -18,6 +18,7 @@ These pages are grouped in the same folders as the source: `apps/`, `cards/`, `d
 | --- | --- | --- |
 | — | [App](./apps/app.md) | The root component: calls the state hooks and renders everything below |
 | — | [Header](./layout/header.md) | App icon, title and version, connection status, and the Settings button |
+| — | [ConnectionStatus](./layout/connection-status.md) | The Header's connection pill: connected environment or "Not connected" |
 | — | [WorkflowProgress](./shared/workflow-progress.md) | The four steps across the top of the page; click one to scroll to its card |
 | — | [SettingsPanel](./panels/settings-panel.md) | Drawer opened from the header's Settings button |
 | 1 | [ProjectCard](./cards/project-card.md) | Pick the project folder and load `.dataverse-gen.json` |
@@ -27,7 +28,12 @@ These pages are grouped in the same folders as the source: `apps/`, `cards/`, `d
 | 2 | [SelectionCard](./cards/selection-card.md) | Choose tables, actions and functions |
 | 3 | [OptionsCard](./cards/options-card.md) | Output folder and which files to generate |
 | 4 | [PreviewCard](./cards/preview-card.md) | Compare generated files with disk, then write them |
+| — | [SelectionTable](./tables/selection-table.md) | The SelectionCard's table: a checkbox per row, sortable columns |
+| — | [FileTable](./tables/file-table.md) | PreviewCard's sortable file table |
+| — | [ProjectsTable](./tables/projects-table.md) | LoadProjectDialog's table of saved projects |
+| — | [SortableHeaderCell](./tables/sortable-header-cell.md) | The sortable header cell the three tables share |
 | — | [FileSearchBox](./shared/file-search-box.md) | The search box above PreviewCard's file table |
+| — | [PathChip](./shared/path-chip.md) | A shortened path with a tooltip and a copy button, in ProjectCard and PreviewCard |
 | — | [FileViewer](./viewers/file-viewer.md) | The selected file's header, changes and content, inside PreviewCard |
 | — | [CodeViewer](./viewers/code-viewer.md) | Syntax-highlighted file view inside PreviewCard |
 | — | [StepCard](./shared/step-card.md) | Shared frame for the four step cards: step header, status badge, active-step accent |

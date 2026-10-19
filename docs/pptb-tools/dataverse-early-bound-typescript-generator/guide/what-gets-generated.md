@@ -27,8 +27,8 @@ In the **project folder**, not the output folder:
 
 dataverse-gen's EJS templates (`action.ejs`, `complextype.ejs`, `entity.ejs`, `enum.ejs`, `function.ejs`,
 `index.ejs`, `metadata.ejs`, from dataverse-gen 2.0.17) are written to the project folder's `templateRoot`
-(`_templates` by default) on every Generate, like `npx dataverse-gen eject`. The dataverse-gen CLI then uses them in
-place of its built-in templates. This tool doesn't read them, since EJS can't run in PPTB.
+(`_templates` by default) on every Generate, like `npx dataverse-gen eject`, unless **Settings → Generate & files →
+Generate templates** is off. The dataverse-gen CLI then uses them in place of its built-in templates. This tool doesn't read them, since EJS can't run in PPTB.
 
 Files are written in this order: entities, enums, actions, functions, complex types and `metadata.ts`. `index.ts`
 re-exports them in the same order.

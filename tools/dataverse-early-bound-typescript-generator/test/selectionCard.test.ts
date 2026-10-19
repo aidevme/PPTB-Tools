@@ -57,13 +57,8 @@ async function render(overrides: { selected?: Partial<Record<SelectionKind, stri
                     step: computeWorkflowSteps({ hasProject: true, selectedCount: 0, plan: null })[1],
                     entities: ENTITIES,
                     operations: OPERATIONS,
-                    solutions: [],
-                    solutionEntityIds: null,
-                    solutionComponentIds: null,
-                    selectedSolutionId: null,
-                    loadingEntities: false,
-                    loadingOperations: false,
-                    loadingSolution: false,
+                    solutionFilter: { solutions: [], selectedId: null, entityIds: null, componentIds: null },
+                    loading: { entities: false, operations: false, solution: false },
                     selected: { entities: [], actions: [], functions: [], ...overrides.selected },
                     missing: { entities: [], actions: [], functions: [] },
                     disabled: overrides.disabled ?? false,
@@ -130,6 +125,7 @@ describe('selection tables', () => {
 
     it('enables the controls once a project is open', async () => {
         await render();
+        expect(document.querySelector('[role="combobox"]')?.getAttribute('aria-label')).toBe('Filter by solution');
         for (const t of Array.from(document.querySelectorAll('[role="tab"]'))) expect((t as HTMLButtonElement).disabled).toBe(false);
         expect((document.querySelector('input[type="search"]') as HTMLInputElement).disabled).toBe(false);
         for (const input of Array.from(document.querySelectorAll('input[role="switch"]'))) expect((input as HTMLInputElement).disabled).toBe(false);
@@ -257,13 +253,8 @@ describe('row limit', () => {
                         step: computeWorkflowSteps({ hasProject: true, selectedCount: 0, plan: null })[1],
                         entities: many,
                         operations: [],
-                        solutions: [],
-                        solutionEntityIds: null,
-                        solutionComponentIds: null,
-                        selectedSolutionId: null,
-                        loadingEntities: false,
-                        loadingOperations: false,
-                        loadingSolution: false,
+                        solutionFilter: { solutions: [], selectedId: null, entityIds: null, componentIds: null },
+                        loading: { entities: false, operations: false, solution: false },
                         selected: { entities: [], actions: [], functions: [] },
                         missing: { entities: [], actions: [], functions: [] },
                         disabled: false,

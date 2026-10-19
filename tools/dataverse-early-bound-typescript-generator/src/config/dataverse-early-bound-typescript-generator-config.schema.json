@@ -32,6 +32,11 @@
             "type": "boolean",
             "default": false
         },
+        "generateTemplates": {
+            "description": "Write dataverse-gen's EJS templates to the project's templateRoot (_templates by default) on Generate, overwriting edited copies, like dataverse-gen eject. When false, Generate doesn't write them and leaves existing copies untouched. Shown on the Settings panel's Generate & files tab.",
+            "type": "boolean",
+            "default": true
+        },
         "projectDefaults": {
             "$ref": "#/definitions/projectDefaults"
         },

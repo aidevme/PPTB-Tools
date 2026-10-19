@@ -5,7 +5,9 @@ and recent projects. With a project open, it shows a summary of that project.
 
 Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx)
 
-## Props (`ProjectCardProps`)
+## Props (`IProjectCardProps`)
+
+`ProjectCardProps` remains as a deprecated alias of `IProjectCardProps`.
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -19,10 +21,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 | `onLoadExistingProject` | `() => void` | Opens the [LoadProjectDialog](../dialogs/load-project-dialog.md). |
 | `onOpenRecent` | `(target: ProjectOpenTarget) => void` | Opens a recent project directly. `ProjectOpenTarget` is `{ name, location }`. |
 | `onReload` | `() => void` | Re-reads `.dataverse-gen.json` from disk. |
-| `outputFolder` | `string \| null` | Absolute output folder (`output.outputRoot` resolved against the project). |
-| `hasSelection` | `boolean` | Whether anything is selected, enabling "Clear selection". |
 | `onCopyPath` | `(path: string, label: string) => void` | Copies a path to the clipboard; `label` names it in the confirmation toast. |
-| `onClearSelection` | `() => void` | Clears every selected table, action and function. |
 | `recentProjectCount` | `number` (optional) | How many recent projects to show; 0 hides the list. Defaults to 3. `App.tsx` passes the `general.recentProjectCount` setting. |
 | `now` | `number` (optional) | Current time for relative dates. Defaults to `Date.now()`; tests pass a fixed value. |
 
@@ -32,7 +31,8 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
   actions. **Load Existing Project** is the primary button and **New Project** the secondary one. There's no
   Reload button until a project is open.
 - **Recent projects:** up to three by default (`recentProjectCount`), as clickable tiles with an icon, the name and a second line. The full
-  path shows in a tooltip, and clicking a tile opens that project directly.
+  path shows in a tooltip, and clicking a tile opens that project directly. Each tile is a button named
+  "Open *name* (*second line*)", with Fluent UI's focus ring (`colorStrokeFocus2`) when reached with the keyboard.
 
 ## Project open
 
@@ -40,7 +40,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
   - the project's **name** as the title, with a **version** badge (`v1.0.2`). A folder that isn't a saved
     project shows its folder name and no version.
   - the **path**, shortened in the middle (`C:\…\Client\clientjs`), with the full path in a tooltip and a
-    copy button.
+    copy button ([PathChip](../shared/path-chip.md)).
   - **chips** for the config status (".dataverse-gen.json found" or "New project: created on generate") and
     the table, action and function counts.
   - "Modified *3 hours ago*" for saved projects.
@@ -50,7 +50,7 @@ Source: [`src/components/cards/ProjectCard.tsx`](https://github.com/aidevme/PPTB
 
 ## Which projects are recent
 
-`recentProjects(projects, projectRoot, rememberedFolder, now, max)` returns up to `max` entries (default 3, the
+`recentProjects(projects, projectRoot, rememberedFolder, now, max)` in `src/components/cards/recentProjects.ts` returns up to `max` entries (default 3, the
 `recentProjectCount` setting; 0 returns none):
 
 1. The folder last used with this connection, labelled "Last used". It shows under its saved project name
@@ -63,8 +63,7 @@ The open project and duplicates (the same folder, compared with `isSamePath`) ar
 
 - The empty state and the summary fade in when they appear. The fade is switched off when the user has
   asked their system for reduced motion.
-- The **History** menu (copy the project folder, `.dataverse-gen.json` or output folder path, and **Clear
-  selection**) is hidden; set `SHOW_HISTORY_MENU` to `true` in `ProjectCard.tsx` to show it again. The
-  summary's copy button covers the project folder path.
+- The recent projects list is `RecentProjectsList` (`src/components/cards/RecentProjectsList.tsx`, styled by
+  `src/styles/RecentProjectsList.styles.ts`); the card passes it the heading, the entries and `onOpenRecent`.
 - Styles are in `src/styles/ProjectCard.styles.ts`. Relative times and shortened paths come from
   `src/components/shared/format.ts`.

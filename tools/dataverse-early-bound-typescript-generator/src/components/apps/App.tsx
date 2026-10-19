@@ -1,9 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { MessageBar, MessageBarBody, MessageBarTitle, ProgressBar, Text } from '@fluentui/react-components';
 import { Footer, GenerateConfirmationDialogs, Header, LoadProjectDialog, ProjectFormDialog, OptionsCard, PreviewCard, ProjectCard, SelectionCard, SettingsPanel, WorkflowProgress, computeWorkflowSteps, type NewProject, type ProjectOpenTarget, type SelectionKind } from '..';
-import { resolveConfig } from '../../core';
 import { useConnection, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useStickyBarHeights, useToolSettings } from '../../hooks';
-import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError, resolveOutputRoot } from '../../services';
+import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 
 /**
@@ -34,7 +33,7 @@ export default function App() {
         onError: setError,
         onPlanStale: markPlanStale,
     });
-    const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear, clearAll } = useProject({
+    const { projectRoot, rememberedFolder, configState, config, loadProject, openSavedProject, pickProjectLocation, updateConfig, markConfigSaved, toggle, clear } = useProject({
         sink,
         connKey,
         inPptb,
@@ -199,22 +198,14 @@ export default function App() {
                     onLoadExistingProject={() => setLoadProjectOpen(true)}
                     onOpenRecent={openRecent}
                     onReload={() => projectRoot && loadProject(projectRoot)}
-                    outputFolder={projectRoot ? resolveOutputRoot(projectRoot, resolveConfig(config)) : null}
-                    hasSelection={hasSelection}
                     onCopyPath={(path, label) => void copyPath(path, label)}
-                    onClearSelection={clearAll}
                 />
                 <SelectionCard
                     step={steps[1]}
                     entities={entities}
                     operations={operations}
-                    solutions={solutions}
-                    solutionEntityIds={solutionEntityIds}
-                    solutionComponentIds={solutionComponentIds}
-                    selectedSolutionId={selectedSolutionId}
-                    loadingEntities={loadingEntities}
-                    loadingOperations={loadingOperations}
-                    loadingSolution={loadingSolution}
+                    solutionFilter={{ solutions, selectedId: selectedSolutionId, entityIds: solutionEntityIds, componentIds: solutionComponentIds }}
+                    loading={{ entities: loadingEntities, operations: loadingOperations, solution: loadingSolution }}
                     selected={selected}
                     missing={missing}
                     disabled={!canSelect || busy}
@@ -236,12 +227,14 @@ export default function App() {
                     previewedAt={plan ? previewedAt : null}
                     lastResult={plan ? lastResult : null}
                     onPreview={() => void runPreview()}
-                    deleteOrphans={toolSettings.deleteOrphanedFiles}
-                    skipDuplicates={skipDuplicates}
-                    onSkipDuplicatesChange={(checked) => void changeSetting('skipDuplicateIdentifiers', checked)}
-                    renameDuplicates={toolSettings.renameDuplicateIdentifiers}
-                    onRenameDuplicatesChange={(checked) => void changeSetting('renameDuplicateIdentifiers', checked)}
-                    onDeleteOrphansChange={(checked) => void changeSetting('deleteOrphanedFiles', checked)}
+                    generateOptions={{
+                        deleteOrphans: toolSettings.deleteOrphanedFiles,
+                        onDeleteOrphansChange: (checked) => void changeSetting('deleteOrphanedFiles', checked),
+                        skipDuplicates,
+                        onSkipDuplicatesChange: (checked) => void changeSetting('skipDuplicateIdentifiers', checked),
+                        renameDuplicates: toolSettings.renameDuplicateIdentifiers,
+                        onRenameDuplicatesChange: (checked) => void changeSetting('renameDuplicateIdentifiers', checked),
+                    }}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}
                 />

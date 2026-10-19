@@ -1,10 +1,17 @@
 /** An OData action or function, as listed in the Select step. */
 export interface OperationSummary {
+    /** The message name, for example `WinOpportunity`; the name a project's config lists. */
     name: string;
+    /** Whether it's an OData action (changes data) or a function (reads data). */
     kind: 'action' | 'function';
+    /** Bound to a table (called on a record or collection) rather than unbound. */
     isBound: boolean;
     /** Logical name of the entity a bound operation binds to (first parameter's type), if any. */
     boundTo?: string;
+    /**
+     * The parameters in `$metadata`, including a bound operation's binding parameter; `0` when the operation isn't
+     * in `$metadata` (see {@link OperationSummary.inMetadata}).
+     */
     parameterCount: number;
     /** Backed by a `customapi` record in the environment. */
     isCustomApi: boolean;

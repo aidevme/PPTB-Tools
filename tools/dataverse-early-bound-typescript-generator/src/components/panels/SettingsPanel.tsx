@@ -25,17 +25,14 @@ import {
 import {
     AlertRegular,
     ArrowResetRegular,
-    CodeRegular,
     CodeTextRegular,
     DeleteRegular,
     DismissRegular,
     DocumentCheckmarkRegular,
     FolderRegular,
     ListRegular,
-    OptionsRegular,
     SettingsRegular,
     WarningRegular,
-    WrenchRegular,
 } from '@fluentui/react-icons';
 import {
     DELETE_ORPHANS_INFO,
@@ -47,33 +44,20 @@ import {
 } from '../shared/settingsInfo';
 import { RECENT_PROJECT_COUNT_RANGE, SELECTION_ROW_LIMIT_RANGE, type ToolConfig } from '../../config';
 import { useSettingsDraft } from '../../hooks';
+import { DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { version } from '../../../package.json';
 import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
-
-type SettingsTab = 'general' | 'options' | 'files' | 'templates';
-
-const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; icon: ReactElement }> = [
-    { value: 'general', label: 'General', subtitle: 'Notifications and lists', icon: <OptionsRegular /> },
-    { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: <WrenchRegular /> },
-    { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: <CodeRegular /> },
-    { value: 'templates', label: 'Templates', subtitle: 'EJS templates', icon: <CodeTextRegular /> },
-];
-
-/** One-line explanation at the top of each tab. */
-const TAB_INTROS: Record<SettingsTab, string> = {
-    general: 'How the tool itself behaves.',
-    options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
-    files: 'How Generate treats files in the output folders, for every project.',
-    templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
-};
-
-const SCOPE_INSTALLATION: SectionBadge = { label: 'This PPTB installation' };
-const SCOPE_PROJECTS: SectionBadge = { label: 'Default for every project', color: 'brand' };
-const SCOPE_CONFIG_FILE: SectionBadge = { label: '.dataverse-gen.json' };
-const SCOPE_ALL_PROJECTS: SectionBadge = { label: 'All projects' };
-
-type ControlIds = { labelledBy: string; describedBy: string };
+import {
+    SCOPE_ALL_PROJECTS,
+    SCOPE_CONFIG_FILE,
+    SCOPE_INSTALLATION,
+    SCOPE_PROJECTS,
+    TABS,
+    TAB_INTROS,
+    type ControlIds,
+    type SettingsTab,
+} from './SettingsPanel.const';
 
 /** A setting as listed in a section; also what search matches against. */
 interface SettingDefinition {
@@ -118,12 +102,21 @@ function spinValue(data: { value?: number | null; displayValue?: string }, curre
     return data.displayValue !== undefined && data.displayValue.trim() !== '' && Number.isFinite(typed) ? typed : current;
 }
 
+/** Props for {@link SettingsPanel}. */
 export interface SettingsPanelProps {
+    /** Whether the drawer is open. Each time it opens, the draft starts again from `settings` and the search is cleared. */
     open: boolean;
+    /**
+     * Called with `false` when the panel should close: the Close or Cancel button, the drawer's own dismiss (for
+     * example Escape), or a successful Save.
+     */
     onOpenChange: (open: boolean) => void;
     /** The saved settings; edits are kept in a draft until Save. */
     settings: ToolConfig;
-    /** Persists the settings. The panel closes when it resolves and shows the error when it rejects. */
+    /**
+     * Called with the draft when Save is clicked, to persist it. The panel closes when it resolves and shows the error
+     * when it rejects.
+     */
     onSave: (settings: ToolConfig) => Promise<void>;
 }
 
@@ -357,6 +350,31 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     keywords: 'confirm confirmation overwrite',
                     changed: draft.confirmBeforeGenerate !== settings.confirmBeforeGenerate,
                     control: switchControl(draft.confirmBeforeGenerate, (checked) => update({ confirmBeforeGenerate: checked })),
+                },
+            ],
+        },
+        {
+            id: 'templateFiles',
+            tab: 'files',
+            title: 'Templates',
+            icon: <CodeTextRegular />,
+            badges: [SCOPE_ALL_PROJECTS],
+            settings: [
+                {
+                    id: 'generateTemplates',
+                    title: 'Generate templates',
+                    description: "Write dataverse-gen's EJS templates to the project's templateRoot.",
+                    info: (
+                        <>
+                            Generate writes the templates to <code>templateRoot</code> (<code>{DEFAULT_TEMPLATE_ROOT}</code> by default),
+                            overwriting edited copies, like <code>dataverse-gen eject</code>. When off, they aren't written and
+                            existing copies are left as they are. The tool itself always uses its built-in templates. Saved as{' '}
+                            <code>generateTemplates</code>.
+                        </>
+                    ),
+                    keywords: 'templates ejs eject templateRoot dataverse-gen write',
+                    changed: draft.generateTemplates !== settings.generateTemplates,
+                    control: switchControl(draft.generateTemplates, (checked) => update({ generateTemplates: checked })),
                 },
             ],
         },
