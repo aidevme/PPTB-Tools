@@ -199,6 +199,10 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 | Protected files | `test/reference/`, `test/fixtures/`, `src/assets/dataverse-gen-templates/` unchanged since before T001 |
 | Docs | `Validate-Markdown.ps1` passed on every changed page; `npm run docs:build` OK |
 
+Re-run after Amendment 1 (T027, 2026-10-19): build OK, **316** tests passed, pptb-validate passed, `npm audit` 0
+vulnerabilities, no new TSDoc warnings, no EJS in the bundle, protected files unchanged, docs build OK, 12 API pages
+regenerated.
+
 ## Phase 7: Convergence
 
 - [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says
@@ -234,3 +238,8 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 - [ ] T027 Regenerate the API pages (`npm run docs:api`), rerun the full verification (build, tests, validate, audit,
   lint:tsdoc), update the Verification table, and rerun `/speckit-converge` until Converged; T019's live test then
   includes the dialog (quickstart step 3)
+
+## Phase 9: Convergence
+
+- [ ] T028 Mention in the `SettingsPanel` TSDoc (`src/components/panels/SettingsPanel.tsx`) that Save asks first when it
+  would replace an edited `enum.ejs` per FR-012 and Constitution VII (partial)
