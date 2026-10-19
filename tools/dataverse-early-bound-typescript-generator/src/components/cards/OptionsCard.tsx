@@ -1,6 +1,7 @@
 import { Field, Input, Switch, Text } from '@fluentui/react-components';
 import { DEFAULT_OUTPUT_ROOT, type DataverseGenConfig } from '../../core';
 import { infoLabel } from '../shared/infoLabel';
+import { CUSTOM_ENUM_TEMPLATE_INFO, CUSTOM_ENUM_TEMPLATE_TITLE } from '../shared/settingsInfo';
 import { useOptionsCardStyles } from '../../styles';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
@@ -18,10 +19,20 @@ export interface IOptionsCardProps {
      * `output`), `generateEntityTypes`, `generateFormContext` or `generateIndex`.
      */
     onChange: (update: Partial<DataverseGenConfig>) => void;
+    /**
+     * Whether the project uses the custom enum template: its `pptbEarlyBoundGenerator.customEnumTemplate`, or the
+     * Settings default when the project has no value.
+     */
+    customEnumTemplate: boolean;
+    /**
+     * The Custom enum template switch: asks first when turning it on would replace an edited `enum.ejs`, then saves the
+     * project's value (see `useCustomEnumTemplateConfirmation`).
+     */
+    onCustomEnumTemplateChange: (checked: boolean) => void;
 }
 
 /** Step 3: output folder and which artefacts to emit (mirrors the dataverse-gen init prompts). */
-export function OptionsCard({ step, config, disabled, onChange }: IOptionsCardProps) {
+export function OptionsCard({ step, config, disabled, onChange, customEnumTemplate, onCustomEnumTemplateChange }: IOptionsCardProps) {
     const styles = useOptionsCardStyles();
     return (
         <StepCard step={step} description="Start from the Options in Settings; change them here for this project. Saved to .dataverse-gen.json, so the dataverse-gen CLI uses the same settings.">
@@ -81,6 +92,12 @@ export function OptionsCard({ step, config, disabled, onChange }: IOptionsCardPr
                         checked={config.generateIndex ?? true}
                         disabled={disabled}
                         onChange={(_, data) => onChange({ generateIndex: data.checked })}
+                    />
+                    <Switch
+                        label={infoLabel(CUSTOM_ENUM_TEMPLATE_TITLE, CUSTOM_ENUM_TEMPLATE_INFO)}
+                        checked={customEnumTemplate}
+                        disabled={disabled}
+                        onChange={(_, data) => onCustomEnumTemplateChange(data.checked)}
                     />
                 </div>
                 <Text size={200}>

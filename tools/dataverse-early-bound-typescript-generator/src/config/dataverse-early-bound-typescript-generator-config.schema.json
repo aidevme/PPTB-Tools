@@ -37,11 +37,6 @@
             "type": "boolean",
             "default": true
         },
-        "customEnumTemplate": {
-            "description": "Use the custom enum template for duplicate identifiers: later duplicate enum members are renamed to <Name>_<Value> in the generated files (as renameDuplicateIdentifiers does), and when generateTemplates is true Generate writes a custom enum.ejs to the project's templateRoot in place of dataverse-gen's, so the dataverse-gen CLI renames them the same way. Proposed in Preview and generate when a preview finds duplicate identifiers; also on the Settings panel's Generate & files tab.",
-            "type": "boolean",
-            "default": false
-        },
         "projectDefaults": {
             "$ref": "#/definitions/projectDefaults"
         },

@@ -43,21 +43,17 @@ import {
     WarningRegular,
 } from '@fluentui/react-icons';
 import {
-    CUSTOM_ENUM_TEMPLATE_INFO,
     CUSTOM_ENUM_TEMPLATE_TITLE,
     DELETE_ORPHANS_INFO,
     DELETE_ORPHANS_TITLE,
-    EDITED_ENUM_TEMPLATE_CONFIRM,
-    EDITED_ENUM_TEMPLATE_TITLE,
     RENAME_DUPLICATES_INFO,
     RENAME_DUPLICATES_TITLE,
     SKIP_DUPLICATES_INFO,
     SKIP_DUPLICATES_TITLE,
-    editedEnumTemplateMessage,
 } from '../shared/settingsInfo';
-import { ConfirmationDialog } from '../dialogs/ConfirmationDialog';
 import { RECENT_PROJECT_COUNT_RANGE, SELECTION_ROW_LIMIT_RANGE, type ToolConfig } from '../../config';
 import { useSettingsDraft } from '../../hooks';
+import { TOOL_CONFIG_KEY } from '../../core';
 import { DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { version } from '../../../package.json';
@@ -132,12 +128,6 @@ export interface SettingsPanelProps {
      * when it rejects.
      */
     onSave: (settings: ToolConfig) => Promise<void>;
-    /**
-     * The project's `enum.ejs` path when the last preview found it edited (`editedEnumTemplate`). When Save turns the
-     * custom enum template on with Generate templates on, the panel then asks before saving, since the next Generate
-     * would overwrite the file (spec 001, FR-012). Without it, Save never asks.
-     */
-    editedEnumTemplatePath?: string;
 }
 
 /**
@@ -146,10 +136,8 @@ export interface SettingsPanelProps {
  * and its control on the right. Changes are made on a draft: a dot marks each changed value, the footer says when
  * there are unsaved changes, Save (enabled once something changed) persists them, and the Cancel split button
  * discards them; its menu also has Reset to defaults, which restores the bundled defaults (saved projects are kept).
- * When Save would turn the custom enum template on over an edited `enum.ejs` (`editedEnumTemplatePath`), it asks
- * first in a confirmation dialog; cancelling it keeps the draft.
  */
-export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnumTemplatePath }: SettingsPanelProps) {
+export function SettingsPanel({ open, onOpenChange, settings, onSave }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();
     const [tab, setTab] = useState<SettingsTab>('general');
     const [query, setQuery] = useState('');
@@ -159,15 +147,6 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
         onSave,
         onOpenChange,
     });
-    // Save asks first when it turns the custom enum template on over an edited enum.ejs; Cancel keeps the draft.
-    const [confirmEnumTemplateOpen, setConfirmEnumTemplateOpen] = useState(false);
-    const requestSave = () => {
-        const overwritesEditedTemplate =
-            !!editedEnumTemplatePath && draft.customEnumTemplate && !settings.customEnumTemplate && draft.generateTemplates;
-        if (overwritesEditedTemplate) setConfirmEnumTemplateOpen(true);
-        else void save();
-    };
-
     // Start every visit with an empty search.
     useEffect(() => {
         if (open) setQuery('');
@@ -177,11 +156,10 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
     const savedGeneral = settings.general;
     /** A setting row's Switch, labelled and described by the row's title and description. */
     const switchControl =
-        (checked: boolean, onChange: (checked: boolean) => void, disabled = false) =>
+        (checked: boolean, onChange: (checked: boolean) => void) =>
         ({ labelledBy, describedBy }: ControlIds) => (
             <Switch
                 checked={checked}
-                disabled={disabled}
                 aria-labelledby={labelledBy}
                 aria-describedby={describedBy}
                 onChange={(_, data) => onChange(data.checked)}
@@ -343,27 +321,45 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
             icon: <DocumentCheckmarkRegular />,
             badges: [SCOPE_PROJECTS, SCOPE_CONFIG_FILE],
             extra: <OutputPreview defaults={draft.projectDefaults} />,
-            settings: (
-                [
-                    ['generateEntityTypes', 'Early-bound entity interfaces', 'A typed interface per table, for dataverse-ify.', 'dataverse-ify entity types'],
-                    ['generateFormContext', 'Form context helpers', 'A typed FormContext per table, for form scripts.', 'xrm formcontext form scripts'],
-                    ['generateIndex', 'index.ts barrel file', 'An index.ts that re-exports every generated file.', 'barrel index exports'],
-                ] as const
-            ).map(
-                ([key, title, description, keywords]): SettingDefinition => ({
-                    id: key,
-                    title,
-                    description,
+            settings: [
+                ...(
+                    [
+                        ['generateEntityTypes', 'Early-bound entity interfaces', 'A typed interface per table, for dataverse-ify.', 'dataverse-ify entity types'],
+                        ['generateFormContext', 'Form context helpers', 'A typed FormContext per table, for form scripts.', 'xrm formcontext form scripts'],
+                        ['generateIndex', 'index.ts barrel file', 'An index.ts that re-exports every generated file.', 'barrel index exports'],
+                    ] as const
+                ).map(
+                    ([key, title, description, keywords]): SettingDefinition => ({
+                        id: key,
+                        title,
+                        description,
+                        info: (
+                            <>
+                                Sets the project's <code>{key}</code>.
+                            </>
+                        ),
+                        keywords,
+                        changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
+                        control: switchControl(draft.projectDefaults[key], (checked) => updateProjectDefaults({ [key]: checked })),
+                    }),
+                ),
+                {
+                    id: 'customEnumTemplate',
+                    title: CUSTOM_ENUM_TEMPLATE_TITLE,
+                    description: "Rename duplicates and write an enum.ejs that does the same for the dataverse-gen CLI.",
                     info: (
                         <>
-                            Sets the project's <code>{key}</code>.
+                            The default for a project's custom enum template, used when its <code>.dataverse-gen.json</code> doesn't
+                            set one yet; unlike the other options, it never replaces a project's own value. Each project turns it on
+                            or off on the Options card or in Preview and generate. Sets the project's{' '}
+                            <code>{TOOL_CONFIG_KEY}.customEnumTemplate</code>.
                         </>
                     ),
-                    keywords,
-                    changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
-                    control: switchControl(draft.projectDefaults[key], (checked) => updateProjectDefaults({ [key]: checked })),
-                }),
-            ),
+                    keywords: 'duplicate duplicated identifier identifiers enum label rename custom template ejs cli dataverse-gen',
+                    changed: draft.projectDefaults.customEnumTemplate !== settings.projectDefaults.customEnumTemplate,
+                    control: switchControl(draft.projectDefaults.customEnumTemplate, (checked) => updateProjectDefaults({ customEnumTemplate: checked })),
+                },
+            ],
         },
         {
             id: 'beforeGenerating',
@@ -424,27 +420,11 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
                 {
                     id: 'renameDuplicateIdentifiers',
                     title: RENAME_DUPLICATES_TITLE,
-                    description: draft.customEnumTemplate
-                        ? `On because ${CUSTOM_ENUM_TEMPLATE_TITLE} is on, which renames them too.`
-                        : 'Give later duplicate enum members their value as a suffix, so the files compile.',
+                    description: 'Give later duplicate enum members their value as a suffix, so the files compile.',
                     info: RENAME_DUPLICATES_INFO,
                     keywords: 'duplicate duplicated identifier identifiers enum label rename suffix compile',
                     changed: draft.renameDuplicateIdentifiers !== settings.renameDuplicateIdentifiers,
-                    // The custom enum template renames too, so while it's on this shows on and can't be turned off here.
-                    control: switchControl(
-                        draft.renameDuplicateIdentifiers || draft.customEnumTemplate,
-                        (checked) => update({ renameDuplicateIdentifiers: checked }),
-                        draft.customEnumTemplate,
-                    ),
-                },
-                {
-                    id: 'customEnumTemplate',
-                    title: CUSTOM_ENUM_TEMPLATE_TITLE,
-                    description: "Rename duplicates and write an enum.ejs that does the same for the dataverse-gen CLI.",
-                    info: CUSTOM_ENUM_TEMPLATE_INFO,
-                    keywords: 'duplicate duplicated identifier identifiers enum label rename custom template ejs cli dataverse-gen',
-                    changed: draft.customEnumTemplate !== settings.customEnumTemplate,
-                    control: switchControl(draft.customEnumTemplate, (checked) => update({ customEnumTemplate: checked })),
+                    control: switchControl(draft.renameDuplicateIdentifiers, (checked) => update({ renameDuplicateIdentifiers: checked })),
                 },
                 {
                     id: 'skipDuplicateIdentifiers',
@@ -617,7 +597,7 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
                     {dirty ? '● Unsaved changes' : 'No unsaved changes'}
                 </span>
                 <span className={styles.footerActions}>
-                    <Button appearance="primary" disabled={!dirty || saving} onClick={requestSave}>
+                    <Button appearance="primary" disabled={!dirty || saving} onClick={() => void save()}>
                         {saving ? 'Saving…' : 'Save'}
                     </Button>
                     {/* Clicking Cancel closes the panel; the chevron opens the menu with Cancel (the default) and Reset to defaults. */}
@@ -646,17 +626,6 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnum
                     </Menu>
                 </span>
             </DrawerFooter>
-            <ConfirmationDialog
-                open={confirmEnumTemplateOpen}
-                title={EDITED_ENUM_TEMPLATE_TITLE}
-                message={editedEnumTemplateMessage(editedEnumTemplatePath ?? '')}
-                confirmLabel={EDITED_ENUM_TEMPLATE_CONFIRM}
-                onConfirm={() => {
-                    setConfirmEnumTemplateOpen(false);
-                    void save();
-                }}
-                onCancel={() => setConfirmEnumTemplateOpen(false)}
-            />
         </OverlayDrawer>
     );
 }

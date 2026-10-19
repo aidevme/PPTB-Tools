@@ -12,7 +12,6 @@ function withDefaults(config: ToolConfig): ToolConfig {
         skipDuplicateIdentifiers: toolConfig.skipDuplicateIdentifiers,
         renameDuplicateIdentifiers: toolConfig.renameDuplicateIdentifiers,
         generateTemplates: toolConfig.generateTemplates,
-        customEnumTemplate: toolConfig.customEnumTemplate,
         projectDefaults: { ...toolConfig.projectDefaults },
     };
 }

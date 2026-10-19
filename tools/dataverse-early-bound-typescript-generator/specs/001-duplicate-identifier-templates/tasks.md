@@ -262,7 +262,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   `PreviewSettingKey` (`src/hooks/useToolSettings.ts`); route the proposal and the Preview card switch through
   `useCustomEnumTemplateConfirmation` to `updateConfig` in `src/components/apps/App.tsx`; tests in `test/hooks.test.ts`
   (project value drives renaming and enum.ejs; changing it marks the plan stale; two projects independent)
-- [ ] T032 Add the Custom enum template switch, with the confirmation, to `src/components/cards/OptionsCard.tsx`; move
+- [x] T032 Add the Custom enum template switch, with the confirmation, to `src/components/cards/OptionsCard.tsx`; move
   the Settings switch to Settings → Options → Generated files as the default (no confirmation), remove it from Generate
   & files with Rename's disabled state and the `editedEnumTemplatePath` prop and Save confirmation
   (`src/components/panels/SettingsPanel.tsx`, `App.tsx`); update `CUSTOM_ENUM_TEMPLATE_INFO`; tests in

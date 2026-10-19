@@ -9,7 +9,7 @@ export const SKIP_DUPLICATES_TITLE = 'Skip duplicated identifier(s)';
 export const RENAME_DUPLICATES_TITLE = 'Rename duplicated identifier(s)';
 /** Switch label for `deleteOrphanedFiles`, explained by {@link DELETE_ORPHANS_INFO}. */
 export const DELETE_ORPHANS_TITLE = 'Delete orphaned files';
-/** Switch label for `customEnumTemplate`, explained by {@link CUSTOM_ENUM_TEMPLATE_INFO}. */
+/** Switch label for the project's custom enum template, explained by {@link CUSTOM_ENUM_TEMPLATE_INFO}. */
 export const CUSTOM_ENUM_TEMPLATE_TITLE = 'Custom enum template';
 
 /** Skip duplicated identifier(s): `skipDuplicateIdentifiers`. */
@@ -36,8 +36,8 @@ export const RENAME_DUPLICATES_INFO = (
 );
 
 /**
- * Custom enum template: `customEnumTemplate`. Also the core of the proposal Preview and generate shows when a preview
- * finds duplicate identifiers.
+ * Custom enum template: the project's `pptbEarlyBoundGenerator.customEnumTemplate`. Also the core of the proposal Preview
+ * and generate shows when a preview finds duplicate identifiers.
  */
 export const CUSTOM_ENUM_TEMPLATE_INFO = (
     <>
@@ -46,8 +46,10 @@ export const CUSTOM_ENUM_TEMPLATE_INFO = (
         Generate writes a custom <code>enum.ejs</code> to the project's <code>templateRoot</code> in place of dataverse-gen's,
         replacing an edited copy, so the CLI renames them the same way. The CLI only gets it while Generate templates is on. When off,
         the output and <code>enum.ejs</code> are dataverse-gen's again. Renaming the labels in Dataverse is the lasting fix, and a
-        reorder of the options can move the suffix to another member. Changing this needs a new preview. The same setting is in
-        Settings → Generate &amp; files and in Preview and generate. Saved as <code>customEnumTemplate</code>.
+        reorder of the options can move the suffix to another member. Changing this needs a new preview. It's set per project, on
+        the Options card and in Preview and generate; Settings → Options sets the default for projects that don't have a value yet.
+        Saved in the project's <code>.dataverse-gen.json</code> as <code>pptbEarlyBoundGenerator.customEnumTemplate</code>, which
+        the dataverse-gen CLI ignores.
     </>
 );
 

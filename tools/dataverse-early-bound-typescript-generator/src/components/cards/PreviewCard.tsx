@@ -38,7 +38,8 @@ export interface IPreviewGenerateOptions {
     /** The Rename duplicated identifier(s) switch; saves `renameDuplicateIdentifiers`. The switch is hidden without it. */
     onRenameDuplicatesChange?: (checked: boolean) => void;
     /**
-     * Whether the custom enum template is on (the tool config's `customEnumTemplate`).
+     * Whether the project uses the custom enum template (its `pptbEarlyBoundGenerator.customEnumTemplate`, or the
+     * Settings default).
      * @defaultValue false
      */
     customEnumTemplate?: boolean;
@@ -48,7 +49,7 @@ export interface IPreviewGenerateOptions {
      */
     generateTemplates?: boolean;
     /**
-     * Saves `customEnumTemplate`: called with `true` when the custom enum template proposal is accepted. Without it, no
+     * Saves the project's custom enum template: called with `true` when the proposal is accepted. Without it, no
      * proposal is shown.
      */
     onCustomEnumTemplateChange?: (checked: boolean) => void;

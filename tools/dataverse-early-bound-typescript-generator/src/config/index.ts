@@ -74,11 +74,6 @@ export interface ToolConfig {
     renameDuplicateIdentifiers: boolean;
     /** Write dataverse-gen's EJS templates to the project's `templateRoot` on Generate, like `dataverse-gen eject`. */
     generateTemplates: boolean;
-    /**
-     * Use the custom enum template: rename later duplicate enum members in the output (as `renameDuplicateIdentifiers`
-     * does) and, when `generateTemplates` is on, write the custom `enum.ejs` that does the same for the dataverse-gen CLI.
-     */
-    customEnumTemplate: boolean;
     projectDefaults: ProjectDefaults;
     projects: ProjectEntry[];
 }
@@ -172,7 +167,6 @@ export const toolConfig: ToolConfig = {
     renameDuplicateIdentifiers: defaults.renameDuplicateIdentifiers === true,
     // On unless the bundled JSON turns it off, so Generate keeps writing the templates by default.
     generateTemplates: defaults.generateTemplates !== false,
-    customEnumTemplate: defaults.customEnumTemplate === true,
     projectDefaults: normalizeProjectDefaults(defaults.projectDefaults, BUILT_IN_PROJECT_DEFAULTS),
     projects: normalizeProjects(defaults.projects as unknown[]),
 };
@@ -190,7 +184,6 @@ export function mergeToolConfig(saved: unknown): ToolConfig {
         renameDuplicateIdentifiers:
             typeof values.renameDuplicateIdentifiers === 'boolean' ? values.renameDuplicateIdentifiers : toolConfig.renameDuplicateIdentifiers,
         generateTemplates: typeof values.generateTemplates === 'boolean' ? values.generateTemplates : toolConfig.generateTemplates,
-        customEnumTemplate: typeof values.customEnumTemplate === 'boolean' ? values.customEnumTemplate : toolConfig.customEnumTemplate,
         projectDefaults: normalizeProjectDefaults(values.projectDefaults, toolConfig.projectDefaults),
         projects: Array.isArray(values.projects) ? normalizeProjects(values.projects) : toolConfig.projects,
     };

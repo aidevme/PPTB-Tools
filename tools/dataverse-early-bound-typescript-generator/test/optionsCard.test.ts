@@ -1,6 +1,7 @@
 /**
- * The Options card: the output folder and the three generated-file switches edit the project config, and nothing
- * can be edited while the card is disabled.
+ * The Options card: the output folder and the three generated-file switches edit the project config, the Custom enum
+ * template switch reports through its own callback (which asks first when needed), and nothing can be edited while the
+ * card is disabled.
  */
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -21,13 +22,27 @@ afterEach(() => {
     root = undefined;
 });
 
-async function render(config: DataverseGenConfig, disabled = false) {
-    const onChange = vi.fn();
+/** Renders the card; returns its `onChange`, with the Custom enum template switch's callback as `onCustomEnumTemplateChange`. */
+async function render(config: DataverseGenConfig, disabled = false, customEnumTemplate = false) {
+    const onChange = Object.assign(vi.fn(), { onCustomEnumTemplateChange: vi.fn() });
     const step = computeWorkflowSteps({ hasProject: true, selectedCount: 1, plan: null })[2];
     container = document.body.appendChild(document.createElement('div'));
     root = createRoot(container);
     await act(async () => {
-        root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(OptionsCard, { step, config, disabled, onChange })));
+        root!.render(
+            createElement(
+                FluentProvider,
+                { theme: webLightTheme },
+                createElement(OptionsCard, {
+                    step,
+                    config,
+                    disabled,
+                    onChange,
+                    customEnumTemplate,
+                    onCustomEnumTemplateChange: onChange.onCustomEnumTemplateChange,
+                }),
+            ),
+        );
     });
     return onChange;
 }
@@ -69,9 +84,18 @@ describe('OptionsCard', () => {
         expect(onChange).toHaveBeenLastCalledWith({ generateIndex: false });
     });
 
+    it("shows the project's custom enum template and reports the switch through its own callback (Amendment 2)", async () => {
+        const onChange = await render({}, false, true);
+        expect(control('Custom enum template').checked).toBe(true);
+        await act(async () => control('Custom enum template').click());
+        expect(onChange.onCustomEnumTemplateChange).toHaveBeenLastCalledWith(false);
+        // The card doesn't edit the config itself: the callback asks first when needed, then saves the project's value.
+        expect(onChange).not.toHaveBeenCalled();
+    });
+
     it('disables every control while disabled', async () => {
         await render({}, true);
-        for (const label of ['Output folder', 'Early-bound entity interfaces', 'Form context helpers', 'index.ts barrel file']) {
+        for (const label of ['Output folder', 'Early-bound entity interfaces', 'Form context helpers', 'index.ts barrel file', 'Custom enum template']) {
             expect(control(label).disabled).toBe(true);
         }
     });

@@ -59,7 +59,6 @@ describe('tool config', () => {
             skipDuplicateIdentifiers: false,
             renameDuplicateIdentifiers: false,
             generateTemplates: true,
-            customEnumTemplate: false,
             projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true, customEnumTemplate: false },
             projects: [],
         });
@@ -94,11 +93,10 @@ describe('tool config', () => {
         expect(mergeToolConfig({}).generateTemplates).toBe(true);
     });
 
-    it('reads customEnumTemplate only when it is a boolean, defaulting to false', () => {
-        expect(mergeToolConfig({ customEnumTemplate: true }).customEnumTemplate).toBe(true);
-        expect(mergeToolConfig({ customEnumTemplate: 'yes' }).customEnumTemplate).toBe(false);
-        // Settings saved before the key existed load with the default.
-        expect(mergeToolConfig({ renameDuplicateIdentifiers: true }).customEnumTemplate).toBe(false);
+    it('drops a tool-wide customEnumTemplate saved before it became a project setting (Amendment 2)', () => {
+        const merged = mergeToolConfig({ customEnumTemplate: true });
+        expect('customEnumTemplate' in merged).toBe(false);
+        expect(merged.projectDefaults.customEnumTemplate).toBe(false);
     });
 
     it('reads renameDuplicateIdentifiers only when it is a boolean', () => {
@@ -187,7 +185,7 @@ describe('settings panel', () => {
         root = undefined;
     });
 
-    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn(), editedEnumTemplatePath?: string) {
+    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn()) {
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
@@ -195,7 +193,7 @@ describe('settings panel', () => {
                 createElement(
                     FluentProvider,
                     { theme: webLightTheme },
-                    createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave, editedEnumTemplatePath }),
+                    createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave }),
                 ),
             );
         });
@@ -367,81 +365,19 @@ describe('settings panel', () => {
         expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
 
-    it('saves the Custom enum template switch, which shows Rename on and disabled while on (spec 001, US3)', async () => {
+    it('saves the Custom enum template default from the Options tab without asking (Amendment 2)', async () => {
         const onSave = vi.fn(async () => {});
         await render(toolConfig, onSave);
         await openTab('Generate & files');
-        expect(control('Rename duplicated identifier(s)').checked).toBe(false);
+        // It's a project setting now: no row on Generate & files, and Rename is its own switch again.
+        expect(control('Custom enum template')).toBeUndefined();
         expect(control('Rename duplicated identifier(s)').disabled).toBe(false);
+        await openTab('Options');
         await click(control('Custom enum template'));
         expect(control('Custom enum template').checked).toBe(true);
-        expect(control('Rename duplicated identifier(s)').checked).toBe(true);
-        expect(control('Rename duplicated identifier(s)').disabled).toBe(true);
-        expect(document.body.textContent).toContain('On because Custom enum template is on');
         await click(button('Save'));
-        // Rename itself stays off: turning the custom template off later restores the default output.
-        expect(onSave).toHaveBeenCalledWith(settingsWith({ customEnumTemplate: true }));
-    });
-
-    describe('confirmation before replacing an edited enum.ejs (spec 001, FR-012)', () => {
-        const EDITED = 'C:\\proj\\_templates\\enum.ejs';
-        const dialogShown = () => document.body.textContent?.includes('Replace your edited enum.ejs?') ?? false;
-        const confirmButton = () =>
-            Array.from(document.querySelectorAll('[role="alertdialog"] button')).find((b) => b.textContent === 'Use custom enum template') as HTMLButtonElement;
-        const dialogCancel = () =>
-            Array.from(document.querySelectorAll('[role="alertdialog"] button')).find((b) => b.textContent === 'Cancel') as HTMLButtonElement;
-
-        it('asks on Save when the custom enum template is turned on over an edited enum.ejs; Cancel saves nothing', async () => {
-            const onSave = vi.fn(async () => {});
-            const onOpenChange = await render(toolConfig, onSave, vi.fn(), EDITED);
-            await openTab('Generate & files');
-            await click(control('Custom enum template'));
-            await click(button('Save'));
-            expect(dialogShown()).toBe(true);
-            expect(document.body.textContent).toContain(EDITED);
-            expect(onSave).not.toHaveBeenCalled();
-            await click(dialogCancel());
-            expect(dialogShown()).toBe(false);
-            expect(onSave).not.toHaveBeenCalled();
-            expect(onOpenChange).not.toHaveBeenCalledWith(false);
-            // The draft is kept.
-            expect(control('Custom enum template').checked).toBe(true);
-        });
-
-        it('saves after confirming', async () => {
-            const onSave = vi.fn(async () => {});
-            await render(toolConfig, onSave, vi.fn(), EDITED);
-            await openTab('Generate & files');
-            await click(control('Custom enum template'));
-            await click(button('Save'));
-            await click(confirmButton());
-            expect(onSave).toHaveBeenCalledWith(settingsWith({ customEnumTemplate: true }));
-        });
-
-        it("doesn't ask without an edited enum.ejs, with Generate templates off, or when turning it off", async () => {
-            const cases: Array<[ToolConfig, string | undefined, (() => Promise<void>)[], Partial<ToolConfig>]> = [
-                [toolConfig, undefined, [() => click(control('Custom enum template'))], { customEnumTemplate: true }],
-                [
-                    toolConfig,
-                    EDITED,
-                    [() => click(control('Generate templates')), () => click(control('Custom enum template'))],
-                    { customEnumTemplate: true, generateTemplates: false },
-                ],
-                [settingsWith({ customEnumTemplate: true }), EDITED, [() => click(control('Custom enum template'))], { customEnumTemplate: false }],
-            ];
-            for (const [settings, path, steps, expected] of cases) {
-                const onSave = vi.fn(async () => {});
-                await render(settings, onSave, vi.fn(), path);
-                await openTab('Generate & files');
-                for (const step of steps) await step();
-                await click(button('Save'));
-                expect(dialogShown()).toBe(false);
-                expect(onSave).toHaveBeenCalledWith(settingsWith(expected));
-                act(() => root?.unmount());
-                container?.remove();
-                root = undefined;
-            }
-        });
+        expect(document.body.textContent).not.toContain('Replace your edited enum.ejs?');
+        expect(onSave).toHaveBeenCalledWith(settingsWith({ projectDefaults: { ...toolConfig.projectDefaults, customEnumTemplate: true } }));
     });
 
     it('searches across all tabs', async () => {
@@ -461,7 +397,7 @@ describe('settings panel', () => {
         const onSave = vi.fn(async () => {});
         const custom = settingsWith({
             deleteOrphanedFiles: true,
-            customEnumTemplate: true,
+            projectDefaults: { ...toolConfig.projectDefaults, customEnumTemplate: true },
             general: { ...toolConfig.general, recentProjectCount: 7 },
             projects: [PROJECT],
         });

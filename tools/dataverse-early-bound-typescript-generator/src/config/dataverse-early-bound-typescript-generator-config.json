@@ -12,7 +12,6 @@
     "skipDuplicateIdentifiers": false,
     "renameDuplicateIdentifiers": false,
     "generateTemplates": true,
-    "customEnumTemplate": false,
     "projectDefaults": {
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,
