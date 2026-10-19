@@ -84,7 +84,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
   `src/components/shared/settingsInfo.tsx`, per `contracts/preview-proposal.md` (what it renames, that it replaces the
   project's `enum.ejs`, that it needs a new preview, that the CLI only gets it while Generate templates is on, and that
   renaming the labels in Dataverse is the lasting fix)
-- [ ] T011 [US1] Add the proposal to the Preview card (`src/components/cards/PreviewCard.tsx`,
+- [x] T011 [US1] Add the proposal to the Preview card (`src/components/cards/PreviewCard.tsx`,
   `src/components/cards/PreviewParts.tsx`, and `src/styles/PreviewCard.styles.ts` if spacing is needed): new props
   `customEnumTemplate`, `generateTemplates` and `onCustomEnumTemplateChange`; a warning `MessageBar` with a title, the
   number of files with duplicate identifiers and the explanation, **Use custom enum template** and **Not now**; shown

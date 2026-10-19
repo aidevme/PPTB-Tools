@@ -285,6 +285,67 @@ describe('PreviewCard', () => {
         // The duplicate status tooltip names the setting too, so look for the switch's label, not the text.
         expect(Array.from(document.querySelectorAll('label')).some((l) => l.textContent === 'Skip duplicated identifier(s)')).toBe(false);
     });
+
+    describe('custom enum template proposal (spec 001)', () => {
+        const PROPOSAL = 'Duplicate identifiers found';
+        const proposalShown = () => document.body.textContent?.includes(PROPOSAL) ?? false;
+        const button = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement | undefined;
+        const withPreview = (previewedAt: string, options: Partial<IPreviewGenerateOptions>): IPreviewCardProps => ({
+            ...props([DUPLICATE], 1, options),
+            previewedAt,
+        });
+        const rerender = (cardProps: IPreviewCardProps) =>
+            act(async () => root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(PreviewCard, cardProps))));
+
+        it('is shown when the preview found duplicates, with the number of files', async () => {
+            await mount(createElement(PreviewCard, withPreview('2026-10-19T10:00:00Z', { onCustomEnumTemplateChange: vi.fn() })));
+            expect(proposalShown()).toBe(true);
+            expect(document.body.textContent).toContain("1 file declares an enum member name twice and won't compile.");
+            expect(document.body.textContent).toContain('Nothing changes until you preview again and generate.');
+            expect(document.body.textContent).not.toContain('Generate templates is off');
+        });
+
+        it('is also shown when Skip duplicated identifier(s) is on', async () => {
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange: vi.fn(), skipDuplicates: true })));
+            expect(proposalShown()).toBe(true);
+        });
+
+        it('is hidden without duplicates, when the setting is already on, or without a handler', async () => {
+            const plain: PlannedFile = { ...DUPLICATE, status: 'new', writeStatus: undefined, duplicateIdentifiers: undefined };
+            await mount(createElement(PreviewCard, { ...props([plain], 0, { onCustomEnumTemplateChange: vi.fn() }), previewedAt: 't1' }));
+            expect(proposalShown()).toBe(false);
+            await rerender(withPreview('t1', { onCustomEnumTemplateChange: vi.fn(), customEnumTemplate: true }));
+            expect(proposalShown()).toBe(false);
+            await rerender(withPreview('t1', {}));
+            expect(proposalShown()).toBe(false);
+        });
+
+        it('turns the setting on when accepted', async () => {
+            const onCustomEnumTemplateChange = vi.fn();
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange })));
+            await act(async () => button('Use custom enum template')!.click());
+            expect(onCustomEnumTemplateChange).toHaveBeenCalledWith(true);
+        });
+
+        it('hides on Not now without saving anything, and comes back after a new preview', async () => {
+            const onCustomEnumTemplateChange = vi.fn();
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange })));
+            await act(async () => button('Not now')!.click());
+            expect(proposalShown()).toBe(false);
+            expect(onCustomEnumTemplateChange).not.toHaveBeenCalled();
+            // The same preview, rendered again: still hidden.
+            await rerender(withPreview('t1', { onCustomEnumTemplateChange }));
+            expect(proposalShown()).toBe(false);
+            // A new preview with duplicates: shown again.
+            await rerender(withPreview('t2', { onCustomEnumTemplateChange }));
+            expect(proposalShown()).toBe(true);
+        });
+
+        it("says the CLI won't get the fix while Generate templates is off", async () => {
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange: vi.fn(), generateTemplates: false })));
+            expect(document.body.textContent).toContain("Generate templates is off, so the CLI won't get the fix until it's turned on.");
+        });
+    });
 });
 
 describe('FileViewer', () => {

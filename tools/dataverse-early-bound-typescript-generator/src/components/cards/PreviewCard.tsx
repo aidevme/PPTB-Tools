@@ -14,7 +14,7 @@ import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
 import { FileTable } from '../tables/FileTable';
-import { PreviewActionBar, StatusTiles } from './PreviewParts';
+import { CustomEnumTemplateProposal, PreviewActionBar, StatusTiles } from './PreviewParts';
 
 /** Explanation in the Show unchanged switch's info label. */
 const SHOW_UNCHANGED_INFO = (
@@ -37,6 +37,21 @@ export interface IPreviewGenerateOptions {
     renameDuplicates?: boolean;
     /** The Rename duplicated identifier(s) switch; saves `renameDuplicateIdentifiers`. The switch is hidden without it. */
     onRenameDuplicatesChange?: (checked: boolean) => void;
+    /**
+     * Whether the custom enum template is on (the tool config's `customEnumTemplate`).
+     * @defaultValue false
+     */
+    customEnumTemplate?: boolean;
+    /**
+     * Whether Generate writes the templates (the tool config's `generateTemplates`); the proposal mentions when it's off.
+     * @defaultValue true
+     */
+    generateTemplates?: boolean;
+    /**
+     * Saves `customEnumTemplate`: called with `true` when the custom enum template proposal is accepted. Without it, no
+     * proposal is shown.
+     */
+    onCustomEnumTemplateChange?: (checked: boolean) => void;
     /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
     deleteOrphans: boolean;
     /** Called with the new value when the Delete orphaned files switch is toggled; saves `deleteOrphanedFiles`. */
@@ -87,6 +102,14 @@ export function PreviewCard(props: IPreviewCardProps) {
     const [filter, setFilter] = useState<FileFilter>({ status: null, showUnchanged: false, search: '' });
     const [sort, setSort] = useState<{ column: FileSortColumn; direction: SortDirection } | null>(null);
     const { listWidth, splitRef, startResize, onSplitterKeyDown } = useResizableSplit();
+    // The preview (by its time) the custom enum template proposal was dismissed for; a new preview shows it again.
+    const [proposalDismissedFor, setProposalDismissedFor] = useState<string | null>(null);
+    const showProposal =
+        !!plan &&
+        plan.counts.duplicate > 0 &&
+        !generateOptions.customEnumTemplate &&
+        !!generateOptions.onCustomEnumTemplateChange &&
+        proposalDismissedFor !== props.previewedAt;
 
     const files = useMemo(() => (plan ? sortFiles(visibleFiles(plan.files, filter), sort) : []), [plan, filter, sort]);
     const selected = plan?.files.find((f) => f.relativePath === selectedPath) ?? null;
@@ -120,6 +143,15 @@ export function PreviewCard(props: IPreviewCardProps) {
                     <MessageBar intent="success">
                         <MessageBarBody>{lastResult}</MessageBarBody>
                     </MessageBar>
+                )}
+                {showProposal && (
+                    <CustomEnumTemplateProposal
+                        duplicateFiles={plan.counts.duplicate}
+                        generateTemplates={generateOptions.generateTemplates ?? true}
+                        onAccept={() => generateOptions.onCustomEnumTemplateChange?.(true)}
+                        onDismiss={() => setProposalDismissedFor(props.previewedAt)}
+                        busy={busy}
+                    />
                 )}
 
                 <PreviewActionBar

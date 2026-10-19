@@ -1,8 +1,9 @@
 /**
- * Parts of the Preview card: the action bar (Preview, Generate and the switches) and the status tiles. They're
- * presentational; `PreviewCard` holds the state. The file table is `tables/FileTable.tsx`.
+ * Parts of the Preview card: the action bar (Preview, Generate and the switches), the custom enum template proposal
+ * and the status tiles. They're presentational; `PreviewCard` holds the state. The file table is
+ * `tables/FileTable.tsx`.
  */
-import { Button, Switch, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
+import { Button, MessageBar, MessageBarActions, MessageBarBody, MessageBarTitle, Switch, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
 import { AddCircleRegular, CheckmarkCircleRegular, DocumentQuestionMarkRegular, DocumentSearchRegular, EditRegular, InfoRegular, SaveRegular, WarningRegular } from '@fluentui/react-icons';
 import type { FileStatus, WritePlan } from '../../types';
 import { plural } from '../../services';
@@ -169,6 +170,48 @@ export function PreviewActionBar(props: IPreviewActionBarProps) {
                 </span>
             )}
         </div>
+    );
+}
+
+/** Props for {@link CustomEnumTemplateProposal}. */
+export interface ICustomEnumTemplateProposalProps {
+    /** How many files in the preview declare an enum member name more than once. */
+    duplicateFiles: number;
+    /** Whether Generate writes the templates (the tool config's `generateTemplates`); off, the CLI won't get the fix. */
+    generateTemplates: boolean;
+    /** Called when **Use custom enum template** is clicked; the caller turns the setting on and marks the preview stale. */
+    onAccept: () => void;
+    /** Called when **Not now** is clicked; the caller hides the proposal until the next preview, without saving anything. */
+    onDismiss: () => void;
+    /** Disables both buttons while work is in progress. */
+    busy: boolean;
+}
+
+/**
+ * The proposal a preview shows when files have duplicate identifiers: use the custom enum template, which renames the
+ * later duplicates in the generated files and gives the dataverse-gen CLI an `enum.ejs` that does the same. Accepting
+ * writes nothing; the files change on the next preview and Generate.
+ */
+export function CustomEnumTemplateProposal({ duplicateFiles, generateTemplates, onAccept, onDismiss, busy }: ICustomEnumTemplateProposalProps) {
+    return (
+        <MessageBar intent="warning" layout="multiline">
+            <MessageBarBody>
+                <MessageBarTitle>Duplicate identifiers found</MessageBarTitle>
+                {plural(duplicateFiles, 'file declares', 'files declare')} an enum member name twice and won't compile. With the custom
+                enum template, each later duplicate gets its value appended (for example <code>InProgress_700970000</code>), and the
+                project's <code>enum.ejs</code> is replaced so the dataverse-gen CLI renames them the same way. Nothing changes until you
+                preview again and generate. Renaming the labels in Dataverse is the lasting fix.
+                {!generateTemplates && " Generate templates is off, so the CLI won't get the fix until it's turned on."}
+            </MessageBarBody>
+            <MessageBarActions>
+                <Button size="small" appearance="primary" disabled={busy} onClick={onAccept}>
+                    Use custom enum template
+                </Button>
+                <Button size="small" disabled={busy} onClick={onDismiss}>
+                    Not now
+                </Button>
+            </MessageBarActions>
+        </MessageBar>
     );
 }
 
