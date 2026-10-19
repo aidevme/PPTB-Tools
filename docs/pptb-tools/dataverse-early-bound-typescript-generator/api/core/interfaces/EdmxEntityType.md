@@ -1,6 +1,6 @@
 # Interface: EdmxEntityType
 
-Defined in: [core/types.ts:35](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L35)
+Defined in: [core/types.ts:35](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L35)
 
 An `<EntityType>` in the CSDL.
 
@@ -10,7 +10,7 @@ An `<EntityType>` in the CSDL.
 
 > **Abstract**: `boolean`
 
-Defined in: [core/types.ts:38](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L38)
+Defined in: [core/types.ts:38](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L38)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [core/types.ts:38](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > `optional` **BaseType?**: `string`
 
-Defined in: [core/types.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L37)
+Defined in: [core/types.ts:37](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L37)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [core/types.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > `optional` **EntitySetName?**: `string`
 
-Defined in: [core/types.ts:42](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L42)
+Defined in: [core/types.ts:42](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L42)
 
 Resolved from the EntityContainer's `<EntitySet>` elements.
 
@@ -36,7 +36,7 @@ Resolved from the EntityContainer's `<EntitySet>` elements.
 
 > `optional` **KeyName?**: `string`
 
-Defined in: [core/types.ts:40](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L40)
+Defined in: [core/types.ts:40](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L40)
 
 `Key/PropertyRef@Name` — the primary id attribute.
 
@@ -46,7 +46,7 @@ Defined in: [core/types.ts:40](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **Name**: `string`
 
-Defined in: [core/types.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L36)
+Defined in: [core/types.ts:36](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L36)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [core/types.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **NavigationProperties**: [`EdmxNavigationProperty`](EdmxNavigationProperty.md)[]
 
-Defined in: [core/types.ts:44](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L44)
+Defined in: [core/types.ts:44](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L44)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [core/types.ts:44](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **Properties**: [`EdmxProperty`](EdmxProperty.md)[]
 
-Defined in: [core/types.ts:43](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L43)
+Defined in: [core/types.ts:43](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L43)

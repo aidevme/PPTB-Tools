@@ -2,7 +2,7 @@
 
 > **recentProjects**(`projects`, `projectRoot`, `rememberedFolder`, `now`, `max?`): [`RecentProject`](../interfaces/RecentProject.md)[]
 
-Defined in: [components/cards/recentProjects.ts:38](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L38)
+Defined in: [components/cards/recentProjects.ts:38](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L38)
 
 Up to `max` projects to offer for reopening, excluding the open one: the folder last used with this
 connection first, then saved projects by most recently modified. The last-used folder is shown under its

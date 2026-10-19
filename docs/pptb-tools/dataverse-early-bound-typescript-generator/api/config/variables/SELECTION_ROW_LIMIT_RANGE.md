@@ -2,7 +2,7 @@
 
 > `const` **SELECTION\_ROW\_LIMIT\_RANGE**: `object`
 
-Defined in: [config/index.ts:57](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L57)
+Defined in: [config/index.ts:57](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L57)
 
 Allowed range for [GeneralSettings.selectionRowLimit](../interfaces/GeneralSettings.md#selectionrowlimit).
 

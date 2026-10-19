@@ -2,7 +2,7 @@
 
 > **mapWithConcurrency**\<`T`, `R`\>(`items`, `limit`, `fn`, `onProgress?`): `Promise`\<`R`[]\>
 
-Defined in: [services/concurrency.ts:5](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/concurrency.ts#L5)
+Defined in: [services/concurrency.ts:5](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/concurrency.ts#L5)
 
 Run `fn` over `items` with at most `limit` in flight at once, preserving result order. Used to keep
 the number of parallel Dataverse metadata requests small (the guide recommends 4 to 6).

@@ -1,6 +1,6 @@
 # Interface: UseToolSettingsOptions
 
-Defined in: [hooks/useToolSettings.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L10)
+Defined in: [hooks/useToolSettings.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L10)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [hooks/useToolSettings.ts:10](https://github.com/aidevme/PPTB-Tools/
 
 > **onError**: (`message`) => `void`
 
-Defined in: [hooks/useToolSettings.ts:12](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L12)
+Defined in: [hooks/useToolSettings.ts:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L12)
 
 Shows an error in the page (the error bar).
 
@@ -28,7 +28,7 @@ Shows an error in the page (the error bar).
 
 > **onPlanStale**: () => `void`
 
-Defined in: [hooks/useToolSettings.ts:14](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L14)
+Defined in: [hooks/useToolSettings.ts:14](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L14)
 
 Called when a saved setting makes the current preview out of date.
 

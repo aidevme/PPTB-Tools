@@ -2,7 +2,7 @@
 
 > `const` **NOTIFICATION\_TYPES**: `object`
 
-Defined in: [services/notifications.ts:16](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L16)
+Defined in: [services/notifications.ts:16](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L16)
 
 The four notification presets: PPTB's type, a default title, and how long it stays up in milliseconds
 (`0` = until the user dismisses it). Warnings and errors stay up so they aren't missed.

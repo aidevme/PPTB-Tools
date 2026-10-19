@@ -50,6 +50,7 @@
 - [joinPath](functions/joinPath.md)
 - [listSolutions](functions/listSolutions.md)
 - [loadProjectConfig](functions/loadProjectConfig.md)
+- [loadStoredToolSettings](functions/loadStoredToolSettings.md)
 - [loadToolConfig](functions/loadToolConfig.md)
 - [mapWithConcurrency](functions/mapWithConcurrency.md)
 - [notificationOptions](functions/notificationOptions.md)

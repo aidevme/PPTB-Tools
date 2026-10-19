@@ -1,6 +1,6 @@
 # Interface: IProjectCardProps
 
-Defined in: [components/cards/ProjectCard.tsx:23](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L23)
+Defined in: [components/cards/ProjectCard.tsx:23](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L23)
 
 Props for [ProjectCard](../functions/ProjectCard.md).
 
@@ -10,7 +10,7 @@ Props for [ProjectCard](../functions/ProjectCard.md).
 
 > **busy**: `boolean`
 
-Defined in: [components/cards/ProjectCard.tsx:40](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L40)
+Defined in: [components/cards/ProjectCard.tsx:40](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L40)
 
 Work in progress (or not running in PPTB): disables every button, including the recent projects.
 
@@ -20,7 +20,7 @@ Work in progress (or not running in PPTB): disables every button, including the 
 
 > **configState**: [`ProjectConfigState`](../../services/interfaces/ProjectConfigState.md) \| `null`
 
-Defined in: [components/cards/ProjectCard.tsx:34](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L34)
+Defined in: [components/cards/ProjectCard.tsx:34](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L34)
 
 The open project's `.dataverse-gen.json`: whether it exists (a "found" or "created on generate" badge) and its
 selection counts. No badges while `null`.
@@ -31,7 +31,7 @@ selection counts. No badges while `null`.
 
 > `optional` **now?**: `number`
 
-Defined in: [components/cards/ProjectCard.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L52)
+Defined in: [components/cards/ProjectCard.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L52)
 
 Current time for relative dates; a parameter so tests get stable output.
 
@@ -41,7 +41,7 @@ Current time for relative dates; a parameter so tests get stable output.
 
 > **onCopyPath**: (`path`, `label`) => `void`
 
-Defined in: [components/cards/ProjectCard.tsx:50](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L50)
+Defined in: [components/cards/ProjectCard.tsx:50](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L50)
 
 Called with the project folder and `"Project folder path"` when its copy button is clicked.
 
@@ -65,7 +65,7 @@ Called with the project folder and `"Project folder path"` when its copy button 
 
 > **onLoadExistingProject**: () => `void`
 
-Defined in: [components/cards/ProjectCard.tsx:44](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L44)
+Defined in: [components/cards/ProjectCard.tsx:44](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L44)
 
 Opens the Load Existing Project dialog.
 
@@ -79,7 +79,7 @@ Opens the Load Existing Project dialog.
 
 > **onNewProject**: () => `void`
 
-Defined in: [components/cards/ProjectCard.tsx:42](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L42)
+Defined in: [components/cards/ProjectCard.tsx:42](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L42)
 
 Opens the New Project dialog.
 
@@ -93,7 +93,7 @@ Opens the New Project dialog.
 
 > **onOpenRecent**: (`target`) => `void`
 
-Defined in: [components/cards/ProjectCard.tsx:46](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L46)
+Defined in: [components/cards/ProjectCard.tsx:46](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L46)
 
 Opens a recent project directly.
 
@@ -113,7 +113,7 @@ Opens a recent project directly.
 
 > **onReload**: () => `void`
 
-Defined in: [components/cards/ProjectCard.tsx:48](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L48)
+Defined in: [components/cards/ProjectCard.tsx:48](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L48)
 
 Called when the reload button of an open project is clicked, to read `.dataverse-gen.json` from disk again.
 
@@ -127,7 +127,7 @@ Called when the reload button of an open project is clicked, to read `.dataverse
 
 > **projectRoot**: `string` \| `null`
 
-Defined in: [components/cards/ProjectCard.tsx:27](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L27)
+Defined in: [components/cards/ProjectCard.tsx:27](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L27)
 
 The open project's folder, or `null` for the empty state with Load Existing Project and New Project.
 
@@ -137,7 +137,7 @@ The open project's folder, or `null` for the empty state with Load Existing Proj
 
 > **projects**: [`ProjectEntry`](../../config/interfaces/ProjectEntry.md)[]
 
-Defined in: [components/cards/ProjectCard.tsx:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L36)
+Defined in: [components/cards/ProjectCard.tsx:36](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L36)
 
 Saved projects, for the open project's name and version and for the recent-projects list.
 
@@ -147,7 +147,7 @@ Saved projects, for the open project's name and version and for the recent-proje
 
 > `optional` **recentProjectCount?**: `number`
 
-Defined in: [components/cards/ProjectCard.tsx:38](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L38)
+Defined in: [components/cards/ProjectCard.tsx:38](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L38)
 
 How many recent projects to offer (the General setting); 0 hides the list. Defaults to 3.
 
@@ -157,7 +157,7 @@ How many recent projects to offer (the General setting); 0 hides the list. Defau
 
 > **rememberedFolder**: `string` \| `null`
 
-Defined in: [components/cards/ProjectCard.tsx:29](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L29)
+Defined in: [components/cards/ProjectCard.tsx:29](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L29)
 
 Folder used last time with this connection, offered first for reopening while no project is open.
 
@@ -167,6 +167,6 @@ Folder used last time with this connection, offered first for reopening while no
 
 > **step**: [`StepState`](StepState.md)
 
-Defined in: [components/cards/ProjectCard.tsx:25](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L25)
+Defined in: [components/cards/ProjectCard.tsx:25](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/ProjectCard.tsx#L25)
 
 The card's step in the workflow: number, title and completion badge.

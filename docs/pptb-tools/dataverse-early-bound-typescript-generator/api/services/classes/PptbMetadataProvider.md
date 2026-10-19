@@ -1,6 +1,6 @@
 # Class: PptbMetadataProvider
 
-Defined in: [services/metadataProvider.ts:56](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L56)
+Defined in: [services/metadataProvider.ts:56](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L56)
 
 Loads the Dataverse metadata the generator needs through `window.dataverseAPI`.
 
@@ -27,7 +27,7 @@ clears the cache.
 
 > **get** **usesMetadataFallback**(): `boolean`
 
-Defined in: [services/metadataProvider.ts:146](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L146)
+Defined in: [services/metadataProvider.ts:146](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L146)
 
 Whether the schema was rebuilt from table and relationship metadata because the `$metadata` document
 is too large for PPTB. Built-in actions/functions and custom process actions are unavailable then.
@@ -42,7 +42,7 @@ is too large for PPTB. Built-in actions/functions and custom process actions are
 
 > **getCsdl**(): `Promise`\<`string`\>
 
-Defined in: [services/metadataProvider.ts:107](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L107)
+Defined in: [services/metadataProvider.ts:107](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L107)
 
 Raw `$metadata` document, fetched once per connection.
 
@@ -56,7 +56,7 @@ Raw `$metadata` document, fetched once per connection.
 
 > **getCustomApis**(): `Promise`\<`CustomApiRecord`[]\>
 
-Defined in: [services/metadataProvider.ts:203](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L203)
+Defined in: [services/metadataProvider.ts:203](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L203)
 
 Custom API records, fetched once per connection. A failed fetch isn't cached, so the next call retries.
 
@@ -70,7 +70,7 @@ Custom API records, fetched once per connection. A failed fetch isn't cached, so
 
 > **getEntities**(`logicalNames`, `onProgress?`): `Promise`\<[`EntityMetadataInput`](../../core/interfaces/EntityMetadataInput.md)[]\>
 
-Defined in: [services/metadataProvider.ts:275](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L275)
+Defined in: [services/metadataProvider.ts:275](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L275)
 
 Fetch several entities with limited concurrency, reporting progress per finished entity.
 
@@ -94,7 +94,7 @@ readonly `string`[]
 
 > **getEntity**(`logicalName`): `Promise`\<[`EntityMetadataInput`](../../core/interfaces/EntityMetadataInput.md)\>
 
-Defined in: [services/metadataProvider.ts:262](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L262)
+Defined in: [services/metadataProvider.ts:262](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L262)
 
 Entity + attributes + option sets for one table (cached).
 
@@ -114,7 +114,7 @@ Entity + attributes + option sets for one table (cached).
 
 > **getSchema**(): `Promise`\<[`EdmxSchema`](../../core/interfaces/EdmxSchema.md)\>
 
-Defined in: [services/metadataProvider.ts:123](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L123)
+Defined in: [services/metadataProvider.ts:123](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L123)
 
 Parsed CSDL, parsed once per connection. When the CSDL is too large for PPTB, a schema rebuilt from
 the table list instead (see [usesMetadataFallback](#usesmetadatafallback)).
@@ -129,7 +129,7 @@ the table list instead (see [usesMetadataFallback](#usesmetadatafallback)).
 
 > **getSchemaForSelection**(`actions`, `functions`): `Promise`\<[`EdmxSchema`](../../core/interfaces/EdmxSchema.md)\>
 
-Defined in: [services/metadataProvider.ts:222](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L222)
+Defined in: [services/metadataProvider.ts:222](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L222)
 
 The CSDL schema plus definitions for any selected custom API that `$metadata` does not contain
 (private custom APIs, or ones created after the environment's metadata cache was built). Those are
@@ -159,7 +159,7 @@ readonly `string`[]
 
 > **listEntities**(): `Promise`\<[`EntitySummary`](../../types/interfaces/EntitySummary.md)[]\>
 
-Defined in: [services/metadataProvider.ts:68](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L68)
+Defined in: [services/metadataProvider.ts:68](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L68)
 
 All tables, sorted by display name.
 
@@ -173,7 +173,7 @@ All tables, sorted by display name.
 
 > **listOperations**(): `Promise`\<[`OperationSummary`](../../types/interfaces/OperationSummary.md)[]\>
 
-Defined in: [services/metadataProvider.ts:151](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L151)
+Defined in: [services/metadataProvider.ts:151](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L151)
 
 Actions and functions from the CSDL, for the Select step.
 
@@ -187,7 +187,7 @@ Actions and functions from the CSDL, for the Select step.
 
 > **reset**(): `void`
 
-Defined in: [services/metadataProvider.ts:283](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L283)
+Defined in: [services/metadataProvider.ts:283](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/metadataProvider.ts#L283)
 
 Drop all cached data (e.g. after the user asks for a refresh).
 

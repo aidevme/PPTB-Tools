@@ -1,6 +1,6 @@
 # Class: PptbFileSink
 
-Defined in: [services/fileSink.ts:65](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L65)
+Defined in: [services/fileSink.ts:65](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L65)
 
 `toolboxAPI.fileSystem` adapter.
 
@@ -29,7 +29,7 @@ Every method throws when the PPTB file system API isn't available (outside Power
 
 > **createDirectory**(`path`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:89](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L89)
+Defined in: [services/fileSink.ts:89](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L89)
 
 Create a directory and any missing parents.
 
@@ -53,7 +53,7 @@ Create a directory and any missing parents.
 
 > **deleteFiles**(`paths`): `Promise`\<`string`[]\>
 
-Defined in: [services/fileSink.ts:98](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L98)
+Defined in: [services/fileSink.ts:98](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L98)
 
 PPTB's file system API has no delete, so this runs the commands from [buildDeleteCommands](../functions/buildDeleteCommands.md) in a hidden
 PPTB terminal (PowerShell on Windows), closes it, and then checks which files still exist. The check, not
@@ -79,7 +79,7 @@ the terminal's output, decides what was deleted.
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [services/fileSink.ts:71](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L71)
+Defined in: [services/fileSink.ts:71](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L71)
 
 Resolves to `true` when a file or directory exists at `path`.
 
@@ -103,7 +103,7 @@ Resolves to `true` when a file or directory exists at `path`.
 
 > **list**(`dir`): `Promise`\<[`DirectoryEntry`](../interfaces/DirectoryEntry.md)[]\>
 
-Defined in: [services/fileSink.ts:75](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L75)
+Defined in: [services/fileSink.ts:75](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L75)
 
 Directory listing; resolves to `[]` when the directory does not exist.
 
@@ -127,7 +127,7 @@ Directory listing; resolves to `[]` when the directory does not exist.
 
 > **read**(`path`): `Promise`\<`string` \| `null`\>
 
-Defined in: [services/fileSink.ts:80](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L80)
+Defined in: [services/fileSink.ts:80](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L80)
 
 File contents, or `null` when the file does not exist.
 
@@ -151,7 +151,7 @@ File contents, or `null` when the file does not exist.
 
 > **write**(`path`, `content`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:85](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L85)
+Defined in: [services/fileSink.ts:85](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L85)
 
 Writes `content` to the file, replacing it if it exists. Callers create the parent directory first
 ([FileSink.createDirectory](../interfaces/FileSink.md#createdirectory)), as [applyWritePlan](../functions/applyWritePlan.md) does.

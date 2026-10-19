@@ -1,6 +1,6 @@
 # Interface: ISelectionLoading
 
-Defined in: [components/cards/SelectionCard.tsx:46](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L46)
+Defined in: [components/cards/SelectionCard.tsx:46](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L46)
 
 Which lists are still loading.
 
@@ -10,7 +10,7 @@ Which lists are still loading.
 
 > **entities**: `boolean`
 
-Defined in: [components/cards/SelectionCard.tsx:48](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L48)
+Defined in: [components/cards/SelectionCard.tsx:48](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L48)
 
 The tables list; the Tables tab shows a spinner.
 
@@ -20,7 +20,7 @@ The tables list; the Tables tab shows a spinner.
 
 > **operations**: `boolean`
 
-Defined in: [components/cards/SelectionCard.tsx:50](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L50)
+Defined in: [components/cards/SelectionCard.tsx:50](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L50)
 
 The actions and functions (the `$metadata` document); the Actions and Functions tabs show a spinner.
 
@@ -30,6 +30,6 @@ The actions and functions (the `$metadata` document); the Actions and Functions 
 
 > **solution**: `boolean`
 
-Defined in: [components/cards/SelectionCard.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L52)
+Defined in: [components/cards/SelectionCard.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/SelectionCard.tsx#L52)
 
 The chosen solution's components.

@@ -1,6 +1,6 @@
 # Interface: OptionSetInput
 
-Defined in: [core/types.ts:117](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L117)
+Defined in: [core/types.ts:117](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L117)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [core/types.ts:117](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **IsGlobal?**: `boolean`
 
-Defined in: [core/types.ts:119](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L119)
+Defined in: [core/types.ts:119](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L119)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [core/types.ts:119](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Name**: `string`
 
-Defined in: [core/types.ts:118](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L118)
+Defined in: [core/types.ts:118](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L118)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/types.ts:118](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Options**: [`OptionInput`](OptionInput.md)[]
 
-Defined in: [core/types.ts:121](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L121)
+Defined in: [core/types.ts:121](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L121)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [core/types.ts:121](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **OptionSetType?**: `string`
 
-Defined in: [core/types.ts:120](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L120)
+Defined in: [core/types.ts:120](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L120)

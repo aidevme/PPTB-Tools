@@ -1,6 +1,6 @@
 # Interface: UseEnvironmentMetadataOptions
 
-Defined in: [hooks/useEnvironmentMetadata.ts:9](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L9)
+Defined in: [hooks/useEnvironmentMetadata.ts:9](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L9)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [hooks/useEnvironmentMetadata.ts:9](https://github.com/aidevme/PPTB-
 
 > **clearPlan**: () => `void`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L21)
+Defined in: [hooks/useEnvironmentMetadata.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L21)
 
 Drops the write plan when the environment's lists reload. Must be stable.
 
@@ -22,7 +22,7 @@ Drops the write plan when the environment's lists reload. Must be stable.
 
 > **connection**: `Connection` \| `null`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:13](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L13)
+Defined in: [hooks/useEnvironmentMetadata.ts:13](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L13)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [hooks/useEnvironmentMetadata.ts:13](https://github.com/aidevme/PPTB
 
 > **hasProject**: `boolean`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:15](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L15)
+Defined in: [hooks/useEnvironmentMetadata.ts:15](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L15)
 
 Tables, solutions and the selection are only listed once a project is open (created or loaded).
 
@@ -40,7 +40,7 @@ Tables, solutions and the selection are only listed once a project is open (crea
 
 > **inPptb**: `boolean`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:12](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L12)
+Defined in: [hooks/useEnvironmentMetadata.ts:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L12)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [hooks/useEnvironmentMetadata.ts:12](https://github.com/aidevme/PPTB
 
 > **provider**: [`PptbMetadataProvider`](../../services/classes/PptbMetadataProvider.md)
 
-Defined in: [hooks/useEnvironmentMetadata.ts:11](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L11)
+Defined in: [hooks/useEnvironmentMetadata.ts:11](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L11)
 
 The connection's metadata provider; a new one per connection.
 
@@ -58,7 +58,7 @@ The connection's metadata provider; a new one per connection.
 
 > **selected**: `Record`\<[`SelectionKind`](../../components/type-aliases/SelectionKind.md), `string`[]\>
 
-Defined in: [hooks/useEnvironmentMetadata.ts:17](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L17)
+Defined in: [hooks/useEnvironmentMetadata.ts:17](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L17)
 
 The project's selection, to tell which selected names the environment doesn't have.
 
@@ -68,7 +68,7 @@ The project's selection, to tell which selected names the environment doesn't ha
 
 > **setError**: (`message`) => `void`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:19](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L19)
+Defined in: [hooks/useEnvironmentMetadata.ts:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L19)
 
 Shows an error in the page (the error bar), or clears it with `null`. Must be stable (a state setter): effects depend on it.
 

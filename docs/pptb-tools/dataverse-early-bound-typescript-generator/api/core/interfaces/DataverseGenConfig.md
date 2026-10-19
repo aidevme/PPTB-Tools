@@ -1,6 +1,6 @@
 # Interface: DataverseGenConfig
 
-Defined in: [core/config.ts:24](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L24)
+Defined in: [core/config.ts:24](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L24)
 
 ## Indexable
 
@@ -14,7 +14,7 @@ Any other keys found in the file are kept as-is.
 
 > `optional` **actions?**: `string`[]
 
-Defined in: [core/config.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L26)
+Defined in: [core/config.ts:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [core/config.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **entities?**: `string`[]
 
-Defined in: [core/config.ts:25](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L25)
+Defined in: [core/config.ts:25](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L25)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [core/config.ts:25](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **functions?**: `string`[]
 
-Defined in: [core/config.ts:27](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L27)
+Defined in: [core/config.ts:27](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L27)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [core/config.ts:27](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **generateEntityTypes?**: `boolean`
 
-Defined in: [core/config.ts:31](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L31)
+Defined in: [core/config.ts:31](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L31)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [core/config.ts:31](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **generateFormContext?**: `boolean`
 
-Defined in: [core/config.ts:30](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L30)
+Defined in: [core/config.ts:30](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L30)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [core/config.ts:30](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **generateIndex?**: `boolean`
 
-Defined in: [core/config.ts:29](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L29)
+Defined in: [core/config.ts:29](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L29)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [core/config.ts:29](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **output?**: [`OutputConfig`](OutputConfig.md)
 
-Defined in: [core/config.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L28)
+Defined in: [core/config.ts:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L28)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [core/config.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **referencedTypes?**: `Record`\<`string`, [`ImportType`](ImportType.md)\>
 
-Defined in: [core/config.ts:32](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L32)
+Defined in: [core/config.ts:32](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L32)

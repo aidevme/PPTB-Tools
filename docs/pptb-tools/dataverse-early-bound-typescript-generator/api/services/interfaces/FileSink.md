@@ -1,6 +1,6 @@
 # Interface: FileSink
 
-Defined in: [services/fileSink.ts:15](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L15)
+Defined in: [services/fileSink.ts:15](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L15)
 
 The file operations the write planner and the project config use. Every path is absolute.
 
@@ -10,7 +10,7 @@ The file operations the write planner and the project config use. Every path is 
 
 > **createDirectory**(`path`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L28)
+Defined in: [services/fileSink.ts:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L28)
 
 Create a directory and any missing parents.
 
@@ -30,7 +30,7 @@ Create a directory and any missing parents.
 
 > **deleteFiles**(`paths`): `Promise`\<`string`[]\>
 
-Defined in: [services/fileSink.ts:30](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L30)
+Defined in: [services/fileSink.ts:30](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L30)
 
 Delete files; resolves to the paths that still exist afterwards (empty when every delete succeeded).
 
@@ -50,7 +50,7 @@ Delete files; resolves to the paths that still exist afterwards (empty when ever
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [services/fileSink.ts:17](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L17)
+Defined in: [services/fileSink.ts:17](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L17)
 
 Resolves to `true` when a file or directory exists at `path`.
 
@@ -70,7 +70,7 @@ Resolves to `true` when a file or directory exists at `path`.
 
 > **list**(`dir`): `Promise`\<[`DirectoryEntry`](DirectoryEntry.md)[]\>
 
-Defined in: [services/fileSink.ts:19](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L19)
+Defined in: [services/fileSink.ts:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L19)
 
 Directory listing; resolves to `[]` when the directory does not exist.
 
@@ -90,7 +90,7 @@ Directory listing; resolves to `[]` when the directory does not exist.
 
 > **read**(`path`): `Promise`\<`string` \| `null`\>
 
-Defined in: [services/fileSink.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L21)
+Defined in: [services/fileSink.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L21)
 
 File contents, or `null` when the file does not exist.
 
@@ -110,7 +110,7 @@ File contents, or `null` when the file does not exist.
 
 > **write**(`path`, `content`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L26)
+Defined in: [services/fileSink.ts:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L26)
 
 Writes `content` to the file, replacing it if it exists. Callers create the parent directory first
 ([FileSink.createDirectory](#createdirectory)), as [applyWritePlan](../functions/applyWritePlan.md) does.

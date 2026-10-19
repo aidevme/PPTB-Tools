@@ -2,7 +2,7 @@
 
 > **StepCard**(`__namedParameters`): `Element`
 
-Defined in: [components/shared/StepCard.tsx:34](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/StepCard.tsx#L34)
+Defined in: [components/shared/StepCard.tsx:34](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/StepCard.tsx#L34)
 
 A workflow card: a step indicator, title, description and status badge in the header, a brand accent while
 it's the active step, and an id the progress bar scrolls to.

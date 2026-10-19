@@ -2,7 +2,7 @@
 
 > **reportError**(`operation`, `error`, `context?`, `options?`): `string`
 
-Defined in: [services/errors.ts:100](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/errors.ts#L100)
+Defined in: [services/errors.ts:100](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/errors.ts#L100)
 
 Handles a failed operation: logs the full error with the operation, any context and a timestamp; shows a
 persistent error notification titled with the operation (best effort); and returns

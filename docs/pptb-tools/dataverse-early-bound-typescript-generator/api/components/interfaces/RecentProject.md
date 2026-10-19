@@ -1,6 +1,6 @@
 # Interface: RecentProject
 
-Defined in: [components/cards/recentProjects.ts:17](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L17)
+Defined in: [components/cards/recentProjects.ts:17](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L17)
 
 One entry in the card's recent-projects list.
 
@@ -14,7 +14,7 @@ One entry in the card's recent-projects list.
 
 > **isLastUsed**: `boolean`
 
-Defined in: [components/cards/recentProjects.ts:23](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L23)
+Defined in: [components/cards/recentProjects.ts:23](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L23)
 
 The folder last used with this connection; shown first, with a history icon.
 
@@ -24,7 +24,7 @@ The folder last used with this connection; shown first, with a history icon.
 
 > **key**: `string`
 
-Defined in: [components/cards/recentProjects.ts:19](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L19)
+Defined in: [components/cards/recentProjects.ts:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L19)
 
 React key: the saved project's id, or `last:<folder>` for a last-used folder that isn't saved.
 
@@ -34,7 +34,7 @@ React key: the saved project's id, or `last:<folder>` for a last-used folder tha
 
 > **location**: `string`
 
-Defined in: [components/cards/recentProjects.ts:13](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L13)
+Defined in: [components/cards/recentProjects.ts:13](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L13)
 
 The project folder's full path.
 
@@ -48,7 +48,7 @@ The project folder's full path.
 
 > **meta**: `string`
 
-Defined in: [components/cards/recentProjects.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L21)
+Defined in: [components/cards/recentProjects.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L21)
 
 Secondary line: "Last used" or "Modified 2 days ago".
 
@@ -58,7 +58,7 @@ Secondary line: "Last used" or "Modified 2 days ago".
 
 > **name**: `string`
 
-Defined in: [components/cards/recentProjects.ts:11](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L11)
+Defined in: [components/cards/recentProjects.ts:11](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/recentProjects.ts#L11)
 
 The saved project's name, or the folder name for a folder that isn't a saved project.
 

@@ -1,6 +1,6 @@
 # Interface: LabelInput
 
-Defined in: [core/types.ts:107](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L107)
+Defined in: [core/types.ts:107](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L107)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [core/types.ts:107](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **LocalizedLabels?**: [`LocalizedLabelInput`](LocalizedLabelInput.md)[]
 
-Defined in: [core/types.ts:109](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L109)
+Defined in: [core/types.ts:109](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L109)
 
 ***
 
@@ -16,4 +16,4 @@ Defined in: [core/types.ts:109](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **UserLocalizedLabel?**: [`LocalizedLabelInput`](LocalizedLabelInput.md) \| `null`
 
-Defined in: [core/types.ts:108](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L108)
+Defined in: [core/types.ts:108](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L108)

@@ -2,7 +2,7 @@
 
 > **useStickyBarHeights**(`header`, `footer`, `footerPinned?`): `void`
 
-Defined in: [hooks/useStickyBarHeights.ts:14](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useStickyBarHeights.ts#L14)
+Defined in: [hooks/useStickyBarHeights.ts:14](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useStickyBarHeights.ts#L14)
 
 Publishes the heights of the sticky header and footer as the CSS variables `--app-header-height` and
 `--app-footer-height` on `<html>`, and keeps them current as the bars resize (the header wraps on narrow tool

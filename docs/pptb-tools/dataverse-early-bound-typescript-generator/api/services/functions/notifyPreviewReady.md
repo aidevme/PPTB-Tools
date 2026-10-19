@@ -2,7 +2,7 @@
 
 > **notifyPreviewReady**(`plan`, `deleteOrphans?`, `skipDuplicates?`): `Promise`\<`void`\>
 
-Defined in: [services/notifications.ts:62](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L62)
+Defined in: [services/notifications.ts:62](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L62)
 
 Shows an info notification that a preview finished, with what Generate would do.
 

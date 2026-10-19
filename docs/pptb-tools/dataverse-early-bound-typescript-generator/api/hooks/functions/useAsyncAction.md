@@ -2,7 +2,7 @@
 
 > **useAsyncAction**(`setError`): `object`
 
-Defined in: [hooks/useAsyncAction.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useAsyncAction.ts#L10)
+Defined in: [hooks/useAsyncAction.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useAsyncAction.ts#L10)
 
 An async action a dialog or panel runs from a button (save, open, delete): `busy` while it runs, the error
 cleared when it starts and set when it fails. The caller owns the error state, so several actions can share one

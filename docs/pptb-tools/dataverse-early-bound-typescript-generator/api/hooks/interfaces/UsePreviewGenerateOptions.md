@@ -1,6 +1,6 @@
 # Interface: UsePreviewGenerateOptions
 
-Defined in: [hooks/usePreviewGenerate.ts:24](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L24)
+Defined in: [hooks/usePreviewGenerate.ts:24](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L24)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [hooks/usePreviewGenerate.ts:24](https://github.com/aidevme/PPTB-Too
 
 > **config**: [`DataverseGenConfig`](../../core/interfaces/DataverseGenConfig.md)
 
-Defined in: [hooks/usePreviewGenerate.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L28)
+Defined in: [hooks/usePreviewGenerate.ts:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L28)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [hooks/usePreviewGenerate.ts:28](https://github.com/aidevme/PPTB-Too
 
 > **markConfigSaved**: (`path`) => `void`
 
-Defined in: [hooks/usePreviewGenerate.ts:35](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L35)
+Defined in: [hooks/usePreviewGenerate.ts:35](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L35)
 
 Records that Generate saved `.dataverse-gen.json` at `path` (see `useProject`).
 
@@ -36,7 +36,7 @@ Records that Generate saved `.dataverse-gen.json` at `path` (see `useProject`).
 
 > **noteMetadataFallback**: () => `void`
 
-Defined in: [hooks/usePreviewGenerate.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L37)
+Defined in: [hooks/usePreviewGenerate.ts:37](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L37)
 
 Shows the "$metadata is too large" warning if the provider fell back (see `useEnvironmentMetadata`).
 
@@ -50,7 +50,7 @@ Shows the "$metadata is too large" warning if the provider fell back (see `useEn
 
 > **planState**: `object`
 
-Defined in: [hooks/usePreviewGenerate.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L26)
+Defined in: [hooks/usePreviewGenerate.ts:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L26)
 
 The write plan and its status, from [usePlanState](../functions/usePlanState.md).
 
@@ -116,7 +116,7 @@ The write plan and its status, from [usePlanState](../functions/usePlanState.md)
 
 > **projectRoot**: `string` \| `null`
 
-Defined in: [hooks/usePreviewGenerate.ts:27](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L27)
+Defined in: [hooks/usePreviewGenerate.ts:27](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L27)
 
 ***
 
@@ -124,7 +124,7 @@ Defined in: [hooks/usePreviewGenerate.ts:27](https://github.com/aidevme/PPTB-Too
 
 > **provider**: [`PptbMetadataProvider`](../../services/classes/PptbMetadataProvider.md)
 
-Defined in: [hooks/usePreviewGenerate.ts:29](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L29)
+Defined in: [hooks/usePreviewGenerate.ts:29](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L29)
 
 ***
 
@@ -132,7 +132,7 @@ Defined in: [hooks/usePreviewGenerate.ts:29](https://github.com/aidevme/PPTB-Too
 
 > **recordProjectGeneration**: (`root`, `applied`) => `Promise`\<`void`\>
 
-Defined in: [hooks/usePreviewGenerate.ts:33](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L33)
+Defined in: [hooks/usePreviewGenerate.ts:33](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L33)
 
 Updates the saved project after a Generate run (see `useToolSettings`).
 
@@ -156,7 +156,7 @@ Updates the saved project after a Generate run (see `useToolSettings`).
 
 > **setError**: (`message`) => `void`
 
-Defined in: [hooks/usePreviewGenerate.ts:39](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L39)
+Defined in: [hooks/usePreviewGenerate.ts:39](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L39)
 
 Shows an error in the page (the error bar), or clears it with `null`.
 
@@ -176,7 +176,7 @@ Shows an error in the page (the error bar), or clears it with `null`.
 
 > **sink**: [`FileSink`](../../services/interfaces/FileSink.md)
 
-Defined in: [hooks/usePreviewGenerate.ts:30](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L30)
+Defined in: [hooks/usePreviewGenerate.ts:30](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L30)
 
 ***
 
@@ -184,4 +184,4 @@ Defined in: [hooks/usePreviewGenerate.ts:30](https://github.com/aidevme/PPTB-Too
 
 > **toolSettings**: [`ToolConfig`](../../config/interfaces/ToolConfig.md)
 
-Defined in: [hooks/usePreviewGenerate.ts:31](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L31)
+Defined in: [hooks/usePreviewGenerate.ts:31](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L31)

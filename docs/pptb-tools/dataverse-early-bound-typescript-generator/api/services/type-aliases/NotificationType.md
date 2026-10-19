@@ -2,6 +2,6 @@
 
 > **NotificationType** = `NonNullable`\<`ToolBoxAPI.NotificationOptions`\[`"type"`\]\>
 
-Defined in: [services/notifications.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L10)
+Defined in: [services/notifications.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/notifications.ts#L10)
 
 The notification types PPTB supports.

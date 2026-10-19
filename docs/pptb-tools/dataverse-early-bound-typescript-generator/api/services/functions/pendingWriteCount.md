@@ -2,7 +2,7 @@
 
 > **pendingWriteCount**(`plan`, `options?`): `number`
 
-Defined in: [services/plan.ts:70](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/plan.ts#L70)
+Defined in: [services/plan.ts:70](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/plan.ts#L70)
 
 How many files Generate writes: new and changed, including files with duplicate identifiers unless they're skipped.
 

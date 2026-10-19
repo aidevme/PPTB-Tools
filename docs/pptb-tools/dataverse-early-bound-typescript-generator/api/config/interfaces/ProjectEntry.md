@@ -1,6 +1,6 @@
 # Interface: ProjectEntry
 
-Defined in: [config/index.ts:5](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L5)
+Defined in: [config/index.ts:5](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L5)
 
 A project created with the New Project dialog.
 
@@ -10,7 +10,7 @@ A project created with the New Project dialog.
 
 > **createdOn**: `string`
 
-Defined in: [config/index.ts:14](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L14)
+Defined in: [config/index.ts:14](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L14)
 
 ISO timestamp.
 
@@ -20,7 +20,7 @@ ISO timestamp.
 
 > **description**: `string`
 
-Defined in: [config/index.ts:8](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L8)
+Defined in: [config/index.ts:8](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L8)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [config/index.ts:8](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **id**: `string`
 
-Defined in: [config/index.ts:6](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L6)
+Defined in: [config/index.ts:6](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L6)
 
 ***
 
@@ -36,7 +36,7 @@ Defined in: [config/index.ts:6](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **lastGeneratedFiles?**: `string`[]
 
-Defined in: [config/index.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L21)
+Defined in: [config/index.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L21)
 
 Output files (relative paths) the last Generate produced for this project, used to tell whether the next
 one adds or drops files. `undefined` until the project is first generated.
@@ -47,7 +47,7 @@ one adds or drops files. `undefined` until the project is first generated.
 
 > **location**: `string`
 
-Defined in: [config/index.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L10)
+Defined in: [config/index.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L10)
 
 Absolute folder path, picked through PPTB's folder picker.
 
@@ -57,7 +57,7 @@ Absolute folder path, picked through PPTB's folder picker.
 
 > **modifiedOn**: `string`
 
-Defined in: [config/index.ts:16](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L16)
+Defined in: [config/index.ts:16](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L16)
 
 ISO timestamp of the last change; equals `createdOn` until the project is changed.
 
@@ -67,7 +67,7 @@ ISO timestamp of the last change; equals `createdOn` until the project is change
 
 > **name**: `string`
 
-Defined in: [config/index.ts:7](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L7)
+Defined in: [config/index.ts:7](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L7)
 
 ***
 
@@ -75,6 +75,6 @@ Defined in: [config/index.ts:7](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **version**: `string`
 
-Defined in: [config/index.ts:12](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L12)
+Defined in: [config/index.ts:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L12)
 
 Project version; new projects start at [DEFAULT\_PROJECT\_VERSION](../variables/DEFAULT_PROJECT_VERSION.md).

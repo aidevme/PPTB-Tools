@@ -1,6 +1,6 @@
 # Interface: EdmxComplexType
 
-Defined in: [core/types.ts:48](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L48)
+Defined in: [core/types.ts:48](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L48)
 
 A `<ComplexType>` in the CSDL.
 
@@ -10,7 +10,7 @@ A `<ComplexType>` in the CSDL.
 
 > **Name**: `string`
 
-Defined in: [core/types.ts:49](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L49)
+Defined in: [core/types.ts:49](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L49)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [core/types.ts:49](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **NavigationProperties**: [`EdmxNavigationProperty`](EdmxNavigationProperty.md)[]
 
-Defined in: [core/types.ts:51](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L51)
+Defined in: [core/types.ts:51](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L51)
 
 ***
 
@@ -26,4 +26,4 @@ Defined in: [core/types.ts:51](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **Properties**: [`EdmxProperty`](EdmxProperty.md)[]
 
-Defined in: [core/types.ts:50](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L50)
+Defined in: [core/types.ts:50](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L50)

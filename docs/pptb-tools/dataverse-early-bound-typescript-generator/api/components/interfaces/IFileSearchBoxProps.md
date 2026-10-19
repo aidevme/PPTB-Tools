@@ -1,6 +1,6 @@
 # Interface: IFileSearchBoxProps
 
-Defined in: [components/shared/FileSearchBox.tsx:5](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L5)
+Defined in: [components/shared/FileSearchBox.tsx:5](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L5)
 
 Props for [FileSearchBox](../functions/FileSearchBox.md).
 
@@ -10,7 +10,7 @@ Props for [FileSearchBox](../functions/FileSearchBox.md).
 
 > `optional` **className?**: `string`
 
-Defined in: [components/shared/FileSearchBox.tsx:11](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L11)
+Defined in: [components/shared/FileSearchBox.tsx:11](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L11)
 
 Extra class merged after the box's own root style, for layout set by the parent.
 
@@ -20,7 +20,7 @@ Extra class merged after the box's own root style, for layout set by the parent.
 
 > **onChange**: (`value`) => `void`
 
-Defined in: [components/shared/FileSearchBox.tsx:9](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L9)
+Defined in: [components/shared/FileSearchBox.tsx:9](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L9)
 
 Called with the new text on every keystroke, and with `''` when the clear button is clicked.
 
@@ -40,6 +40,6 @@ Called with the new text on every keystroke, and with `''` when the clear button
 
 > **value**: `string`
 
-Defined in: [components/shared/FileSearchBox.tsx:7](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L7)
+Defined in: [components/shared/FileSearchBox.tsx:7](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/FileSearchBox.tsx#L7)
 
 The search text.

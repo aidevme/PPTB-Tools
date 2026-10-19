@@ -2,7 +2,7 @@
 
 > **computeWorkflowSteps**(`input`): [`StepState`](../interfaces/StepState.md)[]
 
-Defined in: [components/shared/workflowSteps.ts:59](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/shared/workflowSteps.ts#L59)
+Defined in: [components/shared/workflowSteps.ts:59](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/shared/workflowSteps.ts#L59)
 
 The four workflow steps with their completion, the step to work on next, and a status for each.
 

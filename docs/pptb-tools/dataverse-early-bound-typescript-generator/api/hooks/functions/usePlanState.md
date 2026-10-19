@@ -2,7 +2,7 @@
 
 > **usePlanState**(): `object`
 
-Defined in: [hooks/usePlanState.ts:9](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePlanState.ts#L9)
+Defined in: [hooks/usePlanState.ts:9](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePlanState.ts#L9)
 
 The current write plan and its status. Kept apart from [usePreviewGenerate](usePreviewGenerate.md) so the project, settings and
 environment hooks, which run before it, can invalidate the plan: `clearPlan` drops it, `resetPlan` also clears

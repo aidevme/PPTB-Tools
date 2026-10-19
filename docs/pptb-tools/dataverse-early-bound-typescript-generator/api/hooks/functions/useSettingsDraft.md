@@ -2,7 +2,7 @@
 
 > **useSettingsDraft**(`__namedParameters`): `object`
 
-Defined in: [hooks/useSettingsDraft.ts:33](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L33)
+Defined in: [hooks/useSettingsDraft.ts:33](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L33)
 
 The Settings panel's draft: edits are made on a copy of the saved settings, which is reset to them every time
 the panel opens and only persisted by `save` (which closes the panel, or keeps it open with `saveError`).

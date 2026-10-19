@@ -1,6 +1,6 @@
 # Class: InMemoryFileSink
 
-Defined in: [services/fileSink.ts:119](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L119)
+Defined in: [services/fileSink.ts:119](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L119)
 
 In-memory implementation for unit tests. Paths are compared case-sensitively, like a Linux disk.
 
@@ -14,7 +14,7 @@ In-memory implementation for unit tests. Paths are compared case-sensitively, li
 
 > **new InMemoryFileSink**(`initialFiles?`): `InMemoryFileSink`
 
-Defined in: [services/fileSink.ts:129](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L129)
+Defined in: [services/fileSink.ts:129](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L129)
 
 Creates the sink with `initialFiles` already on "disk".
 
@@ -36,7 +36,7 @@ File contents by absolute path; their parent directories are created too.
 
 > `readonly` **directories**: `Set`\<`string`\>
 
-Defined in: [services/fileSink.ts:123](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L123)
+Defined in: [services/fileSink.ts:123](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L123)
 
 Every directory that exists, by absolute path.
 
@@ -46,7 +46,7 @@ Every directory that exists, by absolute path.
 
 > `readonly` **files**: `Map`\<`string`, `string`\>
 
-Defined in: [services/fileSink.ts:121](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L121)
+Defined in: [services/fileSink.ts:121](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L121)
 
 File contents by absolute path; tests read it to check what was written.
 
@@ -56,7 +56,7 @@ File contents by absolute path; tests read it to check what was written.
 
 > **createDirectory**(`path`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:176](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L176)
+Defined in: [services/fileSink.ts:176](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L176)
 
 Create a directory and any missing parents.
 
@@ -80,7 +80,7 @@ Create a directory and any missing parents.
 
 > **deleteFiles**(`paths`): `Promise`\<`string`[]\>
 
-Defined in: [services/fileSink.ts:184](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L184)
+Defined in: [services/fileSink.ts:184](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L184)
 
 Delete files; resolves to the paths that still exist afterwards (empty when every delete succeeded).
 
@@ -104,7 +104,7 @@ Delete files; resolves to the paths that still exist afterwards (empty when ever
 
 > **exists**(`path`): `Promise`\<`boolean`\>
 
-Defined in: [services/fileSink.ts:148](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L148)
+Defined in: [services/fileSink.ts:148](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L148)
 
 Resolves to `true` when a file or directory exists at `path`.
 
@@ -128,7 +128,7 @@ Resolves to `true` when a file or directory exists at `path`.
 
 > **list**(`dir`): `Promise`\<[`DirectoryEntry`](../interfaces/DirectoryEntry.md)[]\>
 
-Defined in: [services/fileSink.ts:152](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L152)
+Defined in: [services/fileSink.ts:152](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L152)
 
 Directory listing; resolves to `[]` when the directory does not exist.
 
@@ -152,7 +152,7 @@ Directory listing; resolves to `[]` when the directory does not exist.
 
 > **read**(`path`): `Promise`\<`string` \| `null`\>
 
-Defined in: [services/fileSink.ts:163](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L163)
+Defined in: [services/fileSink.ts:163](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L163)
 
 File contents, or `null` when the file does not exist.
 
@@ -176,7 +176,7 @@ File contents, or `null` when the file does not exist.
 
 > **seed**(`path`, `content`): `void`
 
-Defined in: [services/fileSink.ts:139](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L139)
+Defined in: [services/fileSink.ts:139](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L139)
 
 Puts a file on "disk", creating its parent directories, without the checks [InMemoryFileSink.write](#write) makes.
 
@@ -200,7 +200,7 @@ Puts a file on "disk", creating its parent directories, without the checks [InMe
 
 > **write**(`path`, `content`): `Promise`\<`void`\>
 
-Defined in: [services/fileSink.ts:171](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L171)
+Defined in: [services/fileSink.ts:171](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/fileSink.ts#L171)
 
 Writes `content` to the file, replacing it if it exists. Callers create the parent directory first
 ([FileSink.createDirectory](../interfaces/FileSink.md#createdirectory)), as [applyWritePlan](../functions/applyWritePlan.md) does.

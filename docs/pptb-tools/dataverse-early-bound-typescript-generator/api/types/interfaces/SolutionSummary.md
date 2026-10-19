@@ -1,6 +1,6 @@
 # Interface: SolutionSummary
 
-Defined in: [types/SolutionSummary.ts:2](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L2)
+Defined in: [types/SolutionSummary.ts:2](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L2)
 
 A Dataverse solution, used to filter the table list.
 
@@ -10,7 +10,7 @@ A Dataverse solution, used to filter the table list.
 
 > **friendlyName**: `string`
 
-Defined in: [types/SolutionSummary.ts:8](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L8)
+Defined in: [types/SolutionSummary.ts:8](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L8)
 
 The display name; the unique name when it has none.
 
@@ -20,7 +20,7 @@ The display name; the unique name when it has none.
 
 > **id**: `string`
 
-Defined in: [types/SolutionSummary.ts:4](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L4)
+Defined in: [types/SolutionSummary.ts:4](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L4)
 
 The `solutionid`.
 
@@ -30,7 +30,7 @@ The `solutionid`.
 
 > **isManaged**: `boolean`
 
-Defined in: [types/SolutionSummary.ts:12](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L12)
+Defined in: [types/SolutionSummary.ts:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L12)
 
 Whether the solution is managed.
 
@@ -40,7 +40,7 @@ Whether the solution is managed.
 
 > **uniqueName**: `string`
 
-Defined in: [types/SolutionSummary.ts:6](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L6)
+Defined in: [types/SolutionSummary.ts:6](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L6)
 
 The solution's unique name, for example `ContosoCore`.
 
@@ -50,6 +50,6 @@ The solution's unique name, for example `ContosoCore`.
 
 > **version**: `string`
 
-Defined in: [types/SolutionSummary.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L10)
+Defined in: [types/SolutionSummary.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/types/SolutionSummary.ts#L10)
 
 The version number, for example `1.0.0.3`.

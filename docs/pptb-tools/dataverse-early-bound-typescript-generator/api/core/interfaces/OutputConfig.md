@@ -1,6 +1,6 @@
 # Interface: OutputConfig
 
-Defined in: [core/config.ts:8](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L8)
+Defined in: [core/config.ts:8](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L8)
 
 `.dataverse-gen.json` — the project configuration file shared with Scott Durow's `dataverse-gen` CLI.
 
@@ -13,7 +13,7 @@ generated from either tool interchangeably. Unknown keys are preserved on round-
 
 > `optional` **fileSuffix?**: `string`
 
-Defined in: [core/config.ts:14](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L14)
+Defined in: [core/config.ts:14](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L14)
 
 File extension for generated files (default `.ts`).
 
@@ -23,7 +23,7 @@ File extension for generated files (default `.ts`).
 
 > `optional` **outputRoot?**: `string`
 
-Defined in: [core/config.ts:10](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L10)
+Defined in: [core/config.ts:10](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L10)
 
 Folder the generated files go to, relative to the project root.
 
@@ -33,7 +33,7 @@ Folder the generated files go to, relative to the project root.
 
 > `optional` **templateRoot?**: `string`
 
-Defined in: [core/config.ts:12](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L12)
+Defined in: [core/config.ts:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L12)
 
 Ejected EJS templates folder — honoured by the CLI only; this tool uses built-in templates.
 
@@ -43,6 +43,6 @@ Ejected EJS templates folder — honoured by the CLI only; this tool uses built-
 
 > `optional` **useCache?**: `boolean`
 
-Defined in: [core/config.ts:16](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L16)
+Defined in: [core/config.ts:16](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L16)
 
 CLI-only: cache the EDMX document on disk.

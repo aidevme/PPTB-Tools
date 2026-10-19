@@ -2,7 +2,7 @@
 
 > **useAutoHideFooter**(`pinnedMs`, `slideOutMs`): [`FooterPhase`](../type-aliases/FooterPhase.md)
 
-Defined in: [hooks/useAutoHideFooter.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useAutoHideFooter.ts#L26)
+Defined in: [hooks/useAutoHideFooter.ts:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useAutoHideFooter.ts#L26)
 
 Pins the footer for `pinnedMs` after mount, then slides it out over `slideOutMs` and docks it at the end of the
 page.

@@ -2,7 +2,7 @@
 
 > **renderEnum**(`enumModel`): `string`
 
-Defined in: [core/templates.ts:115](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/templates.ts#L115)
+Defined in: [core/templates.ts:115](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/templates.ts#L115)
 
 `enum.ejs`
 

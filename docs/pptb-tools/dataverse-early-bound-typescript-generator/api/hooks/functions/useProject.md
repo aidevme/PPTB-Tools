@@ -2,7 +2,7 @@
 
 > **useProject**(`__namedParameters`): `object`
 
-Defined in: [hooks/useProject.ts:30](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useProject.ts#L30)
+Defined in: [hooks/useProject.ts:30](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useProject.ts#L30)
 
 The project folder and its `.dataverse-gen.json`: opening a folder or a saved project, the folder remembered per
 connection, and edits to the config (selection and Options).

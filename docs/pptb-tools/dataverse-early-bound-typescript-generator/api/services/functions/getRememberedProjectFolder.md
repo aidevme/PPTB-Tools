@@ -2,7 +2,7 @@
 
 > **getRememberedProjectFolder**(`key`): `Promise`\<`string` \| `undefined`\>
 
-Defined in: [services/settings.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/services/settings.ts#L28)
+Defined in: [services/settings.ts:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/services/settings.ts#L28)
 
 Returns the project folder last used with a connection, or with any connection when there's none for it.
 

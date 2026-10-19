@@ -1,6 +1,6 @@
 # Interface: EntityPropertyModel
 
-Defined in: [core/types.ts:202](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L202)
+Defined in: [core/types.ts:202](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L202)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [core/types.ts:202](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **AttributeOf?**: `string` \| `null`
 
-Defined in: [core/types.ts:215](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L215)
+Defined in: [core/types.ts:215](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L215)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [core/types.ts:215](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Description**: `string`
 
-Defined in: [core/types.ts:211](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L211)
+Defined in: [core/types.ts:211](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L211)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/types.ts:211](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **DisplayName**: `string`
 
-Defined in: [core/types.ts:212](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L212)
+Defined in: [core/types.ts:212](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L212)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/types.ts:212](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Format**: `string`
 
-Defined in: [core/types.ts:214](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L214)
+Defined in: [core/types.ts:214](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L214)
 
 `Format:DateTimeBehavior` for date attributes, otherwise empty.
 
@@ -42,7 +42,7 @@ Defined in: [core/types.ts:214](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **IsEnum**: `boolean`
 
-Defined in: [core/types.ts:209](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L209)
+Defined in: [core/types.ts:209](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L209)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [core/types.ts:209](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **IsMultiSelect**: `boolean`
 
-Defined in: [core/types.ts:210](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L210)
+Defined in: [core/types.ts:210](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L210)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [core/types.ts:210](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **IsRequired**: `boolean`
 
-Defined in: [core/types.ts:208](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L208)
+Defined in: [core/types.ts:208](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L208)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [core/types.ts:208](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Name**: `string`
 
-Defined in: [core/types.ts:204](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L204)
+Defined in: [core/types.ts:204](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L204)
 
 Logical name.
 
@@ -76,7 +76,7 @@ Logical name.
 
 > **SchemaName**: `string`
 
-Defined in: [core/types.ts:205](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L205)
+Defined in: [core/types.ts:205](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L205)
 
 ***
 
@@ -84,7 +84,7 @@ Defined in: [core/types.ts:205](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > `optional` **SourceType?**: `number` \| `null`
 
-Defined in: [core/types.ts:216](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L216)
+Defined in: [core/types.ts:216](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L216)
 
 ***
 
@@ -92,7 +92,7 @@ Defined in: [core/types.ts:216](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Type**: `string`
 
-Defined in: [core/types.ts:207](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L207)
+Defined in: [core/types.ts:207](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L207)
 
 `AttributeTypeName.Value` (e.g. `StringType`), or the enum name for choice attributes.
 
@@ -102,4 +102,4 @@ Defined in: [core/types.ts:207](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **TypescriptType**: [`TsType`](TsType.md)
 
-Defined in: [core/types.ts:217](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L217)
+Defined in: [core/types.ts:217](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L217)

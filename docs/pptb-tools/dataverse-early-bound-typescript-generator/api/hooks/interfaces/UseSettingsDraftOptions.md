@@ -1,6 +1,6 @@
 # Interface: UseSettingsDraftOptions
 
-Defined in: [hooks/useSettingsDraft.ts:19](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L19)
+Defined in: [hooks/useSettingsDraft.ts:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L19)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [hooks/useSettingsDraft.ts:19](https://github.com/aidevme/PPTB-Tools
 
 > **onOpenChange**: (`open`) => `void`
 
-Defined in: [hooks/useSettingsDraft.ts:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L26)
+Defined in: [hooks/useSettingsDraft.ts:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L26)
 
 #### Parameters
 
@@ -26,7 +26,7 @@ Defined in: [hooks/useSettingsDraft.ts:26](https://github.com/aidevme/PPTB-Tools
 
 > **onSave**: (`settings`) => `Promise`\<`void`\>
 
-Defined in: [hooks/useSettingsDraft.ts:25](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L25)
+Defined in: [hooks/useSettingsDraft.ts:25](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L25)
 
 Persists the settings; rejects when saving fails.
 
@@ -46,7 +46,7 @@ Persists the settings; rejects when saving fails.
 
 > **open**: `boolean`
 
-Defined in: [hooks/useSettingsDraft.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L21)
+Defined in: [hooks/useSettingsDraft.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L21)
 
 Whether the Settings panel is open; the draft starts from the saved settings every time it opens.
 
@@ -56,6 +56,6 @@ Whether the Settings panel is open; the draft starts from the saved settings eve
 
 > **settings**: [`ToolConfig`](../../config/interfaces/ToolConfig.md)
 
-Defined in: [hooks/useSettingsDraft.ts:23](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L23)
+Defined in: [hooks/useSettingsDraft.ts:23](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useSettingsDraft.ts#L23)
 
 The saved settings.

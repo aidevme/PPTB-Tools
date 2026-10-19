@@ -2,7 +2,7 @@
 
 > **usePreviewGenerate**(`__namedParameters`): `object`
 
-Defined in: [hooks/usePreviewGenerate.ts:47](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L47)
+Defined in: [hooks/usePreviewGenerate.ts:47](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/usePreviewGenerate.ts#L47)
 
 Preview and Generate: builds the write plan from the selection and the environment's metadata, writes it, and
 asks for confirmation first when Generate deletes orphaned files or "Ask before generating" is on. `progress` is

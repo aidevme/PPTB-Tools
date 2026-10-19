@@ -1,6 +1,6 @@
 # Interface: ToolConfig
 
-Defined in: [config/index.ts:60](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L60)
+Defined in: [config/index.ts:60](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L60)
 
 Tool settings and projects, saved in PPTB's per-tool settings.
 
@@ -10,7 +10,7 @@ Tool settings and projects, saved in PPTB's per-tool settings.
 
 > **confirmBeforeGenerate**: `boolean`
 
-Defined in: [config/index.ts:65](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L65)
+Defined in: [config/index.ts:65](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L65)
 
 Ask for confirmation before Generate writes new and changed files.
 
@@ -20,7 +20,7 @@ Ask for confirmation before Generate writes new and changed files.
 
 > **deleteOrphanedFiles**: `boolean`
 
-Defined in: [config/index.ts:63](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L63)
+Defined in: [config/index.ts:63](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L63)
 
 Delete files in the output folders that the current selection no longer generates.
 
@@ -30,7 +30,7 @@ Delete files in the output folders that the current selection no longer generate
 
 > **general**: [`GeneralSettings`](GeneralSettings.md)
 
-Defined in: [config/index.ts:61](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L61)
+Defined in: [config/index.ts:61](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L61)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [config/index.ts:61](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **generateTemplates**: `boolean`
 
-Defined in: [config/index.ts:71](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L71)
+Defined in: [config/index.ts:71](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L71)
 
 Write dataverse-gen's EJS templates to the project's `templateRoot` on Generate, like `dataverse-gen eject`.
 
@@ -48,7 +48,7 @@ Write dataverse-gen's EJS templates to the project's `templateRoot` on Generate,
 
 > **projectDefaults**: [`ProjectDefaults`](ProjectDefaults.md)
 
-Defined in: [config/index.ts:72](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L72)
+Defined in: [config/index.ts:72](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L72)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [config/index.ts:72](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **projects**: [`ProjectEntry`](ProjectEntry.md)[]
 
-Defined in: [config/index.ts:73](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L73)
+Defined in: [config/index.ts:73](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L73)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [config/index.ts:73](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **renameDuplicateIdentifiers**: `boolean`
 
-Defined in: [config/index.ts:69](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L69)
+Defined in: [config/index.ts:69](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L69)
 
 Rename later duplicate enum members to `<Name>_<Value>` so the generated files compile.
 
@@ -74,6 +74,6 @@ Rename later duplicate enum members to `<Name>_<Value>` so the generated files c
 
 > **skipDuplicateIdentifiers**: `boolean`
 
-Defined in: [config/index.ts:67](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L67)
+Defined in: [config/index.ts:67](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L67)
 
 Don't write generated files that declare a name more than once (duplicate enum members).

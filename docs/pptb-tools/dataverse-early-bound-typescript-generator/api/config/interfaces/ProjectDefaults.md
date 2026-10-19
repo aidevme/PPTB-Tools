@@ -1,6 +1,6 @@
 # Interface: ProjectDefaults
 
-Defined in: [config/index.ts:32](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L32)
+Defined in: [config/index.ts:32](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L32)
 
 Options a new project starts with: applied when a project folder without `.dataverse-gen.json` is opened.
 Projects that already have the file keep their own values. Same meaning as the matching
@@ -12,7 +12,7 @@ Projects that already have the file keep their own values. Same meaning as the m
 
 > **generateEntityTypes**: `boolean`
 
-Defined in: [config/index.ts:35](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L35)
+Defined in: [config/index.ts:35](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L35)
 
 ***
 
@@ -20,7 +20,7 @@ Defined in: [config/index.ts:35](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **generateFormContext**: `boolean`
 
-Defined in: [config/index.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L36)
+Defined in: [config/index.ts:36](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L36)
 
 ***
 
@@ -28,7 +28,7 @@ Defined in: [config/index.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **generateIndex**: `boolean`
 
-Defined in: [config/index.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L37)
+Defined in: [config/index.ts:37](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L37)
 
 ***
 
@@ -36,6 +36,6 @@ Defined in: [config/index.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52e
 
 > **outputRoot**: `string`
 
-Defined in: [config/index.ts:34](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L34)
+Defined in: [config/index.ts:34](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L34)
 
 `output.outputRoot`: output folder, relative to the project folder.

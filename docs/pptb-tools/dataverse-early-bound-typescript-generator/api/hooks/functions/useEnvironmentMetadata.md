@@ -2,7 +2,7 @@
 
 > **useEnvironmentMetadata**(`__namedParameters`): `object`
 
-Defined in: [hooks/useEnvironmentMetadata.ts:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L28)
+Defined in: [hooks/useEnvironmentMetadata.ts:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useEnvironmentMetadata.ts#L28)
 
 The environment's lists for the Select step: tables, actions and functions (loaded on demand), solutions and the
 solution filter, plus the warning shown when `$metadata` is too large and the schema comes from table metadata.

@@ -2,7 +2,7 @@
 
 > **useToolSettings**(`__namedParameters`): `object`
 
-Defined in: [hooks/useToolSettings.ts:21](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L21)
+Defined in: [hooks/useToolSettings.ts:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/hooks/useToolSettings.ts#L21)
 
 The tool config: Settings-panel values and saved projects. Holds the bundled defaults until the saved values
 have loaded, and saves every change through PPTB's settings.

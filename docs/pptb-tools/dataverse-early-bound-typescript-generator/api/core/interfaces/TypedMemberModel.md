@@ -1,6 +1,6 @@
 # Interface: TypedMemberModel
 
-Defined in: [core/types.ts:250](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L250)
+Defined in: [core/types.ts:250](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L250)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [core/types.ts:250](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **Name**: `string`
 
-Defined in: [core/types.ts:251](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L251)
+Defined in: [core/types.ts:251](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L251)
 
 ***
 
@@ -16,4 +16,4 @@ Defined in: [core/types.ts:251](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **TypescriptType**: [`TsType`](TsType.md)
 
-Defined in: [core/types.ts:252](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L252)
+Defined in: [core/types.ts:252](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L252)

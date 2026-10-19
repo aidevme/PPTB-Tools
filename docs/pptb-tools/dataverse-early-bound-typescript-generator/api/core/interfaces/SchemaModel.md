@@ -1,6 +1,6 @@
 # Interface: SchemaModel
 
-Defined in: [core/types.ts:275](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L275)
+Defined in: [core/types.ts:275](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L275)
 
 ## Properties
 
@@ -8,7 +8,7 @@ Defined in: [core/types.ts:275](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **actions**: [`OperationModel`](OperationModel.md)[]
 
-Defined in: [core/types.ts:279](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L279)
+Defined in: [core/types.ts:279](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L279)
 
 ***
 
@@ -16,7 +16,7 @@ Defined in: [core/types.ts:279](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **complexTypes**: [`ComplexTypeModel`](ComplexTypeModel.md)[]
 
-Defined in: [core/types.ts:278](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L278)
+Defined in: [core/types.ts:278](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L278)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/types.ts:278](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **entities**: [`EntityModel`](EntityModel.md)[]
 
-Defined in: [core/types.ts:276](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L276)
+Defined in: [core/types.ts:276](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L276)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/types.ts:276](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **enums**: [`EnumModel`](EnumModel.md)[]
 
-Defined in: [core/types.ts:277](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L277)
+Defined in: [core/types.ts:277](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L277)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [core/types.ts:277](https://github.com/aidevme/PPTB-Tools/blob/a52eb
 
 > **functions**: [`OperationModel`](OperationModel.md)[]
 
-Defined in: [core/types.ts:280](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L280)
+Defined in: [core/types.ts:280](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/types.ts#L280)

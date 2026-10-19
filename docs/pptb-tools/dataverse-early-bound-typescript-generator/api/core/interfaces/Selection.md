@@ -1,6 +1,6 @@
 # Interface: Selection
 
-Defined in: [core/model.ts:35](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L35)
+Defined in: [core/model.ts:35](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L35)
 
 The subset of the CSDL that the configured selection pulls in.
 
@@ -10,7 +10,7 @@ The subset of the CSDL that the configured selection pulls in.
 
 > **actions**: [`EdmxOperation`](EdmxOperation.md)[]
 
-Defined in: [core/model.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L37)
+Defined in: [core/model.ts:37](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L37)
 
 ***
 
@@ -18,7 +18,7 @@ Defined in: [core/model.ts:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **complexTypes**: [`EdmxComplexType`](EdmxComplexType.md)[]
 
-Defined in: [core/model.ts:39](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L39)
+Defined in: [core/model.ts:39](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L39)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [core/model.ts:39](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **entities**: [`EdmxEntityType`](EdmxEntityType.md)[]
 
-Defined in: [core/model.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L36)
+Defined in: [core/model.ts:36](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L36)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [core/model.ts:36](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **enumTypes**: [`EdmxEnumType`](EdmxEnumType.md)[]
 
-Defined in: [core/model.ts:40](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L40)
+Defined in: [core/model.ts:40](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L40)
 
 ***
 
@@ -42,4 +42,4 @@ Defined in: [core/model.ts:40](https://github.com/aidevme/PPTB-Tools/blob/a52eb3
 
 > **functions**: [`EdmxOperation`](EdmxOperation.md)[]
 
-Defined in: [core/model.ts:38](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L38)
+Defined in: [core/model.ts:38](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/model.ts#L38)

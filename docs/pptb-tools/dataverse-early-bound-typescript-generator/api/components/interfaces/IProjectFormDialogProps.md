@@ -1,6 +1,6 @@
 # Interface: IProjectFormDialogProps
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:26](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L26)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L26)
 
 Props for [ProjectFormDialog](../functions/ProjectFormDialog.md).
 
@@ -10,7 +10,7 @@ Props for [ProjectFormDialog](../functions/ProjectFormDialog.md).
 
 > **existingNames**: `string`[]
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:35](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L35)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:35](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L35)
 
 Names of the other saved projects; the project can't reuse one (case-insensitive).
 
@@ -20,7 +20,7 @@ Names of the other saved projects; the project can't reuse one (case-insensitive
 
 > **onBrowseLocation**: (`current`) => `Promise`\<`string` \| `null`\>
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:39](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L39)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:39](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L39)
 
 Opens the folder picker for Location; resolves to the chosen folder, or `null` when cancelled.
 
@@ -40,7 +40,7 @@ Opens the folder picker for Location; resolves to the chosen folder, or `null` w
 
 > **onOpenChange**: (`open`) => `void`
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:33](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L33)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:33](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L33)
 
 Called with `false` when the dialog asks to close (Cancel, Escape, or after a successful save); not called
 while saving.
@@ -61,7 +61,7 @@ while saving.
 
 > **onSave**: (`project`) => `Promise`\<`void`\>
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:41](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L41)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:41](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L41)
 
 Saves the project. The dialog closes when it resolves and shows the error when it rejects.
 
@@ -81,7 +81,7 @@ Saves the project. The dialog closes when it resolves and shows the error when i
 
 > **open**: `boolean`
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:28](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L28)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L28)
 
 Shows the dialog; each time it opens, the form starts empty or with `project`'s values.
 
@@ -91,6 +91,6 @@ Shows the dialog; each time it opens, the form starts empty or with `project`'s 
 
 > `optional` **project?**: [`ProjectEntry`](../../config/interfaces/ProjectEntry.md)
 
-Defined in: [components/dialogs/ProjectFormDialog.tsx:37](https://github.com/aidevme/PPTB-Tools/blob/a52eb34c296874a3eb2f07933e3e46daf95bb2f7/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L37)
+Defined in: [components/dialogs/ProjectFormDialog.tsx:37](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx#L37)
 
 The saved project to edit. Omitted for a new project.
