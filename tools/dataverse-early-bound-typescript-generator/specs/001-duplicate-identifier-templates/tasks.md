@@ -138,7 +138,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
   (templates), `components/cards/preview-card.md` and `components/panels/settings-panel.md`
 - [x] T017 Check the TSDoc of every changed export (`aidevme-tsdoc`), run `npm run lint:tsdoc`, then `npm run docs:api`
   from the repository root and commit the regenerated API pages
-- [ ] T018 Full verification from the tool folder: `npm run build`, `npm test`, `npm run validate` (the manifest
+- [x] T018 Full verification from the tool folder: `npm run build`, `npm test`, `npm run validate` (the manifest
   changed through T001) and `npm audit`; record the results for the pull request
 - [ ] T019 Live test in PPTB per `quickstart.md` (a person: light and dark themes, keyboard, Generate templates off,
   optional CLI parity) and record it with the date and PPTB version in
@@ -183,3 +183,18 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 - No task changes `test/reference/`, `test/fixtures/` or `src/assets/dataverse-gen-templates/`; if one would, stop and
   ask (constitution II and V).
 - The feature isn't done before T019 (live test) and T020 (Converged).
+
+## Verification (T018, 2026-10-19)
+
+From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
+
+| Check | Result |
+| --- | --- |
+| `npm run build` | OK (tsc + Vite IIFE bundle) |
+| `npm test` | 27 files, 307 tests passed (276 before the feature) |
+| `npm run validate` | pptb-validate: all checks passed |
+| `npm audit` | 0 vulnerabilities (any severity) |
+| `npm run lint:tsdoc` | 5 warnings, all existing ones in `src/core/model.ts` and `src/core/types.ts`; none new |
+| No EJS at run time | `dist/assets/*.js` has no `ejs.render` or `new Function(` |
+| Protected files | `test/reference/`, `test/fixtures/`, `src/assets/dataverse-gen-templates/` unchanged since before T001 |
+| Docs | `Validate-Markdown.ps1` passed on every changed page; `npm run docs:build` OK |
