@@ -38,8 +38,18 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
 | `onSkipDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled. Without it, the switch isn't shown. |
 | `renameDuplicates` | `boolean` (optional) | Whether the **Rename duplicated identifier(s)** switch is on (`renameDuplicateIdentifiers`). |
 | `onRenameDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled. Without it, the switch isn't shown. |
+| `customEnumTemplate` | `boolean` (optional) | Whether the custom enum template is on (`customEnumTemplate`). |
+| `generateTemplates` | `boolean` (optional, default `true`) | Whether Generate writes the templates (`generateTemplates`); the proposal mentions when it's off. |
+| `onCustomEnumTemplateChange` | `(checked: boolean) => void` (optional) | Called by the proposal (`true`) and the **Custom enum template** switch. Without it, neither is shown. |
 
 ## Messages
+
+- **Custom enum template proposal** (`CustomEnumTemplateProposal` in `PreviewParts.tsx`): a warning bar titled
+  "Duplicate identifiers found", shown when the plan has `duplicate` files, the custom enum template is off and a
+  handler is passed. It gives the number of files, what the template does, that nothing changes until the next
+  preview and Generate, that renaming the labels is the lasting fix, and, with Generate templates off, that the CLI
+  won't get the fix. **Use custom enum template** calls `onCustomEnumTemplateChange(true)`; **Not now** hides it for
+  this preview only (the card keeps the dismissed `previewedAt`), so a new preview shows it again. Nothing is saved.
 
 - **Out of date:** when the selection or options changed since the preview, a warning bar says so and has a
   **Preview again** button.
@@ -81,7 +91,12 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
   `App.tsx` passes it to `generate`, which then renames later duplicate enum members (`renameDuplicateEnumMembers`
   in `core/generator.ts`), so changing it marks the preview stale. It's disabled before a preview and when the
   preview found no duplicates, except while it's on: renaming removes the duplicates, and the switch must stay
-  usable to turn it off.
+  usable to turn it off. While the custom enum template is on, it shows on and disabled, and its info label adds
+  "On because Custom enum template is on".
+- **Custom enum template** (`Switch`), after Rename duplicated identifier(s), with the Settings panel's explanation
+  (`CUSTOM_ENUM_TEMPLATE_INFO`). It reads and saves `customEnumTemplate`; `usePreviewGenerate` then renames
+  duplicates (either setting turns renaming on) and plans the custom `enum.ejs` when Generate templates is on, so
+  changing it marks the preview stale. It's enabled under the same rules as Rename.
 - **Skip duplicated identifier(s)** (`Switch`), after Rename duplicated identifier(s), with an info label (ⓘ) showing the
   same explanation as the Settings panel (`SKIP_DUPLICATES_INFO`). It reads
   and saves the same `skipDuplicateIdentifiers` tool setting as the Settings panel's **Skip Duplicated

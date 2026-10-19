@@ -51,6 +51,23 @@ value must use the new name. This differs from dataverse-gen's output, which is 
 off, the output stays the same as dataverse-gen's. Generate still writes the file, unless you turn on **Skip duplicated identifier(s)** next to the
 Generate button (or **Skip duplicated identifier(s)** in **Settings** → **Generate & files**); then it leaves the file unwritten and any existing copy stays as it is.
 
+### The custom enum template
+
+When a preview finds duplicate identifiers, the Preview card proposes the **Custom enum template**. Click **Use
+custom enum template** to turn it on, or **Not now** to keep the default output (the proposal comes back on the next
+preview with duplicates). Nothing changes until you preview again and generate. With it on:
+
+- the generated files rename later duplicates exactly as **Rename duplicated identifier(s)** does (which then shows
+  as on);
+- Generate writes a custom `enum.ejs` to your project's `templateRoot` (`_templates` by default) in place of
+  dataverse-gen's, replacing any copy there, including one you edited. The [dataverse-gen
+  CLI](./moving-from-dataverse-gen.md) uses it, so it writes the same names as this tool;
+- the CLI only gets the fix while **Generate templates** is on.
+
+Turn it off again in **Settings** → **Generate & files** or next to the Generate button; the next Generate writes
+dataverse-gen's `enum.ejs` and names again. Which member keeps the plain name follows the option order in Dataverse,
+so reordering the options can move the suffix to another member; renaming the labels is still the lasting fix.
+
 ## Private custom APIs
 
 Private custom APIs, and ones the environment's metadata cache doesn't include yet, are still listed and

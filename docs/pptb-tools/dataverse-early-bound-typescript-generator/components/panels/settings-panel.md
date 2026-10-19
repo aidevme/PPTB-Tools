@@ -60,7 +60,8 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
 | Options | Generated files (same badges) | Early-bound entity interfaces, Form context helpers, index.ts barrel file | Switch each | `projectDefaults.generateEntityTypes`, `generateFormContext`, `generateIndex` |
 | Generate & files | Before generating (All projects) | Ask before generating | Switch, off by default | `confirmBeforeGenerate` |
 | Generate & files | Templates (All projects) | Generate templates | Switch, on by default | `generateTemplates` |
-| Generate & files | Duplicate identifiers (All projects) | Rename duplicated identifier(s) | Switch, off by default | `renameDuplicateIdentifiers` |
+| Generate & files | Duplicate identifiers (All projects) | Rename duplicated identifier(s) | Switch, off by default; shows on and disabled while Custom enum template is on | `renameDuplicateIdentifiers` |
+| Generate & files | Duplicate identifiers (All projects) | Custom enum template | Switch, off by default | `customEnumTemplate` |
 | Generate & files | Duplicate identifiers (All projects) | Skip duplicated identifier(s) | Switch, off by default | `skipDuplicateIdentifiers` |
 | Generate & files | Orphaned files (All projects, **Permanent**) | Delete orphaned files | Switch, off by default | `deleteOrphanedFiles` |
 

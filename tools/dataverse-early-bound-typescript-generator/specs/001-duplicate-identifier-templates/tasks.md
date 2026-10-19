@@ -133,7 +133,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 - [x] T015 [P] Update `README.md`: "What this tool changes" (the custom template replaces the project's `enum.ejs`
   when on), "Deliberate deviations from dataverse-gen output" (custom enum template, opt-in) and Credits; and
   `THIRD_PARTY_NOTICES.md` (the modified `enum.ejs` derives from dataverse-gen, MIT)
-- [ ] T016 [P] Update the docs in `/docs/pptb-tools/dataverse-early-bound-typescript-generator/`:
+- [x] T016 [P] Update the docs in `/docs/pptb-tools/dataverse-early-bound-typescript-generator/`:
   `guide/tool-settings.md`, `guide/troubleshooting.md` (duplicate identifiers), `guide/what-gets-generated.md`
   (templates), `components/cards/preview-card.md` and `components/panels/settings-panel.md`
 - [ ] T017 Check the TSDoc of every changed export (`aidevme-tsdoc`), run `npm run lint:tsdoc`, then `npm run docs:api`
