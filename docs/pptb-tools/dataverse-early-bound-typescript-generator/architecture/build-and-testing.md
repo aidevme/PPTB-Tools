@@ -101,6 +101,8 @@ own `tsconfig.json` and types):
 - **Configuration** is in the tool's folder: `typedoc.json` (entry points, HTML output) and `typedoc.markdown.json`,
   which extends it with `typedoc-plugin-markdown` and `typedoc-vitepress-theme`. The entry points are the folders'
   `index.ts` barrels: `core`, `config`, `types`, `services`, `hooks` and `components` (`styles` is left out).
+  `gitRevision: "main"` makes each page's "Defined in" link point to `main` instead of the current commit, so
+  regenerating only changes the pages whose code changed.
 - **`tsdoc.json`** extends `typedoc/tsdoc.json`, so `lint:tsdoc` accepts TypeDoc's extra tags.
 - **When to regenerate:** after changing an exported symbol or its TSDoc, run `npm run docs:api` and commit the
   pages with the change. The site's CI build doesn't regenerate them.

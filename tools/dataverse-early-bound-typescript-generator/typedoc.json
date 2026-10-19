@@ -16,5 +16,6 @@
     "excludePrivate": true,
     "excludeInternal": true,
     "sort": ["kind", "alphabetical"],
-    "githubPages": false
+    "githubPages": false,
+    "gitRevision": "main"
 }
