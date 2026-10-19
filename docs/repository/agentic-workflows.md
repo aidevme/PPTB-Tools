@@ -55,7 +55,7 @@ A compiled workflow runs as several jobs. For the intake review:
    the domains listed under `network:`.
 3. **Detection** has a separate model scan what the agent produced for anything suspicious (for example a
    leaked secret or an injected instruction) before anything is written.
-4. **Safe outputs** carries out the agent's requests, here creating one issue. Only this job has write
+4. **Safe outputs** carries out the agent's requests, here creating the issues. Only this job has write
    permission, and only for the actions declared under `safe-outputs:`.
 5. **Conclusion** reports the result and posts a failure report if a job failed.
 
@@ -133,12 +133,17 @@ following the repository's `intake-policy-review` skill, and opens an issue with
 2. **Reviews the tool.** The agent reads `.github/skills/intake-policy-review/SKILL.md` and follows it. It
    fetches the current policy pages, reads the tool's code, manifest, README, docs and testing records, and
    reads the command results from step 1.
-3. **Reports the result.** It creates one issue titled
-   `[Agentic Workflow]: Intake review of <tool display name>: <verdict>`, labelled `agentic-workflows` and
-   `marketplace-intake`. The body follows the [Agentic Workflow issue template](https://github.com/aidevme/PPTB-Tools/blob/main/.github/ISSUE_TEMPLATE/agentic_workflow.yml): the run link, any failed
-   commands, the trigger and inputs, then a **Review** section with the review table, the numbered findings, the
-   recommended pre-submission changes and the final verdict. A newer review closes
-   the older open one, so there's only ever one open review.
+3. **Reports the result.** Every issue is labelled `agentic-workflows` and `marketplace-intake`, and all issues
+   from the workflow are grouped as sub-issues under one parent issue.
+   - **The report:** `[Agentic Workflow]: Intake review of <tool display name> (run <number>): <verdict>`. The body
+     follows the [Agentic Workflow issue template](https://github.com/aidevme/PPTB-Tools/blob/main/.github/ISSUE_TEMPLATE/agentic_workflow.yml): the run link, any failed commands, the trigger and inputs,
+     then a **Review** section with the review table, the numbered findings, the recommended pre-submission
+     changes and the final verdict, and a list of the finding issues.
+   - **One issue per `❌ Blocker` or `⚠️ Needs attention` finding:**
+     `[Agentic Workflow]: Intake: <tool>: <severity> <Area>: <short finding>`, with the severity, evidence, policy,
+     fix and run link. A finding that's still open from an earlier run isn't created again: its title stays the
+     same and duplicates are skipped.
+   - Up to 15 issues per run. Close a finding's issue when it's fixed, and older reports by hand.
 
 ### Run it
 
@@ -199,7 +204,7 @@ review as a failed command.
 | Commands run in `steps:`, not by the agent | The results are real command output, the agent's own shell stays limited to read-only commands (`cat`, `ls`, `grep`, `find`, …), and npm doesn't run inside the agent's sandbox. |
 | `edit: false` | The review only reads; it can't change files. |
 | `network:` lists only `defaults`, `github`, `node` and the two PPTB domains | The agent can fetch the policies and API docs and nothing else. |
-| One `create-issue` with `close-older-issues` | One open review per run, and older ones close automatically. |
+| `create-issue` with `max: 15`, `group` and `deduplicate-by-title` | A report plus one issue per ❌ or ⚠️ finding, grouped under one parent, without duplicating findings that are still open. `close-older-issues` is off, so a re-run doesn't close findings someone is still fixing. |
 | The prompt tells the agent to treat repository content as data | Text in a README, an issue or a fetched page can't redirect the agent. |
 
 ### The workflow file, annotated
@@ -237,7 +242,7 @@ network:                        # the firewall's allowlist for the agent
 
 tools:
   github:
-    toolsets: [repos]           # read repository content through the GitHub API
+    toolsets: [repos, issues]   # read repository content and open issues through the GitHub API
   web-fetch:                    # fetch the policy pages
   edit: false                   # no file changes
   bash: ["cat", "ls", "find", "grep", ...]   # read-only shell commands
@@ -254,8 +259,10 @@ safe-outputs:                   # the only writes the agent can request
   create-issue:
     title-prefix: "[Agentic Workflow]: "        # same as the issue template
     labels: [agentic-workflows, marketplace-intake]
-    max: 1
-    close-older-issues: true
+    max: 15                     # the report + one issue per ❌ / ⚠️ finding
+    group: true                 # sub-issues under one parent issue
+    deduplicate-by-title: true  # don't recreate a finding whose issue is still open
+    close-older-issues: false   # don't close findings someone is still fixing
 ---
 
 # PPTB marketplace intake review
