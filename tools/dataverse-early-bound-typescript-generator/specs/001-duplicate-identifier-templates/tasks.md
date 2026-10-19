@@ -235,7 +235,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 - [x] T026 [P] Update the docs: `/docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/troubleshooting.md`
   and `guide/safety.md` (the confirmation), `components/cards/preview-card.md`, `components/panels/settings-panel.md`,
   and the README's "What this tool changes"
-- [ ] T027 Regenerate the API pages (`npm run docs:api`), rerun the full verification (build, tests, validate, audit,
+- [x] T027 Regenerate the API pages (`npm run docs:api`), rerun the full verification (build, tests, validate, audit,
   lint:tsdoc), update the Verification table, and rerun `/speckit-converge` until Converged; T019's live test then
   includes the dialog (quickstart step 3)
 
