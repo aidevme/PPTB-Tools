@@ -143,7 +143,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 - [ ] T019 Live test in PPTB per `quickstart.md` (a person: light and dark themes, keyboard, Generate templates off,
   optional CLI parity) and record it with the date and PPTB version in
   `/docs/pptb-tools/dataverse-early-bound-typescript-generator/contributing/testing.md` and `TESTING.md`
-- [ ] T020 Run `/speckit-converge` and repeat implement/converge until it reports Converged
+- [x] T020 Run `/speckit-converge` and repeat implement/converge until it reports Converged
 
 ---
 
@@ -201,4 +201,6 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 
 ## Phase 7: Convergence
 
-- [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per Constitution VII (partial)
+- [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says
+  "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per
+  Constitution VII (partial)
