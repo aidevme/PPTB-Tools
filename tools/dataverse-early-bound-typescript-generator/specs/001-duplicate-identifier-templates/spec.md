@@ -44,9 +44,10 @@ the proposal, preview and generate, then compile the generated files and run the
    its enum files have the same member names as the tool's.
 6. **Given** the last preview found the project's `enum.ejs` edited (different from both dataverse-gen's and the
    custom one) and Generate templates is on, **When** the developer turns the custom enum template on (from the
-   proposal, the Preview card switch or the Settings panel), **Then** a dialog names the file and says the next
+   proposal, the Preview card switch or the Options card switch), **Then** a dialog names the file and says the next
    Generate will overwrite the edits; **Use custom enum template** turns it on, **Cancel** leaves it off. Without an
-   edited `enum.ejs`, no dialog is shown. *(Amendment 1)*
+   edited `enum.ejs`, no dialog is shown. *(Amendment 1; Amendment 2 moved the third entry point from the Settings
+   panel to the Options card)*
 
 ---
 

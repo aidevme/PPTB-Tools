@@ -8,6 +8,17 @@ Projects that already have the file keep their own values. Same meaning as the m
 
 ## Properties
 
+### customEnumTemplate
+
+> **customEnumTemplate**: `boolean`
+
+Defined in: [config/index.ts:42](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L42)
+
+Default for the project's custom enum template (`pptbEarlyBoundGenerator.customEnumTemplate`): unlike the other
+options, it only fills in a project whose `.dataverse-gen.json` has no value, and never replaces one.
+
+***
+
 ### generateEntityTypes
 
 > **generateEntityTypes**: `boolean`

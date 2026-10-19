@@ -1,6 +1,6 @@
 # Interface: IPreviewCardProps
 
-Defined in: [components/cards/PreviewCard.tsx:62](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L62)
+Defined in: [components/cards/PreviewCard.tsx:63](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L63)
 
 Props for [PreviewCard](../functions/PreviewCard.md).
 
@@ -10,7 +10,7 @@ Props for [PreviewCard](../functions/PreviewCard.md).
 
 > **busy**: `boolean`
 
-Defined in: [components/cards/PreviewCard.tsx:74](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L74)
+Defined in: [components/cards/PreviewCard.tsx:75](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L75)
 
 Work in progress: disables the buttons and switches, and shows a loading skeleton while there's no plan yet.
 
@@ -20,7 +20,7 @@ Work in progress: disables the buttons and switches, and shows a loading skeleto
 
 > **canPreview**: `boolean`
 
-Defined in: [components/cards/PreviewCard.tsx:70](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L70)
+Defined in: [components/cards/PreviewCard.tsx:71](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L71)
 
 Enables Preview and the stale warning's Preview again; the app sets it once connected, with a selection.
 
@@ -30,7 +30,7 @@ Enables Preview and the stale warning's Preview again; the app sets it once conn
 
 > **generateOptions**: [`IPreviewGenerateOptions`](IPreviewGenerateOptions.md)
 
-Defined in: [components/cards/PreviewCard.tsx:80](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L80)
+Defined in: [components/cards/PreviewCard.tsx:81](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L81)
 
 The Generate settings shown as switches in the action bar.
 
@@ -40,7 +40,7 @@ The Generate settings shown as switches in the action bar.
 
 > **lastResult**: `string` \| `null`
 
-Defined in: [components/cards/PreviewCard.tsx:78](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L78)
+Defined in: [components/cards/PreviewCard.tsx:79](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L79)
 
 Summary of the last Generate run, shown as a success message until the next preview.
 
@@ -50,7 +50,7 @@ Summary of the last Generate run, shown as a success message until the next prev
 
 > **needsProject**: `boolean`
 
-Defined in: [components/cards/PreviewCard.tsx:72](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L72)
+Defined in: [components/cards/PreviewCard.tsx:73](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L73)
 
 True when everything is ready except the project folder; shows a hint next to the buttons.
 
@@ -60,7 +60,7 @@ True when everything is ready except the project folder; shows a hint next to th
 
 > `optional` **now?**: `number`
 
-Defined in: [components/cards/PreviewCard.tsx:88](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L88)
+Defined in: [components/cards/PreviewCard.tsx:89](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L89)
 
 Current time for relative dates; a parameter so tests get stable output.
 
@@ -70,7 +70,7 @@ Current time for relative dates; a parameter so tests get stable output.
 
 > **onCopyText**: (`text`, `label`) => `void`
 
-Defined in: [components/cards/PreviewCard.tsx:86](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L86)
+Defined in: [components/cards/PreviewCard.tsx:87](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L87)
 
 Copies text (a file's content or a path) to the clipboard; `label` names it in the confirmation.
 
@@ -94,7 +94,7 @@ Copies text (a file's content or a path) to the clipboard; `label` names it in t
 
 > **onGenerate**: () => `void`
 
-Defined in: [components/cards/PreviewCard.tsx:84](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L84)
+Defined in: [components/cards/PreviewCard.tsx:85](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L85)
 
 Called when Generate is clicked; the caller confirms where needed, then writes (and deletes) the files.
 
@@ -108,7 +108,7 @@ Called when Generate is clicked; the caller confirms where needed, then writes (
 
 > **onPreview**: () => `void`
 
-Defined in: [components/cards/PreviewCard.tsx:82](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L82)
+Defined in: [components/cards/PreviewCard.tsx:83](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L83)
 
 Called when Preview or Preview again is clicked, to compute a new plan.
 
@@ -122,7 +122,7 @@ Called when Preview or Preview again is clicked, to compute a new plan.
 
 > **plan**: [`WritePlan`](../../types/interfaces/WritePlan.md) \| `null`
 
-Defined in: [components/cards/PreviewCard.tsx:66](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L66)
+Defined in: [components/cards/PreviewCard.tsx:67](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L67)
 
 The last computed write plan, or `null` before the first preview (the list shows a placeholder).
 
@@ -132,7 +132,7 @@ The last computed write plan, or `null` before the first preview (the list shows
 
 > **previewedAt**: `string` \| `null`
 
-Defined in: [components/cards/PreviewCard.tsx:76](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L76)
+Defined in: [components/cards/PreviewCard.tsx:77](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L77)
 
 When the current plan was computed (ISO), for "Previewed … ago".
 
@@ -142,7 +142,7 @@ When the current plan was computed (ISO), for "Previewed … ago".
 
 > **stale**: `boolean`
 
-Defined in: [components/cards/PreviewCard.tsx:68](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L68)
+Defined in: [components/cards/PreviewCard.tsx:69](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L69)
 
 Whether the plan is stale because the selection or options changed since it was computed.
 
@@ -152,6 +152,6 @@ Whether the plan is stale because the selection or options changed since it was 
 
 > **step**: [`StepState`](StepState.md)
 
-Defined in: [components/cards/PreviewCard.tsx:64](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L64)
+Defined in: [components/cards/PreviewCard.tsx:65](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L65)
 
 The card's step in the workflow: number, title and completion badge.

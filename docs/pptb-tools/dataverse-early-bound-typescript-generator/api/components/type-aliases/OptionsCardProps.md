@@ -2,7 +2,7 @@
 
 > **OptionsCardProps** = [`IOptionsCardProps`](../interfaces/IOptionsCardProps.md)
 
-Defined in: [components/cards/OptionsCard.tsx:96](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/OptionsCard.tsx#L96)
+Defined in: [components/cards/OptionsCard.tsx:113](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/OptionsCard.tsx#L113)
 
 ## Deprecated
 

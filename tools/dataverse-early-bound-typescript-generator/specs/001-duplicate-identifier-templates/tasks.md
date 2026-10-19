@@ -203,6 +203,13 @@ Re-run after Amendment 1 (T027, 2026-10-19): build OK, **316** tests passed, ppt
 vulnerabilities, no new TSDoc warnings, no EJS in the bundle, protected files unchanged, docs build OK, 12 API pages
 regenerated.
 
+Re-run after Amendment 2 (T034, 2026-10-19): build OK, **321** tests passed (the Settings panel's Save confirmation
+tests went with the confirmation; Options card and per-project tests added), pptb-validate passed, `npm audit` 0
+vulnerabilities, no new TSDoc warnings, no EJS in the bundle, protected files unchanged, `Validate-Markdown.ps1`
+passed on the changed pages, docs build OK, 33 API files regenerated (4 new pages for the `core/config.ts` helpers).
+Converge: US1 scenario 6 still named the Settings panel, and the README's "What this tool changes" didn't mention
+the `pptbEarlyBoundGenerator` key; both fixed. T019 (live test, including the two-project step) is still open.
+
 ## Phase 7: Convergence
 
 - [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says
@@ -270,5 +277,5 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 - [x] T033 [P] Update the docs: `guide/tool-settings.md`, `guide/troubleshooting.md`, `guide/project-file.md` (the new
   key), `guide/safety.md`, `components/cards/options-card.md`, `components/cards/preview-card.md`,
   `components/panels/settings-panel.md`, the README, and `quickstart.md` (two projects)
-- [ ] T034 Regenerate the API pages, rerun the full verification, update the Verification note, and rerun
+- [x] T034 Regenerate the API pages, rerun the full verification, update the Verification note, and rerun
   `/speckit-converge` until Converged

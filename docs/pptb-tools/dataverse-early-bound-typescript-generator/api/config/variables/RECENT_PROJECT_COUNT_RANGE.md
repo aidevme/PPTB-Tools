@@ -2,7 +2,7 @@
 
 > `const` **RECENT\_PROJECT\_COUNT\_RANGE**: `object`
 
-Defined in: [config/index.ts:55](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L55)
+Defined in: [config/index.ts:60](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L60)
 
 Allowed range for [GeneralSettings.recentProjectCount](../interfaces/GeneralSettings.md#recentprojectcount).
 

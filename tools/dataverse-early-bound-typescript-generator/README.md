@@ -47,8 +47,9 @@ with both can use both.
 ## What this tool changes
 
 In Dataverse: nothing, since the tool is read-only. On disk, it writes only on **Generate** and only inside the
-project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. With **Custom enum
-template** on (off by default), Generate writes a custom `enum.ejs` to the project's `templateRoot` in place of
+project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. Generate saves the
+project's `.dataverse-gen.json`, including the tool's own `pptbEarlyBoundGenerator` key, which the dataverse-gen CLI
+ignores. With a project's **Custom enum template** on (off by default), Generate writes a custom `enum.ejs` to the project's `templateRoot` in place of
 dataverse-gen's, replacing an existing (also an edited) copy; Preview lists it first, and turning the setting on
 asks first when the last preview found the project's `enum.ejs` edited. See the
 [Safety guide](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/safety.md) for the details.

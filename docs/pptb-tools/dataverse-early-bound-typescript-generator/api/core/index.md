@@ -34,6 +34,7 @@
 - [OptionSetInput](interfaces/OptionSetInput.md)
 - [OutputConfig](interfaces/OutputConfig.md)
 - [ParameterModel](interfaces/ParameterModel.md)
+- [ProjectToolSettings](interfaces/ProjectToolSettings.md)
 - [ResolvedConfig](interfaces/ResolvedConfig.md)
 - [SchemaModel](interfaces/SchemaModel.md)
 - [Selection](interfaces/Selection.md)
@@ -52,6 +53,7 @@
 - [DEFAULT\_OUTPUT\_ROOT](variables/DEFAULT_OUTPUT_ROOT.md)
 - [DEFAULT\_REFERENCED\_TYPES](variables/DEFAULT_REFERENCED_TYPES.md)
 - [OUTPUT\_FOLDERS](variables/OUTPUT_FOLDERS.md)
+- [TOOL\_CONFIG\_KEY](variables/TOOL_CONFIG_KEY.md)
 
 ## Functions
 
@@ -66,6 +68,7 @@
 - [navigationFromRelationships](functions/navigationFromRelationships.md)
 - [parseConfig](functions/parseConfig.md)
 - [parseCsdl](functions/parseCsdl.md)
+- [projectCustomEnumTemplate](functions/projectCustomEnumTemplate.md)
 - [renameDuplicateEnumMembers](functions/renameDuplicateEnumMembers.md)
 - [renderComplexType](functions/renderComplexType.md)
 - [renderEntity](functions/renderEntity.md)
@@ -78,3 +81,4 @@
 - [serializeConfig](functions/serializeConfig.md)
 - [shortTypeName](functions/shortTypeName.md)
 - [stripCollection](functions/stripCollection.md)
+- [withProjectCustomEnumTemplate](functions/withProjectCustomEnumTemplate.md)
