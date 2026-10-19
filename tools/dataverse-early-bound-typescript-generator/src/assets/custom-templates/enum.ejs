@@ -1,0 +1,14 @@
+/* eslint-disable*/
+// Enum <%- locals.Name %>
+export const enum <%- Name %> {
+<% /* Custom enum template (dataverse-early-bound-typescript-generator): a member whose name is already used gets _<Value> appended until the name is unused, so duplicate names compile. */ var usedNames = []; _%>
+<% locals.Members && locals.Members.forEach(function(member){ _%>
+<%_ var name = member.Name; while (usedNames.indexOf(name) !== -1) { name = name + "_" + member.Value; } usedNames.push(name); _%>
+<%_if (locals.StringMembers){_%>
+  <%- name %> = "<%- name %>",
+<%_} else {_%>
+  <%- name %> = <%- member.Value %>,
+<%_}_%>
+<%_}); _%>
+}
+  
