@@ -4,7 +4,7 @@
 
 **Created**: 2026-10-19
 
-**Status**: Approved (2026-10-19)
+**Status**: Approved (2026-10-19); Amendment 1 (confirmation dialog) approved 2026-10-19
 
 **Input**: User description: "By default use the default templates; if any duplicates are found, propose to the user to use
 custom templates." Agreed meaning of "custom templates": the tool writes a fixed `enum.ejs` to the project's templates
@@ -41,6 +41,11 @@ the proposal, preview and generate, then compile the generated files and run the
    as `<Name>_<Value>` (the first keeps its name), and the project's templates folder has the custom `enum.ejs`.
 5. **Given** the custom `enum.ejs` in the project, **When** the dataverse-gen CLI generates the same selection, **Then**
    its enum files have the same member names as the tool's.
+6. **Given** the last preview found the project's `enum.ejs` edited (different from both dataverse-gen's and the
+   custom one) and Generate templates is on, **When** the developer turns the custom enum template on (from the
+   proposal, the Preview card switch or the Settings panel), **Then** a dialog names the file and says the next
+   Generate will overwrite the edits; **Use custom enum template** turns it on, **Cancel** leaves it off. Without an
+   edited `enum.ejs`, no dialog is shown. *(Amendment 1)*
 
 ---
 
@@ -88,7 +93,9 @@ project's `enum.ejs` are dataverse-gen's defaults again.
   duplicates in the tool's output, and the proposal and the setting say that the CLI won't get the fix while
   templates aren't written.
 - **The project already has an edited `enum.ejs`**: writing the custom template replaces it, as Generate does with any
-  template today; the preview lists it as changed before anything is written.
+  template today; the preview lists it as changed before anything is written. Turning the custom template on asks
+  first when the last preview showed the edited file (FR-012). With no preview yet, or Generate templates off, there's
+  no dialog: without a preview the tool doesn't know the file, and with templates off it isn't written.
 - **A renamed name is itself taken** (for example `InProgress_1` already exists): the value is appended again until the
   name is free, in the tool and in the custom template alike.
 - **String-valued enums**: renamed members keep their original string value, so values at run time don't change.
@@ -126,6 +133,13 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 - **FR-011**: The README's "What this tool changes" and "Deliberate deviations from dataverse-gen output" sections, the
   user guide and the Settings panel explanations MUST describe the custom enum template, including that it overwrites
   an existing `enum.ejs`.
+- **FR-012** *(Amendment 1)*: When the custom enum template is turned on (from the proposal, the Preview card switch,
+  or the Settings panel's Save), Generate templates is on, and the last preview found the project's `enum.ejs` edited
+  (different from both dataverse-gen's and the custom template), the tool MUST ask for confirmation in a dialog that
+  names the file's path, says the next Generate overwrites the edits and that they're lost unless they're in source
+  control, and says nothing is written now. Confirming turns the setting on; cancelling leaves it off and saves nothing.
+  In every other case (no edited `enum.ejs` known, Generate templates off, or turning the setting off), no dialog is
+  shown.
 
 ### Key Entities
 
@@ -147,6 +161,8 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 - **SC-003**: For the same metadata and selection, the enum member names written by the tool and by the dataverse-gen
   CLI with the custom template are identical in 100% of the enum files.
 - **SC-004**: Accepting or turning off the custom template never changes a file before a preview has listed the change.
+- **SC-005** *(Amendment 1)*: An `enum.ejs` the developer edited is never set up to be overwritten without a
+  confirmation that names it, whenever the last preview showed it.
 
 ## Assumptions
 
@@ -159,5 +175,8 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 - Fixing the labels in Dataverse remains the recommended long-term fix, and the proposal says so.
 - Clarified on 2026-10-19: the proposal is shown on every preview with duplicates until accepted (Q1), and the choice
   is a tool setting for every project (Q2).
+- Amendment 1 (2026-10-19): a confirmation dialog when turning the custom enum template on would overwrite an edited
+  `enum.ejs` (US1 scenario 6, FR-012, SC-005). Decided: shown only when the last preview found the file edited; with
+  Generate templates off there's no dialog (the setting's explanation already says the CLI won't get the fix).
 - Out of scope: changing labels in Dataverse, other kinds of duplicates (for example two tables with the same name), and
   writing templates when a project is created.

@@ -23,3 +23,15 @@
 - **Behavior:** changing it saves `customEnumTemplate` and marks the preview stale (like `renameDuplicateIdentifiers`).
   While it's on, the Rename switch shows as on and disabled, with "on because Custom enum template is on" in its
   explanation, since the custom template implies renaming.
+
+## Confirmation dialog (Amendment 1)
+
+- **Shown when:** the custom enum template is being turned on (proposal, Preview card switch, or Settings panel
+  Save), Generate templates is on, and the last preview found the project's `enum.ejs` edited.
+- **Title:** "Replace your edited enum.ejs?"
+- **Message:** the file's full path; that it differs from dataverse-gen's template, so it looks edited; that the next
+  Generate replaces it with the custom enum template and the edits are lost unless they're in source control; that
+  nothing is written now and the next preview lists the change.
+- **Actions:** **Use custom enum template** (saves the setting) and **Cancel** (saves nothing; the Settings panel
+  stays open with its draft).
+- **Not shown:** when turning the setting off, with Generate templates off, or when no edited `enum.ejs` is known.

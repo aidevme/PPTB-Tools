@@ -204,3 +204,33 @@ From `tools/dataverse-early-bound-typescript-generator/`, at the T017 commit:
 - [x] T021 Rewrite the comment above the action bar switches in `src/components/cards/PreviewParts.tsx` (it says
   "Both switches", but there are four, and Rename and Custom enum template stay usable while on) per
   Constitution VII (partial)
+
+## Phase 8: Amendment 1 - Confirm before overwriting an edited `enum.ejs` (US1, FR-012, SC-005)
+
+**Goal**: turning the custom enum template on asks first when the last preview found the project's `enum.ejs` edited.
+
+**Independent Test**: with an edited `enum.ejs` in the last preview, turn the setting on from the proposal, the
+Preview card switch and the Settings panel; each opens the dialog, **Cancel** saves nothing, confirming saves it.
+
+- [ ] T022 [US1] Add `editedEnumTemplate(plan)` to `src/services/dataverseGenTemplates.ts` (export through
+  `src/services/index.ts`): the plan's `enum.ejs` template entry when its `existingContent` is neither dataverse-gen's
+  nor `CUSTOM_ENUM_TEMPLATE` (line endings ignored), else `undefined`; tests in `test/dataverseGenTemplates.test.ts`
+  (original, custom, CRLF/LF variants, edited, missing, no templates in the plan)
+- [ ] T023 [US1] Add the shared dialog text (`EDITED_ENUM_TEMPLATE_TITLE`, a message builder taking the path) to
+  `src/components/shared/settingsInfo.tsx`, per `contracts/preview-proposal.md` (Confirmation dialog)
+- [ ] T024 [US1] Add `useCustomEnumTemplateConfirmation` in `src/hooks/` (exported from `src/hooks/index.ts`): turning
+  on with an edited `enum.ejs` (and Generate templates on) opens the dialog instead of saving; confirm saves, cancel
+  closes; turning off saves at once; wire it in `src/components/apps/App.tsx` for the proposal and the Preview card
+  switch, rendering `ConfirmationDialog`; tests in `test/hooks.test.ts` (opens only when edited and templates on;
+  confirm saves `true`; cancel saves nothing; off saves at once)
+- [ ] T025 [US1] Add the optional `editedEnumTemplatePath` prop to `SettingsPanel` in
+  `src/components/panels/SettingsPanel.tsx` and pass it from `App.tsx`; on **Save**, when the draft turns the custom
+  template on with Generate templates on and the prop set, show the dialog before `onSave`; **Cancel** keeps the
+  panel open with its draft; tests in `test/settings.test.ts` (dialog shown and Cancel saves nothing; confirm saves;
+  no dialog without the prop, with Generate templates off in the draft, or when turning it off)
+- [ ] T026 [P] Update the docs: `/docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/troubleshooting.md`
+  and `guide/safety.md` (the confirmation), `components/cards/preview-card.md`, `components/panels/settings-panel.md`,
+  and the README's "What this tool changes"
+- [ ] T027 Regenerate the API pages (`npm run docs:api`), rerun the full verification (build, tests, validate, audit,
+  lint:tsdoc), update the Verification table, and rerun `/speckit-converge` until Converged; T019's live test then
+  includes the dialog (quickstart step 3)

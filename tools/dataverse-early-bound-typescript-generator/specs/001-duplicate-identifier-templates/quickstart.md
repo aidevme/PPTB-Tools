@@ -27,6 +27,9 @@ choice column with options "In Progress" and "In-Progress"), and a project selec
 3. **Accept:** the preview is marked stale. Preview again: the enum file and `_templates/enum.ejs` are listed as
    changed and no file is flagged. Generate. The enum file has `InProgress` and `InProgress_<value>`; `tsc` on the
    project compiles.
+   **Edited `enum.ejs` (Amendment 1):** turn the custom template off, edit `_templates/enum.ejs` in the project,
+   preview, then turn the custom template on (from the proposal, the Preview card switch and the Settings panel): a
+   dialog names the file and asks first; **Cancel** leaves it off.
 4. **CLI parity (optional):** in the project, run the dataverse-gen CLI (where its sign-in works) on the same
    selection; its enum file has the same member names.
 5. **Turn it off** in Settings → Generate & files; preview: the enum file and `enum.ejs` go back to the defaults.

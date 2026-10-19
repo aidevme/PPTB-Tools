@@ -123,3 +123,33 @@ docs/pptb-tools/dataverse-early-bound-typescript-generator/
 ## Complexity Tracking
 
 None.
+
+## Amendment 1: confirm before overwriting an edited `enum.ejs` (2026-10-19)
+
+Spec: US1 scenario 6, FR-012, SC-005.
+
+**Detecting an edited file** (pure, in `services/dataverseGenTemplates.ts`): `editedEnumTemplate(plan)` returns the
+plan's `<templateRoot>/enum.ejs` entry when its `existingContent` is neither dataverse-gen's `enum.ejs` nor
+`CUSTOM_ENUM_TEMPLATE` (line endings ignored, as the write plan compares), otherwise `undefined`. A plan without
+templates (Generate templates off) or without an existing `enum.ejs` gives `undefined`.
+
+**Asking** (shared by both entry points):
+
+- **Preview card** (proposal and switch): `App.tsx` routes `onCustomEnumTemplateChange(true)` through a small hook,
+  `useCustomEnumTemplateConfirmation(plan, generateTemplates, save)`. When `editedEnumTemplate(plan)` finds a file it
+  opens a `ConfirmationDialog` instead of saving; **Use custom enum template** saves, **Cancel** closes it. Turning
+  the setting off saves straight away.
+- **Settings panel**: a new optional prop `editedEnumTemplatePath` (from `editedEnumTemplate(plan)` in `App.tsx`).
+  On **Save**, when the draft turns `customEnumTemplate` on, Generate templates is on in the draft, and the prop is
+  set, the panel opens the same dialog before calling `onSave`; **Cancel** returns to the panel with the draft
+  unchanged and nothing saved.
+
+**Dialog** (reuses `components/dialogs/ConfirmationDialog.tsx`): title "Replace your edited enum.ejs?"; message with
+the file's path, that it differs from dataverse-gen's template and so looks edited, that the next Generate replaces it
+with the custom template and the edits are lost unless they're in source control, and that nothing is written now;
+confirm **Use custom enum template**, cancel **Cancel**. Wording and the shared message live in
+`components/shared/settingsInfo.tsx` so both places say the same.
+
+**Constitution re-check:** I is strengthened (a confirmation naming the file before an overwrite); II–VI are
+unchanged (no new API, dependency or output change; the dialog is a Fluent `Dialog` with keyboard access); VII adds
+the dialog to the docs and to the live test (quickstart step 3).
