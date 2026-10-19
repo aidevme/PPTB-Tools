@@ -536,8 +536,11 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                         )}
                         {visibleSections.length > 0 ? (
                             visibleSections.map(renderSection)
-                        ) : (
+                        ) : searching ? (
                             <Body1 className={styles.empty}>No settings match "{query.trim()}".</Body1>
+                        ) : (
+                            // A tab without sections yet (Advanced).
+                            <Body1 className={styles.empty}>No settings on this tab yet.</Body1>
                         )}
                         {saveError && (
                             <MessageBar intent="error">

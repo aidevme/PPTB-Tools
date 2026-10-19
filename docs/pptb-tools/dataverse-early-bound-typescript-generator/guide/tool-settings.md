@@ -1,6 +1,6 @@
 # Tool settings
 
-Open the Settings panel with the gear button in the header. It has three tabs, and a **Search settings** box that
+Open the Settings panel with the gear button in the header. It has five tabs, and a **Search settings** box that
 finds a setting in any tab by its name or description.
 
 ## General
@@ -48,6 +48,10 @@ Nothing to set: this tab shows the seven EJS templates behind the generated file
 tool's version. Generate writes them to your project's `templateRoot` folder (`_templates` by default), unless
 **Generate templates** is off. The tool generates with built-in copies, so editing the written files doesn't change
 its output, and the next Generate overwrites them. See [What gets generated](./what-gets-generated.md).
+
+## Advanced
+
+For settings most projects never need to change. It has no settings yet.
 
 ## Saving
 

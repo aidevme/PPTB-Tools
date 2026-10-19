@@ -1,5 +1,5 @@
 import { createElement, type ReactElement } from 'react';
-import { CodeRegular, CodeTextRegular, OptionsRegular, WrenchRegular } from '@fluentui/react-icons';
+import { CodeRegular, CodeTextRegular, DeveloperBoardRegular, OptionsRegular, WrenchRegular } from '@fluentui/react-icons';
 import type { SectionBadge } from './SettingsParts';
 
 /** The ids a setting's control is labelled and described by: its row's title and description. */
@@ -11,7 +11,7 @@ export type ControlIds = {
 };
 
 /** The Settings panel's tabs. */
-export type SettingsTab = 'general' | 'options' | 'files' | 'templates';
+export type SettingsTab = 'general' | 'options' | 'files' | 'templates' | 'advanced';
 
 /**
  * The navigation tabs, in order: each tab's label, the subtitle under it, and its icon.
@@ -22,6 +22,7 @@ export const TABS: Array<{ value: SettingsTab; label: string; subtitle: string; 
     { value: 'options', label: 'Options', subtitle: 'What every project generates', icon: createElement(WrenchRegular) },
     { value: 'files', label: 'Generate & files', subtitle: 'Confirmations and orphans', icon: createElement(CodeRegular) },
     { value: 'templates', label: 'Templates', subtitle: 'EJS templates', icon: createElement(CodeTextRegular) },
+    { value: 'advanced', label: 'Advanced', subtitle: 'For power users', icon: createElement(DeveloperBoardRegular) },
 ];
 
 /** One-line explanation at the top of each tab. */
@@ -30,6 +31,7 @@ export const TAB_INTROS: Record<SettingsTab, string> = {
     options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
     files: 'How Generate treats files in the output folders, for every project.',
     templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
+    advanced: 'Settings most projects never need to change.',
 };
 
 /** Badge for sections saved with the tool's settings in this PPTB installation (the General tab). */
