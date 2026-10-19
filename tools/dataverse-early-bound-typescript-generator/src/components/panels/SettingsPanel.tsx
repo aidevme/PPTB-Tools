@@ -146,6 +146,8 @@ export interface SettingsPanelProps {
  * and its control on the right. Changes are made on a draft: a dot marks each changed value, the footer says when
  * there are unsaved changes, Save (enabled once something changed) persists them, and the Cancel split button
  * discards them; its menu also has Reset to defaults, which restores the bundled defaults (saved projects are kept).
+ * When Save would turn the custom enum template on over an edited `enum.ejs` (`editedEnumTemplatePath`), it asks
+ * first in a confirmation dialog; cancelling it keeps the draft.
  */
 export function SettingsPanel({ open, onOpenChange, settings, onSave, editedEnumTemplatePath }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();

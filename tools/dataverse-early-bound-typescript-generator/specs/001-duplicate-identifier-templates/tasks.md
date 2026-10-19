@@ -241,5 +241,5 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 
 ## Phase 9: Convergence
 
-- [ ] T028 Mention in the `SettingsPanel` TSDoc (`src/components/panels/SettingsPanel.tsx`) that Save asks first when it
+- [x] T028 Mention in the `SettingsPanel` TSDoc (`src/components/panels/SettingsPanel.tsx`) that Save asks first when it
   would replace an edited `enum.ejs` per FR-012 and Constitution VII (partial)
