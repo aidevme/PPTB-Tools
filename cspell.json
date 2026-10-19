@@ -426,6 +426,7 @@
     "node_modules/**",
     ".git/**",
     ".github/**",
-    ".claude/**"
+    ".claude/**",
+    "docs/pptb-tools/*/api/**"
   ]
 }

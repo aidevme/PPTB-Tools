@@ -1,0 +1,6 @@
+// markdownlint-cli2 options. The rules themselves are in .markdownlint.jsonc.
+{
+  // TypeDoc's API pages are generated (npm run docs:api); their source is the TSDoc in the code, checked by
+  // each tool's lint:tsdoc.
+  "ignores": ["docs/pptb-tools/*/api/**"]
+}

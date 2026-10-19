@@ -4,19 +4,29 @@
   "private": true,
   "devDependencies": {
     "@fluentui/svg-icons": "^1.1.344",
+    "@microsoft/tsdoc": "^0.17.1",
+    "@microsoft/tsdoc-config": "^0.18.3",
     "@playwright/test": "^1.64.1",
     "@types/node": "^26.6.5",
+    "eslint-plugin-tsdoc": "^0.5.4",
     "gray-matter": "^4.0.3",
     "jszip": "^3.10.2",
     "markdownlint-cli2": "^0.23.3",
     "simple-icons": "^16.35.0",
+    "typedoc": "^0.28.20",
+    "typedoc-plugin-markdown": "^4.14.0",
+    "typedoc-vitepress-theme": "^1.1.4",
+    "typescript": "~5.9.3",
     "vitepress": "^2.0.0-alpha.18"
   },
   "scripts": {
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs --port 8080",
-    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\""
+    "docs:api": "typedoc --options tools/dataverse-early-bound-typescript-generator/typedoc.markdown.json",
+    "docs:api:html": "typedoc --options tools/dataverse-early-bound-typescript-generator/typedoc.json",
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#node_modules\"",
+    "lint:tsdoc": "npm --prefix tools/dataverse-early-bound-typescript-generator run lint:tsdoc"
   },
   "dependencies": {
     "mermaid": "^12.2.0"

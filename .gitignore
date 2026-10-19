@@ -4,5 +4,8 @@ dist/
 .playwright-mcp/
 /tests/
 
+# TypeDoc HTML API docs (npm run docs:api:html); regenerated on demand, not published
+/api-docs/
+
 # skills-ref validator (agent-src/sync/validate-skills.ps1)
 agent-src/sync/.venv-skills-ref/
