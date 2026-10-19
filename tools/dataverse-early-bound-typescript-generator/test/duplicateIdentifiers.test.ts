@@ -341,6 +341,27 @@ describe('PreviewCard', () => {
             expect(proposalShown()).toBe(true);
         });
 
+        it('leaves the Skip and Rename switches working after Not now (US2)', async () => {
+            const onCustomEnumTemplateChange = vi.fn();
+            const onSkipDuplicatesChange = vi.fn();
+            const onRenameDuplicatesChange = vi.fn();
+            await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange, onSkipDuplicatesChange, onRenameDuplicatesChange })));
+            await act(async () => button('Not now')!.click());
+            const input = (title: string) => {
+                const label = Array.from(document.querySelectorAll('label')).find((l) => l.textContent === title);
+                return document.getElementById(label?.getAttribute('for') ?? '') as HTMLInputElement;
+            };
+            expect(input('Skip duplicated identifier(s)').disabled).toBe(false);
+            expect(input('Rename duplicated identifier(s)').disabled).toBe(false);
+            await act(async () => input('Skip duplicated identifier(s)').click());
+            await act(async () => input('Rename duplicated identifier(s)').click());
+            expect(onSkipDuplicatesChange).toHaveBeenCalledWith(true);
+            expect(onRenameDuplicatesChange).toHaveBeenCalledWith(true);
+            expect(onCustomEnumTemplateChange).not.toHaveBeenCalled();
+            // The duplicate is still reported.
+            expect(tiles()[0]).toBe('1Duplicate identifiers');
+        });
+
         it("says the CLI won't get the fix while Generate templates is off", async () => {
             await mount(createElement(PreviewCard, withPreview('t1', { onCustomEnumTemplateChange: vi.fn(), generateTemplates: false })));
             expect(document.body.textContent).toContain("Generate templates is off, so the CLI won't get the fix until it's turned on.");

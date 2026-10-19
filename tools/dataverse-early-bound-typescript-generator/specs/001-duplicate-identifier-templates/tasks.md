@@ -106,7 +106,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 
 **Independent Test**: with duplicates, choose **Not now** and generate; the output equals today's default output.
 
-- [ ] T013 [US2] Tests in `test/duplicateIdentifiers.test.ts` and `test/hooks.test.ts`: after **Not now**, the
+- [x] T013 [US2] Tests in `test/duplicateIdentifiers.test.ts` and `test/hooks.test.ts`: after **Not now**, the
   setting stays off, the files keep the `duplicate` status, the default `enum.ejs` is planned, and the Rename and Skip
   duplicated identifier(s) switches behave as before (no production change expected; fix any gap the tests show)
 

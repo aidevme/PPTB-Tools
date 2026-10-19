@@ -511,6 +511,14 @@ describe('usePreviewGenerate', () => {
             expect(enumTemplate(plan)?.content).toBe(DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content);
         });
 
+        it('plans exactly the default output when the custom enum template is declined (off) (US2)', async () => {
+            const byDefault = await previewWith({});
+            const declined = await previewWith({ customEnumTemplate: false });
+            const contents = (plan: WritePlan) => plan.files.map((f) => [f.relativePath, f.status, f.content]);
+            expect(contents(declined)).toEqual(contents(byDefault));
+            expect(declined.counts.duplicate).toBeGreaterThan(0);
+        });
+
         it('renames the duplicate and plans the custom enum.ejs when the custom enum template is on', async () => {
             const plan = await previewWith({ customEnumTemplate: true });
             expect(plan.counts.duplicate).toBe(0);
