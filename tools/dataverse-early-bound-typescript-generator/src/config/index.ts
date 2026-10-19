@@ -1,5 +1,5 @@
 import defaults from './dataverse-early-bound-typescript-generator-config.json';
-import type { DataverseGenConfig } from '../core';
+import { projectCustomEnumTemplate, withProjectCustomEnumTemplate, type DataverseGenConfig } from '../core';
 
 /** A project created with the New Project dialog. */
 export interface ProjectEntry {
@@ -35,6 +35,11 @@ export interface ProjectDefaults {
     generateEntityTypes: boolean;
     generateFormContext: boolean;
     generateIndex: boolean;
+    /**
+     * Default for the project's custom enum template (`pptbEarlyBoundGenerator.customEnumTemplate`): unlike the other
+     * options, it only fills in a project whose `.dataverse-gen.json` has no value, and never replaces one.
+     */
+    customEnumTemplate: boolean;
 }
 
 /** Settings on the General tab: how the tool itself behaves. */
@@ -113,17 +118,20 @@ const BUILT_IN_PROJECT_DEFAULTS: ProjectDefaults = {
     generateEntityTypes: true,
     generateFormContext: false,
     generateIndex: true,
+    customEnumTemplate: false,
 };
 
 /** Each value from `value` when it has the right type (and, for `outputRoot`, isn't blank), else from `fallback`. */
 function normalizeProjectDefaults(value: unknown, fallback: ProjectDefaults): ProjectDefaults {
     const v = (value && typeof value === 'object' ? value : {}) as Partial<Record<keyof ProjectDefaults, unknown>>;
-    const flag = (key: 'generateEntityTypes' | 'generateFormContext' | 'generateIndex') => (typeof v[key] === 'boolean' ? (v[key] as boolean) : fallback[key]);
+    const flag = (key: 'generateEntityTypes' | 'generateFormContext' | 'generateIndex' | 'customEnumTemplate') =>
+        typeof v[key] === 'boolean' ? (v[key] as boolean) : fallback[key];
     return {
         outputRoot: typeof v.outputRoot === 'string' && v.outputRoot.trim() ? v.outputRoot.trim() : fallback.outputRoot,
         generateEntityTypes: flag('generateEntityTypes'),
         generateFormContext: flag('generateFormContext'),
         generateIndex: flag('generateIndex'),
+        customEnumTemplate: flag('customEnumTemplate'),
     };
 }
 
@@ -191,15 +199,25 @@ export function mergeToolConfig(saved: unknown): ToolConfig {
 /**
  * A new project's `.dataverse-gen.json` with the project defaults applied. Everything else in `config`
  * (selection, other output options) is kept.
+ *
+ * @remarks The custom enum template is the exception: its default is only filled in when the project has no value,
+ * so a project keeps its own choice when it's opened again or the default changes (spec 001, Amendment 2).
+ *
+ * @param config - The project's `.dataverse-gen.json` content.
+ * @param projectDefaults - The Settings panel's Options.
+ * @returns The config with the defaults applied.
  */
 export function applyProjectDefaults(config: DataverseGenConfig, projectDefaults: ProjectDefaults): DataverseGenConfig {
-    return {
+    const applied: DataverseGenConfig = {
         ...config,
         generateEntityTypes: projectDefaults.generateEntityTypes,
         generateFormContext: projectDefaults.generateFormContext,
         generateIndex: projectDefaults.generateIndex,
         output: { ...(config.output ?? {}), outputRoot: projectDefaults.outputRoot },
     };
+    return projectCustomEnumTemplate(config) === undefined
+        ? withProjectCustomEnumTemplate(applied, projectDefaults.customEnumTemplate)
+        : applied;
 }
 
 /** Whether two configs hold the same values. */

@@ -17,7 +17,8 @@
         "outputRoot": "./src/dataverse-gen",
         "generateEntityTypes": true,
         "generateFormContext": false,
-        "generateIndex": true
+        "generateIndex": true,
+        "customEnumTemplate": false
     },
     "projects": []
 }

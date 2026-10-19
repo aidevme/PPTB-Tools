@@ -7,7 +7,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { applyProjectDefaults, mergeToolConfig, toolConfig, toolConfigEquals, type ProjectEntry, type ToolConfig } from '../src/config';
-import { createDefaultConfig } from '../src/core';
+import { createDefaultConfig, projectCustomEnumTemplate, withProjectCustomEnumTemplate } from '../src/core';
 import { loadToolConfig, saveToolConfig } from '../src/services/settings';
 import { DATAVERSE_GEN_TEMPLATES } from '../src/services/dataverseGenTemplates';
 import { version as toolVersion } from '../package.json';
@@ -60,7 +60,7 @@ describe('tool config', () => {
             renameDuplicateIdentifiers: false,
             generateTemplates: true,
             customEnumTemplate: false,
-            projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true },
+            projectDefaults: { outputRoot: './src/dataverse-gen', generateEntityTypes: true, generateFormContext: false, generateIndex: true, customEnumTemplate: false },
             projects: [],
         });
     });
@@ -120,14 +120,34 @@ describe('tool config', () => {
 
     it('applies project defaults to a new project config, keeping everything else', () => {
         const base = { ...createDefaultConfig(), entities: ['account'], output: { outputRoot: './src/dataverse-gen', fileSuffix: '.d.ts' } };
-        const applied = applyProjectDefaults(base, { outputRoot: './types', generateEntityTypes: false, generateFormContext: true, generateIndex: false });
+        const applied = applyProjectDefaults(base, { outputRoot: './types', generateEntityTypes: false, generateFormContext: true, generateIndex: false, customEnumTemplate: false });
         expect(applied).toEqual({
             ...base,
             generateEntityTypes: false,
             generateFormContext: true,
             generateIndex: false,
             output: { outputRoot: './types', fileSuffix: '.d.ts' },
+            pptbEarlyBoundGenerator: { customEnumTemplate: false },
         });
+    });
+
+    it("fills in the custom enum template default only when the project has no value (spec 001, Amendment 2)", () => {
+        const defaults = { ...toolConfig.projectDefaults, customEnumTemplate: true };
+        // No value in the file: the default is filled in.
+        expect(projectCustomEnumTemplate(applyProjectDefaults(createDefaultConfig(), defaults))).toBe(true);
+        // A value in the file is kept, whatever the default.
+        const own = withProjectCustomEnumTemplate(createDefaultConfig(), false);
+        expect(projectCustomEnumTemplate(applyProjectDefaults(own, defaults))).toBe(false);
+        expect(projectCustomEnumTemplate(applyProjectDefaults(withProjectCustomEnumTemplate(createDefaultConfig(), true), toolConfig.projectDefaults))).toBe(true);
+        // Other keys in the tool's object survive.
+        const withOther = { ...createDefaultConfig(), pptbEarlyBoundGenerator: { later: 1 } };
+        expect(applyProjectDefaults(withOther, defaults).pptbEarlyBoundGenerator).toEqual({ later: 1, customEnumTemplate: true });
+    });
+
+    it('reads projectDefaults.customEnumTemplate only when it is a boolean, defaulting to false', () => {
+        expect(mergeToolConfig({ projectDefaults: { customEnumTemplate: true } }).projectDefaults.customEnumTemplate).toBe(true);
+        expect(mergeToolConfig({ projectDefaults: { customEnumTemplate: 'yes' } }).projectDefaults.customEnumTemplate).toBe(false);
+        expect(toolConfig.projectDefaults.customEnumTemplate).toBe(false);
     });
 
     it('fills in fields that projects saved before versions were recorded lack', () => {
@@ -241,7 +261,7 @@ describe('settings panel', () => {
 
         await click(button('Save'));
         expect(onSave).toHaveBeenCalledWith(
-            settingsWith({ projectDefaults: { outputRoot: './types', generateEntityTypes: true, generateFormContext: true, generateIndex: true } }),
+            settingsWith({ projectDefaults: { outputRoot: './types', generateEntityTypes: true, generateFormContext: true, generateIndex: true, customEnumTemplate: false } }),
         );
     });
 

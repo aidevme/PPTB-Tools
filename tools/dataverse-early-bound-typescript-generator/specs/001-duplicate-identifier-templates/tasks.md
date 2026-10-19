@@ -254,7 +254,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 - [x] T029 Add `projectCustomEnumTemplate(config)` and `withProjectCustomEnumTemplate(config, value)` to
   `src/core/config.ts` (key `pptbEarlyBoundGenerator.customEnumTemplate`, "non-boolean values are ignored", other
   keys in the object kept); tests in `test/projectVersion.test.ts` or a new `test/projectTemplates.test.ts`
-- [ ] T030 Move the default to `ProjectDefaults.customEnumTemplate` (default `false`) in `src/config/index.ts` and the
+- [x] T030 Move the default to `ProjectDefaults.customEnumTemplate` (default `false`) in `src/config/index.ts` and the
   three config JSON files, drop `ToolConfig.customEnumTemplate`, and make `applyProjectDefaults` fill the project value
   only when missing; update `useSettingsDraft` defaults; tests in `test/settings.test.ts` (merge, default, fill-only,
   old key ignored)
