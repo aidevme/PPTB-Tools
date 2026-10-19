@@ -80,11 +80,17 @@ export function usePreviewGenerate({
             const byName = new Map<string, EntityMetadataInput>(loaded.map((e) => [e.LogicalName, e]));
             setProgress({ message: 'Generating files…', completed: 0, total: 1 });
             const model = buildSchemaModel(schema, resolved, (name) => byName.get(name));
-            const files = generate(model, resolved, { renameDuplicateIdentifiers: toolSettings.renameDuplicateIdentifiers });
+            // The custom enum template renames duplicates too, so either setting turns renaming on; turning the custom
+            // template off restores the default names unless Rename duplicated identifier(s) is on by itself.
+            const renameDuplicateIdentifiers = toolSettings.renameDuplicateIdentifiers || toolSettings.customEnumTemplate;
+            const files = generate(model, resolved, { renameDuplicateIdentifiers });
             setProgress({ message: 'Comparing with the output folder…', completed: 0, total: 1 });
             // With Generate templates on, dataverse-gen's templates go into the project's templateRoot, like
-            // `dataverse-gen eject`. Off, they're left out of the plan; existing copies are never orphans, so they stay.
-            const templates = toolSettings.generateTemplates ? dataverseGenTemplateFiles(resolved) : [];
+            // `dataverse-gen eject`, with the custom enum.ejs in place of dataverse-gen's when the custom enum template
+            // is on. Off, they're left out of the plan; existing copies are never orphans, so they stay.
+            const templates = toolSettings.generateTemplates
+                ? dataverseGenTemplateFiles(resolved, { customEnum: toolSettings.customEnumTemplate })
+                : [];
             const nextPlan = await createWritePlan(sink, projectRoot, resolved, files, templates);
             setPlan(nextPlan);
             setPreviewedAt(new Date().toISOString());
@@ -112,6 +118,7 @@ export function usePreviewGenerate({
         toolSettings.deleteOrphanedFiles,
         toolSettings.skipDuplicateIdentifiers,
         toolSettings.renameDuplicateIdentifiers,
+        toolSettings.customEnumTemplate,
         toolSettings.generateTemplates,
         toolSettings.general.showPreviewReadyNotification,
     ]);

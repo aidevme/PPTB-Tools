@@ -72,7 +72,7 @@ output and writes the custom `enum.ejs` on the next Generate, after a preview th
 **Independent Test**: preview a project with two labels that become the same name, accept the proposal, preview and
 generate; the files compile and `_templates/enum.ejs` is the custom template.
 
-- [ ] T008 [US1] In `src/hooks/usePreviewGenerate.ts`, rename when `renameDuplicateIdentifiers` or
+- [x] T008 [US1] In `src/hooks/usePreviewGenerate.ts`, rename when `renameDuplicateIdentifiers` or
   `customEnumTemplate` is on, and pass `{ customEnum: generateTemplates && customEnumTemplate }` to
   `dataverseGenTemplateFiles`; add `customEnumTemplate` to the preview's dependencies; tests in `test/hooks.test.ts`
   (with the setting on: no `duplicate` files, `_templates/enum.ejs` is `changed`; with Generate templates off:

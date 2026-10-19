@@ -1,14 +1,18 @@
+/// <reference types="node" />
+// Node types for reading the metadata fixtures from disk; tsconfig keeps them out of src/.
 /**
  * The hooks that hold the app's state (extracted from App.tsx): plan state, tool settings, the project, the
  * environment's lists, and Preview / Generate. Rendered through a probe component with PPTB stubbed.
  */
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { toolConfig, type ProjectEntry, type ToolConfig } from '../src/config';
-import { resolveConfig, type DataverseGenConfig } from '../src/core';
+import { parseCsdl, resolveConfig, type DataverseGenConfig, type EntityMetadataInput } from '../src/core';
 import { useAsyncAction, useAutoHideFooter, useEnvironmentMetadata, usePlanState, usePreviewGenerate, useProject, useToolSettings, type PlanState } from '../src/hooks';
-import { DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
+import { CUSTOM_ENUM_TEMPLATE, DATAVERSE_GEN_TEMPLATES, InMemoryFileSink, createWritePlan, type PptbMetadataProvider } from '../src/services';
 import type { EntitySummary, OperationSummary, WritePlan } from '../src/types';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -442,6 +446,74 @@ describe('usePreviewGenerate', () => {
         };
         expect(await templatesIn(true)).toBe(DATAVERSE_GEN_TEMPLATES.length);
         expect(await templatesIn(false)).toBe(0);
+    });
+
+    describe('with duplicate identifiers (custom enum template, spec 001)', () => {
+        const fixtures = path.join(__dirname, 'fixtures');
+        const edmx = parseCsdl(fs.readFileSync(path.join(fixtures, 'edmx.xml'), 'utf8'));
+        /** The account fixture with accountcategorycode's second option relabelled like its first, so both become PreferredCustomer. */
+        const account = (() => {
+            const json = JSON.parse(fs.readFileSync(path.join(fixtures, 'account-metadata.json'), 'utf8')) as { EntityMetadata: EntityMetadataInput[] };
+            const entity = json.EntityMetadata[0];
+            const attribute = (entity.Attributes as Array<{ LogicalName: string; OptionSet?: { Options: Array<{ Label: { UserLocalizedLabel: { Label: string } } }> } }>).find(
+                (a) => a.LogicalName === 'accountcategorycode',
+            )!;
+            attribute.OptionSet!.Options[1].Label.UserLocalizedLabel.Label = attribute.OptionSet!.Options[0].Label.UserLocalizedLabel.Label;
+            return entity;
+        })();
+        const provider = { getSchemaForSelection: vi.fn(async () => edmx), getEntities: vi.fn(async () => [account]) } as unknown as PptbMetadataProvider;
+
+        async function previewWith(change: Partial<ToolConfig>): Promise<WritePlan> {
+            const hook = renderHook(() =>
+                usePreviewGenerate({
+                    planState: usePlanState(),
+                    projectRoot: '/src/contoso',
+                    config: { entities: ['account'] },
+                    provider,
+                    sink: new InMemoryFileSink(),
+                    toolSettings: settings(change),
+                    recordProjectGeneration: vi.fn(async () => undefined),
+                    markConfigSaved: vi.fn(),
+                    noteMetadataFallback: vi.fn(),
+                    setError: vi.fn(),
+                }),
+            );
+            let plan: WritePlan | null = null;
+            await act(async () => {
+                plan = await hook.result.current.runPreview();
+            });
+            act(() => root?.unmount());
+            container?.remove();
+            root = undefined;
+            return plan!;
+        }
+        const enumFile = (plan: WritePlan) => plan.files.find((f) => f.relativePath.endsWith('account_accountcategorycode.ts'))!;
+        const enumTemplate = (plan: WritePlan) => plan.files.find((f) => f.relativePath.endsWith('_templates/enum.ejs'));
+
+        it("keeps dataverse-gen's names and enum.ejs by default, flagging the duplicate", async () => {
+            const plan = await previewWith({});
+            expect(enumFile(plan).status).toBe('duplicate');
+            expect(enumFile(plan).content).not.toContain('PreferredCustomer_2');
+            expect(enumTemplate(plan)?.content).toBe(DATAVERSE_GEN_TEMPLATES.find((t) => t.name === 'enum.ejs')!.content);
+        });
+
+        it('renames the duplicate and plans the custom enum.ejs when the custom enum template is on', async () => {
+            const plan = await previewWith({ customEnumTemplate: true });
+            expect(plan.counts.duplicate).toBe(0);
+            expect(enumFile(plan).content).toContain('  PreferredCustomer = 1,\n  PreferredCustomer_2 = 2,');
+            expect(enumTemplate(plan)?.content).toBe(CUSTOM_ENUM_TEMPLATE);
+            expect(enumTemplate(plan)?.status).toBe('new');
+            // Every other template stays dataverse-gen's.
+            const others = plan.files.filter((f) => f.relativePath.includes('_templates/') && !f.relativePath.endsWith('enum.ejs'));
+            expect(others.map((f) => f.content)).toEqual(DATAVERSE_GEN_TEMPLATES.filter((t) => t.name !== 'enum.ejs').map((t) => t.content));
+        });
+
+        it('still renames, but writes no templates, when Generate templates is off', async () => {
+            const plan = await previewWith({ customEnumTemplate: true, generateTemplates: false });
+            expect(plan.counts.duplicate).toBe(0);
+            expect(enumFile(plan).content).toContain('PreferredCustomer_2');
+            expect(enumTemplate(plan)).toBeUndefined();
+        });
     });
 
     it('asks before deleting orphaned files', async () => {
