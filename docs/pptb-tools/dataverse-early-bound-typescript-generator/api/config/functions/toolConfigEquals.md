@@ -2,7 +2,7 @@
 
 > **toolConfigEquals**(`a`, `b`): `boolean`
 
-Defined in: [config/index.ts:199](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L199)
+Defined in: [config/index.ts:206](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L206)
 
 Whether two configs hold the same values.
 

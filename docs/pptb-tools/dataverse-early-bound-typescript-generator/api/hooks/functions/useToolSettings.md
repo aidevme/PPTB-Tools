@@ -19,8 +19,8 @@ have loaded, and saves every change through PPTB's settings.
 
 > **changeSetting**: (`key`, `checked`) => `Promise`\<`void`\>
 
-The Preview card's switches (Delete orphaned files, Skip and Rename duplicated identifier(s)): each saves
-its key in the tool config, like the Settings panel.
+The Preview card's switches and proposal (Delete orphaned files, Skip and Rename duplicated identifier(s), the
+custom enum template): each saves its key in the tool config, like the Settings panel.
 
 #### Parameters
 

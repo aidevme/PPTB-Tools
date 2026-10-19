@@ -6,13 +6,66 @@ The Generate settings the Preview card shows as switches; each saves a tool-conf
 
 ## Properties
 
+### customEnumTemplate?
+
+> `optional` **customEnumTemplate?**: `boolean`
+
+Defined in: [components/cards/PreviewCard.tsx:44](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L44)
+
+Whether the custom enum template is on (the tool config's `customEnumTemplate`).
+
+#### Default Value
+
+```ts
+false
+```
+
+***
+
 ### deleteOrphans
 
 > **deleteOrphans**: `boolean`
 
-Defined in: [components/cards/PreviewCard.tsx:41](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L41)
+Defined in: [components/cards/PreviewCard.tsx:56](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L56)
 
 Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`).
+
+***
+
+### generateTemplates?
+
+> `optional` **generateTemplates?**: `boolean`
+
+Defined in: [components/cards/PreviewCard.tsx:49](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L49)
+
+Whether Generate writes the templates (the tool config's `generateTemplates`); the proposal mentions when it's off.
+
+#### Default Value
+
+```ts
+true
+```
+
+***
+
+### onCustomEnumTemplateChange?
+
+> `optional` **onCustomEnumTemplateChange?**: (`checked`) => `void`
+
+Defined in: [components/cards/PreviewCard.tsx:54](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L54)
+
+Saves `customEnumTemplate`: called with `true` when the custom enum template proposal is accepted. Without it, no
+proposal is shown.
+
+#### Parameters
+
+##### checked
+
+`boolean`
+
+#### Returns
+
+`void`
 
 ***
 
@@ -20,7 +73,7 @@ Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedF
 
 > **onDeleteOrphansChange**: (`checked`) => `void`
 
-Defined in: [components/cards/PreviewCard.tsx:43](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L43)
+Defined in: [components/cards/PreviewCard.tsx:58](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L58)
 
 Called with the new value when the Delete orphaned files switch is toggled; saves `deleteOrphanedFiles`.
 

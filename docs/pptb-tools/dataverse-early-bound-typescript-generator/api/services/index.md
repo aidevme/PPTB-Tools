@@ -14,6 +14,7 @@
 - [PagedQuery](interfaces/PagedQuery.md)
 - [ProjectConfigState](interfaces/ProjectConfigState.md)
 - [RetryOptions](interfaces/RetryOptions.md)
+- [TemplateFileOptions](interfaces/TemplateFileOptions.md)
 - [WriteOptions](interfaces/WriteOptions.md)
 
 ## Type Aliases
@@ -23,6 +24,7 @@
 
 ## Variables
 
+- [CUSTOM\_ENUM\_TEMPLATE](variables/CUSTOM_ENUM_TEMPLATE.md)
 - [DATAVERSE\_GEN\_TEMPLATES](variables/DATAVERSE_GEN_TEMPLATES.md)
 - [DEFAULT\_TEMPLATE\_ROOT](variables/DEFAULT_TEMPLATE_ROOT.md)
 - [NOTIFICATION\_TYPES](variables/NOTIFICATION_TYPES.md)

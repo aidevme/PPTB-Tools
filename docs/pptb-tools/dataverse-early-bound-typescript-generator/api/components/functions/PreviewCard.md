@@ -2,7 +2,7 @@
 
 > **PreviewCard**(`props`): `Element`
 
-Defined in: [components/cards/PreviewCard.tsx:81](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L81)
+Defined in: [components/cards/PreviewCard.tsx:96](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/PreviewCard.tsx#L96)
 
 Steps 4 and 5: preview what Generate would do, then write it. Status tiles summarise and filter the files;
 the table lists them (changes only by default) beside a viewer showing each file's content or changes. The

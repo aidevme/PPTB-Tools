@@ -16,6 +16,17 @@ Ask for confirmation before Generate writes new and changed files.
 
 ***
 
+### customEnumTemplate
+
+> **customEnumTemplate**: `boolean`
+
+Defined in: [config/index.ts:76](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L76)
+
+Use the custom enum template: rename later duplicate enum members in the output (as `renameDuplicateIdentifiers`
+does) and, when `generateTemplates` is on, write the custom `enum.ejs` that does the same for the dataverse-gen CLI.
+
+***
+
 ### deleteOrphanedFiles
 
 > **deleteOrphanedFiles**: `boolean`
@@ -48,7 +59,7 @@ Write dataverse-gen's EJS templates to the project's `templateRoot` on Generate,
 
 > **projectDefaults**: [`ProjectDefaults`](ProjectDefaults.md)
 
-Defined in: [config/index.ts:72](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L72)
+Defined in: [config/index.ts:77](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L77)
 
 ***
 
@@ -56,7 +67,7 @@ Defined in: [config/index.ts:72](https://github.com/aidevme/PPTB-Tools/blob/main
 
 > **projects**: [`ProjectEntry`](ProjectEntry.md)[]
 
-Defined in: [config/index.ts:73](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L73)
+Defined in: [config/index.ts:78](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/config/index.ts#L78)
 
 ***
 

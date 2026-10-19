@@ -2,7 +2,7 @@
 
 > **generate**(`model`, `config`, `options?`): [`GeneratedFile`](../interfaces/GeneratedFile.md)[]
 
-Defined in: [core/generator.ts:60](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/generator.ts#L60)
+Defined in: [core/generator.ts:68](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/generator.ts#L68)
 
 ## Parameters
 

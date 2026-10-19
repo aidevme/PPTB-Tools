@@ -136,7 +136,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 - [x] T016 [P] Update the docs in `/docs/pptb-tools/dataverse-early-bound-typescript-generator/`:
   `guide/tool-settings.md`, `guide/troubleshooting.md` (duplicate identifiers), `guide/what-gets-generated.md`
   (templates), `components/cards/preview-card.md` and `components/panels/settings-panel.md`
-- [ ] T017 Check the TSDoc of every changed export (`aidevme-tsdoc`), run `npm run lint:tsdoc`, then `npm run docs:api`
+- [x] T017 Check the TSDoc of every changed export (`aidevme-tsdoc`), run `npm run lint:tsdoc`, then `npm run docs:api`
   from the repository root and commit the regenerated API pages
 - [ ] T018 Full verification from the tool folder: `npm run build`, `npm test`, `npm run validate` (the manifest
   changed through T001) and `npm audit`; record the results for the pull request
