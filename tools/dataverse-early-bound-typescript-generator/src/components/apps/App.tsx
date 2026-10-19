@@ -236,6 +236,9 @@ export default function App() {
                         onSkipDuplicatesChange: (checked) => void changeSetting('skipDuplicateIdentifiers', checked),
                         renameDuplicates: toolSettings.renameDuplicateIdentifiers,
                         onRenameDuplicatesChange: (checked) => void changeSetting('renameDuplicateIdentifiers', checked),
+                        customEnumTemplate: toolSettings.customEnumTemplate,
+                        generateTemplates: toolSettings.generateTemplates,
+                        onCustomEnumTemplateChange: (checked) => void changeSetting('customEnumTemplate', checked),
                     }}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}

@@ -92,7 +92,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
   (reset when `previewedAt` changes); the Generate-templates-off sentence; tests in `test/duplicateIdentifiers.test.ts`
   (shown with duplicates, also when Skip duplicated identifier(s) is on; hidden without; accept calls the handler with
   `true`; Not now hides it and calls nothing; shown again after a new preview; the templates-off sentence)
-- [ ] T012 [US1] Pass `customEnumTemplate`, `generateTemplates` and
+- [x] T012 [US1] Pass `customEnumTemplate`, `generateTemplates` and
   `onCustomEnumTemplateChange: (checked) => changeSetting('customEnumTemplate', checked)` to the Preview card in
   `src/components/apps/App.tsx`
 
