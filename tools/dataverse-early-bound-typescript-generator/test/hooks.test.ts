@@ -136,6 +136,20 @@ describe('useToolSettings', () => {
         expect(onPlanStale).toHaveBeenCalledTimes(1);
     });
 
+    it('saves the custom enum template from the Preview card and marks the plan stale, on and off', async () => {
+        const store = installSettingsStub();
+        const onPlanStale = vi.fn();
+        const { result } = renderHook(() => useToolSettings({ onError: vi.fn(), onPlanStale }));
+        await flush();
+        await act(() => result.current.changeSetting('customEnumTemplate', true));
+        expect(result.current.toolSettings.customEnumTemplate).toBe(true);
+        expect((store.toolConfig as ToolConfig).customEnumTemplate).toBe(true);
+        expect(onPlanStale).toHaveBeenCalledTimes(1);
+        await act(() => result.current.changeSetting('customEnumTemplate', false));
+        expect(result.current.toolSettings.customEnumTemplate).toBe(false);
+        expect(onPlanStale).toHaveBeenCalledTimes(2);
+    });
+
     it('adds, edits and deletes saved projects', async () => {
         const store = installSettingsStub();
         const { result } = renderHook(() => useToolSettings({ onError: vi.fn(), onPlanStale: vi.fn() }));

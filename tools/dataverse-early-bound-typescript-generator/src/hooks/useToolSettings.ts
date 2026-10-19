@@ -5,7 +5,7 @@ import { isSamePath, loadToolConfig, reportError, saveToolConfig, writeStatusOf 
 import type { WritePlan } from '../types';
 
 /** The tool-config switches the Preview card changes directly. */
-export type PreviewSettingKey = 'deleteOrphanedFiles' | 'skipDuplicateIdentifiers' | 'renameDuplicateIdentifiers';
+export type PreviewSettingKey = 'deleteOrphanedFiles' | 'skipDuplicateIdentifiers' | 'renameDuplicateIdentifiers' | 'customEnumTemplate';
 
 export interface UseToolSettingsOptions {
     /** Shows an error in the page (the error bar). */
@@ -36,10 +36,16 @@ export function useToolSettings({ onError, onPlanStale }: UseToolSettingsOptions
             const next = mergeToolConfig(draft);
             await saveToolConfig(next);
             setToolSettings(next);
-            // Renaming duplicates changes the generated files, so the current preview no longer matches.
-            if (next.renameDuplicateIdentifiers !== toolSettings.renameDuplicateIdentifiers) onPlanStale();
+            // Renaming duplicates, or the custom enum template (which renames and changes enum.ejs), changes the
+            // generated files, so the current preview no longer matches.
+            if (
+                next.renameDuplicateIdentifiers !== toolSettings.renameDuplicateIdentifiers ||
+                next.customEnumTemplate !== toolSettings.customEnumTemplate
+            ) {
+                onPlanStale();
+            }
         },
-        [toolSettings.renameDuplicateIdentifiers, onPlanStale],
+        [toolSettings.renameDuplicateIdentifiers, toolSettings.customEnumTemplate, onPlanStale],
     );
 
     /** Adds a project from the New Project dialog to `projects` and saves the config. Throws if saving fails. */
@@ -109,8 +115,8 @@ export function useToolSettings({ onError, onPlanStale }: UseToolSettingsOptions
     );
 
     /**
-     * The Preview card's switches (Delete orphaned files, Skip and Rename duplicated identifier(s)): each saves
-     * its key in the tool config, like the Settings panel.
+     * The Preview card's switches and proposal (Delete orphaned files, Skip and Rename duplicated identifier(s), the
+     * custom enum template): each saves its key in the tool config, like the Settings panel.
      */
     const changeSetting = async (key: PreviewSettingKey, checked: boolean) => {
         try {

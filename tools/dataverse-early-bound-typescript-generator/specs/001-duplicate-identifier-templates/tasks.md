@@ -77,7 +77,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
   `dataverseGenTemplateFiles`; add `customEnumTemplate` to the preview's dependencies; tests in `test/hooks.test.ts`
   (with the setting on: no `duplicate` files, `_templates/enum.ejs` is `changed`; with Generate templates off:
   renamed output, no template files)
-- [ ] T009 [US1] Add `'customEnumTemplate'` to `PreviewSettingKey` in `src/hooks/useToolSettings.ts` and mark the plan
+- [x] T009 [US1] Add `'customEnumTemplate'` to `PreviewSettingKey` in `src/hooks/useToolSettings.ts` and mark the plan
   stale when it changes; add it to the defaults in `src/hooks/useSettingsDraft.ts`; tests in `test/hooks.test.ts`
   (changing it saves the setting and marks the plan stale)
 - [ ] T010 [P] [US1] Add `CUSTOM_ENUM_TEMPLATE_TITLE` ("Custom enum template") and `CUSTOM_ENUM_TEMPLATE_INFO` to

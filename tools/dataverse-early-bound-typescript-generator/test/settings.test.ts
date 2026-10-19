@@ -360,6 +360,7 @@ describe('settings panel', () => {
         const onSave = vi.fn(async () => {});
         const custom = settingsWith({
             deleteOrphanedFiles: true,
+            customEnumTemplate: true,
             general: { ...toolConfig.general, recentProjectCount: 7 },
             projects: [PROJECT],
         });
