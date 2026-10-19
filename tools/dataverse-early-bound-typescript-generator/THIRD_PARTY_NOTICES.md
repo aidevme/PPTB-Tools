@@ -13,6 +13,9 @@ copyright notice are reproduced as its licence requires.
     compiled into the tool's `dist/` bundle.
   - dataverse-gen's seven EJS templates (`_templates/*.ejs`) are included unchanged in
     `src/assets/dataverse-gen-templates/`, bundled into `dist/`, and written into users' projects by Generate.
+  - `src/assets/custom-templates/enum.ejs` is a modified copy of dataverse-gen's `enum.ejs`: it adds renaming of
+    duplicate enum member names. It's bundled into `dist/` and written into users' projects by Generate when the
+    Custom enum template setting is on.
   - The test fixtures in `test/fixtures/` are trimmed from dataverse-gen's test data, and `test/reference/` holds
     output produced by the dataverse-gen CLI.
 

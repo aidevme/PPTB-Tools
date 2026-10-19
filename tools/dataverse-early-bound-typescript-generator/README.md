@@ -47,14 +47,17 @@ with both can use both.
 ## What this tool changes
 
 In Dataverse: nothing, since the tool is read-only. On disk, it writes only on **Generate** and only inside the
-project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. See the
+project folder you opened. Orphaned files are deleted only on opt-in, after confirmation. With **Custom enum
+template** on (off by default), Generate writes a custom `enum.ejs` to the project's `templateRoot` in place of
+dataverse-gen's, replacing an existing (also an edited) copy; Preview lists it first. See the
 [Safety guide](../../docs/pptb-tools/dataverse-early-bound-typescript-generator/guide/safety.md) for the details.
 
 ## Credits
 
 - **Original tool:** [dataverse-gen](https://github.com/scottdurow/dataverse-gen) 2.0.17 by **Scott Durow**,
   licensed **MIT**. This tool's generator logic and output templates are a TypeScript port of dataverse-gen, and
-  its test fixtures come from dataverse-gen's test data. The MIT licence and copyright notice are reproduced in
+  its test fixtures come from dataverse-gen's test data. The custom `enum.ejs` is dataverse-gen's `enum.ejs` with
+  duplicate renaming added. The MIT licence and copyright notice are reproduced in
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), which is also included in the published package.
 - **Runtime:** the generated code is for [dataverse-ify](https://github.com/scottdurow/dataverse-ify), also by
   Scott Durow (MIT). It isn't included in this tool; projects install it themselves.
@@ -186,6 +189,10 @@ These only affect cases where dataverse-gen emits code that does not compile:
 - An option label made only of symbols falls back to `_<value>` instead of an empty member name.
 - With **Rename duplicated identifier(s)** on (off by default), a later enum member whose name repeats an earlier one
   gets its value appended (`InProgress_700970000`) instead of a second `InProgress` that doesn't compile.
+- With **Custom enum template** on (off by default; Preview proposes it when it finds duplicate identifiers), the
+  output is renamed the same way, and Generate writes a custom `enum.ejs` (`src/assets/custom-templates/enum.ejs`)
+  to the project's `templateRoot` instead of dataverse-gen's, so the dataverse-gen CLI writes the same names. The
+  other six templates stay dataverse-gen's.
 
 ## Not implemented
 

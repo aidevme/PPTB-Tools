@@ -130,7 +130,7 @@ generate; the files compile and `_templates/enum.ejs` is the custom template.
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T015 [P] Update `README.md`: "What this tool changes" (the custom template replaces the project's `enum.ejs`
+- [x] T015 [P] Update `README.md`: "What this tool changes" (the custom template replaces the project's `enum.ejs`
   when on), "Deliberate deviations from dataverse-gen output" (custom enum template, opt-in) and Credits; and
   `THIRD_PARTY_NOTICES.md` (the modified `enum.ejs` derives from dataverse-gen, MIT)
 - [ ] T016 [P] Update the docs in `/docs/pptb-tools/dataverse-early-bound-typescript-generator/`:
