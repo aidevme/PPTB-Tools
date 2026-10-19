@@ -69,7 +69,7 @@ to the project: Generate saves it in the project's `.dataverse-gen.json`
 - the CLI only gets the fix while **Generate templates** is on.
 
 Turn it off again on the Options card or next to the Generate button; the next Generate writes
-dataverse-gen's `enum.ejs` and names again. **Settings** → **Options** → **Custom enum template** only sets the
+dataverse-gen's `enum.ejs` and names again. **Settings** → **Generate & files** → **Custom enum template** only sets the
 default for projects whose file has no value yet. Which member keeps the plain name follows the option order in Dataverse,
 so reordering the options can move the suffix to another member; renaming the labels is still the lasting fix.
 

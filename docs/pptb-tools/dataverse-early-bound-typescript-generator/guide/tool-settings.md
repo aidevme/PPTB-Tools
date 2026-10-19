@@ -23,18 +23,10 @@ Where the values apply: the default for every project, saved to its `.dataverse-
 | Early-bound entity interfaces | On | An interface per table for dataverse-ify |
 | Form context helpers | Off | Typed `Xrm.FormContext` interfaces for form scripts |
 | index.ts barrel file | On | One file that re-exports everything |
-| Custom enum template | Off | The default for a project's **Custom enum template** (see below), used only when its `.dataverse-gen.json` doesn't set one yet |
 
 These start every project you open, also over the values in its `.dataverse-gen.json`. You can still change them
 for one project on the Options card, and Generate saves them to that project's file. A preview under the
 Generated files card shows the folder tree these options produce.
-
-**Custom enum template** is the exception: it fills in a project's value only when its file has none, and never
-replaces one. Each project turns it on or off on the Options card or next to the Generate button, and keeps its own
-value in `.dataverse-gen.json`. With it on, duplicates are renamed like **Rename duplicated identifier(s)**, and
-Generate writes a custom `enum.ejs` to `templateRoot` in place of dataverse-gen's (replacing an edited copy), so the
-dataverse-gen CLI writes the same names; the CLI only gets it while **Generate templates** is on. See
-[Troubleshooting](./troubleshooting.md#the-custom-enum-template).
 
 ## Generate & files
 
@@ -45,6 +37,7 @@ Where the values apply: all projects.
 | Ask before generating | Off | Asks for confirmation before Generate writes, naming the output folder and how many files will be created and overwritten. Overwrites can't be undone. |
 | Generate templates | On | Generate writes dataverse-gen's seven EJS templates to your project's `templateRoot` folder (`_templates` by default), overwriting edited copies. Turn it off to stop writing them; copies already there are left as they are. |
 | Rename duplicated identifier(s) | Off | Renames later duplicate enum members to `<Name>_<Value>` (for example `InProgress_700970000`), so files with duplicate identifiers compile. Code using a renamed member must use the new name. Changing it needs a new preview. Same switch as **Rename duplicated identifier(s)** next to the Generate button. A project with **Custom enum template** on renames duplicates even while this is off. |
+| Custom enum template | Off | The global default for every project whose `.dataverse-gen.json` doesn't set its own value yet; it never replaces a project's value. Each project turns it on or off on the Options card or next to the Generate button. With it on, duplicates are renamed like **Rename duplicated identifier(s)**, and Generate writes a custom `enum.ejs` to `templateRoot` in place of dataverse-gen's (replacing an edited copy), so the dataverse-gen CLI writes the same names; the CLI only gets it while **Generate templates** is on. See [Troubleshooting](./troubleshooting.md#the-custom-enum-template). |
 | Skip duplicated identifier(s) | Off | Generate doesn't write files that declare the same name twice (two choice labels that become the same enum member, so the file won't compile). An existing copy on disk stays as it is. When off, these files are written and only reported. This is the same switch as **Skip duplicated identifier(s)** next to the Generate button. See [Troubleshooting](./troubleshooting.md#duplicate-identifiers). |
 | Delete orphaned files | Off | Generate also deletes generated files the current selection no longer produces, after you confirm the list. Deletion is permanent. This is the same switch as **Delete orphaned files** next to the Generate button, so the two stay in sync. |
 

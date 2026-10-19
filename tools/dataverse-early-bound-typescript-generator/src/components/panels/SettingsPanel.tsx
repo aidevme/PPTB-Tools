@@ -321,45 +321,27 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
             icon: <DocumentCheckmarkRegular />,
             badges: [SCOPE_PROJECTS, SCOPE_CONFIG_FILE],
             extra: <OutputPreview defaults={draft.projectDefaults} />,
-            settings: [
-                ...(
-                    [
-                        ['generateEntityTypes', 'Early-bound entity interfaces', 'A typed interface per table, for dataverse-ify.', 'dataverse-ify entity types'],
-                        ['generateFormContext', 'Form context helpers', 'A typed FormContext per table, for form scripts.', 'xrm formcontext form scripts'],
-                        ['generateIndex', 'index.ts barrel file', 'An index.ts that re-exports every generated file.', 'barrel index exports'],
-                    ] as const
-                ).map(
-                    ([key, title, description, keywords]): SettingDefinition => ({
-                        id: key,
-                        title,
-                        description,
-                        info: (
-                            <>
-                                Sets the project's <code>{key}</code>.
-                            </>
-                        ),
-                        keywords,
-                        changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
-                        control: switchControl(draft.projectDefaults[key], (checked) => updateProjectDefaults({ [key]: checked })),
-                    }),
-                ),
-                {
-                    id: 'customEnumTemplate',
-                    title: CUSTOM_ENUM_TEMPLATE_TITLE,
-                    description: "Rename duplicates and write an enum.ejs that does the same for the dataverse-gen CLI.",
+            settings: (
+                [
+                    ['generateEntityTypes', 'Early-bound entity interfaces', 'A typed interface per table, for dataverse-ify.', 'dataverse-ify entity types'],
+                    ['generateFormContext', 'Form context helpers', 'A typed FormContext per table, for form scripts.', 'xrm formcontext form scripts'],
+                    ['generateIndex', 'index.ts barrel file', 'An index.ts that re-exports every generated file.', 'barrel index exports'],
+                ] as const
+            ).map(
+                ([key, title, description, keywords]): SettingDefinition => ({
+                    id: key,
+                    title,
+                    description,
                     info: (
                         <>
-                            The default for a project's custom enum template, used when its <code>.dataverse-gen.json</code> doesn't
-                            set one yet; unlike the other options, it never replaces a project's own value. Each project turns it on
-                            or off on the Options card or in Preview and generate. Sets the project's{' '}
-                            <code>{TOOL_CONFIG_KEY}.customEnumTemplate</code>.
+                            Sets the project's <code>{key}</code>.
                         </>
                     ),
-                    keywords: 'duplicate duplicated identifier identifiers enum label rename custom template ejs cli dataverse-gen',
-                    changed: draft.projectDefaults.customEnumTemplate !== settings.projectDefaults.customEnumTemplate,
-                    control: switchControl(draft.projectDefaults.customEnumTemplate, (checked) => updateProjectDefaults({ customEnumTemplate: checked })),
-                },
-            ],
+                    keywords,
+                    changed: draft.projectDefaults[key] !== settings.projectDefaults[key],
+                    control: switchControl(draft.projectDefaults[key], (checked) => updateProjectDefaults({ [key]: checked })),
+                }),
+            ),
         },
         {
             id: 'beforeGenerating',
@@ -425,6 +407,23 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
                     keywords: 'duplicate duplicated identifier identifiers enum label rename suffix compile',
                     changed: draft.renameDuplicateIdentifiers !== settings.renameDuplicateIdentifiers,
                     control: switchControl(draft.renameDuplicateIdentifiers, (checked) => update({ renameDuplicateIdentifiers: checked })),
+                },
+                {
+                    id: 'customEnumTemplate',
+                    title: CUSTOM_ENUM_TEMPLATE_TITLE,
+                    description: "The default for projects that don't set their own; each project can change it on its Options card.",
+                    info: (
+                        <>
+                            Renames duplicates and writes an <code>enum.ejs</code> that does the same for the dataverse-gen CLI. This is
+                            the global default: it's used by every project whose <code>.dataverse-gen.json</code> doesn't set a value yet,
+                            and it never replaces a project's own value. Each project turns it on or off on the Options card or in
+                            Preview and generate, saved as <code>{TOOL_CONFIG_KEY}.customEnumTemplate</code>. The global value is saved
+                            as <code>projectDefaults.customEnumTemplate</code>.
+                        </>
+                    ),
+                    keywords: 'duplicate duplicated identifier identifiers enum label rename custom template ejs cli dataverse-gen global default project',
+                    changed: draft.projectDefaults.customEnumTemplate !== settings.projectDefaults.customEnumTemplate,
+                    control: switchControl(draft.projectDefaults.customEnumTemplate, (checked) => updateProjectDefaults({ customEnumTemplate: checked })),
                 },
                 {
                     id: 'skipDuplicateIdentifiers',

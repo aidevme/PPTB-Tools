@@ -50,7 +50,7 @@ duplicates (see research R1).
 | Field | Type | Default | Stored in |
 | --- | --- | --- | --- |
 | `pptbEarlyBoundGenerator.customEnumTemplate` | boolean (optional) | from `projectDefaults.customEnumTemplate` when missing | The project's `.dataverse-gen.json`, saved by Generate |
-| `projectDefaults.customEnumTemplate` | boolean | `false` | The tool's PPTB settings (Settings → Options); replaces the top-level `customEnumTemplate` above |
+| `projectDefaults.customEnumTemplate` | boolean | `false` | The tool's PPTB settings (Settings → Generate & files); replaces the top-level `customEnumTemplate` above |
 
 - Opening a project, or changing the default, fills in the project value only when the file has none.
 - Rename duplicates in the output: `renameDuplicateIdentifiers` (tool) or the project's `customEnumTemplate`.

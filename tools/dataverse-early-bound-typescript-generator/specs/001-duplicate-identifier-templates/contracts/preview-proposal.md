@@ -42,5 +42,6 @@
   Generate) instead of a tool setting; the confirmation still applies to both.
 - A **Custom enum template** switch on the Options card (same title and explanation) changes the project's value,
   with the same confirmation.
-- Settings → Options → Generated files: **Custom enum template** is the default for projects without a value; it
-  never asks, since it doesn't change an open project's value. The Generate & files tab no longer has the switch.
+- Settings → Generate & files → Duplicate identifiers: **Custom enum template** is the global default for projects
+  without a value; it never asks, since it doesn't change an open project's value. Rename duplicated identifier(s)
+  is its own switch there again.

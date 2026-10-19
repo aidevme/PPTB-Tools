@@ -253,7 +253,8 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 
 ## Phase 10: Amendment 2 - The custom enum template per project (FR-009, FR-010, FR-012, US3)
 
-**Goal**: each project stores its own choice in `.dataverse-gen.json`; Settings → Options holds the default.
+**Goal**: each project stores its own choice in `.dataverse-gen.json`; Settings holds the default (after T034, moved
+from Options → Generated files to Generate & files → Duplicate identifiers at the user's request).
 
 **Independent Test**: turn it on in one project, open another: it's off there; reopen the first: still on, and its
 `.dataverse-gen.json` has `pptbEarlyBoundGenerator.customEnumTemplate: true` after Generate.

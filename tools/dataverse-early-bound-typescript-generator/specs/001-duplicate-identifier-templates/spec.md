@@ -134,8 +134,8 @@ project's `enum.ejs` are dataverse-gen's defaults again.
   templates on the next Generate.
 - **FR-010** *(Amendment 2, replaces "a tool setting for every project")*: The choice MUST be a project setting, stored
   in the project's `.dataverse-gen.json` (saved by Generate, like the other options) under a key the dataverse-gen CLI
-  keeps and ignores. The proposal and the Preview card switch change the open project's value. Settings → Options holds
-  the default for projects whose file doesn't have the key yet; opening a project MUST NOT replace a value its file
+  keeps and ignores. The proposal and the Preview card switch change the open project's value. Settings → Generate & files
+  (Duplicate identifiers) holds the global default for projects whose file doesn't have the key yet; opening a project MUST NOT replace a value its file
   already has. Declining the proposal MUST NOT be stored.
 - **FR-011**: The README's "What this tool changes" and "Deliberate deviations from dataverse-gen output" sections, the
   user guide and the Settings panel explanations MUST describe the custom enum template, including that it overwrites
@@ -157,7 +157,7 @@ project's `enum.ejs` are dataverse-gen's defaults again.
   into an identifier; already detected and reported per file today.
 - **Custom enum template setting** *(Amendment 2: per project)*: whether the custom template is in use for a project,
   stored in its `.dataverse-gen.json`; turning it on also renames duplicates in that project's output. Its default for
-  projects without the key is a tool setting (Settings → Options).
+  projects without the key is a tool setting (Settings → Generate & files).
 
 ## Success Criteria *(mandatory)*
 
@@ -190,6 +190,7 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 - Amendment 2 (2026-10-19): the custom enum template is configured per project, superseding Q2. Decided: stored in
   `.dataverse-gen.json` (it travels with the repository; the dataverse-gen CLI 2.0.17 reads and writes the whole file,
   so the key survives it); only the custom enum template moves (Generate templates and Rename stay tool settings);
-  Settings → Options keeps a default for projects without the key.
+  Settings keeps a default for projects without the key; on 2026-10-19 the user placed that global switch on
+  Generate & files → Duplicate identifiers (it was on Options → Generated files).
 - Out of scope: changing labels in Dataverse, other kinds of duplicates (for example two tables with the same name), and
   writing templates when a project is created.

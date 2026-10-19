@@ -34,7 +34,7 @@ choice column with options "In Progress" and "In-Progress"), and a project selec
    selection; its enum file has the same member names.
 5. **Turn it off** on the Options card; preview: the enum file and `enum.ejs` go back to the defaults.
    **Two projects (Amendment 2):** with it on and generated in project A, open project B (no value in its file): it
-   follows Settings → Options → Custom enum template (off). Generate B, reopen A: A's `.dataverse-gen.json` still has
+   follows Settings → Generate & files → Custom enum template (off). Generate B, reopen A: A's `.dataverse-gen.json` still has
    `"pptbEarlyBoundGenerator": { "customEnumTemplate": true }` and the switch is on. Turning the Settings default on
    doesn't change A or B once they have a value.
 6. **Generate templates off:** with the custom template on, the proposal/explanation says the CLI won't get the fix;

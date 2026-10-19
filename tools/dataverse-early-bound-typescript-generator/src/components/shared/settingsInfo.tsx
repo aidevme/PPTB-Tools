@@ -47,7 +47,7 @@ export const CUSTOM_ENUM_TEMPLATE_INFO = (
         replacing an edited copy, so the CLI renames them the same way. The CLI only gets it while Generate templates is on. When off,
         the output and <code>enum.ejs</code> are dataverse-gen's again. Renaming the labels in Dataverse is the lasting fix, and a
         reorder of the options can move the suffix to another member. Changing this needs a new preview. It's set per project, on
-        the Options card and in Preview and generate; Settings → Options sets the default for projects that don't have a value yet.
+        the Options card and in Preview and generate; Settings → Generate &amp; files sets the global default for projects that don't have a value yet.
         Saved in the project's <code>.dataverse-gen.json</code> as <code>pptbEarlyBoundGenerator.customEnumTemplate</code>, which
         the dataverse-gen CLI ignores.
     </>

@@ -58,10 +58,10 @@ Preview card are in `src/components/shared/settingsInfo.tsx`.
 | General | Lists & startup | Rows in the Select tables | `SpinButton` 100–2000, step 100, with a "rows" unit; the row limit of the [SelectionCard](../cards/selection-card.md) | `general.selectionRowLimit` |
 | Options | Output (Default for every project, .dataverse-gen.json) | Output folder | Text box | `projectDefaults.outputRoot` |
 | Options | Generated files (same badges) | Early-bound entity interfaces, Form context helpers, index.ts barrel file | Switch each | `projectDefaults.generateEntityTypes`, `generateFormContext`, `generateIndex` |
-| Options | Generated files (same badges) | Custom enum template | Switch, off by default; the default for projects without a value, never replacing one | `projectDefaults.customEnumTemplate` |
 | Generate & files | Before generating (All projects) | Ask before generating | Switch, off by default | `confirmBeforeGenerate` |
 | Generate & files | Templates (All projects) | Generate templates | Switch, on by default | `generateTemplates` |
 | Generate & files | Duplicate identifiers (All projects) | Rename duplicated identifier(s) | Switch, off by default | `renameDuplicateIdentifiers` |
+| Generate & files | Duplicate identifiers (All projects) | Custom enum template | Switch, off by default; the global default for projects without their own value, never replacing one, so Save doesn't ask | `projectDefaults.customEnumTemplate` |
 | Generate & files | Duplicate identifiers (All projects) | Skip duplicated identifier(s) | Switch, off by default | `skipDuplicateIdentifiers` |
 | Generate & files | Orphaned files (All projects, **Permanent**) | Delete orphaned files | Switch, off by default | `deleteOrphanedFiles` |
 

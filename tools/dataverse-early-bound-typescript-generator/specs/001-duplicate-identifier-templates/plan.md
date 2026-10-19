@@ -165,7 +165,8 @@ key means "use the default"; a non-boolean value is ignored. Read and written wi
 `core/config.ts` (`projectCustomEnumTemplate(config)`, `withProjectCustomEnumTemplate(config, value)`).
 
 **Default (D5):** the tool setting moves from `ToolConfig.customEnumTemplate` to
-`ProjectDefaults.customEnumTemplate` (Settings → Options → Generated files card, default `false`). Unlike the other
+`ProjectDefaults.customEnumTemplate` (Settings → Generate & files → Duplicate identifiers, default `false`; first placed on Options → Generated files, moved
+at the user's request on 2026-10-19). Unlike the other
 Options, it's applied only when the project's file has no value: `applyProjectDefaults` fills it in, never replaces
 it, so a project keeps its own choice when it's reopened or when the default changes. The old top-level
 `ToolConfig.customEnumTemplate` (never released) is dropped; `mergeToolConfig` ignores it.
@@ -178,7 +179,7 @@ it, so a project keeps its own choice when it's reopened or when the default cha
   `useProject.updateConfig`, which marks the preview stale; Generate saves it with the rest of `.dataverse-gen.json`.
   `customEnumTemplate` leaves `PreviewSettingKey`.
 - Amendment 1's confirmation stays on the proposal and the Preview card switch (`useCustomEnumTemplateConfirmation`,
-  now saving to the project) and moves from the Settings panel's Save to the Options card switch. Settings → Options
+  now saving to the project) and moves from the Settings panel's Save to the Options card switch. Settings → Generate & files
   only changes the default for projects without a value, so it never overwrites anything and doesn't ask; its
   `editedEnumTemplatePath` prop and the Save confirmation are removed.
 - The Settings panel's Generate & files tab loses the Custom enum template row, and Rename is no longer shown as

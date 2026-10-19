@@ -118,7 +118,7 @@
                     "default": true
                 },
                 "customEnumTemplate": {
-                    "description": "Default for a project's custom enum template (pptbEarlyBoundGenerator.customEnumTemplate in its .dataverse-gen.json). Unlike the other options, it's only filled in when the project's file has no value, and never replaces one. Shown on the Settings panel's Options tab; each project's value is on the Options card.",
+                    "description": "Default for a project's custom enum template (pptbEarlyBoundGenerator.customEnumTemplate in its .dataverse-gen.json). Unlike the other options, it's only filled in when the project's file has no value, and never replaces one. Shown on the Settings panel's Generate & files tab (Duplicate identifiers) as the global default; each project's value is on the Options card.",
                     "type": "boolean",
                     "default": false
                 }

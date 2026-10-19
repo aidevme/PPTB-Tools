@@ -365,15 +365,17 @@ describe('settings panel', () => {
         expect(onSave).toHaveBeenCalledWith(settingsWith({ skipDuplicateIdentifiers: true }));
     });
 
-    it('saves the Custom enum template default from the Options tab without asking (Amendment 2)', async () => {
+    it('saves the global Custom enum template default from Generate & files without asking (Amendment 2)', async () => {
         const onSave = vi.fn(async () => {});
         await render(toolConfig, onSave);
-        await openTab('Generate & files');
-        // It's a project setting now: no row on Generate & files, and Rename is its own switch again.
-        expect(control('Custom enum template')).toBeUndefined();
-        expect(control('Rename duplicated identifier(s)').disabled).toBe(false);
         await openTab('Options');
+        // Only the global default is in Settings, under Duplicate identifiers; each project's value is on its Options card.
+        expect(control('Custom enum template')).toBeUndefined();
+        await openTab('Generate & files');
         await click(control('Custom enum template'));
+        // Rename is its own switch: the custom template doesn't turn it on here.
+        expect(control('Rename duplicated identifier(s)').checked).toBe(false);
+        expect(control('Rename duplicated identifier(s)').disabled).toBe(false);
         expect(control('Custom enum template').checked).toBe(true);
         await click(button('Save'));
         expect(document.body.textContent).not.toContain('Replace your edited enum.ejs?');
