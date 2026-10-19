@@ -44,3 +44,14 @@ The other six templates are always dataverse-gen's. The file goes through the wr
 For each enum, in member order: a name already used by an earlier member gets `_<Value>` appended, repeatedly until
 it's unused; the first member with a name keeps it. String-valued enums (from `$metadata` enum types) can't contain
 duplicates (see research R1).
+
+## Amendment 2: per project
+
+| Field | Type | Default | Stored in |
+| --- | --- | --- | --- |
+| `pptbEarlyBoundGenerator.customEnumTemplate` | boolean (optional) | from `projectDefaults.customEnumTemplate` when missing | The project's `.dataverse-gen.json`, saved by Generate |
+| `projectDefaults.customEnumTemplate` | boolean | `false` | The tool's PPTB settings (Settings → Options); replaces the top-level `customEnumTemplate` above |
+
+- Opening a project, or changing the default, fills in the project value only when the file has none.
+- Rename duplicates in the output: `renameDuplicateIdentifiers` (tool) or the project's `customEnumTemplate`.
+- Write the custom `enum.ejs`: `generateTemplates` (tool) and the project's `customEnumTemplate`.

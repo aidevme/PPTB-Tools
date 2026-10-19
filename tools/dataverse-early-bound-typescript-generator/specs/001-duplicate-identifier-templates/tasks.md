@@ -243,3 +243,32 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
 
 - [x] T028 Mention in the `SettingsPanel` TSDoc (`src/components/panels/SettingsPanel.tsx`) that Save asks first when it
   would replace an edited `enum.ejs` per FR-012 and Constitution VII (partial)
+
+## Phase 10: Amendment 2 - The custom enum template per project (FR-009, FR-010, FR-012, US3)
+
+**Goal**: each project stores its own choice in `.dataverse-gen.json`; Settings → Options holds the default.
+
+**Independent Test**: turn it on in one project, open another: it's off there; reopen the first: still on, and its
+`.dataverse-gen.json` has `pptbEarlyBoundGenerator.customEnumTemplate: true` after Generate.
+
+- [ ] T029 Add `projectCustomEnumTemplate(config)` and `withProjectCustomEnumTemplate(config, value)` to
+  `src/core/config.ts` (key `pptbEarlyBoundGenerator.customEnumTemplate`, "non-boolean values are ignored", other
+  keys in the object kept); tests in `test/projectVersion.test.ts` or a new `test/projectTemplates.test.ts`
+- [ ] T030 Move the default to `ProjectDefaults.customEnumTemplate` (default `false`) in `src/config/index.ts` and the
+  three config JSON files, drop `ToolConfig.customEnumTemplate`, and make `applyProjectDefaults` fill the project value
+  only when missing; update `useSettingsDraft` defaults; tests in `test/settings.test.ts` (merge, default, fill-only,
+  old key ignored)
+- [ ] T031 Read the project's value in `src/hooks/usePreviewGenerate.ts`; remove `'customEnumTemplate'` from
+  `PreviewSettingKey` (`src/hooks/useToolSettings.ts`); route the proposal and the Preview card switch through
+  `useCustomEnumTemplateConfirmation` to `updateConfig` in `src/components/apps/App.tsx`; tests in `test/hooks.test.ts`
+  (project value drives renaming and enum.ejs; changing it marks the plan stale; two projects independent)
+- [ ] T032 Add the Custom enum template switch, with the confirmation, to `src/components/cards/OptionsCard.tsx`; move
+  the Settings switch to Settings → Options → Generated files as the default (no confirmation), remove it from Generate
+  & files with Rename's disabled state and the `editedEnumTemplatePath` prop and Save confirmation
+  (`src/components/panels/SettingsPanel.tsx`, `App.tsx`); update `CUSTOM_ENUM_TEMPLATE_INFO`; tests in
+  `test/optionsCard.test.ts` and `test/settings.test.ts`
+- [ ] T033 [P] Update the docs: `guide/tool-settings.md`, `guide/troubleshooting.md`, `guide/project-file.md` (the new
+  key), `guide/safety.md`, `components/cards/options-card.md`, `components/cards/preview-card.md`,
+  `components/panels/settings-panel.md`, the README, and `quickstart.md` (two projects)
+- [ ] T034 Regenerate the API pages, rerun the full verification, update the Verification note, and rerun
+  `/speckit-converge` until Converged

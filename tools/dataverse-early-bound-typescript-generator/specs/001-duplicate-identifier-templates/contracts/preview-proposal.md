@@ -35,3 +35,12 @@
 - **Actions:** **Use custom enum template** (saves the setting) and **Cancel** (saves nothing; the Settings panel
   stays open with its draft).
 - **Not shown:** when turning the setting off, with Generate templates off, or when no edited `enum.ejs` is known.
+
+## Amendment 2: per project
+
+- The proposal and the Preview card switch change the **open project's** value (`.dataverse-gen.json`, saved by
+  Generate) instead of a tool setting; the confirmation still applies to both.
+- A **Custom enum template** switch on the Options card (same title and explanation) changes the project's value,
+  with the same confirmation.
+- Settings → Options → Generated files: **Custom enum template** is the default for projects without a value; it
+  never asks, since it doesn't change an open project's value. The Generate & files tab no longer has the switch.

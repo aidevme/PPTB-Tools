@@ -4,7 +4,8 @@
 
 **Created**: 2026-10-19
 
-**Status**: Approved (2026-10-19); Amendment 1 (confirmation dialog) approved 2026-10-19
+**Status**: Approved (2026-10-19); Amendment 1 (confirmation dialog) approved 2026-10-19; Amendment 2 (project-level
+setting) approved 2026-10-19
 
 **Input**: User description: "By default use the default templates; if any duplicates are found, propose to the user to use
 custom templates." Agreed meaning of "custom templates": the tool writes a fixed `enum.ejs` to the project's templates
@@ -81,9 +82,11 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 
 **Acceptance Scenarios**:
 
-1. **Given** the custom enum template is in use, **When** the developer turns it off in the settings, **Then** the next
-   preview lists the project's `enum.ejs` as changed back to the default, and Generate writes the default template and
-   default member names.
+1. **Given** the custom enum template is in use for the project, **When** the developer turns it off on the Options card
+   (or the Preview card), **Then** the next preview lists the project's `enum.ejs` as changed back to the default, and
+   Generate writes the default template and default member names. *(Amendment 2: project-level)*
+2. **Given** two projects, **When** the custom enum template is on for one, **Then** the other keeps the default
+   templates, and reopening either project keeps its own choice. *(Amendment 2)*
 
 ---
 
@@ -125,16 +128,20 @@ project's `enum.ejs` are dataverse-gen's defaults again.
   the same metadata.
 - **FR-008**: Developers MUST be able to decline the proposal; declining MUST leave the output and templates at their
   defaults.
-- **FR-009**: Developers MUST be able to turn the custom enum template on and off in the settings, without a
-  duplicate being present, and turning it off MUST restore the default output and templates on the next Generate.
-- **FR-010**: The choice MUST be a tool setting that applies to every project, like Rename duplicated identifier(s)
-  today: shown in the Settings panel and on the Preview card, and saved with the tool's settings. Declining the
-  proposal MUST NOT be stored.
+- **FR-009** *(Amendment 2)*: Developers MUST be able to turn the custom enum template on and off for the open project
+  on the Options card, without a duplicate being present, and turning it off MUST restore the default output and
+  templates on the next Generate.
+- **FR-010** *(Amendment 2, replaces "a tool setting for every project")*: The choice MUST be a project setting, stored
+  in the project's `.dataverse-gen.json` (saved by Generate, like the other options) under a key the dataverse-gen CLI
+  keeps and ignores. The proposal and the Preview card switch change the open project's value. Settings → Options holds
+  the default for projects whose file doesn't have the key yet; opening a project MUST NOT replace a value its file
+  already has. Declining the proposal MUST NOT be stored.
 - **FR-011**: The README's "What this tool changes" and "Deliberate deviations from dataverse-gen output" sections, the
   user guide and the Settings panel explanations MUST describe the custom enum template, including that it overwrites
   an existing `enum.ejs`.
-- **FR-012** *(Amendment 1)*: When the custom enum template is turned on (from the proposal, the Preview card switch,
-  or the Settings panel's Save), Generate templates is on, and the last preview found the project's `enum.ejs` edited
+- **FR-012** *(Amendment 1; Amendment 2 moved the third entry point from the Settings panel to the Options card)*:
+  When the custom enum template is turned on for the project (from the proposal, the Preview card switch, or the
+  Options card switch), Generate templates is on, and the last preview found the project's `enum.ejs` edited
   (different from both dataverse-gen's and the custom template), the tool MUST ask for confirmation in a dialog that
   names the file's path, says the next Generate overwrites the edits and that they're lost unless they're in source
   control, and says nothing is written now. Confirming turns the setting on; cancelling leaves it off and saves nothing.
@@ -147,8 +154,9 @@ project's `enum.ejs` are dataverse-gen's defaults again.
   to the project's templates folder in place of the default one when in use.
 - **Duplicate identifier**: two or more members of one generated enum whose names are equal after the label is turned
   into an identifier; already detected and reported per file today.
-- **Custom enum template setting**: whether the custom template is in use; turning it on also renames duplicates in the
-  tool's own output.
+- **Custom enum template setting** *(Amendment 2: per project)*: whether the custom template is in use for a project,
+  stored in its `.dataverse-gen.json`; turning it on also renames duplicates in that project's output. Its default for
+  projects without the key is a tool setting (Settings → Options).
 
 ## Success Criteria *(mandatory)*
 
@@ -178,5 +186,9 @@ project's `enum.ejs` are dataverse-gen's defaults again.
 - Amendment 1 (2026-10-19): a confirmation dialog when turning the custom enum template on would overwrite an edited
   `enum.ejs` (US1 scenario 6, FR-012, SC-005). Decided: shown only when the last preview found the file edited; with
   Generate templates off there's no dialog (the setting's explanation already says the CLI won't get the fix).
+- Amendment 2 (2026-10-19): the custom enum template is configured per project, superseding Q2. Decided: stored in
+  `.dataverse-gen.json` (it travels with the repository; the dataverse-gen CLI 2.0.17 reads and writes the whole file,
+  so the key survives it); only the custom enum template moves (Generate templates and Rename stay tool settings);
+  Settings → Options keeps a default for projects without the key.
 - Out of scope: changing labels in Dataverse, other kinds of duplicates (for example two tables with the same name), and
   writing templates when a project is created.

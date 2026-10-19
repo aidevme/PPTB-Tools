@@ -153,3 +153,38 @@ confirm **Use custom enum template**, cancel **Cancel**. Wording and the shared 
 **Constitution re-check:** I is strengthened (a confirmation naming the file before an overwrite); II–VI are
 unchanged (no new API, dependency or output change; the dialog is a Fluent `Dialog` with keyboard access); VII adds
 the dialog to the docs and to the live test (quickstart step 3).
+
+## Amendment 2: the custom enum template per project (2026-10-19)
+
+Spec: FR-009, FR-010, FR-012 (Options card entry point), US3 scenarios 1–2, Key Entities.
+
+**Storage (D4):** a tool-namespaced object in `.dataverse-gen.json`, so it can't collide with a future dataverse-gen
+key: `"pptbEarlyBoundGenerator": { "customEnumTemplate": true }`. `DataverseGenConfig` already keeps unknown keys, and
+the dataverse-gen CLI 2.0.17 writes the whole object back (`saveConfig`), so the key survives it. A missing object or
+key means "use the default"; a non-boolean value is ignored. Read and written with two small pure helpers in
+`core/config.ts` (`projectCustomEnumTemplate(config)`, `withProjectCustomEnumTemplate(config, value)`).
+
+**Default (D5):** the tool setting moves from `ToolConfig.customEnumTemplate` to
+`ProjectDefaults.customEnumTemplate` (Settings → Options → Generated files card, default `false`). Unlike the other
+Options, it's applied only when the project's file has no value: `applyProjectDefaults` fills it in, never replaces
+it, so a project keeps its own choice when it's reopened or when the default changes. The old top-level
+`ToolConfig.customEnumTemplate` (never released) is dropped; `mergeToolConfig` ignores it.
+
+**Effects:**
+
+- `usePreviewGenerate` reads the project's value instead of the tool setting (renaming when Rename or it is on; the
+  custom `enum.ejs` when it and Generate templates are on).
+- The proposal, the Preview card switch and a new Options card switch change the project's value through
+  `useProject.updateConfig`, which marks the preview stale; Generate saves it with the rest of `.dataverse-gen.json`.
+  `customEnumTemplate` leaves `PreviewSettingKey`.
+- Amendment 1's confirmation stays on the proposal and the Preview card switch (`useCustomEnumTemplateConfirmation`,
+  now saving to the project) and moves from the Settings panel's Save to the Options card switch. Settings → Options
+  only changes the default for projects without a value, so it never overwrites anything and doesn't ask; its
+  `editedEnumTemplatePath` prop and the Save confirmation are removed.
+- The Settings panel's Generate & files tab loses the Custom enum template row, and Rename is no longer shown as
+  disabled there (Rename is tool-wide, the custom template per project); on the Preview card, Rename still shows on
+  and disabled while the open project uses the custom template.
+
+**Constitution re-check:** I unchanged (no new write; the value is saved by Generate with `.dataverse-gen.json`); II:
+the new key is optional, namespaced and ignored by the CLI, and existing keys keep their meaning; III–VI unchanged;
+VII: docs, schema descriptions and TSDoc change with the code, and the live test checks two projects.
