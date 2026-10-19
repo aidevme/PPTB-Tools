@@ -169,11 +169,7 @@ into the gitignored `agent-src/sync/.venv-skills-ref`).
 | `aidevme-tsdoc` | Writing, reviewing and fixing TSDoc doc comments in TypeScript (public symbols, React components and hooks), checked with ESLint's `tsdoc/syntax` |
 | `aidevme-vitepress` | Changing the VitePress docs site (pages, sidebar, config, build errors), checked against the VitePress docs through the Vue Docs MCP server |
 | `playwright-cli` | Driving a browser: testing, screenshots, scraping |
-| `aidevme-dataverse-sdk-reference` | Dataverse SDK / Web API / metadata reference |
-| `aidevme-fetchxml-queries` | Writing or optimizing FetchXML |
-| `aidevme-dataverse-data` | Querying or changing Dataverse records through the Web API |
-| `aidevme-dataverse-customapi` | Creating or inspecting Custom APIs (for example to test the generator) |
-| `aidevme-shared-scripts` | Shared auth and Web API scripts the Dataverse skills load; not run directly |
+| `aidevme-shared-scripts` | Shared PowerShell library other skills load (the wiki skills use its `Wiki-Tiers.ps1`); not run directly |
 | `aidevme-diagram-drawio` | draw.io diagrams for the docs |
 | `aidevme-wiki-*` | The `agent/` wiki: `capture`, `lint`, `process-inbox`, `query`, `scaffold-project`, `update-topic`, `write-decision` |
 | `aidevme-skill-creator`, `skill-creator` | Creating or improving skills |

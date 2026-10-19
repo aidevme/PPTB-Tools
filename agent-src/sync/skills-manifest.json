@@ -196,18 +196,19 @@
     },
     {
       "name": "aidevme-dataverse-data",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
-      "source": "HINT+shared"
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: query and change Dataverse records through the Web API (OData, FetchXML, batch)."
     },
     {
       "name": "aidevme-dataverse-customapi",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
+      "ported": false,
       "source": "HINT",
-      "note": "aka hso-create-custom-api."
+      "note": "Removed 2026-10-19: not needed for PPTB tool development (the generator reads custom APIs itself), and it referenced removed skills. Was: create/update/query/delete Custom APIs via the Web API. aka hso-create-custom-api."
     },
     {
       "name": "hso-dataverse-ui-config",
@@ -273,10 +274,11 @@
     },
     {
       "name": "aidevme-fetchxml-queries",
-      "scope": "core",
+      "scope": "drop",
       "group": "dataverse",
-      "ported": true,
-      "source": "shared"
+      "ported": false,
+      "source": "shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: write and optimize FetchXML queries."
     },
     {
       "name": "hso-semantic-data-modeling",
@@ -670,10 +672,11 @@
     },
     {
       "name": "aidevme-dataverse-sdk-reference",
-      "scope": "core",
+      "scope": "drop",
       "group": "reference",
-      "ported": true,
-      "source": "HINT+shared"
+      "ported": false,
+      "source": "HINT+shared",
+      "note": "Removed 2026-10-19: not needed for PPTB tool development. Was: Dataverse SDK, Web API and metadata reference from Microsoft docs."
     },
     {
       "name": "hso-dataverse-ui-reference",

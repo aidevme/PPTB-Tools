@@ -39,7 +39,7 @@ Core groups: `foundation dataverse server client pipelines delivery reference me
 ## Step 2 — Name
 
 - Prefix `aidevme-` for product skills (core). Format `aidevme-<domain>-<purpose>` in hyphen-case.
-- Examples: `aidevme-dataverse-data`, `aidevme-wiki-lint`, `aidevme-diagram-drawio`.
+- Examples: `aidevme-docs-maintenance`, `aidevme-wiki-lint`, `aidevme-diagram-drawio`.
 
 ## Step 3 — Create the folder, SKILL.md and evals/
 
