@@ -29,5 +29,5 @@ export { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT, dataverseGenTemplateFil
 export type { DeleteResult } from './plan';
 export { loadProjectConfig, saveProjectConfig } from './projectConfig';
 export type { ProjectConfigState } from './projectConfig';
-export { connectionKey, getRememberedProjectFolder, loadToolConfig, rememberProjectFolder, saveToolConfig } from './settings';
+export { connectionKey, getRememberedProjectFolder, loadStoredToolSettings, loadToolConfig, rememberProjectFolder, saveToolConfig } from './settings';
 export { listSolutions, getSolutionMemberIds, getSolutionEntityIds } from './solutions';

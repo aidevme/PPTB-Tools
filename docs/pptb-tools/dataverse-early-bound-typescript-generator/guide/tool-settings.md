@@ -51,7 +51,13 @@ its output, and the next Generate overwrites them. See [What gets generated](./w
 
 ## Advanced
 
-For settings most projects never need to change. It has no settings yet.
+Details most projects never need. Nothing to set here yet.
+
+**PPTB tool settings** shows, read-only and as JSON, everything Power Platform ToolBox has saved for this tool on
+this installation: the saved settings (`toolConfig`), your saved projects, and the project folder last used with
+each connection (`projectFolders`, `lastProjectFolder`). It's useful when something behaves unexpectedly or for a
+bug report. Click **Refresh** to read it again. Unsaved changes in the panel aren't included, and PPTB doesn't say
+where it stores the file, so no path is shown. Outside PPTB it shows a message instead.
 
 ## Saving
 
@@ -65,4 +71,4 @@ For settings most projects never need to change. It has no settings yet.
 
 Settings are saved in PPTB's per-tool settings for this tool, so they apply to every connection and
 project on this installation. Your saved projects and the last project folder used with each connection are kept
-there too. The defaults are built into the tool.
+there too. The defaults are built into the tool. To see what's saved, open **Advanced → PPTB tool settings**.

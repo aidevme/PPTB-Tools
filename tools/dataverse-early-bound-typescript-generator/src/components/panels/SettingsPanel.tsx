@@ -36,6 +36,7 @@ import {
     DeleteRegular,
     DismissRegular,
     DocumentCheckmarkRegular,
+    DocumentDatabaseRegular,
     FolderRegular,
     ListRegular,
     SettingsRegular,
@@ -54,7 +55,7 @@ import { useSettingsDraft } from '../../hooks';
 import { DEFAULT_TEMPLATE_ROOT } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { version } from '../../../package.json';
-import { OutputPreview, SettingRow, SettingsSection, TemplatesViewer, type SectionBadge } from './SettingsParts';
+import { OutputPreview, SettingRow, SettingsSection, StoredSettingsViewer, TemplatesViewer, type SectionBadge } from './SettingsParts';
 import {
     SCOPE_ALL_PROJECTS,
     SCOPE_CONFIG_FILE,
@@ -422,6 +423,16 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
             // Nothing to set: the card only shows the templates.
             settings: [],
             extra: <TemplatesViewer />,
+        },
+        {
+            id: 'storedSettings',
+            tab: 'advanced',
+            title: 'PPTB tool settings',
+            icon: <DocumentDatabaseRegular />,
+            badges: [SCOPE_INSTALLATION, { label: 'Read-only' }],
+            // Nothing to set: the card shows what PPTB has stored for the tool.
+            settings: [],
+            extra: <StoredSettingsViewer />,
         },
         {
             id: 'orphans',

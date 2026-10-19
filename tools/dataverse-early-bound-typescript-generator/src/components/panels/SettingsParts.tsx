@@ -1,11 +1,13 @@
-import { useId, useState, type ReactElement, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useState, type ReactElement, type ReactNode } from 'react';
 import {
     Badge,
+    Button,
     Caption1,
     Card,
     InfoLabel,
     MessageBar,
     MessageBarBody,
+    Spinner,
     Subtitle2,
     Tab,
     TabList,
@@ -13,8 +15,9 @@ import {
     mergeClasses,
     type BadgeProps,
 } from '@fluentui/react-components';
+import { ArrowClockwiseRegular } from '@fluentui/react-icons';
 import type { ProjectDefaults } from '../../config';
-import { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT } from '../../services';
+import { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT, loadStoredToolSettings } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
 import { CodeViewer } from '../viewers/CodeViewer';
 
@@ -195,6 +198,71 @@ export function TemplatesViewer() {
             <div className={styles.templateCode} role="region" aria-label={`${template.name} template`}>
                 <CodeViewer code={template.content} path={template.name} />
             </div>
+        </div>
+    );
+}
+
+/** What {@link StoredSettingsViewer} is showing. */
+type StoredSettingsState =
+    | { status: 'loading' }
+    | { status: 'ready'; settings: Record<string, unknown> }
+    | { status: 'unavailable' }
+    | { status: 'error'; message: string };
+
+/**
+ * The Advanced tab's view of what PPTB has stored for this tool (`toolboxAPI.settings.getAll()`), as read-only JSON.
+ * It loads when shown and again on **Refresh**. It shows the saved values only, not unsaved changes in the panel.
+ * PPTB doesn't expose where the file is, so no path is shown.
+ */
+export function StoredSettingsViewer() {
+    const styles = useSettingsPanelStyles();
+    const [state, setState] = useState<StoredSettingsState>({ status: 'loading' });
+    const load = useCallback(async () => {
+        setState({ status: 'loading' });
+        try {
+            const stored = await loadStoredToolSettings();
+            setState(stored ? { status: 'ready', settings: stored } : { status: 'unavailable' });
+        } catch (error) {
+            setState({ status: 'error', message: error instanceof Error ? error.message : String(error) });
+        }
+    }, []);
+    useEffect(() => {
+        void load();
+    }, [load]);
+    const keys = state.status === 'ready' ? Object.keys(state.settings).length : 0;
+    return (
+        <div className={styles.templates}>
+            <MessageBar intent="info">
+                <MessageBarBody>
+                    Everything Power Platform ToolBox has saved for this tool in this installation: the saved settings (
+                    <code>toolConfig</code>), your projects, and the project folder last used with each connection. Unsaved changes in
+                    this panel aren't included. PPTB doesn't show where it stores the file.
+                </MessageBarBody>
+            </MessageBar>
+            <div className={styles.storedSettingsBar}>
+                <Caption1 className={styles.templateMeta}>
+                    {state.status === 'ready' ? `${keys} ${keys === 1 ? 'key' : 'keys'} · JSON · read-only` : 'JSON · read-only'}
+                </Caption1>
+                <Button size="small" appearance="subtle" icon={<ArrowClockwiseRegular />} disabled={state.status === 'loading'} onClick={() => void load()}>
+                    Refresh
+                </Button>
+            </div>
+            {state.status === 'loading' && <Spinner size="tiny" label="Reading the stored settings…" />}
+            {state.status === 'unavailable' && (
+                <MessageBar intent="warning">
+                    <MessageBarBody>The stored settings can only be read inside Power Platform ToolBox.</MessageBarBody>
+                </MessageBar>
+            )}
+            {state.status === 'error' && (
+                <MessageBar intent="error">
+                    <MessageBarBody>Could not read the stored settings: {state.message}</MessageBarBody>
+                </MessageBar>
+            )}
+            {state.status === 'ready' && (
+                <div className={styles.templateCode} role="region" aria-label="Stored tool settings">
+                    <CodeViewer code={JSON.stringify(state.settings, null, 2)} path="settings.json" />
+                </div>
+            )}
         </div>
     );
 }

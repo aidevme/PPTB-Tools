@@ -64,7 +64,7 @@ export const useSettingsPanelStyles = makeStyles({
     sectionTitle: { flexGrow: 1 },
     sectionBadges: { display: 'flex', gap: tokens.spacingHorizontalXS, flexWrap: 'wrap' },
     sectionExtra: { padding: `${tokens.spacingVerticalS} ${tokens.spacingHorizontalL} ${tokens.spacingVerticalM}` },
-    // Templates tab: the read-only template viewer.
+    // Templates tab: the read-only template viewer. The Advanced tab's stored-settings viewer uses the same layout.
     templates: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS, minWidth: 0 },
     templateMeta: { color: tokens.colorNeutralForeground3 },
     templateCode: {
@@ -75,6 +75,8 @@ export const useSettingsPanelStyles = makeStyles({
         border: `1px solid ${tokens.colorNeutralStroke2}`,
         borderRadius: tokens.borderRadiusMedium,
     },
+    // Advanced tab: the stored settings' key count on the left, Refresh on the right.
+    storedSettingsBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: tokens.spacingHorizontalS },
 
     row: {
         display: 'flex',

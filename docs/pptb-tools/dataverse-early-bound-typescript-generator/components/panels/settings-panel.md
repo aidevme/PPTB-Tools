@@ -109,9 +109,23 @@ Generate writes. The tab isn't searchable, since it has no settings, and Save an
 
 ## Advanced tab
 
-A placeholder for settings most projects never need to change (icon `DeveloperBoardRegular`). It has no sections
-yet, so the content shows its intro and "No settings on this tab yet." Settings added here with `tab: 'advanced'`
-appear on it and in search like any other.
+For details most projects never need (icon `DeveloperBoardRegular`). Settings added here with `tab: 'advanced'`
+appear on it and in search like any other; a tab without sections shows "No settings on this tab yet."
+
+One card, **PPTB tool settings** (badges: **This PPTB installation** and **Read-only**), with no settings.
+`StoredSettingsViewer` in `SettingsParts.tsx` shows:
+
+- a note on what's included (the saved `toolConfig`, the saved projects and the project folder per connection),
+  that unsaved changes in the panel aren't, and that PPTB doesn't expose the file's location;
+- the number of keys and a **Refresh** button;
+- the stored settings as formatted JSON, read-only, in a [CodeViewer](../viewers/code-viewer.md) with JSON
+  highlighting, scrolling inside a 420px box.
+
+The data comes from `loadStoredToolSettings` in `services/settings.ts`, which calls `toolboxAPI.settings.getAll()`.
+It loads when the tab is shown (the panel's content is re-created on each tab change) and on **Refresh**. While
+loading it shows a spinner; outside PPTB, a warning that the settings can only be read inside Power Platform
+ToolBox; if PPTB fails to read them, the error. Like the Templates tab, it isn't searchable, and Save and Reset to
+defaults don't affect it.
 
 ## Search
 

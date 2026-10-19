@@ -31,7 +31,7 @@ export const TAB_INTROS: Record<SettingsTab, string> = {
     options: 'Applied whenever a project opens; you can still change them per project on the Options card.',
     files: 'How Generate treats files in the output folders, for every project.',
     templates: 'The EJS templates Generate writes to each project. For reference only; nothing to change here.',
-    advanced: 'Settings most projects never need to change.',
+    advanced: 'Details most projects never need, such as what PPTB has stored for this tool.',
 };
 
 /** Badge for sections saved with the tool's settings in this PPTB installation (the General tab). */

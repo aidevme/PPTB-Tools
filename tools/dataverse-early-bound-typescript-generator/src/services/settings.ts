@@ -73,6 +73,21 @@ export async function loadToolConfig(): Promise<ToolConfig> {
     }
 }
 
+/**
+ * Reads everything PPTB has stored for this tool in this installation (`toolboxAPI.settings.getAll()`): the saved
+ * Settings-panel values (`toolConfig`), the saved projects, and the project folder remembered per connection.
+ *
+ * @remarks PPTB doesn't expose where it stores the file, only its contents.
+ *
+ * @returns The stored settings by key (`{}` when nothing is stored yet), or `undefined` outside PPTB.
+ * @throws When PPTB fails to read the settings.
+ */
+export async function loadStoredToolSettings(): Promise<Record<string, unknown> | undefined> {
+    const api = settings();
+    if (!api) return undefined;
+    return (await api.getAll()) ?? {};
+}
+
 /** Saves the Settings-panel values; throws when PPTB is unavailable or the save fails. */
 export async function saveToolConfig(config: ToolConfig): Promise<void> {
     const api = settings();

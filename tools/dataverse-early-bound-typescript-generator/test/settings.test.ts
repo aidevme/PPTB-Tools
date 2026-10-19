@@ -31,6 +31,7 @@ function installSettingsStub(stored: Record<string, unknown> = {}) {
     (window as unknown as { toolboxAPI: unknown }).toolboxAPI = {
         settings: {
             get: async (key: string) => store[key],
+            getAll: async () => ({ ...store }),
             set: async (key: string, value: unknown) => {
                 store[key] = value;
             },
@@ -390,6 +391,57 @@ describe('settings panel', () => {
         await click(button('Save'));
         expect(onOpenChange).not.toHaveBeenCalledWith(false);
         expect(document.body.textContent).toContain('Could not save the settings: disk full');
+    });
+
+    describe('Advanced tab: stored tool settings', () => {
+        /** Lets the viewer's getAll() call settle and its state render. */
+        const settle = () => act(async () => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+        const storedRegion = () => document.querySelector('[role="region"][aria-label="Stored tool settings"]');
+
+        it('shows what PPTB has stored for the tool as JSON, read-only', async () => {
+            installSettingsStub({ lastProjectFolder: '/src/contoso', toolConfig: { deleteOrphanedFiles: true } });
+            await render(toolConfig, vi.fn(async () => {}));
+            await openTab('Advanced');
+            await settle();
+            expect(document.body.textContent).toContain('PPTB tool settings');
+            expect(document.body.textContent).toContain('2 keys · JSON · read-only');
+            expect(storedRegion()?.textContent).toContain('"lastProjectFolder": "/src/contoso"');
+            expect(storedRegion()?.textContent).toContain('"deleteOrphanedFiles": true');
+        });
+
+        it('reads the settings again on Refresh', async () => {
+            const store = installSettingsStub({ lastProjectFolder: '/src/contoso' });
+            await render(toolConfig, vi.fn(async () => {}));
+            await openTab('Advanced');
+            await settle();
+            store.projectFolders = { 'connection-1': '/src/fabrikam' };
+            await click(button('Refresh'));
+            await settle();
+            expect(document.body.textContent).toContain('2 keys · JSON · read-only');
+            expect(storedRegion()?.textContent).toContain('/src/fabrikam');
+        });
+
+        it('says the settings can only be read inside PPTB', async () => {
+            await render(toolConfig, vi.fn(async () => {}));
+            await openTab('Advanced');
+            await settle();
+            expect(document.body.textContent).toContain('can only be read inside Power Platform ToolBox');
+            expect(storedRegion()).toBeNull();
+        });
+
+        it('shows the error when PPTB fails to read them', async () => {
+            (window as unknown as { toolboxAPI: unknown }).toolboxAPI = {
+                settings: {
+                    getAll: async () => {
+                        throw new Error('settings file locked');
+                    },
+                },
+            };
+            await render(toolConfig, vi.fn(async () => {}));
+            await openTab('Advanced');
+            await settle();
+            expect(document.body.textContent).toContain('Could not read the stored settings: settings file locked');
+        });
     });
 });
 
