@@ -190,7 +190,8 @@ These only affect cases where dataverse-gen emits code that does not compile:
 - An option label made only of symbols falls back to `_<value>` instead of an empty member name.
 - With **Rename duplicated identifier(s)** on (off by default), a later enum member whose name repeats an earlier one
   gets its value appended (`InProgress_700970000`) instead of a second `InProgress` that doesn't compile.
-- With **Custom enum template** on (off by default; Preview proposes it when it finds duplicate identifiers), the
+- With a project's **Custom enum template** on (off by default; Preview proposes it when it finds duplicate
+  identifiers; saved in `.dataverse-gen.json` as `pptbEarlyBoundGenerator.customEnumTemplate`), the
   output is renamed the same way, and Generate writes a custom `enum.ejs` (`src/assets/custom-templates/enum.ejs`)
   to the project's `templateRoot` instead of dataverse-gen's, so the dataverse-gen CLI writes the same names. The
   other six templates stay dataverse-gen's.

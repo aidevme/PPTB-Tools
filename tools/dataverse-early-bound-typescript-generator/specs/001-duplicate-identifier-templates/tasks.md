@@ -267,7 +267,7 @@ Preview card switch and the Settings panel; each opens the dialog, **Cancel** sa
   & files with Rename's disabled state and the `editedEnumTemplatePath` prop and Save confirmation
   (`src/components/panels/SettingsPanel.tsx`, `App.tsx`); update `CUSTOM_ENUM_TEMPLATE_INFO`; tests in
   `test/optionsCard.test.ts` and `test/settings.test.ts`
-- [ ] T033 [P] Update the docs: `guide/tool-settings.md`, `guide/troubleshooting.md`, `guide/project-file.md` (the new
+- [x] T033 [P] Update the docs: `guide/tool-settings.md`, `guide/troubleshooting.md`, `guide/project-file.md` (the new
   key), `guide/safety.md`, `components/cards/options-card.md`, `components/cards/preview-card.md`,
   `components/panels/settings-panel.md`, the README, and `quickstart.md` (two projects)
 - [ ] T034 Regenerate the API pages, rerun the full verification, update the Verification note, and rerun

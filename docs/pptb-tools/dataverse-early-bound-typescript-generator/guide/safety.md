@@ -20,7 +20,7 @@ The tool writes only when you click **Generate**, and only inside the project fo
 - **dataverse-gen templates:** Generate also writes dataverse-gen's seven EJS templates to the project's
   `templateRoot` folder (`_templates` by default), overwriting changed copies. Edits you made to those templates
   are lost unless they're in source control. Preview lists them, with their changes. Turn off **Settings →
-  Generate & files → Generate templates** to stop writing them. With **Custom enum template** on, `enum.ejs` is
+  Generate & files → Generate templates** to stop writing them. With a project's **Custom enum template** on, `enum.ejs` is
   replaced by the custom version (also over an edited copy); turning the setting on or off writes nothing by
   itself, and Preview lists the change before Generate writes it. When the last preview found your `enum.ejs`
   edited, turning the setting on asks first, naming the file (**Replace your edited enum.ejs?**).

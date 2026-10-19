@@ -54,8 +54,10 @@ Generate button (or **Skip duplicated identifier(s)** in **Settings** → **Gene
 ### The custom enum template
 
 When a preview finds duplicate identifiers, the Preview card proposes the **Custom enum template**. Click **Use
-custom enum template** to turn it on, or **Not now** to keep the default output (the proposal comes back on the next
-preview with duplicates). Nothing changes until you preview again and generate. With it on:
+custom enum template** to turn it on for this project, or **Not now** to keep the default output (the proposal comes
+back on the next preview with duplicates). Nothing changes until you preview again and generate. The setting belongs
+to the project: Generate saves it in the project's `.dataverse-gen.json`
+(`pptbEarlyBoundGenerator.customEnumTemplate`), so other projects keep their own. With it on:
 
 - the generated files rename later duplicates exactly as **Rename duplicated identifier(s)** does (which then shows
   as on);
@@ -66,8 +68,9 @@ preview with duplicates). Nothing changes until you preview again and generate. 
   names as this tool;
 - the CLI only gets the fix while **Generate templates** is on.
 
-Turn it off again in **Settings** → **Generate & files** or next to the Generate button; the next Generate writes
-dataverse-gen's `enum.ejs` and names again. Which member keeps the plain name follows the option order in Dataverse,
+Turn it off again on the Options card or next to the Generate button; the next Generate writes
+dataverse-gen's `enum.ejs` and names again. **Settings** → **Options** → **Custom enum template** only sets the
+default for projects whose file has no value yet. Which member keeps the plain name follows the option order in Dataverse,
 so reordering the options can move the suffix to another member; renaming the labels is still the lasting fix.
 
 ## Private custom APIs

@@ -1,6 +1,6 @@
 # Project file (`.dataverse-gen.json`)
 
-<!-- cspell:ignore outputRoot templateRoot fileSuffix useCache referencedTypes complexTypes entityTypes -->
+<!-- cspell:ignore outputRoot templateRoot fileSuffix useCache referencedTypes complexTypes entityTypes pptbEarlyBoundGenerator -->
 
 Each project is described by a `.dataverse-gen.json` file in the project folder. The tool shares this file with
 the [dataverse-gen](https://github.com/scottdurow/dataverse-gen) CLI: it reads the file when you open a project
@@ -54,6 +54,25 @@ generation time without being listed (see [What gets generated](./what-gets-gene
 | `output.templateRoot` | string | `./_templates` | Folder, relative to the project, that Generate writes dataverse-gen's EJS templates to (for the CLI) |
 | `output.useCache` | boolean | `false` | Caches the metadata document on disk. **CLI only; ignored by this tool** |
 
+## Tool settings
+
+The tool keeps its own per-project settings under one key, `pptbEarlyBoundGenerator`. The dataverse-gen CLI ignores
+it and keeps it when it saves the file.
+
+| Option | Type | Default | Meaning |
+| --- | --- | --- | --- |
+| `pptbEarlyBoundGenerator.customEnumTemplate` | boolean | **Settings** → **Options** → **Custom enum template** (off) | Renames duplicate enum members and writes the custom `enum.ejs` (**Custom enum template** on the Options card) |
+
+```json
+{
+  "pptbEarlyBoundGenerator": {
+    "customEnumTemplate": true
+  }
+}
+```
+
+A value that isn't `true` or `false` is ignored, and other keys in the object are kept.
+
 ## Referenced types
 
 `referencedTypes` maps the type names the generated code refers to onto the names and import paths it uses. Each
@@ -80,6 +99,7 @@ partial override keeps the other defaults.
 
 The **Options** settings in the [Settings panel](./tool-settings.md) (output folder and the three generation
 switches) are applied every time you open a project, also over the values already in its `.dataverse-gen.json`.
+**Custom enum template** isn't: its default only fills in a missing `pptbEarlyBoundGenerator.customEnumTemplate`.
 The Options card can still change them for the open project, and Generate saves the result to the file. So if
 you edit those four options in the file by hand, set them in Settings too, or they'll be replaced when the project
 is opened.

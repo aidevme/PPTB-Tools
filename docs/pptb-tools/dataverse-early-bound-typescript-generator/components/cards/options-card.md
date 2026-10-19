@@ -16,6 +16,8 @@ Source: [`src/components/cards/OptionsCard.tsx`](https://github.com/aidevme/PPTB
 | `config` | `DataverseGenConfig` | The current project config. |
 | `disabled` | `boolean` | Disables every input. |
 | `onChange` | `(update: Partial<DataverseGenConfig>) => void` | Merges a change into the config. |
+| `customEnumTemplate` | `boolean` | Whether the project uses the custom enum template: its `pptbEarlyBoundGenerator.customEnumTemplate`, or the Settings default. |
+| `onCustomEnumTemplateChange` | `(checked: boolean) => void` | Called by the **Custom enum template** switch. |
 
 ## Options
 
@@ -25,6 +27,12 @@ Source: [`src/components/cards/OptionsCard.tsx`](https://github.com/aidevme/PPTB
 | Early-bound entity interfaces (dataverse-ify) | `generateEntityTypes` | On |
 | Form context helpers (Xrm.FormContext) | `generateFormContext` | Off |
 | index.ts barrel file | `generateIndex` | On |
+| Custom enum template | `pptbEarlyBoundGenerator.customEnumTemplate` | **Settings** → **Options** default (off) |
+
+The **Custom enum template** switch doesn't call `onChange`: `App.tsx` passes the same
+`useCustomEnumTemplateConfirmation` handler as the Preview card, which asks first when turning it on would replace an
+edited `enum.ejs`, then saves the value with `withProjectCustomEnumTemplate` and marks the preview stale. Its info
+label is `CUSTOM_ENUM_TEMPLATE_INFO` from `settingsInfo.tsx`.
 
 Attribute constants, choice enums and the metadata cache (`metadata.ts`) are always generated for the
 selected tables.
