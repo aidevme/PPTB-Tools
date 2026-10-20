@@ -1,6 +1,22 @@
 import { useMemo, useState } from 'react';
-import { Button, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, MessageBar, MessageBarBody, Text } from '@fluentui/react-components';
-import { DeleteRegular } from '@fluentui/react-icons';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogBody,
+    DialogContent,
+    DialogSurface,
+    DialogTitle,
+    DialogTrigger,
+    MessageBar,
+    MessageBarBody,
+    Text,
+    Caption1,
+    Toolbar,
+    ToolbarButton,
+    Tooltip,
+} from '@fluentui/react-components';
+import { CopyRegular, DeleteRegular, DismissRegular, EditRegular, FolderOpenRegular, FolderSearchRegular } from '@fluentui/react-icons';
 import type { ProjectEntry } from '../../config';
 import { useAsyncAction } from '../../hooks';
 import { useLoadProjectDialogStyles } from '../../styles';
@@ -36,15 +52,26 @@ export interface ILoadProjectDialogProps {
      * and shows the error when it rejects.
      */
     onEdit: (project: ProjectEntry, changes: NewProject) => Promise<void>;
+    /**
+     * Saves a copy of a project as a new saved project, with the name, description and location from the copy form.
+     * The form closes when it resolves (the copy is then selected) and shows the error when it rejects.
+     */
+    onCopy: (copy: NewProject) => Promise<void>;
     /** Opens the folder picker for the edited Location; resolves to the chosen folder, or `null` when cancelled. */
     onBrowseLocation: (current: string) => Promise<string | null>;
 }
 
 /**
  * Modal dialog listing the saved projects in a table with single-row selection. Load opens the selected
- * project; clicking a project's name opens it directly. Each row can be edited or deleted.
+ * project; clicking a project's name opens it directly. The toolbar above the table copies, edits or deletes the
+ * selected project; its buttons are disabled until a row is selected, and while a project is opening or being
+ * deleted. Copy opens the project form filled in from the selected project, with a name that isn't used yet.
+ *
+ * @remarks
+ * The title has an icon, the number of saved projects, and a close button; the toolbar says which project is
+ * selected; with no saved projects, an empty state says to create one with New Project.
  */
-export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onBrowseLocation }: ILoadProjectDialogProps) {
+export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDelete, onEdit, onCopy, onBrowseLocation }: ILoadProjectDialogProps) {
     const styles = useLoadProjectDialogStyles();
     const [selectedId, setSelectedId] = useState<string>('');
     const [loadError, setLoadError] = useState<string | null>(null);
@@ -56,6 +83,10 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
     const [pendingDelete, setPendingDelete] = useState<ProjectEntry | null>(null);
     /** The project open in the edit dialog. */
     const [editing, setEditing] = useState<ProjectEntry | null>(null);
+    /** The project open in the copy form. */
+    const [copying, setCopying] = useState<ProjectEntry | null>(null);
+    /** The name of a copy just saved, selected once it shows up in `projects`. */
+    const [selectName, setSelectName] = useState<string | null>(null);
     const [sort, setSort] = useState(DEFAULT_PROJECT_SORT);
 
     const sorted = useMemo(() => sortProjects(projects, sort), [projects, sort]);
@@ -74,6 +105,16 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
             setSort(DEFAULT_PROJECT_SORT);
             setPendingDelete(null);
             setEditing(null);
+            setCopying(null);
+            setSelectName(null);
+        }
+    }
+
+    if (selectName) {
+        const saved = projects.find((p) => p.name === selectName);
+        if (saved) {
+            setSelectName(null);
+            setSelectedId(saved.id);
         }
     }
 
@@ -107,25 +148,72 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
             <Dialog open={open} onOpenChange={(_, data) => !loading && onOpenChange(data.open)}>
                 <DialogSurface className={styles.surface}>
                     <DialogBody>
-                        <DialogTitle>Load existing project</DialogTitle>
-                        <DialogContent>
+                        <DialogTitle
+                            action={
+                                <DialogTrigger action="close">
+                                    <Button appearance="subtle" aria-label="Close" icon={<DismissRegular />} disabled={loading} />
+                                </DialogTrigger>
+                            }
+                        >
+                            <span className={styles.titleRow}>
+                                <span className={styles.titleIcon} aria-hidden="true">
+                                    <FolderOpenRegular />
+                                </span>
+                                <span className={styles.titleText}>
+                                    Load Existing Project
+                                    <Caption1 className={styles.subtitle}>
+                                        {projects.length === 0 ? 'No saved projects' : `${projects.length} saved project${projects.length === 1 ? '' : 's'}`}
+                                    </Caption1>
+                                </span>
+                            </span>
+                        </DialogTitle>
+                        <DialogContent className={styles.content}>
                             {sorted.length === 0 ? (
-                                <Text className={styles.empty}>No saved projects yet. Create one with New Project.</Text>
-                            ) : (
-                                <div className={styles.tableWrapper}>
-                                    <ProjectsTable
-                                        projects={sorted}
-                                        sort={sort}
-                                        onToggleSort={toggleSort}
-                                        selectedId={selectedId}
-                                        onSelect={select}
-                                        onLoad={(project) => void load(project)}
-                                        onEdit={setEditing}
-                                        onDelete={setPendingDelete}
-                                        loading={loading}
-                                        busy={busy}
-                                    />
+                                <div className={styles.empty}>
+                                    <FolderSearchRegular className={styles.emptyIcon} aria-hidden="true" />
+                                    <Text weight="semibold">No saved projects yet</Text>
+                                    <Text className={styles.muted}>Create one with New Project, and it shows up here.</Text>
                                 </div>
+                            ) : (
+                                <>
+                                    <Toolbar aria-label="Project actions" size="small" className={styles.toolbar}>
+                                        <Tooltip content={selected ? `Copy ${selected.name}` : 'Select a project to copy it'} relationship="description" withArrow>
+                                            <ToolbarButton icon={<CopyRegular />} disabled={!selected || busy} onClick={() => selected && setCopying(selected)}>
+                                                Copy
+                                            </ToolbarButton>
+                                        </Tooltip>
+                                        <Tooltip content={selected ? `Edit ${selected.name}` : 'Select a project to edit it'} relationship="description" withArrow>
+                                            <ToolbarButton icon={<EditRegular />} disabled={!selected || busy} onClick={() => selected && setEditing(selected)}>
+                                                Edit
+                                            </ToolbarButton>
+                                        </Tooltip>
+                                        <Tooltip content={selected ? `Delete ${selected.name}` : 'Select a project to delete it'} relationship="description" withArrow>
+                                            <ToolbarButton icon={<DeleteRegular />} disabled={!selected || busy} onClick={() => selected && setPendingDelete(selected)}>
+                                                Delete
+                                            </ToolbarButton>
+                                        </Tooltip>
+                                        <Caption1 className={styles.selection} aria-live="polite">
+                                            {selected ? (
+                                                <>
+                                                    Selected: <span className={styles.selectionName}>{selected.name}</span>
+                                                </>
+                                            ) : (
+                                                'Select a project to load, copy, edit or delete it'
+                                            )}
+                                        </Caption1>
+                                    </Toolbar>
+                                    <div className={styles.tableWrapper}>
+                                        <ProjectsTable
+                                            projects={sorted}
+                                            sort={sort}
+                                            onToggleSort={toggleSort}
+                                            selectedId={selectedId}
+                                            onSelect={select}
+                                            onLoad={(project) => void load(project)}
+                                            loading={loading}
+                                        />
+                                    </div>
+                                </>
                             )}
                             {loadError && (
                                 <MessageBar intent="error">
@@ -134,7 +222,7 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                             )}
                         </DialogContent>
                         <DialogActions>
-                            <Button appearance="primary" disabled={!selected || loading} onClick={() => selected && void load(selected)}>
+                            <Button appearance="primary" icon={<FolderOpenRegular />} disabled={!selected || loading} onClick={() => selected && void load(selected)}>
                                 {loading ? 'Loading…' : 'Load'}
                             </Button>
                             <Button appearance="secondary" disabled={loading} onClick={() => onOpenChange(false)}>
@@ -162,6 +250,17 @@ export function LoadProjectDialog({ open, onOpenChange, projects, onLoad, onDele
                 existingNames={projects.filter((p) => p.id !== editing?.id).map((p) => p.name)}
                 onBrowseLocation={onBrowseLocation}
                 onSave={(changes) => (editing ? onEdit(editing, changes) : Promise.resolve())}
+            />
+            <ProjectFormDialog
+                open={copying !== null}
+                onOpenChange={(isOpen) => !isOpen && setCopying(null)}
+                copyOf={copying ?? undefined}
+                existingNames={projects.map((p) => p.name)}
+                onBrowseLocation={onBrowseLocation}
+                onSave={async (copy) => {
+                    await onCopy(copy);
+                    setSelectName(copy.name);
+                }}
             />
         </>
     );

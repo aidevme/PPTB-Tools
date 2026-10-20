@@ -565,6 +565,21 @@ describe('new project dialog', () => {
         expect(props.onOpenChange).toHaveBeenCalledWith(false);
     });
 
+    it('says what it does in the title, shows the details when editing, and closes from the title', async () => {
+        const props = await render();
+        expect(document.body.textContent).toContain('Save a project folder so you can open it again later.');
+        expect(document.body.textContent).not.toContain('Version');
+        await click(document.querySelector('button[aria-label="Close"]') as HTMLButtonElement);
+        expect(props.onOpenChange).toHaveBeenCalledWith(false);
+
+        act(() => root?.unmount());
+        container?.remove();
+        await render({ project: PROJECT });
+        expect(document.body.textContent).toContain(`Change the name, description or folder of ${PROJECT.name}.`);
+        expect(document.body.textContent).toContain(`Version ${PROJECT.version}`);
+        expect(document.body.textContent).toContain('Created');
+    });
+
     it('rejects a name that is already used', async () => {
         await render();
         await type(field('Project name') as HTMLInputElement, 'contoso');
@@ -599,7 +614,7 @@ describe('load existing project dialog', () => {
     });
 
     async function render(props: Partial<Parameters<typeof LoadProjectDialog>[0]> = {}) {
-        const all = { open: true, onOpenChange: vi.fn(), projects: [PROJECT, OTHER], onLoad: vi.fn(async () => true), onDelete: vi.fn(async () => {}), onEdit: vi.fn(async () => {}), onBrowseLocation: vi.fn(async () => null), ...props };
+        const all = { open: true, onOpenChange: vi.fn(), projects: [PROJECT, OTHER], onLoad: vi.fn(async () => true), onDelete: vi.fn(async () => {}), onEdit: vi.fn(async () => {}), onCopy: vi.fn(async () => {}), onBrowseLocation: vi.fn(async () => null), ...props };
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
@@ -610,6 +625,13 @@ describe('load existing project dialog', () => {
 
     const button = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement;
     const click = (element: HTMLElement) => act(async () => element.click());
+    /** Selects Contoso's row and clicks the toolbar's Delete. */
+    const deleteContoso = async () => {
+        await click(Array.from(document.querySelectorAll('tbody tr')).find((r) => r.textContent?.includes('Contoso')) as HTMLElement);
+        await click(Array.from(document.querySelectorAll('[role="toolbar"] button')).find((b) => b.textContent === 'Delete') as HTMLButtonElement);
+    };
+    /** The confirmation's Delete button (the toolbar has one too). */
+    const confirmDeleteButton = () => Array.from(document.querySelectorAll('[role="alertdialog"] button')).find((b) => b.textContent === 'Delete') as HTMLButtonElement;
     const radios = () => Array.from(document.querySelectorAll('input[type="radio"]')) as HTMLInputElement[];
 
     it('lists saved projects by name and loads the chosen one', async () => {
@@ -658,7 +680,10 @@ describe('load existing project dialog', () => {
 
     it('explains when there are no saved projects', async () => {
         await render({ projects: [] });
-        expect(document.body.textContent).toContain('No saved projects yet.');
+        expect(document.body.textContent).toContain('No saved projects yet');
+        expect(document.body.textContent).toContain('Create one with New Project');
+        // No toolbar or table without projects.
+        expect(document.querySelector('[role="toolbar"]')).toBeNull();
         expect(button('Load').disabled).toBe(true);
     });
 
@@ -695,32 +720,29 @@ describe('load existing project dialog', () => {
         expect(names()).toEqual(['Alpha', 'Beta']);
     });
 
-    it('deletes a project after confirmation, without selecting or loading it', async () => {
+    it('deletes the selected project from the toolbar after confirmation, without loading it', async () => {
         const props = await render();
-        const deleteButton = document.querySelector('button[aria-label="Delete Contoso"]') as HTMLButtonElement;
-        expect(deleteButton).not.toBeNull();
-        await click(deleteButton);
+        await deleteContoso();
         // Nothing happens until the user confirms.
         expect(props.onDelete).not.toHaveBeenCalled();
         expect(props.onLoad).not.toHaveBeenCalled();
         expect(document.body.textContent).toContain("Contoso will be removed from your saved projects. Files in /src/contoso aren't touched.");
-        expect(button('Load').disabled).toBe(true);
 
-        await click(button('Delete'));
+        await click(confirmDeleteButton());
         expect(props.onDelete).toHaveBeenCalledWith(PROJECT);
         expect(props.onOpenChange).not.toHaveBeenCalledWith(false);
     });
 
     it('cancels a deletion, and shows an error when it fails', async () => {
         const failing = await render({ onDelete: vi.fn(async () => Promise.reject(new Error('locked'))) });
-        await click(document.querySelector('button[aria-label="Delete Contoso"]') as HTMLButtonElement);
+        await deleteContoso();
         const cancelButtons = () => Array.from(document.querySelectorAll('button')).filter((b) => b.textContent === 'Cancel');
         await click(cancelButtons()[cancelButtons().length - 1]);
         expect(failing.onDelete).not.toHaveBeenCalled();
         expect(document.body.textContent).not.toContain('will be removed');
 
-        await click(document.querySelector('button[aria-label="Delete Contoso"]') as HTMLButtonElement);
-        await click(button('Delete'));
+        await deleteContoso();
+        await click(confirmDeleteButton());
         expect(document.body.textContent).toContain('Could not delete Contoso: locked');
     });
 
@@ -728,21 +750,21 @@ describe('load existing project dialog', () => {
         // Keeps the real open state, so this checks what's rendered rather than only the callback.
         function Host() {
             const [open, setOpen] = useState(true);
-            return createElement(LoadProjectDialog, { open, onOpenChange: setOpen, projects: [PROJECT], onLoad: async () => true, onDelete: async () => {}, onEdit: async () => {}, onBrowseLocation: async () => null });
+            return createElement(LoadProjectDialog, { open, onOpenChange: setOpen, projects: [PROJECT], onLoad: async () => true, onDelete: async () => {}, onEdit: async () => {}, onCopy: async () => {}, onBrowseLocation: async () => null });
         }
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => root!.render(createElement(FluentProvider, { theme: webLightTheme }, createElement(Host))));
         const settle = () => act(async () => new Promise((resolve) => setTimeout(resolve, 400)));
 
-        await click(document.querySelector('button[aria-label="Delete Contoso"]') as HTMLButtonElement);
+        await deleteContoso();
         const cancelButtons = () => Array.from(document.querySelectorAll('button')).filter((b) => b.textContent === 'Cancel');
         await click(cancelButtons()[cancelButtons().length - 1]);
         await settle();
-        expect(document.body.textContent).toContain('Load existing project');
+        expect(document.body.textContent).toContain('Load Existing Project');
 
         await click(button('Cancel'));
         await settle();
-        expect(document.body.textContent).not.toContain('Load existing project');
+        expect(document.body.textContent).not.toContain('Load Existing Project');
     });
 });

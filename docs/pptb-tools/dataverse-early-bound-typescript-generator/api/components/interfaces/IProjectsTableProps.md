@@ -1,68 +1,18 @@
 # Interface: IProjectsTableProps
 
-Defined in: [components/tables/ProjectsTable.tsx:12](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L12)
+Defined in: [components/tables/ProjectsTable.tsx:11](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L11)
 
 Props for [ProjectsTable](../functions/ProjectsTable.md).
 
 ## Properties
 
-### busy
-
-> **busy**: `boolean`
-
-Defined in: [components/tables/ProjectsTable.tsx:32](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L32)
-
-Opening or deleting: the row actions are disabled.
-
-***
-
 ### loading
 
 > **loading**: `boolean`
 
-Defined in: [components/tables/ProjectsTable.tsx:30](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L30)
+Defined in: [components/tables/ProjectsTable.tsx:25](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L25)
 
 A project is being opened: the name links are disabled.
-
-***
-
-### onDelete
-
-> **onDelete**: (`project`) => `void`
-
-Defined in: [components/tables/ProjectsTable.tsx:28](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L28)
-
-Called with the row's project when its Delete button is clicked; the row isn't selected.
-
-#### Parameters
-
-##### project
-
-[`ProjectEntry`](../../config/interfaces/ProjectEntry.md)
-
-#### Returns
-
-`void`
-
-***
-
-### onEdit
-
-> **onEdit**: (`project`) => `void`
-
-Defined in: [components/tables/ProjectsTable.tsx:26](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L26)
-
-Called with the row's project when its Edit button is clicked; the row isn't selected.
-
-#### Parameters
-
-##### project
-
-[`ProjectEntry`](../../config/interfaces/ProjectEntry.md)
-
-#### Returns
-
-`void`
 
 ***
 
@@ -70,7 +20,7 @@ Called with the row's project when its Edit button is clicked; the row isn't sel
 
 > **onLoad**: (`project`) => `void`
 
-Defined in: [components/tables/ProjectsTable.tsx:24](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L24)
+Defined in: [components/tables/ProjectsTable.tsx:23](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L23)
 
 Opens a project directly (a click on its name).
 
@@ -90,7 +40,7 @@ Opens a project directly (a click on its name).
 
 > **onSelect**: (`project`) => `void`
 
-Defined in: [components/tables/ProjectsTable.tsx:22](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L22)
+Defined in: [components/tables/ProjectsTable.tsx:21](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L21)
 
 Selects a row (a click or Enter/Space on it).
 
@@ -110,7 +60,7 @@ Selects a row (a click or Enter/Space on it).
 
 > **onToggleSort**: (`column`) => `void`
 
-Defined in: [components/tables/ProjectsTable.tsx:18](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L18)
+Defined in: [components/tables/ProjectsTable.tsx:17](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L17)
 
 Called with the column when its header is clicked, to sort by it or reverse its direction.
 
@@ -130,7 +80,7 @@ Called with the column when its header is clicked, to sort by it or reverse its 
 
 > **projects**: [`ProjectEntry`](../../config/interfaces/ProjectEntry.md)[]
 
-Defined in: [components/tables/ProjectsTable.tsx:14](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L14)
+Defined in: [components/tables/ProjectsTable.tsx:13](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L13)
 
 The saved projects, already sorted.
 
@@ -140,7 +90,7 @@ The saved projects, already sorted.
 
 > **selectedId**: `string`
 
-Defined in: [components/tables/ProjectsTable.tsx:20](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L20)
+Defined in: [components/tables/ProjectsTable.tsx:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L19)
 
 Id of the selected project, whose row is highlighted and its radio checked; an empty string selects none.
 
@@ -150,6 +100,6 @@ Id of the selected project, whose row is highlighted and its radio checked; an e
 
 > **sort**: `ProjectSort`
 
-Defined in: [components/tables/ProjectsTable.tsx:16](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L16)
+Defined in: [components/tables/ProjectsTable.tsx:15](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/tables/ProjectsTable.tsx#L15)
 
 The sorted column and direction, shown in the column headers.

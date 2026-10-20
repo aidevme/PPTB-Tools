@@ -41,7 +41,7 @@ The vitest suite runs in a jsdom environment, because the CSDL parser needs `DOM
 | `duplicateIdentifiers.test.ts` | Duplicate enum member names: finding and renaming them, the `duplicate` status in the write plan, Skip duplicated identifier(s), the summaries, and how the Preview card and FileViewer show them |
 | `optionsCard.test.ts` | The Options card: defaults, the output folder and the three switches reporting their config keys, and the disabled state |
 | `projectColumns.test.ts` | The saved-project table's order: versions by number, dates by time, ties by name, plus `formatDateTime` and `compareText` |
-| `loadProjectDialog.test.ts` | The Load Existing Project dialog: editing a saved project from its row, name validation, and the full description in a tooltip |
+| `loadProjectDialog.test.ts` | The Load Existing Project dialog: the Edit and Delete toolbar (disabled until a row is selected), editing the selected project, name validation, and the full description in a tooltip |
 | `confirmationDialog.test.ts` | The reusable confirmation dialog: alert role, Confirm and Cancel, Escape, and the busy state |
 | `customApi.test.ts` | Private custom APIs missing from `$metadata`: listed, selectable, and generated from their definitions; an unreadable `customapi` table fails Preview and isn't cached |
 | `metadataFallback.test.ts` | The `$metadata`-too-large fallback: navigation rebuilt from relationships matches the CSDL's, table files match the reference output, and the provider switches only on PPTB's size-limit errors |

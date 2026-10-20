@@ -164,6 +164,7 @@ export default function App() {
                 onLoad={openSavedProject}
                 onDelete={deleteProject}
                 onEdit={editProject}
+                onCopy={saveNewProject}
                 onBrowseLocation={pickProjectLocation}
             />
             <main className={styles.main}>

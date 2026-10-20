@@ -2,7 +2,7 @@
 
 > **CustomTemplatesPopover**(`__namedParameters`): `Element`
 
-Defined in: components/popovers/CustomTemplatesPopover.tsx:52
+Defined in: [components/popovers/CustomTemplatesPopover.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/popovers/CustomTemplatesPopover.tsx#L52)
 
 The Custom Templates button and its popover. The button has a count badge of the saved choices: opens a popover with a tile per kind of
 generated file (Actions, Complex Types, Entities, Enums, Functions, Metadata), one per row. Each tile has an icon,

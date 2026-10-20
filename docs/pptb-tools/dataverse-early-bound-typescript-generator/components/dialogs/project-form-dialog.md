@@ -1,8 +1,9 @@
 # ProjectFormDialog
 
 A modal dialog for creating a new project. It opens from the **New Project** button on the
-[ProjectCard](../cards/project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s **Edit** button reuses it,
-titled **Edit project**, to edit a saved project.
+[ProjectCard](../cards/project-card.md). The [LoadProjectDialog](./load-project-dialog.md)'s toolbar reuses it:
+**Edit** opens it titled **Edit project**, to edit a saved project, and **Copy** titled **Copy project**, to save a
+new project from a saved one's details.
 
 Source: [`src/components/dialogs/ProjectFormDialog.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/dialogs/ProjectFormDialog.tsx);
 styles in `src/styles/ProjectFormDialog.styles.ts`. It was called `NewProjectDialog`; that name (and
@@ -16,8 +17,9 @@ styles in `src/styles/ProjectFormDialog.styles.ts`. It was called `NewProjectDia
 | `onOpenChange` | `(open: boolean) => void` | Called when the dialog opens or closes. |
 | `existingNames` | `string[]` | Names of the other saved projects; the project can't reuse one (case-insensitive). |
 | `project` | `ProjectEntry` (optional) | The saved project to edit. The form opens with its values and the title is **Edit project**. Omitted for a new project. |
+| `copyOf` | `ProjectEntry` (optional) | The saved project to copy, when `project` isn't set. The form opens with its description and location, a free name from `copyName` (*name* (copy), *name* (copy 2), …), and the title **Copy project**; Save creates a new project. |
 | `onBrowseLocation` | `(current: string) => Promise<string \| null>` | Opens PPTB's folder picker for Location. Resolves to the folder, or `null` when cancelled. |
-| `onSave` | `(project: NewProject) => Promise<void>` | Saves the project, then opens it. The dialog closes when it resolves and shows the error when it rejects. |
+| `onSave` | `(project: NewProject) => Promise<void>` | Saves the project. For **New Project**, `App.tsx` then opens it. The dialog closes when it resolves and shows the error when it rejects. |
 
 `NewProject` is `{ name, description, location }`. `App.tsx` adds an `id`, a `version` (`1.0.0`) and
 `createdOn` and `modifiedOn` timestamps (both the creation time) before saving. Projects saved before
@@ -35,6 +37,22 @@ added, or a previously generated file is no longer produced (an orphan), the ver
   Windows, casing. Folders that aren't saved projects aren't tracked.
 - If saving the updated project fails, the generated files are still written; the error is logged.
 
+## Layout
+
+- **Title:** an icon on a brand-tinted tile (`FolderAddRegular` for a new project, `EditRegular` when editing,
+  `CopyRegular` when copying),
+  the title, and a subtitle: "Save a project folder so you can open it again later." or "Change the name,
+  description or folder of *name*." A close button (✕) on the right closes the dialog like **Cancel**; it's
+  disabled while saving. The surface has a larger radius and shadow, like the
+  [LoadProjectDialog](./load-project-dialog.md).
+- **Inputs:** Project name and Location have an icon inside (`RenameRegular`, `FolderRegular`) and a
+  placeholder; Description has a placeholder. Location is monospace.
+- **Details (editing only):** a strip under the fields with the project's version, Created on and Modified on.
+  The dialog doesn't change them.
+- **Save** has an icon: `AddRegular` for a new project, `SaveRegular` when editing.
+
+Styles: `useProjectFormDialogStyles` in `src/styles/ProjectFormDialog.styles.ts`.
+
 ## Fields
 
 | Field | Required | Notes |
@@ -45,7 +63,7 @@ added, or a previously generated file is no longer produced (an orphan), the ver
 
 ## Behavior
 
-- The form is empty each time the dialog opens.
+- The form is empty each time the dialog opens for a new project, and filled in when editing or copying.
 - **Save** is enabled once Project name and Location are filled in and the name isn't already used. It saves
   and closes the dialog, or shows the error and stays open if saving fails. After saving, `App.tsx` also opens
   the new project (as Load Existing Project would), which lists the tables on the Select card; if opening
@@ -56,4 +74,4 @@ added, or a previously generated file is no longer produced (an orphan), the ver
   [SettingsPanel](../panels/settings-panel.md) values. `projects` defaults to `[]` in
   `src/config/dataverse-early-bound-typescript-generator-config.json`. The tool can't write that file at
   runtime.
-- Creating a project doesn't open it or create any files yet.
+- Creating a project doesn't create any files yet; Generate does. A copy isn't opened either.
