@@ -411,3 +411,80 @@ describe('clampListWidth', () => {
         expect(clampListWidth(10, 0)).toBe(280);
     });
 });
+
+describe('Custom Templates button', () => {
+    const none = { actions: false, complexTypes: false, entities: false, enums: false, functions: false, metadata: false };
+    const customTemplatesButton = () => Array.from(document.querySelectorAll('button')).find((b) => b.textContent?.startsWith('Custom Templates'));
+    const checkboxes = () => Array.from(document.querySelectorAll('input[type="checkbox"]:not([role="switch"])')) as HTMLInputElement[];
+    const labelOf = (input: HTMLInputElement) => document.querySelector(`label[for="${input.id}"]`)?.textContent;
+
+    it('is hidden without a handler', async () => {
+        await render();
+        expect(customTemplatesButton()).toBeUndefined();
+    });
+
+    it('opens a popover with a checkbox per kind and reports every kind when one changes', async () => {
+        const onCustomTemplatesChange = vi.fn();
+        await render({ generateOptions: { customTemplates: { ...none, entities: true }, onCustomTemplatesChange } });
+        await act(async () => customTemplatesButton()!.click());
+        expect(checkboxes().map(labelOf)).toEqual(['Actions', 'Complex Types', 'Entities', 'Enums', 'Functions', 'Metadata']);
+        // Each has an info label explaining its files.
+        const infoButtons = Array.from(document.querySelectorAll('button[aria-label^="About "]')).map((b) => b.getAttribute('aria-label'));
+        expect(infoButtons).toEqual(expect.arrayContaining(['About Actions', 'About Complex Types', 'About Entities', 'About Enums', 'About Functions', 'About Metadata']));
+        expect(checkboxes().map((c) => c.checked)).toEqual([false, false, true, false, false, false]);
+        expect(document.body.textContent).toContain('Not used yet');
+        const popoverButton = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement;
+        // OK stays disabled until something changes.
+        expect(popoverButton('OK').disabled).toBe(true);
+        await act(async () => checkboxes()[3].click());
+        expect(onCustomTemplatesChange).not.toHaveBeenCalled();
+        await act(async () => popoverButton('OK').click());
+        expect(onCustomTemplatesChange).toHaveBeenCalledTimes(1);
+        expect(onCustomTemplatesChange).toHaveBeenLastCalledWith({ ...none, entities: true, enums: true });
+        expect(checkboxes()).toHaveLength(0);
+    });
+
+    it('shows the saved count on the button, and Select all, Clear, the tiles and the count in the popover', async () => {
+        const onCustomTemplatesChange = vi.fn();
+        await render({ generateOptions: { customTemplates: { ...none, enums: true, metadata: true }, onCustomTemplatesChange } });
+        expect(customTemplatesButton()!.querySelector('[aria-label="2 selected"]')).not.toBeNull();
+        await act(async () => customTemplatesButton()!.click());
+        const link = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement;
+        expect(document.body.textContent).toContain('2 of 6 selected');
+        await act(async () => link('Select all').click());
+        expect(checkboxes().every((c) => c.checked)).toBe(true);
+        expect(document.body.textContent).toContain('6 of 6 selected');
+        await act(async () => link('Clear').click());
+        expect(checkboxes().some((c) => c.checked)).toBe(false);
+        // A click on the tile outside the checkbox (here its output location) toggles it.
+        const location = Array.from(document.querySelectorAll('span, div')).find((e) => e.textContent === 'complextypes/') as HTMLElement;
+        await act(async () => location.click());
+        expect(checkboxes()[1].checked).toBe(true);
+        await act(async () => link('OK').click());
+        expect(onCustomTemplatesChange).toHaveBeenLastCalledWith({ ...none, complexTypes: true });
+    });
+
+    it('discards the changes on Cancel, and starts again from the saved choices', async () => {
+        const onCustomTemplatesChange = vi.fn();
+        await render({ generateOptions: { customTemplates: none, onCustomTemplatesChange } });
+        const popoverButton = (name: string) => Array.from(document.querySelectorAll('button')).find((b) => b.textContent === name) as HTMLButtonElement;
+        await act(async () => customTemplatesButton()!.click());
+        await act(async () => checkboxes()[0].click());
+        expect(checkboxes()[0].checked).toBe(true);
+        await act(async () => popoverButton('Cancel').click());
+        expect(checkboxes()).toHaveLength(0);
+        expect(onCustomTemplatesChange).not.toHaveBeenCalled();
+        await act(async () => customTemplatesButton()!.click());
+        expect(checkboxes()[0].checked).toBe(false);
+    });
+
+    it('is disabled while busy', async () => {
+        await render({ busy: true, generateOptions: { onCustomTemplatesChange: vi.fn() } });
+        expect(customTemplatesButton()!.disabled).toBe(true);
+    });
+
+    it('shows, disabled, before a project is open', async () => {
+        await render({ plan: null, generateOptions: { onCustomTemplatesChange: vi.fn(), customTemplatesDisabled: true } });
+        expect(customTemplatesButton()!.disabled).toBe(true);
+    });
+});

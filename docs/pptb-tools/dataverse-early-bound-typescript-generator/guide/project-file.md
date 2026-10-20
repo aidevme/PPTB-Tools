@@ -62,6 +62,7 @@ it and keeps it when it saves the file.
 | Option | Type | Default | Meaning |
 | --- | --- | --- | --- |
 | `pptbEarlyBoundGenerator.customEnumTemplate` | boolean | **Settings** → **Generate & files** → **Custom enum template** (off) | Renames duplicate enum members and writes the custom `enum.ejs` (**Custom enum template** on the Options card) |
+| `pptbEarlyBoundGenerator.customTemplates` | object of booleans | all `false` | The kinds chosen in **Custom Templates** on the Preview card: `actions`, `complexTypes`, `entities`, `enums`, `functions`, `metadata`. Saved only; they don't change the output yet |
 
 ```json
 {

@@ -1,6 +1,6 @@
 import { Text, Tooltip } from '@fluentui/react-components';
 import { FolderRegular, HistoryRegular } from '@fluentui/react-icons';
-import { useRecentProjectsListStyles } from '../../styles';
+import { useRecentProjectsListStyles } from '../../../styles';
 import type { ProjectOpenTarget, RecentProject } from './recentProjects';
 
 /** Props for {@link RecentProjectsList}. */

@@ -12,7 +12,7 @@ import {
     useStickyBarHeights,
     useToolSettings,
 } from '../../hooks';
-import { projectCustomEnumTemplate, withProjectCustomEnumTemplate } from '../../core';
+import { projectCustomEnumTemplate, projectCustomTemplates, withProjectCustomEnumTemplate, withProjectCustomTemplates } from '../../core';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
 import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
@@ -264,6 +264,10 @@ export default function App() {
                         customEnumTemplate: projectUsesCustomEnumTemplate,
                         generateTemplates: toolSettings.generateTemplates,
                         onCustomEnumTemplateChange: customEnumTemplate.request,
+                        customTemplates: projectCustomTemplates(config),
+                        // Not used for generating yet, so changing them keeps the preview current.
+                        onCustomTemplatesChange: (selection) => updateConfig(withProjectCustomTemplates(config, selection), { markStale: false }),
+                        customTemplatesDisabled: !projectRoot,
                     }}
                     onGenerate={startGenerate}
                     onCopyText={(text, label) => void copyPath(text, label)}

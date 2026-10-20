@@ -140,6 +140,8 @@ export const TOOL_CONFIG_KEY = 'pptbEarlyBoundGenerator';
 export interface ProjectToolSettings {
     /** Use the custom enum template for this project (spec 001): rename duplicates and write the custom `enum.ejs`. */
     customEnumTemplate?: boolean;
+    /** The kinds of generated file chosen in Custom Templates on the Preview card (not used for generating yet). */
+    customTemplates?: Partial<Record<CustomTemplateKind, boolean>>;
     /** Keys a later version of the tool may add are kept as-is. */
     [key: string]: unknown;
 }
@@ -172,4 +174,40 @@ export function projectCustomEnumTemplate(config: DataverseGenConfig): boolean |
  */
 export function withProjectCustomEnumTemplate(config: DataverseGenConfig, value: boolean): DataverseGenConfig {
     return { ...config, [TOOL_CONFIG_KEY]: { ...toolSettingsOf(config), customEnumTemplate: value } };
+}
+
+/** The kinds of generated file a project can choose custom templates for, in the order Custom Templates lists them. */
+export const CUSTOM_TEMPLATE_KINDS = ['actions', 'complexTypes', 'entities', 'enums', 'functions', 'metadata'] as const;
+
+/** One of {@link CUSTOM_TEMPLATE_KINDS}. */
+export type CustomTemplateKind = (typeof CUSTOM_TEMPLATE_KINDS)[number];
+
+/** Which kinds of generated file a project chose custom templates for. */
+export type CustomTemplateSelection = Record<CustomTemplateKind, boolean>;
+
+/**
+ * The project's Custom Templates choices.
+ *
+ * @remarks Only stored for now: nothing reads them when generating.
+ *
+ * @param config - The project's `.dataverse-gen.json` content.
+ * @returns Every kind, `true` only where the file sets it to `true`; a missing or non-boolean value is `false`.
+ */
+export function projectCustomTemplates(config: DataverseGenConfig): CustomTemplateSelection {
+    const stored = toolSettingsOf(config).customTemplates;
+    const values = stored !== null && typeof stored === 'object' && !Array.isArray(stored) ? (stored as Record<string, unknown>) : {};
+    return Object.fromEntries(CUSTOM_TEMPLATE_KINDS.map((kind) => [kind, values[kind] === true])) as CustomTemplateSelection;
+}
+
+/**
+ * A copy of the config with the project's Custom Templates choices set; every other key, including other keys of the
+ * tool's settings object, is kept.
+ *
+ * @param config - The project's `.dataverse-gen.json` content.
+ * @param selection - The choices to store, one per kind.
+ * @returns The updated config; `config` itself isn't changed.
+ */
+export function withProjectCustomTemplates(config: DataverseGenConfig, selection: CustomTemplateSelection): DataverseGenConfig {
+    const customTemplates = Object.fromEntries(CUSTOM_TEMPLATE_KINDS.map((kind) => [kind, selection[kind] === true]));
+    return { ...config, [TOOL_CONFIG_KEY]: { ...toolSettingsOf(config), customTemplates } };
 }

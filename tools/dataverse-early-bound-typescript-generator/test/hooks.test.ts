@@ -218,6 +218,16 @@ describe('useProject', () => {
         return { ...hook, setError, resetPlan, markPlanStale };
     }
 
+    it('updates the config without marking the preview stale when asked (Custom Templates)', () => {
+        installSettingsStub();
+        const { result, markPlanStale } = renderProject(new InMemoryFileSink());
+        act(() => result.current.updateConfig({ pptbEarlyBoundGenerator: { customTemplates: { enums: true } } }, { markStale: false }));
+        expect(result.current.config.pptbEarlyBoundGenerator).toEqual({ customTemplates: { enums: true } });
+        expect(markPlanStale).not.toHaveBeenCalled();
+        act(() => result.current.updateConfig({ generateIndex: false }));
+        expect(markPlanStale).toHaveBeenCalledTimes(1);
+    });
+
     it("loads a folder's .dataverse-gen.json, keeps the draft selection, and resets the plan", async () => {
         installSettingsStub();
         const sink = new InMemoryFileSink({ '/src/contoso/.dataverse-gen.json': JSON.stringify({ entities: ['account'] }) });

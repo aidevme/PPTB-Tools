@@ -40,11 +40,14 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
 | `onRenameDuplicatesChange` | `(checked: boolean) => void` (optional) | Called when that switch is toggled. Without it, the switch isn't shown. |
 | `customEnumTemplate` | `boolean` (optional) | Whether the project uses the custom enum template (`pptbEarlyBoundGenerator.customEnumTemplate`, or the Settings default). |
 | `generateTemplates` | `boolean` (optional, default `true`) | Whether Generate writes the templates (`generateTemplates`); the proposal mentions when it's off. |
+| `customTemplates` | `CustomTemplateSelection` (optional) | The project's Custom Templates choices (`pptbEarlyBoundGenerator.customTemplates`). |
+| `onCustomTemplatesChange` | `(selection: CustomTemplateSelection) => void` (optional) | Saves them. Without it, the **Custom Templates** button isn't shown. |
+| `customTemplatesDisabled` | `boolean` (optional) | Disables the button; `App.tsx` sets it until a project is open. |
 | `onCustomEnumTemplateChange` | `(checked: boolean) => void` (optional) | Called by the proposal (`true`) and the **Custom enum template** switch. Without it, neither is shown. |
 
 ## Messages
 
-- **Custom enum template proposal** (`CustomEnumTemplateProposal` in `PreviewParts.tsx`): a warning bar titled
+- **Custom enum template proposal** (`CustomEnumTemplateProposal` in `subcomponents/PreviewParts.tsx`): a warning bar titled
   "Duplicate identifiers found", shown when the plan has `duplicate` files, the custom enum template is off and a
   handler is passed. It gives the number of files, what the template does, that nothing changes until the next
   preview and Generate, that renaming the labels is the lasting fix, and, with Generate templates off, that the CLI
@@ -65,10 +68,13 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
 
 ## Action bar
 
+Two rows: the buttons, "Previewed … ago" and the hint on the first; the switches on their own row below
+(`actionBar` and `switchRow` in `PreviewCard.styles.ts`). Both rows wrap on narrow widths.
+
 - **Preview** (secondary) and **Generate** (primary). The Generate button names the count: **Generate 2
   files**, or **Nothing to write** when every file is up to date. It's disabled without an up-to-date
   preview or with nothing to write, and its tooltip says why.
-- **Delete orphaned files** (`Switch`), right after Generate. Its label is an info label (ⓘ, the shared `infoLabel`
+- **Delete orphaned files** (`Switch`), first on the switch row. Its label is an info label (ⓘ, the shared `infoLabel`
   helper) with the same explanation as the Settings panel (`DELETE_ORPHANS_INFO` in
   `components/shared/settingsInfo.tsx`). It reads and saves
   the same `deleteOrphanedFiles` tool setting as the [SettingsPanel](../panels/settings-panel.md) switch, so they stay
@@ -113,7 +119,9 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
   files with the duplicate identifiers status aren't written: the Generate button, the summary ("…won't be
   written."), the confirmation and the progress count leave them out.
 - The "Preview ready" and "Generation complete" notifications can be turned off in the Settings panel's General tab.
-- "Previewed *2 minutes ago*" after a preview.
+- **Custom Templates**, last on the switch row: the [CustomTemplatesPopover](../popovers/custom-templates-popover.md)
+  button. It shows greyed out until a project is open, like the switches, and is disabled while the tool is busy.
+- "Previewed *2 minutes ago*" after a preview, after the Generate button.
 - Without a project folder, a hint says to open a project first.
 
 ## Summary and status tiles
@@ -172,7 +180,7 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 ## Where the code lives
 
 - `components/cards/PreviewCard.tsx`: the card, its state (selection, filter, sort) and layout.
-- `components/cards/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches) and `StatusTiles`.
+- `components/cards/subcomponents/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches) and `StatusTiles`.
 - `components/tables/FileTable.tsx`: the sortable file table.
 - `components/shared/useResizableSplit.ts`: the divider between the file list and the viewer.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the

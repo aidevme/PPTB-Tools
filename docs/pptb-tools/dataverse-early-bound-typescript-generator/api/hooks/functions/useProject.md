@@ -157,13 +157,22 @@ Folder picker for the New Project and edit dialogs' Location; `null` when cancel
 
 ### updateConfig
 
-> **updateConfig**: (`update`) => `void`
+> **updateConfig**: (`update`, `options`) => `void`
+
+Merges `update` into the project config and, unless `options.markStale` is `false` (for values that don't change
+the generated files), marks the preview out of date.
 
 #### Parameters
 
 ##### update
 
 `Partial`\<[`DataverseGenConfig`](../../core/interfaces/DataverseGenConfig.md)\>
+
+##### options?
+
+###### markStale?
+
+`boolean`
 
 #### Returns
 

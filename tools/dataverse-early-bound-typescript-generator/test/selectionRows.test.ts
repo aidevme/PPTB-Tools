@@ -3,7 +3,7 @@
  * the columns sort by.
  */
 import { describe, expect, it } from 'vitest';
-import { buildEntityRows, buildOperationRows, operationType, type EntityRowFilter, type OperationRowFilter } from '../src/components/cards/selectionRows';
+import { buildEntityRows, buildOperationRows, operationType, type EntityRowFilter, type OperationRowFilter } from '../src/components/cards/subcomponents/selectionRows';
 import type { EntitySummary, OperationSummary } from '../src/types';
 
 const STYLES = { mono: 'mono', muted: 'muted', stacked: 'stacked', secondary: 'secondary' };

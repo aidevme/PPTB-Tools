@@ -44,12 +44,15 @@
 
 ## Type Aliases
 
+- [CustomTemplateKind](type-aliases/CustomTemplateKind.md)
+- [CustomTemplateSelection](type-aliases/CustomTemplateSelection.md)
 - [EntityMetadataLookup](type-aliases/EntityMetadataLookup.md)
 - [OutputTypeKind](type-aliases/OutputTypeKind.md)
 
 ## Variables
 
 - [CONFIG\_FILE\_NAME](variables/CONFIG_FILE_NAME.md)
+- [CUSTOM\_TEMPLATE\_KINDS](variables/CUSTOM_TEMPLATE_KINDS.md)
 - [DEFAULT\_OUTPUT\_ROOT](variables/DEFAULT_OUTPUT_ROOT.md)
 - [DEFAULT\_REFERENCED\_TYPES](variables/DEFAULT_REFERENCED_TYPES.md)
 - [OUTPUT\_FOLDERS](variables/OUTPUT_FOLDERS.md)
@@ -69,6 +72,7 @@
 - [parseConfig](functions/parseConfig.md)
 - [parseCsdl](functions/parseCsdl.md)
 - [projectCustomEnumTemplate](functions/projectCustomEnumTemplate.md)
+- [projectCustomTemplates](functions/projectCustomTemplates.md)
 - [renameDuplicateEnumMembers](functions/renameDuplicateEnumMembers.md)
 - [renderComplexType](functions/renderComplexType.md)
 - [renderEntity](functions/renderEntity.md)
@@ -82,3 +86,4 @@
 - [shortTypeName](functions/shortTypeName.md)
 - [stripCollection](functions/stripCollection.md)
 - [withProjectCustomEnumTemplate](functions/withProjectCustomEnumTemplate.md)
+- [withProjectCustomTemplates](functions/withProjectCustomTemplates.md)

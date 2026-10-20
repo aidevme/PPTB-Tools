@@ -19,3 +19,13 @@ Keys a later version of the tool may add are kept as-is.
 Defined in: [core/config.ts:142](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L142)
 
 Use the custom enum template for this project (spec 001): rename duplicates and write the custom `enum.ejs`.
+
+***
+
+### customTemplates?
+
+> `optional` **customTemplates?**: `Partial`\<`Record`\<`"actions"` \| `"metadata"` \| `"entities"` \| `"functions"` \| `"enums"` \| `"complexTypes"`, `boolean`\>\>
+
+Defined in: [core/config.ts:144](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L144)
+
+The kinds of generated file chosen in Custom Templates on the Preview card (not used for generating yet).

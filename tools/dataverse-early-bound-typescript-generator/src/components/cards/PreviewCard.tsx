@@ -1,3 +1,4 @@
+import type { CustomTemplateSelection } from '../../core';
 import { useMemo, useState } from 'react';
 import { Button, MessageBar, MessageBarActions, MessageBarBody, Skeleton, SkeletonItem, Switch, Text, mergeClasses, type SortDirection } from '@fluentui/react-components';
 import { ArrowSyncRegular } from '@fluentui/react-icons';
@@ -14,7 +15,7 @@ import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
 import { FileTable } from '../tables/FileTable';
-import { CustomEnumTemplateProposal, PreviewActionBar, StatusTiles } from './PreviewParts';
+import { CustomEnumTemplateProposal, PreviewActionBar, StatusTiles } from './subcomponents/PreviewParts';
 
 /** Explanation in the Show unchanged switch's info label. */
 const SHOW_UNCHANGED_INFO = (
@@ -53,6 +54,15 @@ export interface IPreviewGenerateOptions {
      * proposal is shown.
      */
     onCustomEnumTemplateChange?: (checked: boolean) => void;
+    /** The project's Custom Templates choices (`pptbEarlyBoundGenerator.customTemplates`). */
+    customTemplates?: CustomTemplateSelection;
+    /** Saves the project's Custom Templates choices. The Custom Templates button is hidden without it. */
+    onCustomTemplatesChange?: (selection: CustomTemplateSelection) => void;
+    /**
+     * Disables the Custom Templates button, for example before a project is open.
+     * @defaultValue false
+     */
+    customTemplatesDisabled?: boolean;
     /** Whether Generate also deletes orphaned files (the tool config's `deleteOrphanedFiles`). */
     deleteOrphans: boolean;
     /** Called with the new value when the Delete orphaned files switch is toggled; saves `deleteOrphanedFiles`. */

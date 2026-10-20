@@ -8,7 +8,7 @@ using Fluent UI v9. They hold no app state: the hooks in `src/hooks/` own the st
 passes data and callbacks down as props. Everything is exported from the folder's `index.ts` barrel.
 
 These pages are grouped in the same folders as the source: `apps/`, `cards/`, `dialogs/`, `layout/`, `panels/`,
-`shared/`, `tables/` and `viewers/`.
+`popovers/`, `shared/`, `tables/` and `viewers/`.
 
 ## Page layout
 
@@ -28,6 +28,7 @@ These pages are grouped in the same folders as the source: `apps/`, `cards/`, `d
 | 2 | [SelectionCard](./cards/selection-card.md) | Choose tables, actions and functions |
 | 3 | [OptionsCard](./cards/options-card.md) | Output folder and which files to generate |
 | 4 | [PreviewCard](./cards/preview-card.md) | Compare generated files with disk, then write them |
+| — | [CustomTemplatesPopover](./popovers/custom-templates-popover.md) | PreviewCard's Custom Templates button and popover |
 | — | [SelectionTable](./tables/selection-table.md) | The SelectionCard's table: a checkbox per row, sortable columns |
 | — | [FileTable](./tables/file-table.md) | PreviewCard's sortable file table |
 | — | [ProjectsTable](./tables/projects-table.md) | LoadProjectDialog's table of saved projects |

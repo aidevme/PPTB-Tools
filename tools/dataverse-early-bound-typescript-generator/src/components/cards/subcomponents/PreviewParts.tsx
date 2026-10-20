@@ -1,16 +1,19 @@
 /**
- * Parts of the Preview card: the action bar (Preview, Generate and the switches), the custom enum template proposal
+ * Parts of the Preview card: the action bar (Preview, Generate, the switches and Custom Templates, from
+ * `popovers/CustomTemplatesPopover.tsx`), the custom enum template proposal
  * and the status tiles. They're presentational; `PreviewCard` holds the state. The file table is
  * `tables/FileTable.tsx`.
  */
 import { Button, MessageBar, MessageBarActions, MessageBarBody, MessageBarTitle, Switch, Text, Tooltip, mergeClasses } from '@fluentui/react-components';
 import { AddCircleRegular, CheckmarkCircleRegular, DocumentQuestionMarkRegular, DocumentSearchRegular, EditRegular, InfoRegular, SaveRegular, WarningRegular } from '@fluentui/react-icons';
-import type { FileStatus, WritePlan } from '../../types';
-import { plural } from '../../services';
-import { usePreviewCardStyles } from '../../styles';
-import { formatRelativeTime } from '../shared/format';
-import { STATUS_META, STATUS_ORDER } from '../shared/generatedFiles';
-import { infoLabel } from '../shared/infoLabel';
+import { CUSTOM_TEMPLATE_KINDS, type CustomTemplateSelection } from '../../../core';
+import type { FileStatus, WritePlan } from '../../../types';
+import { plural } from '../../../services';
+import { usePreviewCardStyles } from '../../../styles';
+import { formatRelativeTime } from '../../shared/format';
+import { STATUS_META, STATUS_ORDER } from '../../shared/generatedFiles';
+import { infoLabel } from '../../shared/infoLabel';
+import { CustomTemplatesPopover } from '../../popovers/CustomTemplatesPopover';
 import {
     CUSTOM_ENUM_TEMPLATE_INFO,
     CUSTOM_ENUM_TEMPLATE_TITLE,
@@ -20,7 +23,7 @@ import {
     RENAME_DUPLICATES_TITLE,
     SKIP_DUPLICATES_INFO,
     SKIP_DUPLICATES_TITLE,
-} from '../shared/settingsInfo';
+} from '../../shared/settingsInfo';
 
 type PreviewCardStyles = ReturnType<typeof usePreviewCardStyles>;
 
@@ -78,6 +81,9 @@ function generateHelp(plan: WritePlan | null, writable: number, deletable: numbe
         .join(', ');
 }
 
+/** Every kind off: the Custom Templates choices of a project that has none. */
+const NO_CUSTOM_TEMPLATES = Object.fromEntries(CUSTOM_TEMPLATE_KINDS.map((kind) => [kind, false])) as CustomTemplateSelection;
+
 /** Props for {@link PreviewActionBar}. */
 export interface IPreviewActionBarProps {
     /** The last computed write plan; `null` before the first preview disables Generate and the switches. */
@@ -117,6 +123,18 @@ export interface IPreviewActionBarProps {
     customEnumTemplate?: boolean;
     /** Called with the new value when the Custom enum template switch is toggled; the switch is hidden without it. */
     onCustomEnumTemplateChange?: (checked: boolean) => void;
+    /**
+     * The project's Custom Templates choices, shown as checkboxes in the Custom Templates popover.
+     * @defaultValue every kind off
+     */
+    customTemplates?: CustomTemplateSelection;
+    /** Called with every kind's value when a Custom Templates checkbox changes; the button is hidden without it. */
+    onCustomTemplatesChange?: (selection: CustomTemplateSelection) => void;
+    /**
+     * Disables the Custom Templates button (no project open); it's also disabled while `busy`.
+     * @defaultValue false
+     */
+    customTemplatesDisabled?: boolean;
     /** Called when Preview is clicked. */
     onPreview: () => void;
     /** Called when Generate (or Delete orphaned files, when there's nothing to write) is clicked. */
@@ -126,8 +144,9 @@ export interface IPreviewActionBarProps {
 }
 
 /**
- * Preview and Generate, the Delete orphaned files, Rename and Skip duplicated identifier(s) and Custom enum template
- * switches, and hints.
+ * Preview and Generate with the "Previewed … ago" text and hints on one row, and below them the Delete orphaned files,
+ * Rename duplicated identifier(s), Custom enum template and Skip duplicated identifier(s) switches and the Custom
+ * Templates button on their own row.
  */
 export function PreviewActionBar(props: IPreviewActionBarProps) {
     const { plan, stale, canPreview, needsProject, busy, previewedAt, writable, deleteOrphans, onDeleteOrphansChange, skipDuplicates, onPreview, onGenerate } = props;
@@ -137,74 +156,81 @@ export function PreviewActionBar(props: IPreviewActionBarProps) {
     // The custom enum template renames too, so while it's on renaming is on and its own switch can't turn it off.
     const renaming = (props.renameDuplicates ?? false) || customEnumTemplate;
     return (
-        <div className={styles.actionBar}>
-            <Button icon={<DocumentSearchRegular />} disabled={!canPreview || busy} onClick={onPreview}>
-                Preview
-            </Button>
-            <Tooltip content={generateHelp(plan, writable, deletable)} relationship="description" withArrow>
-                <Button appearance="primary" icon={<SaveRegular />} disabled={!plan || stale || busy || writable + deletable === 0} onClick={onGenerate}>
-                    {generateLabel(plan, writable, deletable)}
+        <div className={styles.actionArea}>
+            <div className={styles.actionBar}>
+                <Button icon={<DocumentSearchRegular />} disabled={!canPreview || busy} onClick={onPreview}>
+                    Preview
                 </Button>
-            </Tooltip>
-            {/* The switches only apply to files a preview found: they're disabled before a preview and while it found none
-                of their kind (orphaned files, or files with duplicate identifiers). Rename and Custom enum template stay
-                usable while on, since they remove the duplicates they act on; Rename is disabled while Custom enum template
-                is on. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
-            <Switch
-                label={infoLabel(DELETE_ORPHANS_TITLE, switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
-                checked={deleteOrphans}
-                disabled={!plan || plan.counts.orphaned === 0 || busy}
-                onChange={(_, data) => onDeleteOrphansChange(data.checked)}
-            />
-            {props.onRenameDuplicatesChange && (
+                <Tooltip content={generateHelp(plan, writable, deletable)} relationship="description" withArrow>
+                    <Button appearance="primary" icon={<SaveRegular />} disabled={!plan || stale || busy || writable + deletable === 0} onClick={onGenerate}>
+                        {generateLabel(plan, writable, deletable)}
+                    </Button>
+                </Tooltip>
+                {previewedAt && (
+                    <Text size={200} className={styles.muted}>
+                        Previewed {formatRelativeTime(previewedAt, props.now)}
+                    </Text>
+                )}
+                {needsProject && (
+                    <span className={styles.hint}>
+                        <InfoRegular aria-hidden="true" />
+                        <Text size={200}>Open a project (step 1) to preview and generate.</Text>
+                    </span>
+                )}
+            </div>
+            <div className={styles.switchRow}>
+                {/* The switches only apply to files a preview found: they're disabled before a preview and while it found none
+                    of their kind (orphaned files, or files with duplicate identifiers). Rename and Custom enum template stay
+                    usable while on, since they remove the duplicates they act on; Rename is disabled while Custom enum template
+                    is on. Their info labels show the same explanation as the Settings panel, plus the reason when disabled. */}
                 <Switch
-                    label={infoLabel(
-                        RENAME_DUPLICATES_TITLE,
-                        customEnumTemplate ? (
-                            <>
-                                {RENAME_DUPLICATES_INFO} On because {CUSTOM_ENUM_TEMPLATE_TITLE} is on.
-                            </>
-                        ) : (
-                            // Once on, the preview has no duplicates left, but the switch must stay usable to turn it off.
-                            switchInfo(RENAME_DUPLICATES_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (props.renameDuplicates ? 1 : 0), 'files with duplicate identifiers')
-                        ),
-                    )}
-                    checked={renaming}
-                    disabled={customEnumTemplate || !plan || (plan.counts.duplicate === 0 && !props.renameDuplicates) || busy}
-                    onChange={(_, data) => props.onRenameDuplicatesChange?.(data.checked)}
+                    label={infoLabel(DELETE_ORPHANS_TITLE, switchInfo(DELETE_ORPHANS_INFO, !!plan, plan?.counts.orphaned ?? 0, 'orphaned files'))}
+                    checked={deleteOrphans}
+                    disabled={!plan || plan.counts.orphaned === 0 || busy}
+                    onChange={(_, data) => onDeleteOrphansChange(data.checked)}
                 />
-            )}
-            {props.onCustomEnumTemplateChange && (
-                <Switch
-                    label={infoLabel(
-                        CUSTOM_ENUM_TEMPLATE_TITLE,
-                        // Like Rename: usable once a preview found duplicates, and always while on, so it can be turned off.
-                        switchInfo(CUSTOM_ENUM_TEMPLATE_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (customEnumTemplate ? 1 : 0), 'files with duplicate identifiers'),
-                    )}
-                    checked={customEnumTemplate}
-                    disabled={!plan || (plan.counts.duplicate === 0 && !customEnumTemplate) || busy}
-                    onChange={(_, data) => props.onCustomEnumTemplateChange?.(data.checked)}
-                />
-            )}
-            {props.onSkipDuplicatesChange && (
-                <Switch
-                    label={infoLabel(SKIP_DUPLICATES_TITLE, switchInfo(SKIP_DUPLICATES_INFO, !!plan, plan?.counts.duplicate ?? 0, 'files with duplicate identifiers'))}
-                    checked={skipDuplicates}
-                    disabled={!plan || plan.counts.duplicate === 0 || busy}
-                    onChange={(_, data) => props.onSkipDuplicatesChange?.(data.checked)}
-                />
-            )}
-            {previewedAt && (
-                <Text size={200} className={styles.muted}>
-                    Previewed {formatRelativeTime(previewedAt, props.now)}
-                </Text>
-            )}
-            {needsProject && (
-                <span className={styles.hint}>
-                    <InfoRegular aria-hidden="true" />
-                    <Text size={200}>Open a project (step 1) to preview and generate.</Text>
-                </span>
-            )}
+                {props.onRenameDuplicatesChange && (
+                    <Switch
+                        label={infoLabel(
+                            RENAME_DUPLICATES_TITLE,
+                            customEnumTemplate ? (
+                                <>
+                                    {RENAME_DUPLICATES_INFO} On because {CUSTOM_ENUM_TEMPLATE_TITLE} is on.
+                                </>
+                            ) : (
+                                // Once on, the preview has no duplicates left, but the switch must stay usable to turn it off.
+                                switchInfo(RENAME_DUPLICATES_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (props.renameDuplicates ? 1 : 0), 'files with duplicate identifiers')
+                            ),
+                        )}
+                        checked={renaming}
+                        disabled={customEnumTemplate || !plan || (plan.counts.duplicate === 0 && !props.renameDuplicates) || busy}
+                        onChange={(_, data) => props.onRenameDuplicatesChange?.(data.checked)}
+                    />
+                )}
+                {props.onCustomEnumTemplateChange && (
+                    <Switch
+                        label={infoLabel(
+                            CUSTOM_ENUM_TEMPLATE_TITLE,
+                            // Like Rename: usable once a preview found duplicates, and always while on, so it can be turned off.
+                            switchInfo(CUSTOM_ENUM_TEMPLATE_INFO, !!plan, (plan?.counts.duplicate ?? 0) + (customEnumTemplate ? 1 : 0), 'files with duplicate identifiers'),
+                        )}
+                        checked={customEnumTemplate}
+                        disabled={!plan || (plan.counts.duplicate === 0 && !customEnumTemplate) || busy}
+                        onChange={(_, data) => props.onCustomEnumTemplateChange?.(data.checked)}
+                    />
+                )}
+                {props.onCustomTemplatesChange && (
+                    <CustomTemplatesPopover selection={props.customTemplates ?? NO_CUSTOM_TEMPLATES} disabled={busy || (props.customTemplatesDisabled ?? false)} onChange={props.onCustomTemplatesChange} />
+                )}
+                {props.onSkipDuplicatesChange && (
+                    <Switch
+                        label={infoLabel(SKIP_DUPLICATES_TITLE, switchInfo(SKIP_DUPLICATES_INFO, !!plan, plan?.counts.duplicate ?? 0, 'files with duplicate identifiers'))}
+                        checked={skipDuplicates}
+                        disabled={!plan || plan.counts.duplicate === 0 || busy}
+                        onChange={(_, data) => props.onSkipDuplicatesChange?.(data.checked)}
+                    />
+                )}
+            </div>
         </div>
     );
 }

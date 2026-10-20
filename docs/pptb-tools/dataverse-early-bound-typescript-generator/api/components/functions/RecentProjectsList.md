@@ -2,7 +2,7 @@
 
 > **RecentProjectsList**(`__namedParameters`): `Element` \| `null`
 
-Defined in: [components/cards/RecentProjectsList.tsx:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/RecentProjectsList.tsx#L19)
+Defined in: [components/cards/subcomponents/RecentProjectsList.tsx:19](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/cards/subcomponents/RecentProjectsList.tsx#L19)
 
 The Project card's recent projects: one button per project, with its full path in a tooltip.
 

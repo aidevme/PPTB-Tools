@@ -3,6 +3,7 @@ export { useAppStyles } from './App.styles';
 export { useAppIconStyles } from './AppIcon.styles';
 export { useCodeViewerStyles } from './CodeViewer.styles';
 export { useConnectionStatusStyles } from './ConnectionStatus.styles';
+export { useCustomTemplatesPopoverStyles } from './CustomTemplatesPopover.styles';
 export { useFileSearchBoxStyles } from './FileSearchBox.styles';
 export { useFileTableStyles } from './FileTable.styles';
 export { useFileViewerStyles } from './FileViewer.styles';

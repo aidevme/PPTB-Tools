@@ -1,6 +1,6 @@
-import type { ProjectEntry } from '../../config';
-import { basename, isSamePath } from '../../services';
-import { formatRelativeTime } from '../shared/format';
+import type { ProjectEntry } from '../../../config';
+import { basename, isSamePath } from '../../../services';
+import { formatRelativeTime } from '../../shared/format';
 
 /** How many recent projects the Project card offers by default. */
 export const MAX_RECENT = 3;

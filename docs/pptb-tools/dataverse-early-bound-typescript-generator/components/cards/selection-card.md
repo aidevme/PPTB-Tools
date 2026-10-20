@@ -54,7 +54,7 @@ Source: [`src/components/cards/SelectionCard.tsx`](https://github.com/aidevme/PP
 ## Where the code lives
 
 - `components/cards/SelectionCard.tsx`: the card: tabs, filters, solution filter, row limit and missing items.
-- `components/cards/selectionRows.tsx`: `buildEntityRows` and `buildOperationRows`, pure functions that filter the
+- `components/cards/subcomponents/selectionRows.tsx`: `buildEntityRows` and `buildOperationRows`, pure functions that filter the
   entities or operations, order them, and build the cells and sort values of each row; also `operationType`.
 - `components/tables/SelectionTable.tsx`: the table (a checkbox per row, sortable columns) and the `SelectionRow`
   type.

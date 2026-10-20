@@ -1,7 +1,7 @@
 import { Badge, Tooltip } from '@fluentui/react-components';
-import type { EntitySummary, OperationSummary } from '../../types';
-import type { SelectionRow } from '../tables/SelectionTable';
-import { TABLE_TYPE_COLORS } from '../tables/selectionColumns';
+import type { EntitySummary, OperationSummary } from '../../../types';
+import type { SelectionRow } from '../../tables/SelectionTable';
+import { TABLE_TYPE_COLORS } from '../../tables/selectionColumns';
 
 /** The SelectionCard class names the row cells use. */
 export type SelectionRowStyles = Record<'mono' | 'muted' | 'stacked' | 'secondary', string>;

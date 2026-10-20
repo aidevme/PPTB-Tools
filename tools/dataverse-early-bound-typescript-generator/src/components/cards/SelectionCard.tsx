@@ -21,7 +21,7 @@ import { nextSort, sortSelectionRows, type SortState } from '../shared/sorting';
 import { StepCard } from '../shared/StepCard';
 import { SelectionTable } from '../tables/SelectionTable';
 import { ACTION_COLUMNS, ENTITY_COLUMNS, FUNCTION_COLUMNS } from '../tables/selectionColumns';
-import { buildEntityRows, buildOperationRows } from './selectionRows';
+import { buildEntityRows, buildOperationRows } from './subcomponents/selectionRows';
 import type { StepState } from '../shared/workflowSteps';
 
 /** A Select tab, and the matching list of names in the config (tables, actions or functions). */

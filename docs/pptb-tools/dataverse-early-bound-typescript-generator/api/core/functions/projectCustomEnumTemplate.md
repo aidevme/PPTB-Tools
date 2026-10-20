@@ -2,7 +2,7 @@
 
 > **projectCustomEnumTemplate**(`config`): `boolean` \| `undefined`
 
-Defined in: [core/config.ts:160](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L160)
+Defined in: [core/config.ts:162](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/core/config.ts#L162)
 
 The project's custom enum template choice.
 

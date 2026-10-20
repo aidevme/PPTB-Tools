@@ -1,12 +1,16 @@
 import { makeStyles, shorthands, tokens } from '@fluentui/react-components';
 
 /**
- * Styles for `PreviewCard`: the action bar, the status tiles, the file table beside the viewer, and the
+ * Styles for `PreviewCard`: the action bar (buttons, then a row of switches; the Custom Templates popover has its own
+ * file), the status tiles, the file table beside the viewer, and the
  * resizable divider between them.
  */
 export const usePreviewCardStyles = makeStyles({
     body: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalM },
+    actionArea: { display: 'flex', flexDirection: 'column', gap: tokens.spacingVerticalS },
     actionBar: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalS, flexWrap: 'wrap' },
+
+    switchRow: { display: 'flex', alignItems: 'center', columnGap: tokens.spacingHorizontalL, rowGap: tokens.spacingVerticalXS, flexWrap: 'wrap' },
     muted: { color: tokens.colorNeutralForeground3 },
     hint: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS, color: tokens.colorNeutralForeground3 },
 

@@ -130,10 +130,14 @@ export function useProject({ sink, connKey, inPptb, connection, projectDefaults,
         };
     }, [inPptb, connection, connKey]);
 
+    /**
+     * Merges `update` into the project config and, unless `options.markStale` is `false` (for values that don't change
+     * the generated files), marks the preview out of date.
+     */
     const updateConfig = useCallback(
-        (update: Partial<DataverseGenConfig>) => {
+        (update: Partial<DataverseGenConfig>, options: { markStale?: boolean } = {}) => {
             setConfigState((state) => ({ ...state, config: { ...state.config, ...update } }));
-            markPlanStale();
+            if (options.markStale !== false) markPlanStale();
         },
         [markPlanStale],
     );

@@ -127,6 +127,13 @@ export default defineConfig({
                                     ],
                                 },
                                 {
+                                    text: "Popovers",
+                                    collapsed: true,
+                                    items: [
+                                        { text: "CustomTemplatesPopover", link: "/pptb-tools/dataverse-early-bound-typescript-generator/components/popovers/custom-templates-popover" },
+                                    ],
+                                },
+                                {
                                     text: "Shared",
                                     collapsed: true,
                                     items: [
