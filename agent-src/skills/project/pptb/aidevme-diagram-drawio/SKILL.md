@@ -173,3 +173,9 @@ Commit **both** `.drawio` and `.svg` — the XML is the source, the SVG is the e
 - `references/drawio-xml-cheatsheet.md` — common mxCell/mxGeometry patterns
 - `templates/` — starter `.drawio` files
 - `examples/` — rendered reference SVGs
+
+## Changelog
+
+| Date | Author | Description |
+| --- | --- | --- |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

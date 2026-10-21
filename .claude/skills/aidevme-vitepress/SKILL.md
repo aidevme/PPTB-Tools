@@ -125,3 +125,4 @@ MCP files yourself unless they ask.
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-17 | aidevme | Created: VitePress site changes (pages, sidebar, nav, config, build errors and dead links), grounded in the official VitePress docs through the Vue Docs MCP server, with setup for Claude Code and VS Code Copilot. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

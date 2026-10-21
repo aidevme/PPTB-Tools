@@ -373,3 +373,4 @@ The output of `playwright-cli click`, `playwright-cli snapshot`, and other comma
 | Date | Author | Description |
 |---|---|---|
 | 2026-09-11 | aidevme | Ported from prior in-house reference skills and neutralised for the reusable template (dropped internal license header, stripped stray project tags). |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

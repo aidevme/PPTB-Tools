@@ -172,3 +172,4 @@ selected SalesCore, clicked Export, chose Managed, and downloaded SalesCore_1_2_
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-21 | aidevme | Created: intake and redaction, reconstruction gate, generalization, UI-to-API mapping, drafting from a template, review gate with hand-off to aidevme-skill-creator, optional schedule and trigger evals; references for the template, redaction checklist and UI-to-API mapping. Ported from the skill-recorder method. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

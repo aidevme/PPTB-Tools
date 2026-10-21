@@ -79,3 +79,4 @@ are in [references/commit.md](references/commit.md).
 | --- | --- | --- |
 | 2026-10-17 | aidevme | Created: one commit per file with Conventional Commits 1.0.0 messages; repo-state inspection, safety check, per-file diffs, coupled-file grouping, plan table and confirmation, ordered commits, and the never-push/never-bypass rules. |
 | 2026-10-17 | aidevme | Restructured into a router with references: the commit workflow moved verbatim to `references/commit.md`; added branch naming, issues, pull requests, review comments, CI and security through the GitHub MCP server (tool names checked at `github-mcp-server@e3809fe`), MCP setup, and notes on the official `awesome-copilot` skills adapted (`@cb64ad1`). |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

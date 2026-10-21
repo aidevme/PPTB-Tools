@@ -337,4 +337,4 @@ Fill `<topic_slug>` in frontmatter `topics:` with the slug itself — this makes
 
 ## Changelog
 
-Moved out of this file per [ADR 0021](../../../agent/wiki/decisions/0021-skill-changelogs-in-sibling-file.md) — see **[CHANGELOG.md](CHANGELOG.md)**.
+The full history is in **[CHANGELOG.md](CHANGELOG.md)**.

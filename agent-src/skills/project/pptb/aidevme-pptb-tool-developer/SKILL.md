@@ -191,3 +191,4 @@ Don't commit unless the user asks; if asked, use Conventional Commits from `CONT
 | 2026-10-16 | aidevme | Created: tool selection, read-only analysis of inline makeStyles hooks with edge-case flags, approval gate, extraction to src/styles/<ComponentName>.styles.ts with the barrel, build/test/lint verification, report. |
 | 2026-10-16 | aidevme | Styling questions are answered from Microsoft Learn through the Microsoft Learn MCP Server (search, fetch, code samples), cited in the proposal and the report; Learn-based improvements are reported as follow-ups, never applied. |
 | 2026-10-18 | aidevme | New style files and changed components are handed to `aidevme-tsdoc` ("After a code change") after extraction. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

@@ -118,3 +118,4 @@ Run this whenever TypeScript code was just created or changed, by the user or by
 | 2026-10-18 | aidevme | Every exported function, public method and hook documents each parameter (`@param`) and its result (`@returns`) in a fixed layout (summary, `@remarks`, parameters and result, modifiers); components keep their props on the props interface. |
 | 2026-10-18 | aidevme | New "After a code change" section and trigger: other skills and ad-hoc edits hand off here to document only the symbols they touched, in the same commit. |
 | 2026-10-19 | aidevme | tags.md links every tag to its tsdoc.org reference page (25 tags; the `@jsx…` pragmas have none) and explains release-tag inheritance from the `@alpha` example. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits, including the 2026-10-18 check-script fix. |

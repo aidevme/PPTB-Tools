@@ -206,3 +206,4 @@ Runs right after Phase 6, without asking. Edit only the TODO file(s) Phase 4 wro
 | 2026-10-17 | aidevme | Findings, failures and fixes that depend on Microsoft platforms are checked against Microsoft Learn through the Microsoft Learn MCP Server and cited; the report lists the pages used. |
 | 2026-10-18 | aidevme | TODO files are saved per tool in `docs/todos/<tool-name>/` instead of directly in `docs/todos/`. |
 | 2026-10-18 | aidevme | Each step's TSDoc goes through `aidevme-tsdoc` ("After a code change") and `npm run lint:tsdoc`. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

@@ -88,3 +88,4 @@ Never use `-AutoAdd`: it adds typos too. Instead:
 | Date | Author | Description |
 | --- | --- | --- |
 | 2026-10-16 | aidevme | Created from the repository's `scripts/` folder. The scripts find the root with git; `Validate-Markdown.ps1` gained `-Path`, runs through npx and fails when either check fails; `Sync-Cspell.ps1` gained `-ListOnly` and `-Word`. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

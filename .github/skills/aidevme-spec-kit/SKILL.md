@@ -98,3 +98,4 @@ speed; say which gate is waiting instead.
 | 2026-10-17 | aidevme | Created: phase detection, review gates, routing to per-phase references, `power-platform` and `typescript-web` profiles, and the handoff to aidevme-github; checked against Spec Kit v1.2.1. |
 | 2026-10-18 | aidevme | One Spec Kit project per package (the nearest `.specify/`), initialized in the package folder when the repository has several packages or regenerates its root `.claude/skills/`; replaces the root-only setup and its sync blocker. Branch names carry the package in a monorepo. |
 | 2026-10-18 | aidevme | implement.md updates the doc comments of each task's changed symbols, through aidevme-tsdoc for TypeScript. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |

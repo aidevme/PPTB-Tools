@@ -280,3 +280,5 @@ findings, the scaffold is broken — report the findings and stop.
   removed the governance/program-tier apparatus (`tier.md`/`policies.md`, `-TierSlug`) not adopted here;
   neutralised `Forge-USA` / `claude-code/skills/` path assumptions to this template's `agent-src` /
   `shared/dv` layout. `scope: core`.
+
+The full history is in **[CHANGELOG.md](CHANGELOG.md)**.

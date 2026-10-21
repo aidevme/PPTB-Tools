@@ -58,3 +58,4 @@ is in source control. **Never touch `raw/`.**
 | Date | Author | Description |
 |---|---|---|
 | 2026-09-10 | aidevme | Ported from prior in-house skills; invariant numbering de-duplicated (was two "14"s → 14/15/16). |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |
