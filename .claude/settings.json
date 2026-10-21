@@ -6,6 +6,9 @@
       "Bash(pwsh -File agent-src/sync/sync.ps1*)",
       "Bash(pwsh -File agent-src/sync/verify-parity.ps1*)",
       "Bash(pwsh -File agent-src/sync/check-shared.ps1*)",
+      "Bash(pwsh -File agent-src/sync/validate-skills.ps1*)",
+      "Bash(pwsh -File agent-src/sync/check-changelogs.ps1*)",
+      "Bash(pwsh -File agent-src/sync/update-changelog.ps1*)",
       "Bash(git status*)",
       "Bash(git diff*)",
       "Bash(git add *)",
@@ -20,5 +23,19 @@
       "Bash(pac pcf push*)"
     ]
   },
-  "_note": "Generated-file safety: .claude/skills and .github/skills are OUTPUTS of agent-src/sync/sync.ps1 — do not hand-edit. The deny list keeps deploy/push actions (which must target Dev via a verified connection) from running unattended; approve them per-action. Extend allow[] per project."
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pwsh -NoProfile -File \"$CLAUDE_PROJECT_DIR/agent-src/sync/changelog-hook.ps1\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  },
+  "_note": "Generated-file safety: .claude/skills and .github/skills are OUTPUTS of agent-src/sync/sync.ps1 — do not hand-edit. The deny list keeps deploy/push actions (which must target Dev via a verified connection) from running unattended; approve them per-action. Extend allow[] per project. The PostToolUse hook (agent-src/sync/changelog-hook.ps1) keeps each aidevme-* skill's CHANGELOG.md in step with edits to the skill: it creates a missing one from docs/templates/CHANGELOG_STYLE.md and reminds Claude to add an entry."
 }

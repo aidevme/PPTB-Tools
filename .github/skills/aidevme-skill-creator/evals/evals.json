@@ -113,6 +113,19 @@
         "Doesn't install the npm package named skills-ref or an unpinned version",
         "After installing, reports the valid and invalid counts and each problem with its skill folder"
       ]
+    },
+    {
+      "id": 10,
+      "prompt": "Add a 'Troubleshooting' section to aidevme-vitepress about the 'Cannot find module vitepress' error.",
+      "expected_output": "The section is added to the source SKILL.md, an entry goes under today's date in the skill's CHANGELOG.md (Added) and a row in its SKILL.md Changelog table, all in the same change, and the sync, parity check and check-changelogs.ps1 pass.",
+      "files": [],
+      "expectations": [
+        "Edits agent-src/skills/core/delivery/aidevme-vitepress/SKILL.md, not a generated copy",
+        "Adds an entry under a '## <today>' heading at the top of agent-src/skills/core/delivery/aidevme-vitepress/CHANGELOG.md, in the Added category, leading with the change in bold and naming the new section",
+        "Adds a matching one-line row to the SKILL.md Changelog table",
+        "Runs sync.ps1, verify-parity.ps1 and check-changelogs.ps1, and reports CHANGELOGS OK",
+        "Doesn't invent a commit SHA for the new entry"
+      ]
     }
   ]
 }

@@ -10,8 +10,9 @@ description: |
   (2) A repeatable workflow should become a reusable capability
   (3) A project-level skill should be promoted to the reusable core
   (4) An existing skill's SKILL.md frontmatter changes (name, description, metadata, tools)
+  (5) Any change to an existing skill under agent-src/skills/ (it adds the CHANGELOG.md entry)
   Enforces naming, the scope split, no-client-data rules, spec-valid frontmatter, the manifest registration,
-  and a re-sync.
+  a CHANGELOG.md entry for every change, and a re-sync.
 ---
 
 # aidevme-skill-creator
@@ -50,8 +51,8 @@ New-Item -ItemType Directory -Force -Path $base, "$base/evals" | Out-Null       
 New-Item -ItemType Directory -Force -Path "$base/scripts","$base/references" | Out-Null   # only if used
 ```
 
-Do NOT create `README.md`/`CHANGELOG.md` files — only files the skill actively uses, plus `evals/evals.json`,
-which every skill has (Step 4).
+Do NOT create a `README.md` — only files the skill actively uses, plus `evals/evals.json` (Step 4) and
+`CHANGELOG.md` (Step 8), which every skill has.
 
 ### Frontmatter
 
@@ -160,23 +161,62 @@ fields, that `name` matches the folder, and the length limits (`name` 64, `descr
 `validate-skills.ps1 -Install`, which downloads it from PyPI. Fix every problem it reports in the source
 `SKILL.md`, never in the generated copies, and re-run until it's clean.
 
-**Updating an existing skill:** run the same command after any change to its `SKILL.md` frontmatter, then sync.
+**Updating an existing skill:** run the same command after any change to its `SKILL.md` frontmatter, add the
+change to its `CHANGELOG.md` (Step 8), then sync.
 
-## Step 8 — Sync + verify
+## Step 8 — Record the change in CHANGELOG.md
+
+Every skill has a `CHANGELOG.md` next to its `SKILL.md`, written to the repository's changelog style guide,
+`docs/templates/CHANGELOG_STYLE.md`. Every change to a skill (its
+`SKILL.md`, references, scripts, assets or evals) adds an entry **in the same commit as the change**:
+
+- **New skill:** `CHANGELOG.md` is created automatically from the style guide's template, filled in from
+  `SKILL.md`, with an **Added** entry for the skill itself: by the Claude Code hook as soon as the skill's first
+  file is written, or by `sync.ps1` for any `aidevme-*` skill without one. Rewrite that first entry so it says what
+  the skill ships with (modes, references, scripts, what it was checked against). To create it yourself:
+
+  ```powershell
+  pwsh -File agent-src/sync/update-changelog.ps1 -Skill aidevme-your-skill
+  ```
+
+- **Update:** after every change, add the entry with `update-changelog.ps1`. It puts the entry under
+  `## <today>` (created at the top when missing) in the category's section, in the style guide's order, and
+  skips an entry that's already there. In Claude Code, the hook reminds you after the first edit to a skill whose
+  changelog isn't changed yet.
+
+  ```powershell
+  pwsh -File agent-src/sync/update-changelog.ps1 -Skill aidevme-your-skill -Category Changed `
+    -Entry '**<The change, in a short phrase>.** <What it means for the person using the skill, naming the file or option.>'
+  ```
+
+  Categories: **Added**, **Changed**, **Deprecated**, **Removed**, **Fixed**, **Security**. Lead with the change in
+  bold and say what it means for the reader. Breaking changes start with `**Breaking:**`.
+- **The commit:** entries end with the commit's short SHA. The SHA doesn't exist until you commit, so leave it off
+  in the commit that adds the entry; it's added the next time the file changes, or by the next entry's author.
+- **`SKILL.md`:** add a one-line row for the change to its **Changelog** table as well.
+
+Write what changed for the reader, not how; the reasoning stays in the commit message. Internal-only edits (a typo,
+re-wrapped lines) still get a short **Changed** or **Fixed** entry, so the check in Step 9 stays meaningful.
+
+## Step 9 — Sync + verify
 
 ```powershell
 pwsh -File agent-src/sync/sync.ps1
 pwsh -File agent-src/sync/verify-parity.ps1     # must be clean
+pwsh -File agent-src/sync/check-changelogs.ps1  # must print "CHANGELOGS OK"
 ```
 
-The sync copies the whole folder, `evals/` included, to `.claude/skills` and `.github/skills`. Never place skill
-files directly there — they are generated.
+The sync copies the whole folder, `evals/` and `CHANGELOG.md` included, to `.claude/skills` and `.github/skills`.
+Never place skill files directly there — they are generated. `check-changelogs.ps1` fails when an `aidevme-*`
+skill has no `CHANGELOG.md`, or was changed (in the working tree or a commit) without its `CHANGELOG.md`.
 
 ## Critical rules
 
 - NEVER put client names, environment URLs, org/PAT, or secrets in a `core` skill.
 - ALWAYS register in the manifest with the correct scope, then sync.
 - ALWAYS include a `Changelog` section (date · author · description).
+- ALWAYS give a skill a `CHANGELOG.md`, and add an entry to it in the same commit as every change to the skill
+  (Step 8); `check-changelogs.ps1` must pass.
 - ALWAYS create `evals/evals.json` with at least three test cases, one of them an edge or boundary case.
 - ALWAYS run `agent-src/sync/validate-skills.ps1` on the skill after creating or changing it, and fix what it reports
   before syncing.
@@ -188,3 +228,6 @@ files directly there — they are generated.
 | 2026-09-10 | aidevme | Ported from HINT; added the required core\|project scope selector, manifest registration, and the sync/verify step for the inverted model. |
 | 2026-10-16 | aidevme | New skills always get `evals/evals.json` (new Step 4 with the shared format and guidance; critical rule); steps renumbered. |
 | 2026-10-18 | aidevme | Skills are validated against the Agent Skills specification with skills-ref (new Step 7, `agent-src/sync/validate-skills.ps1`, also after updates); `layer` and `scope` move under `metadata`; sync is now Step 8. |
+| 2026-10-21 | aidevme | New [CHANGELOG.md](CHANGELOG.md): the skill's full history from its commits. |
+| 2026-10-21 | aidevme | Every skill has a `CHANGELOG.md`, and every change adds an entry in the same commit (new Step 8, critical rule, trigger 5); `check-changelogs.ps1` joins the sync step, now Step 9. Replaces the rule against `CHANGELOG.md` files. |
+| 2026-10-21 | aidevme | Changelogs are created and placed automatically: `update-changelog.ps1` (from the style guide's template), `sync.ps1` for missing ones, and a Claude Code PostToolUse hook; Step 8 shows the commands. |

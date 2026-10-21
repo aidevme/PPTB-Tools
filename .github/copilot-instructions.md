@@ -162,7 +162,18 @@ pwsh -File agent-src/sync/validate-skills.ps1  # Agent Skills specification chec
 pwsh -File agent-src/sync/sync.ps1 -DryRun     # see what would change
 pwsh -File agent-src/sync/sync.ps1             # regenerate (it deletes and recreates the generated folders)
 pwsh -File agent-src/sync/verify-parity.ps1    # must pass
+pwsh -File agent-src/sync/check-changelogs.ps1 # every aidevme-* skill's CHANGELOG.md is present and current
 ```
+
+**Every skill change gets a changelog entry.** Each `aidevme-*` skill has a `CHANGELOG.md` next to its `SKILL.md`,
+written to [`docs/templates/CHANGELOG_STYLE.md`](docs/templates/CHANGELOG_STYLE.md). When you change a skill under
+`agent-src/skills/` (its `SKILL.md`, references, scripts, assets or evals), add an entry under today's date in its
+`CHANGELOG.md` and a row in the `SKILL.md` Changelog table, in the same commit, then run the commands above;
+`check-changelogs.ps1` fails when a skill changed without its changelog. This applies to ad-hoc edits as well as to
+work done through `aidevme-skill-creator`. Most of it is automatic: `sync.ps1` creates a missing `CHANGELOG.md` from the
+style guide's template, and in Claude Code a `PostToolUse` hook (`agent-src/sync/changelog-hook.ps1`) creates it for a
+new skill and asks for the entry after the first edit to an existing one. Add entries with
+`pwsh -File agent-src/sync/update-changelog.ps1 -Skill <name> -Category <Added|Changed|…> -Entry '<text>'`.
 
 New skills use the `aidevme-` prefix (`aidevme-<domain>-<purpose>`) and are created with `aidevme-skill-creator`.
 Their frontmatter follows the [Agent Skills specification](https://agentskills.io/specification): `name` (equal to

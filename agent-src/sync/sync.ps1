@@ -114,6 +114,19 @@ foreach ($name in $ported.Keys) {
 if ($problems -gt 0) { Write-Warn2 "  ($problems manifest/filesystem discrepancy(ies) — sync continues with what exists on disk.)" }
 else { Write-Good '  Manifest and filesystem agree.' }
 
+# --- 3b. Every aidevme-* skill has a CHANGELOG.md: create missing ones from the style guide's template ---
+# update-changelog.ps1 fills docs/templates/CHANGELOG_STYLE.md's template from the skill's SKILL.md, so a new skill
+# gets its changelog (with an "Added: the skill itself" entry) on its first sync, before the fan-out copies it.
+$newChangelogs = @($physical | Where-Object { $_.Name -like 'aidevme-*' -and -not (Test-Path (Join-Path $_.Path 'CHANGELOG.md')) })
+if ($newChangelogs.Count -gt 0) {
+    Write-Head 'Changelogs'
+    foreach ($p in $newChangelogs) {
+        if ($DryRun) { Write-Info "  [DRY RUN] would create $($p.Name)/CHANGELOG.md from docs/templates/CHANGELOG_STYLE.md"; continue }
+        & pwsh -NoProfile -File (Join-Path $syncDir 'update-changelog.ps1') -Skill $p.Path
+        if ($LASTEXITCODE -ne 0) { Write-Warn2 "  Could not create $($p.Name)/CHANGELOG.md; run update-changelog.ps1 -Skill $($p.Name)." }
+    }
+}
+
 # --- 4. Fan skills out to the selected tool targets ---
 $doClaude  = $Target -in @('Claude','Both')
 $doCopilot = $Target -in @('Copilot','Both')
