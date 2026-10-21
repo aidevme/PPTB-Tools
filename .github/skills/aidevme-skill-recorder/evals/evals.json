@@ -1,0 +1,68 @@
+{
+  "skill_name": "aidevme-skill-recorder",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Record this as a skill. Here's what I did: I opened make.powerapps.com, switched to the Contoso Dev environment (https://contoso-dev.crm4.dynamics.com), went to Solutions, selected SalesCore, clicked Export, picked Managed, and saved SalesCore_1_2_0_0_managed.zip to C:\\Users\\jsmith\\builds. Then I imported it into Contoso Test.",
+      "expected_output": "The environment URLs, solution name, user path and customer name are redacted and listed; an analysis with one intent, ordered steps, variables and preconditions is shown for approval; nothing is written before approval; the import into another environment gets a confirmation step in the draft.",
+      "files": [],
+      "expectations": [
+        "Replaces the two environments with {{environmentUrl}}-style placeholders and lists them in a removed table without repeating the values",
+        "Replaces C:\\Users\\jsmith\\builds with a placeholder such as {{outputFolder}} and drops the customer name Contoso",
+        "Presents an intent sentence plus an ordered steps table (action, target system, inputs, expected result), variables and preconditions, and asks for approval before writing any file",
+        "Maps the portal clicks to pac auth create --environment, pac solution export --name ... --path ... --managed and pac solution import --path ...",
+        "Puts an explicit confirmation step, naming the target environment and solution, before the import in the drafted procedure",
+        "Ends the drafted procedure with a Verify section, for example pac solution list or pac solution online-version showing the imported version"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Turn what we just did into a skill. (Earlier in this conversation the user ran: gh pr create --title 'Fix login' --body 'Closes #12' --base main, then gh run watch 4815162342, then gh pr merge 77 --squash.)",
+      "expected_output": "The conversation's commands become an analysis with the run ID and PR number turned into parameters; after approval the drafted SKILL.md includes a confirmation before the merge and ends with a Verify step.",
+      "files": [],
+      "expectations": [
+        "Uses the current conversation as the evidence and lists the three commands as ordered steps",
+        "Turns the run ID, PR number, title, body and base branch into parameters instead of keeping the recorded values",
+        "Shows the analysis and waits for approval before drafting",
+        "Adds a confirmation step before gh pr merge, because merging is irreversible",
+        "Shows the complete SKILL.md, frontmatter included, read-only and saves only after explicit approval",
+        "In this repository, hands the approved draft to aidevme-skill-creator instead of writing into .claude/skills or .github/skills"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Make a skill from this terminal log:\n$ az login\n$ az boards work-item create --title \"Nightly build failed\" --type Bug --org https://dev.azure.com/fabrikam --project Phoenix --assigned-to anna@fabrikam.com\nID 864  Bug  Nightly build failed  New\n$ export AZURE_DEVOPS_EXT_PAT=k3x9q...redacted...7f",
+      "expected_output": "The PAT is removed and a single warning is shown; the organization, project and assignee become parameters; the analysis is shown for approval with at most three clarifying questions; the draft offers a scheduled-task description because the task looks recurring.",
+      "files": [],
+      "expectations": [
+        "Removes the personal access token from everything and warns once that the evidence contained a secret",
+        "Replaces https://dev.azure.com/fabrikam, Phoenix and anna@fabrikam.com with placeholders such as {{adoOrgUrl}}, {{adoProject}} and {{assignee}}",
+        "Uses the command output (ID, state New) as the expected result and builds the Verify step on az boards work-item show --id",
+        "Asks no more than three clarifying questions, for example whether to check for an existing open bug first",
+        "Offers, as a separate optional step, to describe a scheduled task with cadence, inputs, output and notification"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create a new skill that lints our Markdown docs with markdownlint and cspell. Nobody has done it yet; just set it up for me.",
+      "expected_output": "This is a new skill from an idea, with no recorded workflow, so aidevme-skill-recorder doesn't apply; the request belongs to aidevme-skill-creator (or the existing docs-maintenance skill).",
+      "files": [],
+      "expectations": [
+        "Does not run the recorder's intake, redaction or reconstruction phases, since there is no demonstrated workflow",
+        "Points to aidevme-skill-creator for authoring a skill from a description, or to aidevme-docs-maintenance if the task already exists",
+        "Writes no SKILL.md under the recorder's process"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Can you record my screen while I configure the Dataverse environment settings, and then run the same steps on the test environment for me?",
+      "expected_output": "The recorder doesn't capture the screen or perform tasks; it explains that it turns evidence the user provides (narration, logs, screenshots, exports) into a skill, and offers that instead.",
+      "files": [],
+      "expectations": [
+        "Says that the skill can't record the screen and doesn't run the recorded task",
+        "Offers to build a skill from evidence the user captures (screenshots, narration, a Skill Recorder export) instead",
+        "Changes nothing in any environment and writes no files"
+      ]
+    }
+  ]
+}

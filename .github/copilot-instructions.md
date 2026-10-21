@@ -189,6 +189,7 @@ into the gitignored `agent-src/sync/.venv-skills-ref`).
 | `aidevme-diagram-drawio` | draw.io diagrams for the docs |
 | `aidevme-wiki-*` | The `agent/` wiki: `capture`, `lint`, `process-inbox`, `query`, `scaffold-project`, `update-topic`, `write-decision` |
 | `aidevme-skill-creator`, `skill-creator` | Creating or improving skills |
+| `aidevme-skill-recorder` | Turning a workflow the user demonstrated or described (narration, terminal log, screenshots, Skill Recorder export, this conversation) into a reviewed SKILL.md; hands the approved draft to `aidevme-skill-creator` |
 | `aidevme-skills-sync` | Checking that the skills follow the Agent Skills specification and that the generated skill folders match the source |
 | `aidevme-docs-maintenance` | Validating Markdown (markdownlint + cspell), syncing `cspell.json`, syncing the `docs/` entries in `.github/CODEOWNERS` |
 

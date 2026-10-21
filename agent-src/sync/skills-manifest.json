@@ -91,6 +91,14 @@
       "note": "Adds required --scope core|project selector."
     },
     {
+      "name": "aidevme-skill-recorder",
+      "scope": "core",
+      "group": "meta",
+      "ported": true,
+      "source": "authored",
+      "note": "Ports the skill-recorder method (aidevme/skill-recorder, a fork of microsoft/skill-recorder): a recorded or described workflow becomes a reviewed SKILL.md. Hands the approved draft to aidevme-skill-creator for placement."
+    },
+    {
       "name": "aidevme-skills-sync",
       "scope": "core",
       "group": "meta",
