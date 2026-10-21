@@ -123,7 +123,9 @@ One card, **PPTB tool settings** (badges: **This PPTB installation** and **Read-
 
 - a note on what's included (the saved `toolConfig`, the saved projects and the project folder per connection),
   that unsaved changes in the panel aren't, and that PPTB doesn't expose the file's location;
-- the number of keys and a **Refresh** button;
+- the number of keys, a **Copy** button that copies the JSON shown through the panel's `onCopyText` (`App.tsx`
+  passes `copyPath`, which uses `toolboxAPI.utils.copyToClipboard` and confirms with a notification; disabled until the
+  settings are read, and absent without `onCopyText`), and a **Refresh** button;
 - the stored settings as formatted JSON, read-only, in a [CodeViewer](../viewers/code-viewer.md) with JSON
   highlighting, scrolling inside a 420px box.
 

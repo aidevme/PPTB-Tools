@@ -39,6 +39,8 @@ export interface SettingsTabContext extends Pick<ReturnType<typeof useSettingsDr
     settings: ToolConfig;
     /** The Settings panel's styles. */
     styles: ReturnType<typeof useSettingsPanelStyles>;
+    /** Copies text to the clipboard; `label` names it in the confirmation. The Advanced tab's Copy button uses it. */
+    onCopyText?: (text: string, label: string) => void;
 }
 
 /**

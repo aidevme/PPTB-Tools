@@ -15,7 +15,7 @@ import {
     mergeClasses,
     type BadgeProps,
 } from '@fluentui/react-components';
-import { ArrowClockwiseRegular } from '@fluentui/react-icons';
+import { ArrowClockwiseRegular, CopyRegular } from '@fluentui/react-icons';
 import type { ProjectDefaults } from '../../config';
 import { DATAVERSE_GEN_TEMPLATES, DEFAULT_TEMPLATE_ROOT, loadStoredToolSettings } from '../../services';
 import { useSettingsPanelStyles } from '../../styles';
@@ -209,12 +209,21 @@ type StoredSettingsState =
     | { status: 'unavailable' }
     | { status: 'error'; message: string };
 
+/** Props for {@link StoredSettingsViewer}. */
+export interface IStoredSettingsViewerProps {
+    /**
+     * Copies text to the clipboard; `label` names it in the confirmation. Called with the JSON shown when **Copy** is
+     * clicked. Without it, there's no Copy button.
+     */
+    onCopyText?: (text: string, label: string) => void;
+}
+
 /**
  * The Advanced tab's view of what PPTB has stored for this tool (`toolboxAPI.settings.getAll()`), as read-only JSON.
- * It loads when shown and again on **Refresh**. It shows the saved values only, not unsaved changes in the panel.
- * PPTB doesn't expose where the file is, so no path is shown.
+ * It loads when shown and again on **Refresh**; **Copy**, before it, copies the JSON shown. It shows the saved values
+ * only, not unsaved changes in the panel. PPTB doesn't expose where the file is, so no path is shown.
  */
-export function StoredSettingsViewer() {
+export function StoredSettingsViewer({ onCopyText }: IStoredSettingsViewerProps) {
     const styles = useSettingsPanelStyles();
     const [state, setState] = useState<StoredSettingsState>({ status: 'loading' });
     const load = useCallback(async () => {
@@ -230,6 +239,8 @@ export function StoredSettingsViewer() {
         void load();
     }, [load]);
     const keys = state.status === 'ready' ? Object.keys(state.settings).length : 0;
+    // The text shown and copied: the same indented JSON.
+    const json = state.status === 'ready' ? JSON.stringify(state.settings, null, 2) : '';
     return (
         <div className={styles.templates}>
             <MessageBar intent="info">
@@ -243,9 +254,22 @@ export function StoredSettingsViewer() {
                 <Caption1 className={styles.templateMeta}>
                     {state.status === 'ready' ? `${keys} ${keys === 1 ? 'key' : 'keys'} · JSON · read-only` : 'JSON · read-only'}
                 </Caption1>
-                <Button size="small" appearance="subtle" icon={<ArrowClockwiseRegular />} disabled={state.status === 'loading'} onClick={() => void load()}>
-                    Refresh
-                </Button>
+                <span className={styles.storedSettingsActions}>
+                    {onCopyText && (
+                        <Button
+                            size="small"
+                            appearance="subtle"
+                            icon={<CopyRegular />}
+                            disabled={state.status !== 'ready'}
+                            onClick={() => onCopyText(json, 'The stored tool settings')}
+                        >
+                            Copy
+                        </Button>
+                    )}
+                    <Button size="small" appearance="subtle" icon={<ArrowClockwiseRegular />} disabled={state.status === 'loading'} onClick={() => void load()}>
+                        Refresh
+                    </Button>
+                </span>
             </div>
             {state.status === 'loading' && <Spinner size="tiny" label="Reading the stored settings…" />}
             {state.status === 'unavailable' && (
@@ -260,7 +284,7 @@ export function StoredSettingsViewer() {
             )}
             {state.status === 'ready' && (
                 <div className={styles.templateCode} role="region" aria-label="Stored tool settings">
-                    <CodeViewer code={JSON.stringify(state.settings, null, 2)} path="settings.json" />
+                    <CodeViewer code={json} path="settings.json" />
                 </div>
             )}
         </div>

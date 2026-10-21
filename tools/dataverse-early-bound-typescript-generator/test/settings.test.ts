@@ -185,7 +185,7 @@ describe('settings panel', () => {
         root = undefined;
     });
 
-    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn()) {
+    async function render(settings: ToolConfig, onSave: (s: ToolConfig) => Promise<void>, onOpenChange = vi.fn(), onCopyText?: (text: string, label: string) => void) {
         container = document.body.appendChild(document.createElement('div'));
         root = createRoot(container);
         await act(async () => {
@@ -193,7 +193,7 @@ describe('settings panel', () => {
                 createElement(
                     FluentProvider,
                     { theme: webLightTheme },
-                    createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave }),
+                    createElement(SettingsPanel, { open: true, onOpenChange, settings, onSave, onCopyText }),
                 ),
             );
         });
@@ -455,6 +455,32 @@ describe('settings panel', () => {
             expect(document.body.textContent).toContain('2 keys · JSON · read-only');
             expect(storedRegion()?.textContent).toContain('"lastProjectFolder": "/src/contoso"');
             expect(storedRegion()?.textContent).toContain('"deleteOrphanedFiles": true');
+        });
+
+        it('copies the JSON shown with Copy, which comes before Refresh', async () => {
+            installSettingsStub({ lastProjectFolder: '/src/contoso' });
+            const onCopyText = vi.fn();
+            await render(toolConfig, vi.fn(async () => {}), vi.fn(), onCopyText);
+            await openTab('Advanced');
+            await settle();
+            const labels = Array.from(document.querySelectorAll('button')).map((b) => b.textContent);
+            expect(labels.indexOf('Copy')).toBeGreaterThan(-1);
+            expect(labels.indexOf('Copy')).toBeLessThan(labels.indexOf('Refresh'));
+            await click(button('Copy'));
+            expect(onCopyText).toHaveBeenCalledTimes(1);
+            const [text, label] = onCopyText.mock.calls[0];
+            // The indented JSON shown in the viewer, exactly what PPTB has stored.
+            expect(text).toBe(JSON.stringify({ lastProjectFolder: '/src/contoso' }, null, 2));
+            expect(label).toBe('The stored tool settings');
+        });
+
+        it('has no Copy button without onCopyText', async () => {
+            installSettingsStub({ lastProjectFolder: '/src/contoso' });
+            await render(toolConfig, vi.fn(async () => {}));
+            await openTab('Advanced');
+            await settle();
+            expect(button('Copy')).toBeUndefined();
+            expect(button('Refresh')).toBeDefined();
         });
 
         it('reads the settings again on Refresh', async () => {

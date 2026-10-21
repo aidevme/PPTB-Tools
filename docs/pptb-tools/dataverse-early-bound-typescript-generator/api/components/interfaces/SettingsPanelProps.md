@@ -6,6 +6,31 @@ Props for [SettingsPanel](../functions/SettingsPanel.md).
 
 ## Properties
 
+### onCopyText?
+
+> `optional` **onCopyText?**: (`text`, `label`) => `void`
+
+Defined in: [components/panels/SettingsPanel.tsx:69](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L69)
+
+Copies text to the clipboard; `label` names it in the confirmation. The Advanced tab's Copy button uses it to
+copy the stored settings' JSON; without it, there's no Copy button.
+
+#### Parameters
+
+##### text
+
+`string`
+
+##### label
+
+`string`
+
+#### Returns
+
+`void`
+
+***
+
 ### onOpenChange
 
 > **onOpenChange**: (`open`) => `void`

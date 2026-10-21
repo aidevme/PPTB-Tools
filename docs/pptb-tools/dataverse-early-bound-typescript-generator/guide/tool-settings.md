@@ -57,7 +57,8 @@ Details most projects never need. Nothing to set here yet.
 **PPTB tool settings** shows, read-only and as JSON, everything Power Platform ToolBox has saved for this tool on
 this installation: the saved settings (`toolConfig`), your saved projects, and the project folder last used with
 each connection (`projectFolders`, `lastProjectFolder`). It's useful when something behaves unexpectedly or for a
-bug report. Click **Refresh** to read it again. Unsaved changes in the panel aren't included, and PPTB doesn't say
+bug report. Click **Copy** to copy the JSON to the clipboard, for example to paste into a bug report, or
+**Refresh** to read it again. Unsaved changes in the panel aren't included, and PPTB doesn't say
 where it stores the file, so no path is shown. Outside PPTB it shows a message instead.
 
 ## Saving

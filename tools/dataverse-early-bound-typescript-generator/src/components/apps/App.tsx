@@ -149,6 +149,7 @@ export default function App() {
                 onOpenChange={setSettingsOpen}
                 settings={toolSettings}
                 onSave={saveToolSettings}
+                onCopyText={(text, label) => void copyPath(text, label)}
             />
             <ProjectFormDialog
                 open={newProjectOpen}

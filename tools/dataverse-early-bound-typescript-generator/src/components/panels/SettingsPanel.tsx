@@ -62,6 +62,11 @@ export interface SettingsPanelProps {
      * when it rejects.
      */
     onSave: (settings: ToolConfig) => Promise<void>;
+    /**
+     * Copies text to the clipboard; `label` names it in the confirmation. The Advanced tab's Copy button uses it to
+     * copy the stored settings' JSON; without it, there's no Copy button.
+     */
+    onCopyText?: (text: string, label: string) => void;
 }
 
 /**
@@ -75,7 +80,7 @@ export interface SettingsPanelProps {
  * Each tab's sections come from its own file (`GeneralTab`, `OptionsTab`, `FilesTab`, `TemplatesTab`, `AdvancedTab`);
  * the panel combines them, so search matches settings on every tab.
  */
-export function SettingsPanel({ open, onOpenChange, settings, onSave }: SettingsPanelProps) {
+export function SettingsPanel({ open, onOpenChange, settings, onSave, onCopyText }: SettingsPanelProps) {
     const styles = useSettingsPanelStyles();
     const [tab, setTab] = useState<SettingsTab>('general');
     const [query, setQuery] = useState('');
@@ -90,14 +95,14 @@ export function SettingsPanel({ open, onOpenChange, settings, onSave }: Settings
         if (open) setQuery('');
     }, [open, settings]);
 
-    const context: SettingsTabContext = { draft, settings, update, updateProjectDefaults, updateGeneral, styles };
+    const context: SettingsTabContext = { draft, settings, update, updateProjectDefaults, updateGeneral, styles, onCopyText };
     // Every tab's sections, so search can match across tabs.
     const sections: SectionDefinition[] = [
         ...generalTabSections(context),
         ...optionsTabSections(context),
         ...filesTabSections(context),
         ...templatesTabSections(),
-        ...advancedTabSections(),
+        ...advancedTabSections(context),
     ];
 
     const searching = query.trim().length > 0;

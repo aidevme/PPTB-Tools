@@ -1,14 +1,15 @@
 import { DocumentDatabaseRegular } from '@fluentui/react-icons';
 import { SCOPE_INSTALLATION } from '../SettingsPanel.const';
 import { StoredSettingsViewer } from '../SettingsParts';
-import type { SectionDefinition } from '../SettingsTab.shared';
+import type { SectionDefinition, SettingsTabContext } from '../SettingsTab.shared';
 
 /**
- * The Settings panel's Advanced tab: what PPTB has stored for the tool, read-only. Nothing to set.
+ * The Settings panel's Advanced tab: what PPTB has stored for the tool, read-only, with Copy and Refresh. Nothing to set.
  *
+ * @param context - The tabs' context; only its `onCopyText` is used, for the Copy button.
  * @returns The tab's sections, in order.
  */
-export function advancedTabSections(): SectionDefinition[] {
+export function advancedTabSections(context: SettingsTabContext): SectionDefinition[] {
     return [
         {
             id: 'storedSettings',
@@ -18,7 +19,7 @@ export function advancedTabSections(): SectionDefinition[] {
             badges: [SCOPE_INSTALLATION, { label: 'Read-only' }],
             // Nothing to set: the card shows what PPTB has stored for the tool.
             settings: [],
-            extra: <StoredSettingsViewer />,
+            extra: <StoredSettingsViewer onCopyText={context.onCopyText} />,
         },
     ];
 }

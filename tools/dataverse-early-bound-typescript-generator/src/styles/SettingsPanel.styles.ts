@@ -77,6 +77,7 @@ export const useSettingsPanelStyles = makeStyles({
     },
     // Advanced tab: the stored settings' key count on the left, Refresh on the right.
     storedSettingsBar: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: tokens.spacingHorizontalS },
+    storedSettingsActions: { display: 'flex', alignItems: 'center', gap: tokens.spacingHorizontalXS },
 
     row: {
         display: 'flex',
