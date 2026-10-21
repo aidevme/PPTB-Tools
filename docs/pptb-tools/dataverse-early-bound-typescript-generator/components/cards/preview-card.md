@@ -47,7 +47,7 @@ Each switch saves a tool setting; `App.tsx` passes the settings and saves the ch
 
 ## Messages
 
-- **Custom enum template proposal** (`CustomEnumTemplateProposal` in `subcomponents/PreviewParts.tsx`): a warning bar titled
+- **Custom enum template proposal** (`CustomEnumTemplateProposal` in `parts/PreviewParts.tsx`): a warning bar titled
   "Duplicate identifiers found", shown when the plan has `duplicate` files, the custom enum template is off and a
   handler is passed. It gives the number of files, what the template does, that nothing changes until the next
   preview and Generate, that renaming the labels is the lasting fix, and, with Generate templates off, that the CLI
@@ -180,7 +180,7 @@ Collapsible grouping by type isn't implemented, since it conflicts with sorting 
 ## Where the code lives
 
 - `components/cards/PreviewCard.tsx`: the card, its state (selection, filter, sort) and layout.
-- `components/cards/subcomponents/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches) and `StatusTiles`.
+- `components/cards/parts/PreviewParts.tsx`: `PreviewActionBar` (Preview, Generate and the switches) and `StatusTiles`.
 - `components/tables/FileTable.tsx`: the sortable file table.
 - `components/shared/useResizableSplit.ts`: the divider between the file list and the viewer.
 - `components/shared/previewFiles.tsx`: the file table's sorting (`sortFiles`) and filtering (`visibleFiles`), the

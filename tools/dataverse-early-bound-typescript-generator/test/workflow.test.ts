@@ -8,7 +8,7 @@ import { FluentProvider, webLightTheme } from '@fluentui/react-components';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ProjectEntry } from '../src/config';
 import { ProjectCard, type IProjectCardProps } from '../src/components/cards/ProjectCard';
-import { recentProjects } from '../src/components/cards/subcomponents/recentProjects';
+import { recentProjects } from '../src/components/cards/parts/recentProjects';
 import { formatRelativeTime, shortenPath } from '../src/components/shared/format';
 import { WorkflowProgress } from '../src/components/shared/WorkflowProgress';
 import { computeWorkflowSteps, stepElementId } from '../src/components/shared/workflowSteps';

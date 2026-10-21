@@ -1,5 +1,5 @@
 import { makeStyles, tokens } from '@fluentui/react-components';
-import { FOOTER_SLIDE_OUT_MS } from '../components/layout/Footer.const';
+import { FOOTER_SLIDE_OUT_MS } from '../components/layout/Layout.const';
 
 /**
  * Styles for `App`: the full-height page, the header that stays visible while the page scrolls, the footer that is

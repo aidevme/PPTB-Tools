@@ -3,7 +3,7 @@ import { BookOpenRegular, BranchForkRegular, InfoRegular, OpenRegular } from '@f
 import { version } from '../../../package.json';
 import { useFooterStyles } from '../../styles';
 import { AppIcon } from '../shared/AppIcon';
-import { CREDITS, DOCUMENTATION_URL, REPOSITORY_URL } from './Footer.const';
+import { CREDITS, DOCUMENTATION_URL, REPOSITORY_URL } from './Layout.const';
 
 /**
  * The bar at the bottom: the tool's name and version; credits to Scott Durow's dataverse-ify and dataverse-gen

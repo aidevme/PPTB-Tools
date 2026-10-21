@@ -5,13 +5,13 @@ compatible with, reminds users to review generated files, and links to the docum
 
 Source: [`src/components/layout/Footer.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Footer.tsx);
 the links and credits are constants in
-[`Footer.const.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Footer.const.ts)
+[`Layout.const.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/layout/Layout.const.ts)
 (`DOCUMENTATION_URL`, `REPOSITORY_URL`, `CREDITS`).
 
 ## Layout
 
 When the tool opens, the footer is pinned to the bottom of the window for 5 seconds (`FOOTER_AUTO_HIDE_MS` in
-`Footer.const.ts`). Then it slides down out of the window (`FOOTER_SLIDE_OUT_MS`, 250 ms; instant when the system
+`Layout.const.ts`). Then it slides down out of the window (`FOOTER_SLIDE_OUT_MS`, 250 ms; instant when the system
 asks for reduced motion) and stays at the end of the page, so it shows again whenever the page is scrolled to the
 bottom. If the page is already scrolled to the end, or doesn't scroll, it stays where it is.
 
@@ -36,7 +36,7 @@ right:
 - **Links:** **Documentation** and **GitHub Repo** as subtle buttons with icons and an "opens in a new
   window" marker. They're in a `nav` labelled "Project links".
   - **Documentation** points to the tool's Getting started page on the docs site
-    (`DOCUMENTATION_URL` in `Footer.const.ts`).
+    (`DOCUMENTATION_URL` in `Layout.const.ts`).
   - **GitHub Repo** points to <https://github.com/aidevme/PPTB-Tools> (`REPOSITORY_URL`).
 
 All external links open in a new window. On narrow windows the sections wrap onto separate rows.

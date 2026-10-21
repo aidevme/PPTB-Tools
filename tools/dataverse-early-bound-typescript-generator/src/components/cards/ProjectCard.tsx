@@ -16,8 +16,8 @@ import { formatRelativeTime } from '../shared/format';
 import { PathChip } from '../shared/PathChip';
 import { StepCard } from '../shared/StepCard';
 import type { StepState } from '../shared/workflowSteps';
-import { RecentProjectsList } from './subcomponents/RecentProjectsList';
-import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './subcomponents/recentProjects';
+import { RecentProjectsList } from './parts/RecentProjectsList';
+import { MAX_RECENT, recentProjects, type ProjectOpenTarget } from './parts/recentProjects';
 
 /** Props for {@link ProjectCard}. */
 export interface IProjectCardProps {

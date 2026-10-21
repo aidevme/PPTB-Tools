@@ -24,7 +24,7 @@ import { DocumentSettingsRegular } from '@fluentui/react-icons';
 import { CUSTOM_TEMPLATE_KINDS, type CustomTemplateSelection } from '../../core';
 import { useCustomTemplatesPopoverStyles } from '../../styles';
 import { infoLabel } from '../shared/infoLabel';
-import { CUSTOM_TEMPLATE_LABELS } from './CustomTemplatesPopover.const';
+import { CUSTOM_TEMPLATE_LABELS } from './Popovers.const';
 
 /** Props for {@link CustomTemplatesPopover}. */
 export interface ICustomTemplatesPopoverProps {

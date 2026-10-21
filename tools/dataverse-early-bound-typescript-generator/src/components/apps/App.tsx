@@ -15,7 +15,7 @@ import {
 import { projectCustomEnumTemplate, projectCustomTemplates, withProjectCustomEnumTemplate, withProjectCustomTemplates } from '../../core';
 import { PptbFileSink, PptbMetadataProvider, connectionKey, pendingWriteCount, reportError } from '../../services';
 import { useAppStyles } from '../../styles';
-import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Footer.const';
+import { FOOTER_AUTO_HIDE_MS, FOOTER_SLIDE_OUT_MS } from '../layout/Layout.const';
 import { EDITED_ENUM_TEMPLATE_CONFIRM, EDITED_ENUM_TEMPLATE_TITLE, editedEnumTemplateMessage } from '../shared/settingsInfo';
 
 /**

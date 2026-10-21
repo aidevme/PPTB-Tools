@@ -8,7 +8,7 @@ but don't change the output yet; the popover says so.
 
 Source: [`src/components/popovers/CustomTemplatesPopover.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/popovers/CustomTemplatesPopover.tsx),
 styles in `src/styles/CustomTemplatesPopover.styles.ts` (`useCustomTemplatesPopoverStyles`), and each kind's label, icon,
-location and info text in `CustomTemplatesPopover.const.tsx` (`CUSTOM_TEMPLATE_LABELS`).
+location and info text in `Popovers.const.tsx` (`CUSTOM_TEMPLATE_LABELS`).
 
 ## Props (`ICustomTemplatesPopoverProps`)
 
@@ -18,7 +18,7 @@ location and info text in `CustomTemplatesPopover.const.tsx` (`CUSTOM_TEMPLATE_L
 | `disabled` | `boolean` | Disables the button (no project open, or work in progress). |
 | `onChange` | `(selection: CustomTemplateSelection) => void` | Called with every kind's value when **OK** is clicked; not on **Cancel**. |
 
-`PreviewActionBar` (in `cards/subcomponents/PreviewParts.tsx`) renders it when the Preview card has `onCustomTemplatesChange`,
+`PreviewActionBar` (in `cards/parts/PreviewParts.tsx`) renders it when the Preview card has `onCustomTemplatesChange`,
 with `customTemplates` as `selection` (every kind off when unset) and `disabled` while busy or while
 `customTemplatesDisabled` is set. `App.tsx` stores the choices in the project's config with
 `withProjectCustomTemplates` (`pptbEarlyBoundGenerator.customTemplates`) and doesn't mark the preview stale

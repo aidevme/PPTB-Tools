@@ -15,7 +15,7 @@ import type { StepState } from '../shared/workflowSteps';
 import { FileViewer } from '../viewers/FileViewer';
 import { FileSearchBox } from '../shared/FileSearchBox';
 import { FileTable } from '../tables/FileTable';
-import { CustomEnumTemplateProposal, PreviewActionBar, StatusTiles } from './subcomponents/PreviewParts';
+import { CustomEnumTemplateProposal, PreviewActionBar, StatusTiles } from './parts/PreviewParts';
 
 /** Explanation in the Show unchanged switch's info label. */
 const SHOW_UNCHANGED_INFO = (
