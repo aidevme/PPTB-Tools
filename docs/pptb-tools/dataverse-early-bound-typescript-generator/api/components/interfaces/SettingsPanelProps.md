@@ -1,6 +1,6 @@
 # Interface: SettingsPanelProps
 
-Defined in: [components/panels/SettingsPanel.tsx:116](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L116)
+Defined in: [components/panels/SettingsPanel.tsx:50](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L50)
 
 Props for [SettingsPanel](../functions/SettingsPanel.md).
 
@@ -10,7 +10,7 @@ Props for [SettingsPanel](../functions/SettingsPanel.md).
 
 > **onOpenChange**: (`open`) => `void`
 
-Defined in: [components/panels/SettingsPanel.tsx:123](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L123)
+Defined in: [components/panels/SettingsPanel.tsx:57](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L57)
 
 Called with `false` when the panel should close: the Close or Cancel button, the drawer's own dismiss (for
 example Escape), or a successful Save.
@@ -31,7 +31,7 @@ example Escape), or a successful Save.
 
 > **onSave**: (`settings`) => `Promise`\<`void`\>
 
-Defined in: [components/panels/SettingsPanel.tsx:130](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L130)
+Defined in: [components/panels/SettingsPanel.tsx:64](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L64)
 
 Called with the draft when Save is clicked, to persist it. The panel closes when it resolves and shows the error
 when it rejects.
@@ -52,7 +52,7 @@ when it rejects.
 
 > **open**: `boolean`
 
-Defined in: [components/panels/SettingsPanel.tsx:118](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L118)
+Defined in: [components/panels/SettingsPanel.tsx:52](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L52)
 
 Whether the drawer is open. Each time it opens, the draft starts again from `settings` and the search is cleared.
 
@@ -62,6 +62,6 @@ Whether the drawer is open. Each time it opens, the draft starts again from `set
 
 > **settings**: [`ToolConfig`](../../config/interfaces/ToolConfig.md)
 
-Defined in: [components/panels/SettingsPanel.tsx:125](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L125)
+Defined in: [components/panels/SettingsPanel.tsx:59](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L59)
 
 The saved settings; edits are kept in a draft until Save.

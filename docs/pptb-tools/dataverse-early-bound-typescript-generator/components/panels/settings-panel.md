@@ -6,7 +6,12 @@ Tool settings, shown in a Fluent UI `OverlayDrawer` that slides in from the righ
 Settings button in the [Header](../layout/header.md).
 
 Sources: [`SettingsPanel.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx)
-(the panel and the list of settings),
+(the panel: navigation, search, footer), one file per tab with that tab's sections
+([`GeneralTab.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/tabs/GeneralTab.tsx), [`OptionsTab.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/tabs/OptionsTab.tsx),
+[`FilesTab.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/tabs/FilesTab.tsx), [`TemplatesTab.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/tabs/TemplatesTab.tsx) and
+[`AdvancedTab.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/tabs/AdvancedTab.tsx); the panel combines them, so search matches every tab),
+[`SettingsTab.shared.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsTab.shared.tsx) (the section and setting types, the tabs' context,
+`switchControl` and `spinValue`),
 [`SettingsPanel.const.ts`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.const.ts)
 (the tabs, their intros and the scope badges) and
 [`SettingsParts.tsx`](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsParts.tsx)

@@ -2,7 +2,7 @@
 
 > **SettingsPanel**(`__namedParameters`): `Element`
 
-Defined in: [components/panels/SettingsPanel.tsx:140](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L140)
+Defined in: [components/panels/SettingsPanel.tsx:78](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/panels/SettingsPanel.tsx#L78)
 
 Tool settings, in an overlay drawer that slides in from the right. A navigation column (search, then vertical
 tabs with subtitles) sits beside section cards; each setting is a row with its title and description on the left
@@ -19,3 +19,8 @@ discards them; its menu also has Reset to defaults, which restores the bundled d
 ## Returns
 
 `Element`
+
+## Remarks
+
+Each tab's sections come from its own file (`GeneralTab`, `OptionsTab`, `FilesTab`, `TemplatesTab`, `AdvancedTab`);
+the panel combines them, so search matches settings on every tab.
