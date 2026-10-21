@@ -6,6 +6,7 @@ the document you're writing; [WRITING_STYLE.md](./WRITING_STYLE.md) applies to a
 
 | Template Name | Purpose | Version | Created On | Modified On |
 | --- | --- | --- | --- | --- |
+| [Changelog Style Guide](./CHANGELOG_STYLE.md) | Structure and writing rules for `CHANGELOG.md` files (agent skills and versioned tools): releases newest first, Keep a Changelog categories, one bold-led entry per change ending with its commit, with a template and review checklist. Modelled on the `aidevme-tsdoc` changelog. | 1.1.0 | 2026-10-21 | 2026-10-21 |
 | [Developer Guide Style Guide](./DEVELOPER_STYLE.md) | Structure and writing rules for the sections of `DEVELOPER.md` that explain a development tool or workflow (CLI, VS Code extension, agent skills), with a section template and review checklist. | 1.0.0 | 2026-10-19 | 2026-10-19 |
 | [Refactoring Style Guide](./REFACTORING_STYLE.md) | Structure and writing rules for refactoring documents (`docs/todos/<tool-name>/refactoring-<tool-name>-<YYYY-MM-DD>.md`): analysis, plan, decision and execution record. The `aidevme-pptb-tool-refactoring` skill follows it. | 1.0.0 | 2026-10-18 | 2026-10-18 |
 | [Writing Style Guide](./WRITING_STYLE.md) | General writing rules for documentation pages: page structure, YAML frontmatter, intro and key takeaway, tone and terminology. | 1.0.0 | 2026-10-12 | 2026-10-12 |

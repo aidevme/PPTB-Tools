@@ -37,6 +37,7 @@ export default defineConfig({
                             text: "Document templates",
                             link: "/templates/",
                             items: [
+                                { text: "Changelog Style Guide", link: "/templates/CHANGELOG_STYLE" },
                                 { text: "Developer Guide Style Guide", link: "/templates/DEVELOPER_STYLE" },
                                 { text: "Refactoring Style Guide", link: "/templates/REFACTORING_STYLE" },
                                 { text: "Writing Style Guide", link: "/templates/WRITING_STYLE" },
