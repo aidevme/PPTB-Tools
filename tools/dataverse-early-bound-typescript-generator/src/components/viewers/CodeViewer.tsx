@@ -2,37 +2,8 @@ import type { ReactNode } from 'react';
 import { Highlight } from 'prism-react-renderer';
 import { mergeClasses } from '@fluentui/react-components';
 import { useCodeViewerStyles } from '../../styles';
-
-type TokenStyle = Exclude<keyof ReturnType<typeof useCodeViewerStyles>, 'code' | 'line' | 'lineNumber' | 'lineContent' | 'flagged' | 'flaggedNumber'>;
-
-/** Prism token type → style. Unlisted types (plain identifiers, properties) keep the default foreground. */
-const TOKEN_STYLE: Record<string, TokenStyle> = {
-    comment: 'comment',
-    keyword: 'keyword',
-    builtin: 'keyword',
-    string: 'string',
-    'template-string': 'string',
-    char: 'string',
-    number: 'literal',
-    boolean: 'literal',
-    constant: 'literal',
-    'class-name': 'type',
-    function: 'func',
-    punctuation: 'punctuation',
-    operator: 'punctuation',
-};
-
-/** Files above this size are shown unhighlighted, since tokenizing runs synchronously on render. */
-const MAX_HIGHLIGHT_LENGTH = 300_000;
-
-function languageFor(path: string): string | undefined {
-    if (/\.tsx?$/i.test(path)) return 'typescript';
-    if (/\.json$/i.test(path)) return 'json';
-    // dataverse-gen's EJS templates produce TypeScript, so most of their text is TypeScript; the <% %> tags show in the
-    // punctuation color.
-    if (/\.ejs$/i.test(path)) return 'typescript';
-    return undefined;
-}
+import { MAX_HIGHLIGHT_LENGTH, TOKEN_STYLE } from './Viewers.const';
+import { languageFor } from './Viewers.func';
 
 /** Props for {@link CodeViewer}. */
 export interface ICodeViewerProps {

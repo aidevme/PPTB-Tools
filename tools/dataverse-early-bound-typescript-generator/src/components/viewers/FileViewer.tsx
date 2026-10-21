@@ -8,8 +8,8 @@ import { useFileViewerStyles } from '../../styles';
 import { STATUS_META, fileName, fileType } from '../shared/generatedFiles';
 import { CodeViewer } from './CodeViewer';
 import { DiffViewer } from './DiffViewer';
-
-type ViewerTab = 'changes' | 'content';
+import { lineCount } from './Viewers.const';
+import type { ViewerTab } from './Viewers.types';
 
 /** Props for {@link FileViewer}. */
 export interface IFileViewerProps {
@@ -46,8 +46,6 @@ export function duplicateLineNotes(content: string | undefined, duplicates: Dupl
     });
     return notes;
 }
-
-const lineCount = (text: string) => text.replace(/\r\n?/g, '\n').replace(/\n$/, '').split('\n').length;
 
 /**
  * The right side of the Preview card: a header with the file's name, type, status, path and line count and a

@@ -1,6 +1,6 @@
 # Interface: ICodeViewerProps
 
-Defined in: [components/viewers/CodeViewer.tsx:38](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L38)
+Defined in: [components/viewers/CodeViewer.tsx:9](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L9)
 
 Props for [CodeViewer](../functions/CodeViewer.md).
 
@@ -10,7 +10,7 @@ Props for [CodeViewer](../functions/CodeViewer.md).
 
 > **code**: `string`
 
-Defined in: [components/viewers/CodeViewer.tsx:40](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L40)
+Defined in: [components/viewers/CodeViewer.tsx:11](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L11)
 
 The file's text; CRLF and CR line endings are shown as plain line breaks, and a final newline is dropped.
 
@@ -20,7 +20,7 @@ The file's text; CRLF and CR line endings are shown as plain line breaks, and a 
 
 > `optional` **lineNotes?**: `ReadonlyMap`\<`number`, `string`\>
 
-Defined in: [components/viewers/CodeViewer.tsx:44](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L44)
+Defined in: [components/viewers/CodeViewer.tsx:15](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L15)
 
 Lines to highlight (1-based), each with the note shown when hovering over it.
 
@@ -30,6 +30,6 @@ Lines to highlight (1-based), each with the note shown when hovering over it.
 
 > **path**: `string`
 
-Defined in: [components/viewers/CodeViewer.tsx:42](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L42)
+Defined in: [components/viewers/CodeViewer.tsx:13](https://github.com/aidevme/PPTB-Tools/blob/main/tools/dataverse-early-bound-typescript-generator/src/components/viewers/CodeViewer.tsx#L13)
 
 File path; its extension picks the highlighting language.
